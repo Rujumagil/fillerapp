@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#006241">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
   <title>Filler Monitor</title>
   <style>
     body{margin:0;background:#073c2c;color:white;font-family:system-ui}main{padding:32px}.top{display:flex;justify-content:space-between;align-items:center}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:18px}.card.late-card{background:#b64235;border-color:#ffb7ad}.card.ready-card{background:#dff4e8;color:#063b2c}.card.prep-card{background:#e9f2ff;color:#123c6b}.card.new-card{background:#fff4d8;color:#5d3c00}.badge{display:inline-block;border-radius:999px;padding:7px 11px;font-weight:900;margin-bottom:10px;background:rgba(255,255,255,.22)}.time{font-size:18px;font-weight:900}.detail{opacity:.85}@media(max-width:900px){.grid{grid-template-columns:1fr}}
@@ -10,6 +13,7 @@
 </head>
 <body>
   <main><div class="top"><h1>Pedidos Filler</h1><div id="clock"></div></div><div class="grid" id="orders"></div></main>
+  <script src="pwa.js"></script>
   <script>
     const min=ms=>Math.floor(ms/60000);
     function stateInfo(o){const now=Date.now();const created=o.createdTs||now;const updated=o.statusUpdatedAt||created;if((o.status==="Nuevo"||o.status==="Preparando")&&now-created>10*60000)return{card:"late-card",label:"Fuera de tiempo",detail:`${min(now-created)} min en preparacion`};if(o.status==="Listo"&&now-updated>10*60000)return{card:"late-card",label:"Fuera de tiempo",detail:`${min(now-updated)} min sin recoger`};if(o.status==="Listo")return{card:"ready-card",label:"Listo",detail:`${min(now-updated)} min listo`};if(o.status==="Preparando")return{card:"prep-card",label:"Preparando",detail:`${min(now-created)} min`};return{card:"new-card",label:"Nuevo",detail:`${min(now-created)} min`}}
