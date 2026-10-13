@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#006241">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
   <title>Filler Pedidos</title>
   <style>
     :root{--green:#006241;--mint:#e8f2ed;--cream:#f7f1e7;--ink:#1e2f29;--muted:#69766f;--line:#e4ded4;--danger:#b64235;--yellow:#fff4d8;--blue:#e9f2ff;--shadow:0 12px 28px rgba(51,36,18,.1)}
@@ -14,6 +17,7 @@
     <header><div><h1>Pedidos</h1><p class="muted">Control para cocina y entrega con tiempos reales.</p><div class="legend"><span class="dot new">Nuevo</span><span class="dot prep">Preparando</span><span class="dot ready">Listo</span><span class="dot late">Fuera de tiempo</span></div></div><nav class="top-links"><a href="admin.html">Control</a><a href="monitor.html">Monitor</a></nav></header>
     <section class="card"><div id="orders"></div></section>
   </main>
+  <script src="pwa.js"></script>
   <script>
     let orders=JSON.parse(localStorage.getItem("fillerOrders")||"[]");
     const money=v=>"$"+Number(v||0).toLocaleString("es-MX");
