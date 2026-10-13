@@ -1,5 +1,5 @@
 -- Filler Café | esquema inicial preparado, NO aplicado a producción
--- Aplicar únicamente a un proyecto Supabase dedicado a Filler Café.
+-- Aplicado al proyecto existente Compás One con tablas filler_ y RLS independiente.
 create extension if not exists pgcrypto;
 create table if not exists public.filler_staff (
   user_id uuid primary key references auth.users(id) on delete cascade,
