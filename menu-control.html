@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Filler Menu Control</title>
+  <style>
+    :root{--green:#006241;--mint:#e8f2ed;--cream:#f7f1e7;--ink:#1e2f29;--muted:#69766f;--line:#e4ded4;--danger:#b64235;--shadow:0 12px 28px rgba(51,36,18,.1)}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f7f1e7;color:var(--ink)}main{max-width:1050px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:18px}h1,h2{margin:0}.muted{color:var(--muted)}.card{background:white;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}button{border:0;border-radius:999px;background:var(--green);color:white;padding:10px 13px;font-weight:850;cursor:pointer}button.secondary{background:#fff;color:var(--green);border:1px solid var(--line)}button.danger{background:var(--danger)}input{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fffdf8;color:var(--ink)}label{display:grid;gap:6px;font-size:13px;font-weight:850;color:var(--muted)}.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 16px}.form .wide{grid-column:1/-1}.line{border-top:1px solid #eee;padding:12px 0}.item-line{display:grid;grid-template-columns:74px 1fr;gap:12px;align-items:start}.thumb{width:74px;aspect-ratio:1;border-radius:18px;background:var(--mint);object-fit:cover;border:1px solid var(--line)}.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}.price-row{display:grid;grid-template-columns:1fr 110px 90px;gap:8px;margin-top:8px}.top-links a{color:var(--green);font-weight:850;text-decoration:none;margin-left:10px}@media(max-width:760px){header{display:block}.top-links{margin-top:10px}.top-links a{margin:0 10px 0 0}.form,.price-row{grid-template-columns:1fr}.form .wide{grid-column:auto}.item-line{grid-template-columns:58px 1fr}.thumb{width:58px}}
+  </style>
+</head>
+<body>
+  <main>
+    <header><div><h1>Control de menu</h1><p class="muted">Fotos, platillos, precios y existencias.</p></div><nav class="top-links"><a href="admin.html">Control</a><a href="index.html">Menu publico</a></nav></header>
+    <section class="card">
+      <h2>Agregar platillo</h2>
+      <form class="form" id="add-form">
+        <label>Nombre del platillo<input id="new-name" required placeholder="Ej. Mollete especial"></label>
+        <label>Categoria<input id="new-cat" required placeholder="Ej. Antojo" list="cat-list"></label>
+        <label>Precio<input id="new-price" required type="number" min="0" placeholder="65"></label>
+        <label>Existencia<input id="new-stock" required type="number" min="0" placeholder="10"></label>
+        <label class="wide">Foto<input id="new-image" type="file" accept="image/*"></label>
+        <button type="submit">Agregar platillo</button>
+        <button type="button" class="secondary" onclick="resetMenu()">Restaurar menu base</button>
+      </form>
+      <datalist id="cat-list"></datalist>
+      <div id="inventory"></div>
+    </section>
+  </main>
+  <script>
+    const initialMenu=[{id:"chilaquiles-rojos-sencillos",cat:"Chilaquiles",name:"Rojos sencillos",price:55,stock:10},{id:"rojos-con-huevo",cat:"Chilaquiles",name:"Rojos con huevo",price:60,stock:10},{id:"rojos-con-pollo",cat:"Chilaquiles",name:"Rojos con pollo",price:65,stock:10},{id:"verdes-sencillos",cat:"Chilaquiles",name:"Verdes sencillos",price:55,stock:10},{id:"verdes-con-huevo",cat:"Chilaquiles",name:"Verdes con huevo",price:60,stock:10},{id:"verdes-con-pollo",cat:"Chilaquiles",name:"Verdes con pollo",price:65,stock:10},{id:"huevo-mexicana",cat:"De la plancha",name:"Huevo a la mexicana",price:55,stock:8},{id:"huevo-jamon-queso",cat:"De la plancha",name:"Huevo con jamon y queso",price:58,stock:8},{id:"huevos-tocino",cat:"De la plancha",name:"Huevos con tocino",price:65,stock:8},{id:"enchiladas-pollo",cat:"De la plancha",name:"Enchiladas de pollo",price:70,stock:8},{id:"club-sandwich",cat:"Sandwiches y mas",name:"Club sandwich Oroweat",price:115,stock:6},{id:"sandwich-atun",cat:"Sandwiches y mas",name:"Sandwich de atun",price:55,stock:8},{id:"sandwich-pollo",cat:"Sandwiches y mas",name:"Sandwich de pollo",price:48,stock:8},{id:"avocado-toast",cat:"Sandwiches y mas",name:"Avocado toast",price:65,stock:5},{id:"ensalada-pollo",cat:"Ensaladas",name:"Ensalada de pollo",price:85,stock:6},{id:"coctel-fruta",cat:"Frutas y bowls",name:"Coctel de fruta",price:50,stock:10},{id:"parfait",cat:"Frutas y bowls",name:"Parfait",price:52,stock:8},{id:"acai-bowl",cat:"Frutas y bowls",name:"Acai bowl",price:60,stock:8},{id:"hotcakes-frutos-rojos",cat:"Antojo",name:"Hotcakes con frutos rojos",price:54,stock:8},{id:"pan-dulce",cat:"Antojo",name:"Pan de dulce",price:19,stock:12},{id:"americano-12",cat:"Bebidas calientes",name:"Cafe americano 12 oz",price:29,stock:20},{id:"capuchino-12",cat:"Bebidas calientes",name:"Capuchino 12 oz",price:39,stock:20},{id:"latte-12",cat:"Bebidas calientes",name:"Latte 12 oz",price:39,stock:20},{id:"frappe-oreo",cat:"Bebidas frias",name:"Frappe de Oreo",price:58,stock:10},{id:"jugo-naranja",cat:"Bebidas frias",name:"Jugo de naranja",price:40,stock:10},{id:"smoothie-mango",cat:"Bebidas frias",name:"Smoothie de mango",price:55,stock:10}];
+    let menu=JSON.parse(localStorage.getItem("fillerMenu")||"null")||initialMenu;
+    const slug=s=>s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
+    const save=()=>localStorage.setItem("fillerMenu",JSON.stringify(menu));
+    function readImage(file){return new Promise(resolve=>{if(!file)return resolve("");const r=new FileReader();r.onload=()=>resolve(r.result);r.readAsDataURL(file)})}
+    function render(){document.getElementById("cat-list").innerHTML=[...new Set(menu.map(i=>i.cat))].map(c=>`<option value="${c}"></option>`).join("");document.getElementById("inventory").innerHTML=menu.map(i=>`<div class="line item-line"><img class="thumb" src="${i.image||""}" alt=""><div><b>${i.name}</b><br><span class="muted">${i.cat}</span><div class="price-row"><input value="${i.name}" onchange="updateItem('${i.id}','name',this.value)"><input type="number" min="0" value="${i.price}" onchange="updateItem('${i.id}','price',this.value)"><input type="number" min="0" value="${i.stock}" onchange="updateItem('${i.id}','stock',this.value)"></div><div class="actions"><label class="secondary" style="display:inline-block;padding:10px 13px;border:1px solid var(--line);border-radius:999px;color:var(--green);font-weight:850;cursor:pointer">Subir foto<input type="file" accept="image/*" style="display:none" onchange="setPhoto('${i.id}',this.files[0])"></label><button class="danger" onclick="removeItem('${i.id}')">Quitar</button></div></div></div>`).join("")}
+    function updateItem(id,key,value){const item=menu.find(i=>i.id===id);if(!item)return;item[key]=key==="price"||key==="stock"?Number(value):value;save();render()}
+    async function setPhoto(id,file){const item=menu.find(i=>i.id===id);if(!item)return;item.image=await readImage(file);save();render()}
+    function removeItem(id){if(!confirm("Quitar este platillo del menu?"))return;menu=menu.filter(i=>i.id!==id);save();render()}
+    function resetMenu(){if(!confirm("Esto restaura el menu base y borra fotos/agregados guardados en este navegador."))return;menu=initialMenu;save();render()}
+    document.getElementById("add-form").addEventListener("submit",async e=>{e.preventDefault();const name=document.getElementById("new-name").value.trim();const cat=document.getElementById("new-cat").value.trim();const price=Number(document.getElementById("new-price").value);const stock=Number(document.getElementById("new-stock").value);const image=await readImage(document.getElementById("new-image").files[0]);menu.push({id:slug(name)+"-"+Date.now().toString().slice(-5),cat,name,price,stock,image});save();e.target.reset();render()});
+    render();
+  </script>
+</body>
+</html>
