@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#006241">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
   <title>Filler Menu Control</title>
   <style>
     :root{--green:#006241;--mint:#e8f2ed;--cream:#f7f1e7;--ink:#1e2f29;--muted:#69766f;--line:#e4ded4;--danger:#b64235;--shadow:0 12px 28px rgba(51,36,18,.1)}
@@ -27,6 +30,7 @@
       <div id="inventory"></div>
     </section>
   </main>
+  <script src="pwa.js"></script>
   <script>
     const initialMenu=[{id:"chilaquiles-rojos-sencillos",cat:"Chilaquiles",name:"Rojos sencillos",price:55,stock:10},{id:"rojos-con-huevo",cat:"Chilaquiles",name:"Rojos con huevo",price:60,stock:10},{id:"rojos-con-pollo",cat:"Chilaquiles",name:"Rojos con pollo",price:65,stock:10},{id:"verdes-sencillos",cat:"Chilaquiles",name:"Verdes sencillos",price:55,stock:10},{id:"verdes-con-huevo",cat:"Chilaquiles",name:"Verdes con huevo",price:60,stock:10},{id:"verdes-con-pollo",cat:"Chilaquiles",name:"Verdes con pollo",price:65,stock:10},{id:"huevo-mexicana",cat:"De la plancha",name:"Huevo a la mexicana",price:55,stock:8},{id:"huevo-jamon-queso",cat:"De la plancha",name:"Huevo con jamon y queso",price:58,stock:8},{id:"huevos-tocino",cat:"De la plancha",name:"Huevos con tocino",price:65,stock:8},{id:"enchiladas-pollo",cat:"De la plancha",name:"Enchiladas de pollo",price:70,stock:8},{id:"club-sandwich",cat:"Sandwiches y mas",name:"Club sandwich Oroweat",price:115,stock:6},{id:"sandwich-atun",cat:"Sandwiches y mas",name:"Sandwich de atun",price:55,stock:8},{id:"sandwich-pollo",cat:"Sandwiches y mas",name:"Sandwich de pollo",price:48,stock:8},{id:"avocado-toast",cat:"Sandwiches y mas",name:"Avocado toast",price:65,stock:5},{id:"ensalada-pollo",cat:"Ensaladas",name:"Ensalada de pollo",price:85,stock:6},{id:"coctel-fruta",cat:"Frutas y bowls",name:"Coctel de fruta",price:50,stock:10},{id:"parfait",cat:"Frutas y bowls",name:"Parfait",price:52,stock:8},{id:"acai-bowl",cat:"Frutas y bowls",name:"Acai bowl",price:60,stock:8},{id:"hotcakes-frutos-rojos",cat:"Antojo",name:"Hotcakes con frutos rojos",price:54,stock:8},{id:"pan-dulce",cat:"Antojo",name:"Pan de dulce",price:19,stock:12},{id:"americano-12",cat:"Bebidas calientes",name:"Cafe americano 12 oz",price:29,stock:20},{id:"capuchino-12",cat:"Bebidas calientes",name:"Capuchino 12 oz",price:39,stock:20},{id:"latte-12",cat:"Bebidas calientes",name:"Latte 12 oz",price:39,stock:20},{id:"frappe-oreo",cat:"Bebidas frias",name:"Frappe de Oreo",price:58,stock:10},{id:"jugo-naranja",cat:"Bebidas frias",name:"Jugo de naranja",price:40,stock:10},{id:"smoothie-mango",cat:"Bebidas frias",name:"Smoothie de mango",price:55,stock:10}];
     let menu=JSON.parse(localStorage.getItem("fillerMenu")||"null")||initialMenu;
