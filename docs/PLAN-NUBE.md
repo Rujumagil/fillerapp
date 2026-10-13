@@ -4,10 +4,10 @@
 Confirmados en main: index.html, admin.html, pedidos.html, monitor.html, menu-control.html, pwa.js, sw.js, manifest.json. Los archivos HTML contienen scripts inline que leen/escriben fillerOrders y fillerMenu desde localStorage. El cliente descuenta existencia en navegador y muestra promesa de aviso por teléfono sin un servicio real de mensajería. El service worker guarda shell en caché y muestra notificaciones locales, pero no implementa eventos push entrantes.
 
 ## Decisión arquitectónica
-Conservar GitHub Pages y todos los estilos/pantallas. Crear proyecto Supabase **dedicado** para pedidos y productos; jamás reutilizar sin autorización compas-one o aula-compas. Aplicar `supabase/schema.sql` como base inicial solo tras validar el diseño y elegir un proyecto. Configurar Auth para cocina/admin, RLS, Storage para fotos y Edge Function transaccional para ingresar pedidos con precio y stock verificados en servidor.
+Conservar GitHub Pages y todos los estilos/pantallas. El usuario autorizó reutilizar el proyecto **compas-one** (qwxydjotwhniahaovrff). El 13/oct/2026 se crearon cuatro tablas filler_ con RLS y permisos restringidos; sin cambios en tablas CRM. No es aislamiento físico: cuotas y recursos siguen compartidos. Aplicar `supabase/schema.sql` como base inicial solo tras validar el diseño y elegir un proyecto. Configurar Auth para cocina/admin, RLS, Storage para fotos y Edge Function transaccional para ingresar pedidos con precio y stock verificados en servidor.
 
 ## Pendientes antes de pasar a producción
-1. Crear/seleccionar proyecto Supabase Filler dedicado y guardar URL pública + publishable key (nunca secret/service_role en GitHub Pages).
+1. [HECHO] Seleccionar compas-one como Supabase compartido y crear esquema filler_. Falta obtener publishable key para cliente (nunca secret/service_role en GitHub Pages).
 2. Registrar usuarios internos de cocina y administración; asignar roles por vía administrativa segura.
 3. Implementar endpoint seguro de pedido, atómico y con control anti-abuso; devolver identificador y token privado de seguimiento.
 4. Sustituir los puntos de lectura/escritura de localStorage en index, pedidos, monitor y menu-control por un módulo de datos; gestionar fallos sin afirmar que se recibió un pedido.
