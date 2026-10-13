@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Filler Monitor</title>
+  <style>
+    body{margin:0;background:#073c2c;color:white;font-family:system-ui}main{padding:32px}.top{display:flex;justify-content:space-between;align-items:center}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:18px}.ready{background:#dff4e8;color:#063b2c}.new{background:#fff4d8;color:#5d3c00}.prep{background:#e8f2ed;color:#063b2c}.badge{display:inline-block;border-radius:999px;padding:6px 10px;font-weight:900;margin-bottom:10px}@media(max-width:900px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main><div class="top"><h1>Pedidos Filler</h1><div id="clock"></div></div><div class="grid" id="orders"></div></main>
+  <script>
+    function render(){const orders=JSON.parse(localStorage.getItem("fillerOrders")||"[]").filter(o=>o.status!=="Entregado");document.getElementById("clock").textContent=new Date().toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});document.getElementById("orders").innerHTML=orders.length?orders.map(o=>`<article class="card"><span class="badge ${o.status==="Listo"?"ready":o.status==="Preparando"?"prep":"new"}">${o.status}</span><h2>${o.id}</h2><h3>${o.customer}</h3><p>Recoge: ${o.pickup}</p><p>${o.items.map(i=>`${i.qty} x ${i.name}`).join("<br>")}</p></article>`).join(""):"<h2>Sin pedidos activos</h2>"}render();setInterval(render,3000)
+  </script>
+</body>
+</html>

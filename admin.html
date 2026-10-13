@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Filler Admin</title>
+  <style>
+    body{margin:0;font-family:system-ui;background:#f7f1e7;color:#1e2f29}main{max-width:1100px;margin:auto;padding:24px}h1{margin:0 0 18px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:white;border:1px solid #e4ded4;border-radius:18px;padding:16px;box-shadow:0 12px 28px rgba(51,36,18,.1)}button{border:0;border-radius:10px;background:#006241;color:white;padding:10px 12px;font-weight:800;margin:4px}input{padding:9px;border:1px solid #ddd;border-radius:8px;width:90px}.line{border-top:1px solid #eee;padding:10px 0}.muted{color:#69766f}@media(max-width:800px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Filler Admin</h1>
+    <p class="muted">Link interno para cocina: pedidos, estados y existencias.</p>
+    <div class="grid"><section class="card"><h2>Pedidos</h2><div id="orders"></div></section><section class="card"><h2>Existencias</h2><div id="inventory"></div></section></div>
+  </main>
+  <script>
+    const menu=JSON.parse(localStorage.getItem("fillerMenu")||"[]");const orders=JSON.parse(localStorage.getItem("fillerOrders")||"[]");const money=v=>"$"+v.toLocaleString("es-MX");function save(){localStorage.setItem("fillerMenu",JSON.stringify(menu));localStorage.setItem("fillerOrders",JSON.stringify(orders))}function render(){document.getElementById("orders").innerHTML=orders.length?orders.map(o=>`<div class="line"><b>${o.id} - ${o.customer}</b><br>${o.phone} | Recoge ${o.pickup}<br>${o.items.map(i=>`${i.qty} x ${i.name}`).join("<br>")}<br><b>${money(o.total)}</b><br><button onclick="status('${o.id}','Preparando')">Preparando</button><button onclick="status('${o.id}','Listo')">Listo</button><button onclick="status('${o.id}','Entregado')">Entregado</button><span>${o.status}</span></div>`).join(""):"Sin pedidos.";document.getElementById("inventory").innerHTML=menu.map(i=>`<div class="line"><b>${i.name}</b><br>${i.cat} | ${money(i.price)}<br><input type="number" min="0" value="${i.stock}" onchange="stock('${i.id}',this.value)"> disponibles</div>`).join("")}function status(id,s){orders.find(o=>o.id===id).status=s;save();render()}function stock(id,v){menu.find(i=>i.id===id).stock=Number(v);save();render()}render()
+  </script>
+</body>
+</html>
