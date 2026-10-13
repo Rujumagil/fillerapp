@@ -1,0 +1,10 @@
+{
+  "name": "fillerapp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "App web para menu digital, pedidos para recoger y control de existencias.",
+  "scripts": {
+    "dev": "npx serve .",
+    "start": "npx serve ."
+  }
+}
