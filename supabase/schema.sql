@@ -47,7 +47,7 @@ grant select on public.filler_products to anon,authenticated;
 grant select on public.filler_staff to authenticated;
 grant select on public.filler_orders,public.filler_order_items to authenticated;
 grant insert,update,delete on public.filler_products to authenticated;
-grant update on public.filler_orders to authenticated;
+grant update (status, status_updated_at) on public.filler_orders to authenticated;
 create policy "personal lee su perfil" on public.filler_staff for select to authenticated using (user_id=(select auth.uid()));
 create policy "catalogo publico" on public.filler_products for select to anon,authenticated using (active);
 create policy "personal ve productos" on public.filler_products for select to authenticated using (exists(select 1 from public.filler_staff s where s.user_id=(select auth.uid())));
