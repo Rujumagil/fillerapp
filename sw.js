@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v1";
+const CACHE_NAME = "filler-app-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,7 +7,8 @@ const APP_SHELL = [
   "./monitor.html",
   "./menu-control.html",
   "./manifest.json",
-  "./icon.svg"
+  "./icon.svg",
+  "./assets/filler-vitrina-hero.jpg"
 ];
 
 self.addEventListener("install", event => {
