@@ -96,8 +96,15 @@
       try {
         const src = await getURL(key);
         if (!el.isConnected || el.dataset.photoKey !== key || !src) continue;
-        if (el.tagName === "IMG") el.src = src;
-        else el.style.backgroundImage = 'url("' + src + '")';
+        if (el.tagName === "IMG") {
+          el.src = src;
+        } else {
+          el.style.backgroundImage = 'url("' + src + '")';
+          el.style.backgroundPosition = "center center";
+          el.style.backgroundSize = "contain";
+          el.style.backgroundRepeat = "no-repeat";
+          el.style.backgroundColor = "#ffffff";
+        }
       } catch (error) {
         console.warn("Foto de platillo no disponible:", error);
       }
