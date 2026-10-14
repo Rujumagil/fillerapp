@@ -1,7 +1,7 @@
 {
-  "name": "Filler Cafe",
+  "name": "Filler Café",
   "short_name": "Filler",
-  "description": "Menu digital para ordenar y recoger en Filler Cafe.",
+  "description": "Menú digital para ordenar y recoger en Filler Café.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -10,10 +10,16 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "assets/filler-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/filler-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

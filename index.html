@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#006241">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/filler-icon-192.png">
+  <link rel="apple-touch-icon" href="assets/filler-icon-192.png">
   <title>Filler Cafe - Menu y pedidos</title>
   <style>
     :root{--green:#006241;--deep:#12362d;--mint:#e8f2ed;--cream:#f7f1e7;--gold:#c99542;--ink:#1e2f29;--muted:#69766f;--line:#e4ded4;--danger:#b64235;--shadow:0 16px 40px rgba(51,36,18,.12)}
@@ -22,10 +23,13 @@
     .hero-actions{margin-top:32px}
     .hero-actions button{box-shadow:0 4px 16px rgba(0,0,0,.12)}
     @media(max-width:700px){.hero-copy{min-height:580px;background:linear-gradient(180deg,rgba(3,54,38,.92) 0%,rgba(3,54,38,.72) 62%,rgba(3,54,38,.4) 100%),url('assets/filler-vitrina-hero-hd.webp') 57% center/cover no-repeat}.hero h2{font-size:clamp(41px,10vw,61px)}.hero-actions{gap:8px}.hero-actions button{padding:12px 14px}}
-</style>
+
+    .brand-mark{display:block;width:95px;height:72px;object-fit:contain;flex:0 0 auto}
+    @media(max-width:560px){.brand-mark{width:70px;height:56px}}
+  </style>
 </head>
 <body>
-  <header><div class="nav"><div class="brand"><div class="logo">F</div><div><h1>Filler Cafe</h1><p>Menu digital para pedir y recoger</p></div></div><nav><a href="#menu">Menu</a><a href="#pedido" class="order-link">Ordenar</a></nav></div></header>
+  <header><div class="nav"><div class="brand"><img class="brand-mark" src="assets/filler-logo-oficial.webp" alt="Filler Café" width="95" height="72"><div><h1>Filler Cafe</h1><p>Menu digital para pedir y recoger</p></div></div><nav><a href="#menu">Menu</a><a href="#pedido" class="order-link">Ordenar</a></nav></div></header>
   <main>
     <section class="hero">
       <div class="hero-copy">

@@ -41,10 +41,10 @@ async function fillerNotify(title, body) {
   if (registration) {
     registration.showNotification(title, {
       body,
-      icon: "./icon.svg",
-      badge: "./icon.svg"
+      icon: "./assets/filler-icon-192.png",
+      badge: "./assets/filler-icon-192.png"
     });
   } else {
-    new Notification(title, { body, icon: "./icon.svg" });
+    new Notification(title, { body, icon: "./assets/filler-icon-192.png" });
   }
 }
