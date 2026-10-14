@@ -5,6 +5,7 @@
   const keyToId = key => key.split("::")[0];
   const reserved = id => Object.entries(state.cart).reduce((sum, [key, qty]) => sum + (keyToId(key) === id ? Number(qty || 0) : 0), 0);
   const activeExtras = () => {
+    if (Array.isArray(window.FillerCloudExtras)) return window.FillerCloudExtras;
     try {
       const data = JSON.parse(localStorage.getItem(catalogKey) || "[]");
       return Array.isArray(data) ? data.filter(e => e && e.enabled === true && e.name && e.price !== null && e.price !== "" && Number.isFinite(Number(e.price)) && Number(e.price) >= 0).map(e => ({ id: String(e.id), name: String(e.name), price: Number(e.price) })) : [];
