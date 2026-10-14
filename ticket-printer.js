@@ -61,9 +61,10 @@
     activeTicket.style.setProperty("--ticket-width",WIDTHS[paper()]);
     activeTicket.innerHTML=ticketHtml(order,kind==="cliente"?"cliente":"cocina");
     document.body.appendChild(activeTicket);
-    window.print();
     // Respaldo para navegadores que no disparan afterprint.
     cleanupTimer=setTimeout(cleanup,90000);
+    try{window.print();}
+    catch(error){cleanup();throw error;}
   }
   window.FillerTickets=Object.freeze({print,paper,setPaper});
 })();
