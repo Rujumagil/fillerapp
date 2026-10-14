@@ -1,7 +1,9 @@
-const CACHE_NAME = "filler-app-v17";
+const CACHE_NAME = "filler-app-v18";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./pedido.html",
+  "./order-tracking.js",
   "./admin.html",
   "./pedidos.html",
   "./monitor.html",
@@ -62,11 +64,18 @@ self.addEventListener("fetch", event => {
 self.addEventListener("notificationclick", event => {
   event.notification.close();
   const raw=event.notification.data?.url || "./pedidos.html";
-  const target=raw==="./monitor.html"?"./monitor.html":"./pedidos.html";
+  const isPrivateTracking=typeof raw==="string" &&
+    /^\.\/pedido\.html#token=[0-9a-f-]{36}$/i.test(raw);
+  const target=isPrivateTracking?raw:(raw==="./monitor.html"?"./monitor.html":"./pedidos.html");
   const absolute=new URL(target,self.registration.scope).href;
   event.waitUntil((async()=>{
     const all=await clients.matchAll({type:"window",includeUncontrolled:true});
-    const existing=all.find(c=>c.url.split("?")[0].split("#")[0]===absolute);
+    const existing=all.find(c=>{
+      const seen=new URL(c.url);
+      const target=new URL(absolute);
+      return isPrivateTracking?seen.href===target.href:
+        (seen.origin===target.origin && seen.pathname===target.pathname);
+    });
     if(existing){await existing.focus();existing.postMessage({kind:"filler-order-notification-click"});return;}
     await clients.openWindow(absolute);
   })());
