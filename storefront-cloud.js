@@ -23,6 +23,7 @@
       window.FillerCloudExtras=extras;
       if(!products.length) {block("El menú de la nube aún no está configurado. Estamos preparando los pedidos entre dispositivos.");return;}
       const local=new Map(state.menu.map(i=>[i.id,i]));
+      if(state.category!=="Todos"&&!products.some(p=>p.cat===state.category))state.category="Todos";
       state.menu=products.map(i=>({...i,imageKey:local.get(i.id)?.imageKey||"",image:i.image||local.get(i.id)?.image||""}));
       // Revisión de carrito cuando el stock cambia remotamente.
       for(const key of Object.keys(state.cart)){
@@ -57,11 +58,13 @@
         p_lines:items.map(i=>({id:i.id,qty:i.qty,extras:(i.extras||[]).map(x=>x.id)}))
       });
       state.cart={};state.extraSelections={};
+      render();
       const notice=document.getElementById("client-status");
       notice.textContent="✓ Pedido "+data.code+" recibido en cocina · Total confirmado $"+Number(data.total).toLocaleString("es-MX")+". Puedes consultar con el personal el estado de preparación.";
       notice.classList.add("show");
       toast("¡Pedido enviado a cocina!");
-      await refresh();
+      // Pedido confirmado: una recarga fallida del catálogo no cambia su recepción.
+      refresh().catch(error=>console.warn("No se pudo actualizar la vista después del pedido:",error));
     }catch(error){
       status("No se pudo confirmar el pedido: "+error.message,true);
       toast("Pedido no enviado. "+error.message);
@@ -69,6 +72,7 @@
   }
   button.addEventListener("click",checkout);
   block("Comprobando conexión segura con cocina…");
+  window.FillerCloudModeReady=true;
   const prev=document.getElementById("client-status");
   if(prev?.textContent?.includes("guardado en este navegador")){prev.textContent="Los pedidos locales anteriores no fueron enviados a cocina. La recepción compartida está en configuración.";}
   refresh();
