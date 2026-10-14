@@ -57,12 +57,12 @@
     return {card:"new-card",label:"Nuevo",detail:"Pendiente de preparación"};
   }
   function login(){
-    bar.innerHTML='<form id="monitor-login" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><strong>Acceso al monitor</strong><input name="email" type="email" placeholder="Correo autorizado" required style="padding:10px;border-radius:8px"><input name="password" type="password" placeholder="Contraseña" required style="padding:10px;border-radius:8px"><button type="submit" style="padding:10px">Entrar</button></form>';
+    bar.innerHTML='<form id="monitor-login" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><strong>Acceso al monitor</strong><input name="username" type="text" placeholder="Usuario: admin o cocina" autocapitalize="none" spellcheck="false" autocomplete="username" required style="padding:10px;border-radius:8px"><input name="password" type="password" placeholder="Contraseña" required style="padding:10px;border-radius:8px"><button type="submit" style="padding:10px">Entrar</button></form>';
     root.innerHTML='<h2>Inicia sesión para ver los pedidos compartidos.</h2>';
     document.getElementById("monitor-login").addEventListener("submit",async event=>{
       event.preventDefault();
       const form=event.currentTarget,button=form.querySelector("button");button.disabled=true;
-      try{role=(await FillerCloud.login(form.email.value,form.password.value)).role;refresh();}catch(err){msg(err.message);role=null;}
+      try{role=(await FillerCloud.login(form.elements.namedItem("username").value,form.elements.namedItem("password").value)).role;refresh();}catch(err){msg(err.message);role=null;}
       finally{button.disabled=false;}
     });
   }
