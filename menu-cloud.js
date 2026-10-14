@@ -28,11 +28,11 @@
     notify(remote.length?"Hay "+remote.length+" productos compartidos en Supabase. No se modificará el catálogo mediante la importación inicial.":"La nube todavía no tiene productos. Puedes importar los "+menu.length+" platillos locales.");
   }
   function renderLogin(){
-    actions.innerHTML='<form id="filler-cloud-form" class="form"><label>Correo del administrador<input name="email" type="email" required autocomplete="username"></label><label>Contraseña<input name="password" type="password" required autocomplete="current-password"></label><button type="submit">Entrar como administrador</button></form>';
+    actions.innerHTML='<form id="filler-cloud-form" class="form"><label>Usuario administrador<input name="username" type="text" placeholder="admin" autocapitalize="none" spellcheck="false" autocomplete="username" required></label><label>Contraseña<input name="password" type="password" required autocomplete="current-password"></label><button type="submit">Entrar como administrador</button></form>';
     document.getElementById("filler-cloud-form").addEventListener("submit",async e=>{
       e.preventDefault();const f=e.currentTarget,button=f.querySelector("button");button.disabled=true;
       try {
-        const staff=await FillerCloud.login(f.email.value,f.password.value);
+        const staff=await FillerCloud.login(f.elements.namedItem("username").value,f.elements.namedItem("password").value);
         if(staff.role!=="admin"){FillerCloud.logout();throw new Error("Este usuario no tiene permiso de administrador Filler Café.");}
         await showAdmin();
       }catch(err){notify(err.message,true);}finally{button.disabled=false;}
