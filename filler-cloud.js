@@ -100,6 +100,10 @@
     const rows=await request("filler_products?select=id,category,name,price,stock,image_url,active&active=eq.true&order=category.asc,name.asc");
     return (rows||[]).map(i=>({id:i.id,cat:i.category,name:i.name,price:Number(i.price),stock:Number(i.stock),image:i.image_url||""}));
   }
+  async function extras() {
+    const rows=await request("filler_extras?select=id,name,price,enabled&enabled=eq.true&order=name.asc");
+    return (rows||[]).map(i=>({id:i.id,name:i.name,price:Number(i.price),enabled:true}));
+  }
   async function placeOrder(data) {
     const result=await request("rpc/filler_place_order",{method:"POST",body:data});
     if (!result?.code) throw new Error("No hubo confirmación del servidor.");
@@ -121,5 +125,5 @@
     if (safe.length) await request("filler_extras?on_conflict=id",{method:"POST",staff:true,body:safe,prefer:"resolution=merge-duplicates,return=minimal"});
   }
   function logout(){saveSession(null);}
-  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,catalog,placeOrder,importCatalog,importExtras,present});
+  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,catalog,extras,placeOrder,importCatalog,importExtras,present});
 })();
