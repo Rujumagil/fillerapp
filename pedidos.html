@@ -7,10 +7,36 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/filler-icon-192.png">
   <link rel="apple-touch-icon" href="assets/filler-icon-192.png">
+  <link rel="stylesheet" href="ticket-print.css">
   <title>Filler Pedidos</title>
   <style>
     :root{--green:#006241;--mint:#e8f2ed;--cream:#f7f1e7;--ink:#1e2f29;--muted:#69766f;--line:#e4ded4;--danger:#b64235;--yellow:#fff4d8;--blue:#e9f2ff;--shadow:0 12px 28px rgba(51,36,18,.1)}
     *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f7f1e7;color:var(--ink)}main{max-width:1060px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:18px}h1{margin:0}.muted{color:var(--muted)}.legend{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}.dot{border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900}.new{background:var(--yellow);color:#5d3c00}.prep{background:var(--blue);color:#123c6b}.ready{background:var(--mint);color:#063b2c}.done{background:#eee;color:#555}.late{background:var(--danger);color:white}.card{background:white;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}button{border:0;border-radius:999px;background:var(--green);color:white;padding:10px 13px;font-weight:850;cursor:pointer}.line{border-top:1px solid #eee;padding:14px;border-radius:16px}.line.alert{background:#fff1ef;border:2px solid var(--danger)}.line.ok{background:#f8fffb;border:1px solid #cfe8d8}.line.wait{background:#fffaf0}.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}.empty{border:1px dashed #cfc8bd;border-radius:16px;padding:18px;text-align:center;color:var(--muted)}.top-links a{color:var(--green);font-weight:850;text-decoration:none;margin-left:10px}.progress{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}.timer{font-weight:900}.note{font-size:13px;color:var(--muted)}@media(max-width:720px){header{display:block}.top-links{margin-top:10px}.top-links a{margin:0 10px 0 0}}
+    /* Una tarjeta = un pedido. Nunca mezclamos dos comandas. */
+    .kitchen-group{margin:22px 0 28px}
+    .kitchen-group h2{margin:0 0 12px;color:var(--green);font-size:22px}
+    .kitchen-group h2 small{font-size:14px;color:var(--muted)}
+    .kitchen-orders{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px;align-items:start}
+    .order-card{background:#fff;border:2px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow);min-width:0;overflow-wrap:anywhere}
+    .order-card.alert{border-color:var(--danger);background:#fff1ef}
+    .order-card.wait{border-color:#f1d09b;background:#fffdf5}
+    .order-card.ok{border-color:#a5d8bf;background:#f8fffb}
+    .order-card .order-heading{display:flex;justify-content:space-between;gap:8px;align-items:baseline;margin:6px 0 12px}
+    .order-card h3{font-size:24px;margin:0}
+    .order-card .order-heading span{font-size:12px;color:var(--muted);white-space:nowrap}
+    .order-card>div{margin:5px 0}
+    .order-products{border-top:1px dashed #aab7ad;border-bottom:1px dashed #aab7ad;padding:8px 0;margin:12px 0!important}
+    .order-product{display:grid;grid-template-columns:32px minmax(0,1fr);gap:9px;margin:8px 0;align-items:start}
+    .order-product .order-qty{color:var(--green);font-size:19px}
+    .order-notes{padding:10px;border:1px solid #efd8a2;background:#fff5d6;border-radius:11px;white-space:pre-wrap}
+    .order-total{font-size:17px;font-weight:900}
+    .order-card .actions{margin-top:12px}
+    .order-card button{border-radius:11px;font-size:13px;padding:11px}
+    .order-card button.secondary{color:var(--green);background:white;border:1px solid var(--green)}
+    .print-actions{border-top:1px solid #ddd;padding-top:12px}
+    .paper-choice{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink)}
+    .paper-choice select{font:inherit;border:1px solid var(--line);border-radius:9px;padding:9px;background:#fff}
+    @media (max-width:720px){main{padding:14px}.order-card{padding:15px}}
   </style>
 </head>
 <body>
@@ -21,6 +47,7 @@
   <script src="pwa.js"></script>
   <script src="order-notifications.js"></script>
   <script src="filler-cloud.js"></script>
+  <script src="ticket-printer.js"></script>
   <script src="kitchen-cloud.js"></script>
 
 </body>
