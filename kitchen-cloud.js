@@ -33,13 +33,15 @@
     if(o.status==="Listo")return {cls:"ready",line:"ok",label:"Listo",detail:"Listo hace "+min(since)+" min"};
     if(o.status==="Preparando")return {cls:"prep",line:"wait",label:"Preparando",detail:min(age)+" min preparando"};
     if(o.status==="Entregado")return {cls:"done",line:"ok",label:"Entregado",detail:"Pedido cerrado"};
+    if(o.status==="Cancelado")return {cls:"done",line:"ok",label:"Cancelado",detail:"Pedido cancelado"};
     return {cls:"new",line:"wait",label:"Nuevo",detail:min(age)+" min desde que entró"};
   }
   const sections=[
     {title:"🟡 Por preparar",status:"Nuevo"},
     {title:"🔵 En preparación",status:"Preparando"},
     {title:"🟢 Listos para entregar",status:"Listo"},
-    {title:"⚪ Entregados",status:"Entregado"}
+    {title:"⚪ Entregados",status:"Entregado"},
+    {title:"⚫ Cancelados",status:"Cancelado"}
   ];
   function render(){
     if(!orders.length){
@@ -72,7 +74,7 @@
             '<button type="button" data-print="'+escape(o.uuid)+'" data-kind="cocina">🖨 Imprimir comanda</button>'+
             '<button type="button" class="secondary" data-print="'+escape(o.uuid)+'" data-kind="cliente">Ticket cliente</button>'+
             '</div>'+
-            (o.status!=="Entregado"?'<div class="actions state-actions">'+
+            (!["Entregado","Cancelado"].includes(o.status)?'<div class="actions state-actions">'+
             (o.status==="Nuevo"?'<button type="button" data-change="'+escape(o.uuid)+'" data-status="Preparando">Preparando</button>':"")+
             (o.status!=="Listo"?'<button type="button" data-change="'+escape(o.uuid)+'" data-status="Listo">Listo</button>':"")+
             '<button type="button" data-change="'+escape(o.uuid)+'" data-status="Entregado">Entregado</button></div>':"")+
