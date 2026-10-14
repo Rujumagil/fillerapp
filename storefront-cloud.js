@@ -60,7 +60,17 @@
       state.cart={};state.extraSelections={};
       render();
       const notice=document.getElementById("client-status");
-      notice.textContent="✓ Pedido "+data.code+" recibido en cocina · Total confirmado $"+Number(data.total).toLocaleString("es-MX")+". Puedes consultar con el personal el estado de preparación.";
+      notice.textContent="✓ Pedido "+data.code+" recibido en cocina · Total confirmado $"+Number(data.total).toLocaleString("es-MX")+". ";
+      if(data.tracking_token && /^[0-9a-f-]{36}$/i.test(data.tracking_token)){
+        try{localStorage.setItem("filler_last_tracking_v1",JSON.stringify({token:data.tracking_token,code:data.code}));}catch{}
+        const link=document.createElement("a");
+        link.href="./pedido.html#token="+encodeURIComponent(data.tracking_token);
+        link.textContent="🔔 Seguir mi pedido y saber cuándo está listo";
+        link.style.cssText="display:block;margin-top:11px;padding:13px;border-radius:12px;background:#006241;color:white;font-size:15px;font-weight:850;text-decoration:none;text-align:center";
+        notice.appendChild(link);
+      }else{
+        notice.appendChild(document.createTextNode("Solicita a cocina información sobre su preparación."));
+      }
       notice.classList.add("show");
       toast("¡Pedido enviado a cocina!");
       // Pedido confirmado: una recarga fallida del catálogo no cambia su recepción.
@@ -73,6 +83,17 @@
   button.addEventListener("click",checkout);
   block("Comprobando conexión segura con cocina…");
   window.FillerCloudModeReady=true;
+  // Acceso al último seguimiento incluso después de recargar el menú.
+  try{
+    const previous=JSON.parse(localStorage.getItem("filler_last_tracking_v1")||"null");
+    if(previous?.token&&/^[0-9a-f-]{36}$/i.test(previous.token)){
+      const link=document.createElement("a");
+      link.href="./pedido.html#token="+encodeURIComponent(previous.token);
+      link.textContent="🔔 Consultar estado de mi último pedido ("+String(previous.code||"")+")";
+      link.style.cssText="display:block;padding:11px 15px;margin:5px 0 16px;border-radius:12px;border:1px solid #acd7b9;background:#f5fff6;color:#006241;font-weight:750;text-decoration:none";
+      banner.after(link);
+    }
+  }catch{}
   const prev=document.getElementById("client-status");
   if(prev?.textContent?.includes("guardado en este navegador")){prev.textContent="Los pedidos locales anteriores no fueron enviados a cocina. La recepción compartida está en configuración.";}
   refresh();
