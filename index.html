@@ -53,9 +53,10 @@
         if(!Array.isArray(latest))return;
         state.menu=latest;
         Object.keys(state.cart).forEach(id=>{
-          const product=itemById(id);
+          const product=itemById(id.split('::')[0]);
           if(!product || !Number(product.stock)){delete state.cart[id];return;}
-          state.cart[id]=Math.min(state.cart[id],Number(product.stock));
+          const allocated=Object.keys(state.cart).filter(k=>k.split('::')[0]===product.id).reduce((sum,k)=>sum+Number(state.cart[k]||0),0);
+          if(allocated>Number(product.stock)){state.cart[id]=Math.max(0,Number(state.cart[id])- (allocated-Number(product.stock)));if(!state.cart[id])delete state.cart[id];}
         });
         render();
       }catch(error){console.warn("No se pudo actualizar el menú local.",error);}
@@ -64,5 +65,6 @@
     window.addEventListener("focus",syncMenuFromStorage);
     render();
   </script>
+  <script src="extras-storefront.js"></script>
 </body>
 </html>
