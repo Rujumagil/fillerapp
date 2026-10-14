@@ -7,9 +7,16 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/filler-icon-192.png">
   <link rel="apple-touch-icon" href="assets/filler-icon-192.png">
+  <link rel="stylesheet" href="ticket-print.css">
   <title>Filler Monitor</title>
   <style>
     body{margin:0;background:#073c2c;color:white;font-family:system-ui}main{padding:32px}.top{display:flex;justify-content:space-between;align-items:center}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:18px}.card.late-card{background:#b64235;border-color:#ffb7ad}.card.ready-card{background:#dff4e8;color:#063b2c}.card.prep-card{background:#e9f2ff;color:#123c6b}.card.new-card{background:#fff4d8;color:#5d3c00}.badge{display:inline-block;border-radius:999px;padding:7px 11px;font-weight:900;margin-bottom:10px;background:rgba(255,255,255,.22)}.time{font-size:18px;font-weight:900}.detail{opacity:.85}@media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+    .monitor-print-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;padding-top:10px;border-top:1px solid rgba(0,0,0,.15)}
+    .monitor-print-actions button{border-radius:12px;border:2px solid #168356;background:#fff;color:#064b31;cursor:pointer;font-size:14px;font-weight:850;padding:12px}
+    .monitor-print-actions button:hover{background:#d6ffe7}
+    .card{min-width:0;overflow-wrap:anywhere}
+    .card h2{font-size:25px;margin:8px 0}
   </style>
 </head>
 <body>
@@ -17,6 +24,7 @@
   <script src="pwa.js"></script>
   <script src="order-notifications.js"></script>
   <script src="filler-cloud.js"></script>
+  <script src="ticket-printer.js"></script>
   <script src="monitor-cloud.js"></script>
 
 </body>
