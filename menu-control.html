@@ -34,11 +34,12 @@
         <label>Categoria<input id="new-cat" required placeholder="Ej. Antojo" list="cat-list"></label>
         <label>Precio<input id="new-price" required type="number" min="0" placeholder="65"></label>
         <label>Existencia<input id="new-stock" required type="number" min="0" placeholder="10"></label>
-        <label class="wide">Foto<input id="new-image" type="file" accept="image/*"></label>
+        <label class="wide">Foto del platillo<input id="new-image" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif"><small>La imagen se optimizará automáticamente. Máximo 25 MB. JPG, PNG o WebP recomendados.</small></label>
         <button type="submit">Agregar platillo</button>
         <button type="button" class="secondary" onclick="resetMenu()">Restaurar menu base</button>
       </form>
       <datalist id="cat-list"></datalist>
+      <p class="edit-hint">Las fotos ahora se guardan en el almacenamiento de imágenes de este navegador, separado del menú. No borres los datos del sitio; la sincronización entre dispositivos está pendiente.</p>
       <p class="edit-hint">Para cambiar el nombre de un platillo, escríbelo en el campo <strong>Nombre del platillo</strong> y pulsa <strong>Guardar nombre</strong>. Los cambios se guardan en este navegador; para verlos en el menú público utiliza el mismo navegador.</p>
       <div id="menu-feedback" class="menu-feedback" role="status" aria-live="polite" hidden></div>
       <div id="inventory"></div>
@@ -53,12 +54,12 @@
     </section>
   </main>
   <script src="pwa.js"></script>
+  <script src="photo-store.js"></script>
   <script>
     const initialMenu=[{id:"chilaquiles-rojos-sencillos",cat:"Chilaquiles",name:"Rojos sencillos",price:55,stock:10},{id:"rojos-con-huevo",cat:"Chilaquiles",name:"Rojos con huevo",price:60,stock:10},{id:"rojos-con-pollo",cat:"Chilaquiles",name:"Rojos con pollo",price:65,stock:10},{id:"verdes-sencillos",cat:"Chilaquiles",name:"Verdes sencillos",price:55,stock:10},{id:"verdes-con-huevo",cat:"Chilaquiles",name:"Verdes con huevo",price:60,stock:10},{id:"verdes-con-pollo",cat:"Chilaquiles",name:"Verdes con pollo",price:65,stock:10},{id:"huevo-mexicana",cat:"De la plancha",name:"Huevo a la mexicana",price:55,stock:8},{id:"huevo-jamon-queso",cat:"De la plancha",name:"Huevo con jamon y queso",price:58,stock:8},{id:"huevos-tocino",cat:"De la plancha",name:"Huevos con tocino",price:65,stock:8},{id:"enchiladas-pollo",cat:"De la plancha",name:"Enchiladas de pollo",price:70,stock:8},{id:"club-sandwich",cat:"Sandwiches y mas",name:"Club sandwich Oroweat",price:115,stock:6},{id:"sandwich-atun",cat:"Sandwiches y mas",name:"Sandwich de atun",price:55,stock:8},{id:"sandwich-pollo",cat:"Sandwiches y mas",name:"Sandwich de pollo",price:48,stock:8},{id:"avocado-toast",cat:"Sandwiches y mas",name:"Avocado toast",price:65,stock:5},{id:"ensalada-pollo",cat:"Ensaladas",name:"Ensalada de pollo",price:85,stock:6},{id:"coctel-fruta",cat:"Frutas y bowls",name:"Coctel de fruta",price:50,stock:10},{id:"parfait",cat:"Frutas y bowls",name:"Parfait",price:52,stock:8},{id:"acai-bowl",cat:"Frutas y bowls",name:"Acai bowl",price:60,stock:8},{id:"hotcakes-frutos-rojos",cat:"Antojo",name:"Hotcakes con frutos rojos",price:54,stock:8},{id:"pan-dulce",cat:"Antojo",name:"Pan de dulce",price:19,stock:12},{id:"americano-12",cat:"Bebidas calientes",name:"Cafe americano 12 oz",price:29,stock:20},{id:"capuchino-12",cat:"Bebidas calientes",name:"Capuchino 12 oz",price:39,stock:20},{id:"latte-12",cat:"Bebidas calientes",name:"Latte 12 oz",price:39,stock:20},{id:"frappe-oreo",cat:"Bebidas frias",name:"Frappe de Oreo",price:58,stock:10},{id:"jugo-naranja",cat:"Bebidas frias",name:"Jugo de naranja",price:40,stock:10},{id:"smoothie-mango",cat:"Bebidas frias",name:"Smoothie de mango",price:55,stock:10}];
     let menu=JSON.parse(localStorage.getItem("fillerMenu")||"null")||initialMenu;
     const slug=s=>s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
     const save=()=>localStorage.setItem("fillerMenu",JSON.stringify(menu));
-    function readImage(file){return new Promise(resolve=>{if(!file)return resolve("");const r=new FileReader();r.onload=()=>resolve(r.result);r.readAsDataURL(file)})}
 
     const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
     function feedback(message,error=false){
@@ -67,7 +68,8 @@
     }
     function render(){
       document.getElementById("cat-list").innerHTML=[...new Set(menu.map(i=>i.cat))].map(c=>`<option value="${escapeHtml(c)}"></option>`).join("");
-      document.getElementById("inventory").innerHTML=menu.map(i=>`<div class="line item-line"><img class="thumb" src="${escapeHtml(i.image||"")}" alt=""><div><b>${escapeHtml(i.name)}</b><br><span class="muted">${escapeHtml(i.cat)}</span><div class="name-editor"><label>Nombre del platillo<input data-name-input value="${escapeHtml(i.name)}" maxlength="100" autocomplete="off" aria-label="Editar nombre de ${escapeHtml(i.name)}"></label><button type="button" onclick="saveName('${i.id}',this)">Guardar nombre</button></div><div class="price-row"><label>Precio<input type="number" min="0" value="${i.price}" onchange="updateItem('${i.id}','price',this.value)"></label><label>Existencia<input type="number" min="0" value="${i.stock}" onchange="updateItem('${i.id}','stock',this.value)"></label></div><label class="allow-extras"><input type="checkbox" ${i.allowExtras===true || (i.allowExtras!==false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(i.cat))?"checked":""} onchange="updateItem('${i.id}','allowExtras',this.checked)"> Permitir extras en este platillo</label><div class="actions"><label class="secondary" style="display:inline-block;padding:10px 13px;border:1px solid var(--line);border-radius:999px;color:var(--green);font-weight:850;cursor:pointer">Subir foto<input type="file" accept="image/*" style="display:none" onchange="setPhoto('${i.id}',this.files[0])"></label><button class="danger" onclick="removeItem('${i.id}')">Quitar</button></div></div></div>`).join("");
+      document.getElementById("inventory").innerHTML=menu.map(i=>`<div class="line item-line"><img class="thumb" src="${escapeHtml(i.image||"")}" data-photo-key="${escapeHtml(i.imageKey||"")}" alt="Foto de ${escapeHtml(i.name)}"><div><b>${escapeHtml(i.name)}</b><br><span class="muted">${escapeHtml(i.cat)}</span><div class="name-editor"><label>Nombre del platillo<input data-name-input value="${escapeHtml(i.name)}" maxlength="100" autocomplete="off" aria-label="Editar nombre de ${escapeHtml(i.name)}"></label><button type="button" onclick="saveName('${i.id}',this)">Guardar nombre</button></div><div class="price-row"><label>Precio<input type="number" min="0" value="${i.price}" onchange="updateItem('${i.id}','price',this.value)"></label><label>Existencia<input type="number" min="0" value="${i.stock}" onchange="updateItem('${i.id}','stock',this.value)"></label></div><label class="allow-extras"><input type="checkbox" ${i.allowExtras===true || (i.allowExtras!==false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(i.cat))?"checked":""} onchange="updateItem('${i.id}','allowExtras',this.checked)"> Permitir extras en este platillo</label><div class="actions"><label class="secondary" style="display:inline-block;padding:10px 13px;border:1px solid var(--line);border-radius:999px;color:var(--green);font-weight:850;cursor:pointer">Subir foto<input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" style="display:none" onchange="setPhoto('${i.id}',this.files[0])"></label><button class="danger" onclick="removeItem('${i.id}')">Quitar</button></div></div></div>`).join("");
+      FillerPhotos.applyImages(document.getElementById("inventory"));
     }
     function saveName(id,button){
       const item=menu.find(i=>i.id===id);
@@ -81,11 +83,44 @@
       render();feedback("Nombre actualizado: "+name);
     }
     function updateItem(id,key,value){const item=menu.find(i=>i.id===id);if(!item)return;item[key]=key==="price"||key==="stock"?Number(value):value;save();render()}
-    async function setPhoto(id,file){const item=menu.find(i=>i.id===id);if(!item)return;item.image=await readImage(file);save();render()}
+    async function setPhoto(id,file){
+      const item=menu.find(i=>i.id===id);
+      if(!item||!file)return;
+      feedback("Procesando y guardando fotografía…");
+      try{
+        await FillerPhotos.migrateMenu(menu);
+        const key=await FillerPhotos.putFile(id,file);
+        const oldImage=item.image,oldKey=item.imageKey;
+        item.imageKey=key;delete item.image;
+        try{save();}catch(error){item.image=oldImage;item.imageKey=oldKey;throw error;}
+        render();feedback("Fotografía de "+item.name+" guardada correctamente.");
+      }catch(error){render();feedback("No se guardó la foto: "+(error.message||"almacenamiento lleno o no disponible"),true);}
+    }
     function removeItem(id){if(!confirm("Quitar este platillo del menu?"))return;menu=menu.filter(i=>i.id!==id);save();render()}
     function resetMenu(){if(!confirm("Esto restaura el menu base y borra fotos/agregados guardados en este navegador."))return;menu=initialMenu;save();render()}
-    document.getElementById("add-form").addEventListener("submit",async e=>{e.preventDefault();const name=document.getElementById("new-name").value.trim();const cat=document.getElementById("new-cat").value.trim();const price=Number(document.getElementById("new-price").value);const stock=Number(document.getElementById("new-stock").value);const image=await readImage(document.getElementById("new-image").files[0]);menu.push({id:slug(name)+"-"+Date.now().toString().slice(-5),cat,name,price,stock,image});save();e.target.reset();render()});
+    document.getElementById("add-form").addEventListener("submit",async e=>{
+      e.preventDefault();
+      const form=e.currentTarget,button=form.querySelector('[type="submit"]');
+      const name=document.getElementById("new-name").value.trim();
+      const cat=document.getElementById("new-cat").value.trim();
+      const price=Number(document.getElementById("new-price").value);
+      const stock=Number(document.getElementById("new-stock").value);
+      if(!name||!cat||!Number.isFinite(price)||price<0||!Number.isInteger(stock)||stock<0){feedback("Revisa los datos del platillo.",true);return;}
+      button.disabled=true;feedback("Guardando platillo…");
+      try{
+        await FillerPhotos.migrateMenu(menu);
+        const id=slug(name)+"-"+Date.now()+"-"+Math.floor(Math.random()*1000);
+        const file=document.getElementById("new-image").files[0];
+        const entry={id,cat,name,price,stock};
+        if(file)entry.imageKey=await FillerPhotos.putFile(id,file);
+        menu.push(entry);
+        try{save();}catch(error){menu.pop();throw error;}
+        form.reset();render();feedback("Platillo "+name+" agregado correctamente.");
+      }catch(error){render();feedback("No se agregó el platillo: "+(error.message||"No hay espacio o permisos de almacenamiento."),true);}
+      finally{button.disabled=false;}
+    });
     render();
+    FillerPhotos.migrateMenu(menu).then(changed=>{if(changed)render();}).catch(error=>console.warn("Migración de fotos pendiente:",error));
   </script>
   <script src="extras-control.js"></script>
 </body>
