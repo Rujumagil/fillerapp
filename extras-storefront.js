@@ -6,8 +6,13 @@
   const reserved = id => Object.entries(state.cart).reduce((sum, [key, qty]) => sum + (keyToId(key) === id ? Number(qty || 0) : 0), 0);
   const activeExtras = () => {
     try {
-      const data = JSON.parse(localStorage.getItem(catalogKey) || "[]");
-      return Array.isArray(data) ? data.filter(e => e && e.enabled === true && e.name && e.price !== null && e.price !== "" && Number.isFinite(Number(e.price)) && Number(e.price) >= 0).map(e => ({ id: String(e.id), name: String(e.name), price: Number(e.price) })) : [];
+      // En modo compartido, los precios de extras vienen del servidor.
+      // No aceptar configuraciones locales diferentes en cada teléfono.
+      const cloud = window.FillerCloudExtras;
+      const data = Array.isArray(cloud) ? cloud : [];
+      return data.filter(e => e && e.enabled === true && e.name && e.price !== null &&
+        e.price !== "" && Number.isFinite(Number(e.price)) && Number(e.price) >= 0)
+        .map(e => ({ id: String(e.id), name: String(e.name), price: Number(e.price) }));
     } catch { return []; }
   };
   const eligible = item => item && (item.allowExtras === true || (item.allowExtras !== false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(item.cat || "")));
