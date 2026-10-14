@@ -102,8 +102,9 @@
       const available = Number(item.stock) - reserved(item.id);
       const photo = item.image ? 'style="background-image:url(&quot;' + esc(item.image) + '&quot;);background-size:cover;background-position:center"' : "";
       const options = eligible(item) && activeExtras().length;
-      return '<article class="item"><div class="item-photo photo ' + photoClass(item.cat) + '" ' + photo + '></div><h3>' + esc(item.name) + '</h3><div class="meta">' + (available > 0 ? available + ' disponibles' : 'Agotado') + '</div><div class="price">' + money(Number(item.price)) + '</div><button ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(item.id) + '">' + (available <= 0 ? "Agotado" : options ? "Elegir extras" : "Agregar") + '</button></article>';
+      return '<article class="item"><div class="item-photo photo ' + photoClass(item.cat) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><h3>' + esc(item.name) + '</h3><div class="meta">' + (available > 0 ? available + ' disponibles' : 'Agotado') + '</div><div class="price">' + money(Number(item.price)) + '</div><button ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(item.id) + '">' + (available <= 0 ? "Agotado" : options ? "Elegir extras" : "Agregar") + '</button></article>';
     }).join("");
+    FillerPhotos.applyImages(document.getElementById("menu-list"));
     document.querySelectorAll("[data-add]").forEach(b => b.addEventListener("click", () => addToCart(b.dataset.add)));
   };
   renderCart = function() {
