@@ -4,6 +4,7 @@
   const root=document.getElementById("orders");
   const clock=document.getElementById("clock");
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  let currentOrders=[];
   let role=null, permissionMessage="Activa las notificaciones para ver avisos del sistema.";
   function enableControls(){
     const button=document.getElementById("monitor-sound");
@@ -18,11 +19,22 @@
     });
     document.getElementById("monitor-exit")?.addEventListener("click",()=>{role=null;FillerCloud.logout();login();});
   }
+  root.addEventListener("click",event=>{
+    const button=event.target.closest("button[data-print]");
+    if(!button||!root.contains(button))return;
+    const order=currentOrders.find(o=>o.uuid===button.dataset.print);
+    if(!order)return msg("No se encontró el pedido; actualiza la pantalla.");
+    try{FillerTickets.print(order,button.dataset.kind);}
+    catch(error){msg("No se pudo imprimir: "+error.message);}
+  });
   const bar=document.createElement("div");
   bar.style.cssText="padding:14px;border:1px solid #497c64;border-radius:14px;margin-bottom:18px;background:#104d38";
   root.before(bar);
   function msg(v){bar.textContent=v;}
   const notifier=FillerOrderNotifications.create({onStatus:msg});
+  bar.addEventListener("change",event=>{
+    if(event.target.id==="monitor-paper")FillerTickets.setPaper(event.target.value);
+  });
   function status(o){
     const now=Date.now(),age=now-o.createdTs,wait=now-o.statusUpdatedAt;
     if(["Nuevo","Preparando"].includes(o.status)&&age>600000)return {card:"late-card",label:"Fuera de tiempo",detail:Math.floor(age/60000)+" min en preparación"};
@@ -45,14 +57,16 @@
     if(!role)return;
     try {
       const orders=(await FillerCloud.orders()).filter(o=>o.status!=="Entregado");
+      currentOrders=orders;
       notifier.incoming(orders);
       clock.textContent=new Date().toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});
       root.innerHTML=orders.length?orders.map(o=>{
         const s=status(o);
         const lines=o.items.map(i=>Number(i.qty)+" × "+esc(i.name)+(i.extras?.length?"<br><small>Extras: "+i.extras.map(x=>esc(x.name)).join(", ")+"</small>":"")).join("<br>");
-        return '<article class="card '+s.card+'"><span class="badge">'+s.label+'</span><h2>'+esc(o.id)+'</h2><h3>'+esc(o.customer)+'</h3><p class="time">'+s.detail+'</p><p>Recoge: '+esc(o.pickup)+'</p><p>'+lines+'</p></article>';
+        return '<article class="card '+s.card+'"><span class="badge">'+s.label+'</span><h2>'+esc(o.id)+'</h2><h3>'+esc(o.customer)+'</h3><p class="time">'+s.detail+'</p><p>Recoge: '+esc(o.pickup)+'</p><p>'+lines+'</p><div class="monitor-print-actions"><button type="button" data-print="'+esc(o.uuid)+'" data-kind="cocina">🖨 Comanda</button><button type="button" data-print="'+esc(o.uuid)+'" data-kind="cliente">Ticket cliente</button></div></article>';
       }).join(""):'<h2>Sin pedidos activos</h2>';
-      bar.innerHTML='<span>🟢 Monitor conectado · Actualizado: '+new Date().toLocaleTimeString("es-MX")+'</span> <button id="monitor-sound" style="margin-left:15px">'+(notifier.isEnabled()?"🔔 Probar notificación nuevamente":"🔔 Activar notificaciones y probar sonido")+'</button> <button id="monitor-exit" style="margin-left:8px">Salir</button><div id="monitor-notification-status" style="font-size:13px;margin-top:9px;opacity:.95">'+permissionMessage+'</div>';
+      bar.innerHTML='<span>🟢 Monitor conectado · Actualizado: '+new Date().toLocaleTimeString("es-MX")+'</span> <button id="monitor-sound" style="margin-left:15px">'+(notifier.isEnabled()?"🔔 Probar notificación nuevamente":"🔔 Activar notificaciones y probar sonido")+'</button> <label style="margin-left:9px">Papel <select id="monitor-paper" style="padding:7px;border-radius:8px"><option value="80">80 mm</option><option value="58">58 mm</option></select></label> <button id="monitor-exit" style="margin-left:8px">Salir</button><div id="monitor-notification-status" style="font-size:13px;margin-top:9px;opacity:.95">'+permissionMessage+'</div>';
+      document.getElementById("monitor-paper").value=FillerTickets.paper();
       enableControls();
     }catch(err){msg("No se pudo actualizar: "+err.message);}
     if(role)setTimeout(refresh,3000);
