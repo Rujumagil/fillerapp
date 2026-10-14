@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v11";
+const CACHE_NAME = "filler-app-v12";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -13,6 +13,7 @@ const APP_SHELL = [
   "./menu-cloud.js",
   "./kitchen-cloud.js",
   "./monitor-cloud.js",
+  "./storefront-cloud.js",
   "./manifest.json",
   "./assets/filler-logo-oficial.webp",
   "./assets/filler-icon-192.png",
@@ -34,7 +35,24 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
+  const req = event.request;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+  const documentOrScript = req.mode === "navigate" || /\\.(?:html|js)$/.test(url.pathname);
+  if (documentOrScript) {
+    // Evitar que una PWA instalada muestre una versión anterior del checkout.
+    event.respondWith(
+      fetch(req).then(response => {
+        if (response.ok) {
+          const responseCopy = response.clone();
+          event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put(req,responseCopy)).catch(()=>{}));
+        }
+        return response;
+      }).catch(() => caches.match(req))
+    );
+  } else {
+    event.respondWith(caches.match(req).then(cached => cached || fetch(req)));
+  }
 });
 
 self.addEventListener("notificationclick", event => {
