@@ -4,13 +4,15 @@
   const root=document.getElementById("orders");
   const clock=document.getElementById("clock");
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  let role=null;
+  let role=null, permissionMessage="Activa las notificaciones para ver avisos del sistema.";
   function enableControls(){
     const button=document.getElementById("monitor-sound");
     if(button)button.addEventListener("click",async()=>{
       button.disabled=true;
       try {
-        await notifier.enable();
+        const result=await notifier.enable();
+        permissionMessage=result.notifications?"✓ Notificaciones de Windows/navegador permitidas":"Alerta visual activada. Revisa los permisos de notificaciones del navegador.";
+        const status=document.getElementById("monitor-notification-status");if(status)status.textContent=permissionMessage;
         button.textContent="🔔 Probar notificación nuevamente";
       } finally {button.disabled=false;}
     });
@@ -50,7 +52,7 @@
         const lines=o.items.map(i=>Number(i.qty)+" × "+esc(i.name)+(i.extras?.length?"<br><small>Extras: "+i.extras.map(x=>esc(x.name)).join(", ")+"</small>":"")).join("<br>");
         return '<article class="card '+s.card+'"><span class="badge">'+s.label+'</span><h2>'+esc(o.id)+'</h2><h3>'+esc(o.customer)+'</h3><p class="time">'+s.detail+'</p><p>Recoge: '+esc(o.pickup)+'</p><p>'+lines+'</p></article>';
       }).join(""):'<h2>Sin pedidos activos</h2>';
-      bar.innerHTML='<span>🟢 Monitor conectado · Actualizado: '+new Date().toLocaleTimeString("es-MX")+'</span> <button id="monitor-sound" style="margin-left:15px">'+(notifier.isEnabled()?"🔔 Probar notificación nuevamente":"🔔 Activar notificaciones y probar sonido")+'</button> <button id="monitor-exit" style="margin-left:8px">Salir</button>';
+      bar.innerHTML='<span>🟢 Monitor conectado · Actualizado: '+new Date().toLocaleTimeString("es-MX")+'</span> <button id="monitor-sound" style="margin-left:15px">'+(notifier.isEnabled()?"🔔 Probar notificación nuevamente":"🔔 Activar notificaciones y probar sonido")+'</button> <button id="monitor-exit" style="margin-left:8px">Salir</button><div id="monitor-notification-status" style="font-size:13px;margin-top:9px;opacity:.95">'+permissionMessage+'</div>';
       enableControls();
     }catch(err){msg("No se pudo actualizar: "+err.message);}
     if(role)setTimeout(refresh,3000);
