@@ -13,17 +13,34 @@
 - `monitor.html`: también exige acceso autorizado y actualiza cada 3 segundos; incluye botón de activar sonido y notificaciones locales cuando la página está abierta.
 - `sw.js`: nueva versión de caché para todos los módulos.
 
+## Acceso con nombre de usuario (sin correo visible)
+La aplicación usa **usuario + contraseña**:
+- `admin` — administra el catálogo y también puede entrar a cocina/monitor.
+- `cocina` — solo recibe pedidos y modifica estados.
+
+**Importante:** Supabase Auth internamente autentica por correo y contraseña. Para no pedir correos al personal, el cliente traduce **solo el nombre de usuario** a un identificador técnico, sin guardar claves en GitHub:
+- `admin` corresponde a `filler.admin@proyectocompas.com`
+- `cocina` corresponde a `filler.cocina@proyectocompas.com`
+
+Estos identificadores **no son buzones ni cuentas creadas automáticamente**. Los usuarios se crean de forma manual en **Supabase → Authentication → Users → Add user** con contraseña robusta elegida privadamente en el panel de Supabase. Si la interfaz lo permite, usar `Auto Confirm User` al crear estos usuarios de uso interno. No se publican las contraseñas ni se envían por chat.
+
+Después se asigna cada cuenta al rol de Filler correspondiente, **únicamente cuando exista en auth.users**:
+
+```sql
+insert into public.filler_staff(user_id,role)
+select id, 'admin' from auth.users where lower(email)='filler.admin@proyectocompas.com'
+on conflict(user_id) do update set role=excluded.role;
+
+insert into public.filler_staff(user_id,role)
+select id, 'cocina' from auth.users where lower(email)='filler.cocina@proyectocompas.com'
+on conflict(user_id) do update set role=excluded.role;
+```
+
+Evitar contraseñas triviales, compartir la clave entre todos los equipos o agregar a personal de Compás One al rol Filler sin autorización.
+
 ## Tareas necesarias antes de pasar a producción
-1. Preguntar al propietario qué correo de Supabase debe tener rol administrador de Filler Café. Confirmar que ese usuario exista en `auth.users`.
-2. Autorizar **únicamente** el usuario indicado mediante `public.filler_staff`. SQL de ejemplo, ejecutado **solo después de confirmar el correo**:
-
-   ```sql
-   insert into public.filler_staff(user_id,role)
-   select id,'admin' from auth.users where lower(email)=lower('CORREO_CONFIRMADO')
-   on conflict(user_id) do update set role=excluded.role;
-   ```
-
-   No registrar como staff a todos los usuarios de Compás One.
+1. Crear los usuarios técnicos de Filler Café en Supabase Auth desde el panel privado, sin enviar las contraseñas en mensajes. Si todavía no se crearon, los formularios `admin` y `cocina` correctamente rechazarán el acceso.
+2. Con autorización del propietario, vincular **solo** los IDs creados a los roles `admin` y `cocina` en `public.filler_staff` según el SQL anterior; comprobar el rol correcto.
 3. Acceder a `menu-control.html` con la cuenta autorizada y sincronizar el catálogo real del navegador del encargado. Revisar precios, existencias, nombres y extras primero.
 4. Iniciar sesión en `pedidos.html` y/o `monitor.html` desde otra PC. Pulsar **Activar sonido y probar alarma** y conceder notificaciones del navegador si se desea.
 5. Desde otro dispositivo, colocar un pedido de prueba, confirmar que aparezca en cocina y se escuche. Cambiar su estado y verificar en monitor. Revisar existencia y total.
