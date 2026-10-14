@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v13";
+const CACHE_NAME = "filler-app-v14";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -11,6 +11,7 @@ const APP_SHELL = [
   "./photo-store.js",
   "./filler-cloud.js",
   "./menu-cloud.js",
+  "./order-notifications.js",
   "./kitchen-cloud.js",
   "./monitor-cloud.js",
   "./storefront-cloud.js",
@@ -55,7 +56,32 @@ self.addEventListener("fetch", event => {
   }
 });
 
+// Abre la pantalla de cocina a la que pertenece el aviso.
 self.addEventListener("notificationclick", event => {
   event.notification.close();
-  event.waitUntil(clients.openWindow("./index.html"));
+  const raw=event.notification.data?.url || "./pedidos.html";
+  const target=raw==="./monitor.html"?"./monitor.html":"./pedidos.html";
+  const absolute=new URL(target,self.registration.scope).href;
+  event.waitUntil((async()=>{
+    const all=await clients.matchAll({type:"window",includeUncontrolled:true});
+    const existing=all.find(c=>c.url.split("?")[0].split("#")[0]===absolute);
+    if(existing){await existing.focus();existing.postMessage({kind:"filler-order-notification-click"});return;}
+    await clients.openWindow(absolute);
+  })());
+});
+
+// Preparado para Web Push real; no se enviarán mensajes cuando la página
+// esté cerrada hasta configurar servidor, suscripciones y claves VAPID.
+self.addEventListener("push",event=>{
+  if(!event.data)return;
+  let payload={};
+  try{payload=event.data.json();}catch{payload={body:event.data.text()};}
+  const safeCode=typeof payload.code==="string"?payload.code.slice(0,60):"Nuevo pedido";
+  event.waitUntil(self.registration.showNotification("🔔 Nuevo pedido Filler Café",{
+    body:safeCode,
+    icon:"./assets/filler-icon-192.png",
+    badge:"./assets/filler-icon-192.png",
+    tag:"filler-push-"+safeCode,
+    data:{url:"./pedidos.html"}
+  }));
 });
