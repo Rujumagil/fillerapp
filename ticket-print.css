@@ -1,0 +1,29 @@
+/* Sólo la comanda solicitada aparece al imprimir. Papel físico en ajustes de impresora. */
+#filler-print-root{display:none!important}
+@media print{
+  @page{margin:0}
+  html,body{margin:0!important;padding:0!important;background:#fff!important;color:#000!important}
+  body>*:not(#filler-print-root){display:none!important}
+  #filler-print-root{
+    display:block!important;position:static!important;float:none!important;
+    width:var(--ticket-width,72mm)!important;max-width:var(--ticket-width,72mm)!important;
+    min-height:0!important;box-sizing:border-box!important;margin:0!important;padding:2mm!important;
+    color:#000!important;background:#fff!important;box-shadow:none!important;
+    border:0!important;font-family:Arial,sans-serif!important;
+    font-size:11pt!important;line-height:1.35!important;overflow:visible!important;
+    print-color-adjust:exact!important
+  }
+  #filler-print-root *{box-sizing:border-box!important;color:#000!important;box-shadow:none!important}
+  #filler-print-root .tp-title{text-align:center;font-size:17pt;font-weight:900;margin:2mm 0 1mm}
+  #filler-print-root .tp-subtitle{text-align:center;font-size:12pt;font-weight:900;margin:1mm 0 3mm}
+  #filler-print-root .tp-code{text-align:center;font-size:21pt;font-weight:900;margin:3mm 0;overflow-wrap:anywhere}
+  #filler-print-root .tp-meta{font-size:10pt;margin:1mm 0;overflow-wrap:anywhere}
+  #filler-print-root .tp-rule{border:0;border-top:1px dashed #000;margin:3mm 0}
+  #filler-print-root .tp-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2mm;margin:2mm 0;break-inside:avoid;page-break-inside:avoid}
+  #filler-print-root .tp-name{font-size:11pt;font-weight:700;overflow-wrap:anywhere}
+  #filler-print-root .tp-qty{font-size:16pt;font-weight:900;white-space:nowrap}
+  #filler-print-root .tp-extra{font-size:10pt;padding:1mm 0 0 3mm;overflow-wrap:anywhere}
+  #filler-print-root .tp-notes{font-weight:750;white-space:pre-wrap;overflow-wrap:anywhere}
+  #filler-print-root .tp-total{display:flex;justify-content:space-between;gap:2mm;font-weight:900;font-size:13pt;margin:2mm 0}
+  #filler-print-root .tp-footer{text-align:center;font-size:9pt;margin-top:5mm}
+}
