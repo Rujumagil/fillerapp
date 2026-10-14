@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v12";
+const CACHE_NAME = "filler-app-v13";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -38,7 +38,7 @@ self.addEventListener("fetch", event => {
   const req = event.request;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
-  const documentOrScript = req.mode === "navigate" || /\\.(?:html|js)$/.test(url.pathname);
+  const documentOrScript = req.mode === "navigate" || /\.(?:html|js)$/.test(url.pathname);
   if (documentOrScript) {
     // Evitar que una PWA instalada muestre una versión anterior del checkout.
     event.respondWith(
