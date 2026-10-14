@@ -53,17 +53,34 @@
     cocina: "filler.cocina@proyectocompas.com"
   });
   async function login(username,password) {
-    const account=String(username||"").trim().toLowerCase();
-    const email=USER_ACCOUNTS[account];
-    if(!email || typeof password!=="string" || !password) {
-      throw new Error("Usuario o contraseña incorrectos.");
+    const raw=String(username||"").trim().toLowerCase();
+    const account=USER_ACCOUNTS[raw]?raw:Object.keys(USER_ACCOUNTS).find(k=>USER_ACCOUNTS[k]===raw);
+    const email=account?USER_ACCOUNTS[account]:null;
+    if(!email)throw new Error('Usuario no reconocido. Escribe "admin" o "cocina".');
+    if(typeof password!=="string" || !password)throw new Error("Escribe tu contraseña de Filler Café.");
+    let res;
+    try {
+      res=await fetch(BASE+"/auth/v1/token?grant_type=password",{
+        method:"POST",headers:{...publicHeaders(),"Content-Type":"application/json"},
+        body:JSON.stringify({email,password})
+      });
+    } catch(error) {
+      throw new Error("No fue posible contactar a Supabase. Comprueba tu conexión y vuelve a intentar.");
     }
-    const res=await fetch(BASE+"/auth/v1/token?grant_type=password",{
-      method:"POST",headers:{...publicHeaders(),"Content-Type":"application/json"},
-      body:JSON.stringify({email,password})
-    });
-    const data=await res.json();
-    if (!res.ok || !data.access_token) throw new Error("Usuario o contraseña incorrectos.");
+    let data;
+    try{data=await res.json();}catch{throw new Error("Supabase respondió sin datos válidos. Intenta de nuevo.");}
+    if (!res.ok || !data.access_token) {
+      const code=String(data.error_code||data.code||data.error||"").toLowerCase();
+      if(res.status===429 || code.includes("rate_limit") || code.includes("over_request"))
+        throw new Error("Se alcanzó el límite de intentos. Espera unos minutos antes de intentarlo de nuevo.");
+      if(code.includes("email_not_confirmed"))
+        throw new Error("La cuenta todavía no está confirmada en Supabase.");
+      if(code.includes("invalid_credentials") || code.includes("invalid_grant"))
+        throw new Error("Supabase rechazó la contraseña. Revísala o actualízala en Authentication > Users de Supabase; la clave es la que asignaste al crear esta cuenta.");
+      if(res.status===401 || res.status===403)
+        throw new Error("Acceso rechazado por Supabase ("+res.status+"). Revisa que la cuenta esté activa y la conexión sea correcta.");
+      throw new Error("Error de autenticación en Supabase ("+res.status+"): "+String(data.error_description||data.msg||data.message||data.error||"Intenta nuevamente.").slice(0,160));
+    }
     saveSession(data);
     try {
       const staff = await request("filler_staff?select=user_id,role&user_id=eq."+encodeURIComponent(data.user.id),{staff:true});
