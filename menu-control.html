@@ -19,6 +19,9 @@
     .extra-switch input{width:20px;height:20px;accent-color:var(--green)}
     @media(max-width:800px){.extra-control-row{grid-template-columns:1fr 1fr}.extra-switch{grid-column:span 2}}
     @media(max-width:560px){.extra-control-row{grid-template-columns:1fr}.extra-switch{grid-column:auto}}
+  
+    .allow-extras{display:flex;align-items:center;gap:8px;margin-top:10px;color:var(--ink);font-size:13px}
+    .allow-extras input{width:19px;height:19px;accent-color:var(--green)}
   </style>
 </head>
 <body>
@@ -64,7 +67,7 @@
     }
     function render(){
       document.getElementById("cat-list").innerHTML=[...new Set(menu.map(i=>i.cat))].map(c=>`<option value="${escapeHtml(c)}"></option>`).join("");
-      document.getElementById("inventory").innerHTML=menu.map(i=>`<div class="line item-line"><img class="thumb" src="${escapeHtml(i.image||"")}" alt=""><div><b>${escapeHtml(i.name)}</b><br><span class="muted">${escapeHtml(i.cat)}</span><div class="name-editor"><label>Nombre del platillo<input data-name-input value="${escapeHtml(i.name)}" maxlength="100" autocomplete="off" aria-label="Editar nombre de ${escapeHtml(i.name)}"></label><button type="button" onclick="saveName('${i.id}',this)">Guardar nombre</button></div><div class="price-row"><label>Precio<input type="number" min="0" value="${i.price}" onchange="updateItem('${i.id}','price',this.value)"></label><label>Existencia<input type="number" min="0" value="${i.stock}" onchange="updateItem('${i.id}','stock',this.value)"></label></div><div class="actions"><label class="secondary" style="display:inline-block;padding:10px 13px;border:1px solid var(--line);border-radius:999px;color:var(--green);font-weight:850;cursor:pointer">Subir foto<input type="file" accept="image/*" style="display:none" onchange="setPhoto('${i.id}',this.files[0])"></label><button class="danger" onclick="removeItem('${i.id}')">Quitar</button></div></div></div>`).join("");
+      document.getElementById("inventory").innerHTML=menu.map(i=>`<div class="line item-line"><img class="thumb" src="${escapeHtml(i.image||"")}" alt=""><div><b>${escapeHtml(i.name)}</b><br><span class="muted">${escapeHtml(i.cat)}</span><div class="name-editor"><label>Nombre del platillo<input data-name-input value="${escapeHtml(i.name)}" maxlength="100" autocomplete="off" aria-label="Editar nombre de ${escapeHtml(i.name)}"></label><button type="button" onclick="saveName('${i.id}',this)">Guardar nombre</button></div><div class="price-row"><label>Precio<input type="number" min="0" value="${i.price}" onchange="updateItem('${i.id}','price',this.value)"></label><label>Existencia<input type="number" min="0" value="${i.stock}" onchange="updateItem('${i.id}','stock',this.value)"></label></div><label class="allow-extras"><input type="checkbox" ${i.allowExtras===true || (i.allowExtras!==false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(i.cat))?"checked":""} onchange="updateItem('${i.id}','allowExtras',this.checked)"> Permitir extras en este platillo</label><div class="actions"><label class="secondary" style="display:inline-block;padding:10px 13px;border:1px solid var(--line);border-radius:999px;color:var(--green);font-weight:850;cursor:pointer">Subir foto<input type="file" accept="image/*" style="display:none" onchange="setPhoto('${i.id}',this.files[0])"></label><button class="danger" onclick="removeItem('${i.id}')">Quitar</button></div></div></div>`).join("");
     }
     function saveName(id,button){
       const item=menu.find(i=>i.id===id);
