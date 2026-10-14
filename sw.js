@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v5";
+const CACHE_NAME = "filler-app-v6";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -6,6 +6,8 @@ const APP_SHELL = [
   "./pedidos.html",
   "./monitor.html",
   "./menu-control.html",
+  "./extras-control.js",
+  "./extras-storefront.js",
   "./manifest.json",
   "./assets/filler-logo-oficial.webp",
   "./assets/filler-icon-192.png",
