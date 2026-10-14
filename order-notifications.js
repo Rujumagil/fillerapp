@@ -1,109 +1,131 @@
-/* Filler Café — avisos para pedidos nuevos mientras la página de cocina está abierta.
- * No es Web Push remoto con el navegador cerrado: requiere backend VAPID/subscripciones.
+/* Filler Café — avisos visuales de pedidos mientras Cocina/Monitor están abiertos.
+ * La ventana visual no requiere permisos de Windows; el aviso del sistema sí.
+ * El push con el navegador cerrado requiere un servidor VAPID.
  */
 (() => {
   "use strict";
-  const KEY="filler_notifications_seen_v1";
+  const SCREEN=location.pathname.endsWith("/monitor.html")?"monitor":"pedidos";
+  const KEY="filler_seen_"+SCREEN+"_v2";
   const MAX_AGE=30*60*1000;
-  const titleDefault=document.title;
-  const path=location.pathname.endsWith("/monitor.html")?"monitor.html":"pedidos.html";
-  const escapeHtml=s=>String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  const originalTitle=document.title;
   let seen=[];
-  try{const stored=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(stored))seen=stored.filter(i=>typeof i==="string").slice(-350);}catch{}
+  try{
+    const stored=JSON.parse(sessionStorage.getItem(KEY)||"[]");
+    if(Array.isArray(stored))seen=stored.filter(v=>typeof v==="string").slice(-350);
+  }catch{}
+  const saveSeen=()=>{try{sessionStorage.setItem(KEY,JSON.stringify(seen));}catch{}};
+
   function create({onStatus=()=>{}}={}) {
-    let audioContext=null, audioEnabled=false, lastNotice=null;
-    const notice=document.createElement("aside");
-    notice.id="filler-new-order-alert";
-    notice.setAttribute("role","alert");
-    notice.setAttribute("aria-live","assertive");
-    notice.hidden=true;
-    notice.style.cssText="position:fixed;z-index:9999;top:12px;left:50%;transform:translateX(-50%);width:min(94vw,560px);background:#fff9eb;border:3px solid #db8920;border-radius:19px;padding:18px 16px;box-shadow:0 10px 35px #0005;color:#173e2d;text-align:left";
-    notice.innerHTML='<div style="display:flex;gap:12px;align-items:flex-start"><div style="font-size:36px">🔔</div><div style="flex:1"><b id="filler-alert-title" style="font-size:21px">¡Nuevo pedido!</b><p id="filler-alert-body" style="margin:5px 0 8px"></p><button id="filler-alert-show" type="button" style="padding:10px 13px;border-radius:10px;background:#006241;color:white;border:0;cursor:pointer">Ver pedidos</button></div><button id="filler-alert-close" type="button" aria-label="Cerrar aviso" style="border:0;background:transparent;color:#173e2d;font-size:24px;cursor:pointer">×</button></div>';
-    document.body.appendChild(notice);
-    const close=()=>{notice.hidden=true;document.title=titleDefault;};
-    notice.querySelector("#filler-alert-close").addEventListener("click",close);
-    notice.querySelector("#filler-alert-show").addEventListener("click",()=>{close();document.getElementById("orders")?.scrollIntoView({behavior:"smooth",block:"start"});});
-    window.addEventListener("focus",()=>{if(notice.hidden)document.title=titleDefault;});
-    const icon="assets/filler-icon-192.png";
-    function banner(label,details){
-      notice.querySelector("#filler-alert-title").textContent=label;
-      notice.querySelector("#filler-alert-body").textContent=details;
-      notice.hidden=false;
-      document.title="🔔 Nuevo pedido — Filler Café";
+    let audio=null, audioEnabled=false, lastNotice=null;
+    const overlay=document.createElement("section");
+    overlay.id="filler-order-popup";
+    overlay.hidden=true;
+    overlay.setAttribute("role","alertdialog");
+    overlay.setAttribute("aria-modal","true");
+    overlay.setAttribute("aria-labelledby","filler-popup-title");
+    overlay.setAttribute("aria-describedby","filler-popup-details");
+    overlay.style.cssText="display:flex;align-items:center;justify-content:center;position:fixed;inset:0;z-index:2147483647;background:rgba(6,28,22,.83);padding:16px";
+    overlay.innerHTML=
+      '<div style="width:min(100%,570px);background:#fffdf5;border:5px solid #ffa924;border-radius:26px;box-shadow:0 30px 110px rgba(0,0,0,.55);padding:27px 23px;color:#143e2b;font-family:system-ui,sans-serif;text-align:center">'+
+      '<div aria-hidden="true" style="font-size:66px;line-height:1.2">🔔</div>'+
+      '<h2 id="filler-popup-title" style="margin:9px 0;font-size:clamp(25px,5vw,37px);line-height:1.15;color:#125537">¡Nuevo pedido recibido!</h2>'+
+      '<p id="filler-popup-details" style="margin:12px 0;font-size:clamp(18px,3vw,24px);line-height:1.5;color:#233d30;font-weight:750"></p>'+
+      '<div style="font-size:14px;background:#fff1cd;border:1px solid #ffd98e;border-radius:11px;padding:10px;margin:14px 0;color:#745114">Pedido recibido en cocina · Confirma que lo viste</div>'+
+      '<div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">'+
+      '<button type="button" id="filler-popup-show" style="font:inherit;font-size:16px;font-weight:850;border:0;border-radius:13px;background:#006241;color:#fff;padding:15px 19px;cursor:pointer;min-width:145px">Ver pedido</button>'+
+      '<button type="button" id="filler-popup-close" style="font:inherit;font-size:16px;font-weight:850;border:2px solid #bfcfc2;border-radius:13px;background:#f5f8f5;color:#16432e;padding:13px 19px;cursor:pointer">Entendido</button>'+
+      '</div></div>';
+    const css=document.createElement("style");
+    css.textContent="#filler-order-popup[hidden]{display:none!important}";
+    document.head.appendChild(css);
+    document.body.appendChild(overlay);
+
+    const close=()=>{overlay.hidden=true;document.title=originalTitle;};
+    overlay.querySelector("#filler-popup-close").addEventListener("click",close);
+    overlay.querySelector("#filler-popup-show").addEventListener("click",()=>{
+      close();document.getElementById("orders")?.scrollIntoView({behavior:"smooth",block:"start"});
+    });
+
+    function showVisual(title,details){
+      overlay.querySelector("#filler-popup-title").textContent=title;
+      overlay.querySelector("#filler-popup-details").textContent=details;
+      overlay.hidden=false;
+      document.title="🔔 PEDIDO NUEVO — Filler Café";
+      overlay.querySelector("#filler-popup-show").focus({preventScroll:true});
     }
-    function beep(){
-      if(!audioEnabled||!audioContext)return;
-      audioContext.resume().then(()=>{
-        const t=audioContext.currentTime;
+    function sound(){
+      if(!audioEnabled||!audio)return;
+      audio.resume().then(()=>{
+        const t=audio.currentTime;
         for(let i=0;i<3;i++){
-          const osc=audioContext.createOscillator(),vol=audioContext.createGain(),at=t+i*.33;
-          osc.type="sine";osc.frequency.setValueAtTime(i===1?720:920,at);
+          const osc=audio.createOscillator(),vol=audio.createGain(),at=t+i*.36;
+          osc.type="sine";osc.frequency.setValueAtTime(i===1?740:980,at);
           vol.gain.setValueAtTime(.001,at);
-          vol.gain.linearRampToValueAtTime(.22,at+.03);
-          vol.gain.exponentialRampToValueAtTime(.002,at+.27);
-          osc.connect(vol);vol.connect(audioContext.destination);
-          osc.start(at);osc.stop(at+.29);
+          vol.gain.linearRampToValueAtTime(.20,at+.03);
+          vol.gain.exponentialRampToValueAtTime(.002,at+.29);
+          osc.connect(vol);vol.connect(audio.destination);osc.start(at);osc.stop(at+.30);
         }
-      }).catch(error=>onStatus("El navegador bloqueó el sonido: "+error.message,true));
+      }).catch(error=>onStatus("Sonido bloqueado: "+error.message,true));
     }
-    async function systemNotification(label,body,tag){
+    async function systemNotification(title,details,tag){
       if(!("Notification" in window)||Notification.permission!=="granted")return false;
-      const options={body,icon,badge:icon,tag,renotify:true,data:{url:"./"+path}};
+      const icon="./assets/filler-icon-192.png";
+      const options={body:details,icon,badge:icon,tag,renotify:true,requireInteraction:true,
+        data:{url:SCREEN==="monitor"?"./monitor.html":"./pedidos.html"}};
       try{
         if("serviceWorker" in navigator){
           const registration=await navigator.serviceWorker.getRegistration();
-          if(registration?.active && typeof registration.showNotification==="function"){
-            await registration.showNotification(label,options);
-            return true;
+          if(registration?.active&&typeof registration.showNotification==="function"){
+            await registration.showNotification(title,options);return true;
           }
         }
-        const msg=new Notification(label,options);
-        msg.onclick=()=>{window.focus();document.getElementById("orders")?.scrollIntoView({block:"start"});msg.close();};
+        const notification=new Notification(title,options);
+        notification.onclick=()=>{window.focus();document.getElementById("orders")?.scrollIntoView({block:"start"});notification.close();};
         return true;
       }catch(error){
-        try{new Notification(label,options);return true;}catch{onStatus("Aviso visible, pero el sistema bloqueó las notificaciones.",true);return false;}
+        onStatus("La alerta visual funciona; el sistema bloqueó la notificación externa.",true);
+        return false;
       }
     }
     async function enable(){
-      // Ambos métodos deben iniciarse directamente desde la pulsación del usuario.
-      const permissionPromise=("Notification" in window && Notification.permission==="default")
+      // La solicitud de permiso comienza durante el clic, antes de operaciones asincrónicas.
+      const permissionRequest=("Notification" in window&&Notification.permission==="default")
         ? Notification.requestPermission()
         : Promise.resolve("Notification" in window?Notification.permission:"unsupported");
       try{
-        if(!audioContext)audioContext=new (window.AudioContext||window.webkitAudioContext)();
-        await audioContext.resume();
-        audioEnabled=true;
-      }catch(error){onStatus("El sonido no pudo activarse: "+error.message,true);}
-      const permission=await permissionPromise;
-      beep();
-      banner("Prueba de alerta Filler Café","Esta es una prueba: no se creó ningún pedido.");
-      await systemNotification("🔔 Prueba Filler Café","Notificaciones listas. Esta prueba no registró ningún pedido.","filler-test-"+path);
-      if(permission==="granted")onStatus("🔊 Sonido y notificaciones del sistema activados. Mantén esta página abierta.");
-      else onStatus("🔊 Sonido "+(audioEnabled?"activado":"no disponible")+". Para avisos del sistema, habilita las notificaciones de este sitio en el navegador.");
-      return {sound:audioEnabled,notifications:permission==="granted"};
+        if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();
+        await audio.resume();audioEnabled=true;
+      }catch(error){onStatus("Audio no disponible: "+error.message,true);}
+      let permission="unsupported";
+      try{permission=await permissionRequest;}catch{}
+      showVisual("🔔 Prueba de notificación","Prueba visual. No se creó ningún pedido.");
+      sound();
+      await systemNotification("🔔 Prueba Filler Café","Notificación de prueba, sin pedido real.","filler-test-"+SCREEN);
+      if(permission==="granted")onStatus("✓ Alerta visual, sonido y avisos del sistema habilitados.");
+      else onStatus("✓ Alerta visual y sonido activos. Avisos del sistema: "+(permission==="denied"?"permiso bloqueado":"permiso pendiente")+".");
+      return {sound:audioEnabled,notifications:permission==="granted",permission};
     }
     function incoming(orders){
-      const fresh=(Array.isArray(orders)?orders:[]).filter(o=>
-        o?.status==="Nuevo"&&
-        (o.uuid||o.id)&&
-        Number.isFinite(Number(o.createdTs))&&
-        Date.now()-Number(o.createdTs)<MAX_AGE&&
-        Date.now()-Number(o.createdTs)>-120000&&
-        !seen.includes(String(o.uuid||o.id))
-      );
-      if(!fresh.length)return;
-      const ids=fresh.map(o=>String(o.uuid||o.id));
+      const incomingOrders=(Array.isArray(orders)?orders:[]).filter(o=>{
+        const id=String(o?.uuid||o?.id||""),ts=Number(o?.createdTs),age=Date.now()-ts;
+        return o?.status==="Nuevo"&&id&&Number.isFinite(ts)&&age>=-120000&&age<MAX_AGE&&!seen.includes(id);
+      });
+      if(!incomingOrders.length)return;
+      const ids=incomingOrders.map(o=>String(o.uuid||o.id));
       seen=[...new Set([...seen,...ids])].slice(-350);
-      try{localStorage.setItem(KEY,JSON.stringify(seen));}catch{}
-      lastNotice=fresh[0];
-      const count=fresh.length;
-      const label=count>1?"🔔 "+count+" pedidos nuevos":"🔔 ¡Nuevo pedido recibido!";
-      const details=count>1?fresh.map(o=>o.id).join(", "):fresh[0].id+" · "+fresh[0].items.reduce((sum,i)=>sum+Number(i.qty||0),0)+" artículos";
-      banner(label,details);
-      beep();
-      systemNotification(label,details,"filler-new-"+ids[0]);
+      saveSeen();
+      lastNotice=incomingOrders[0];
+      const qty=incomingOrders.reduce((n,o)=>n+(Array.isArray(o.items)?o.items:[])
+        .reduce((sum,i)=>sum+Number(i.qty||0),0),0);
+      const title=incomingOrders.length===1?"🔔 ¡Nuevo pedido recibido!":"🔔 "+incomingOrders.length+" pedidos nuevos";
+      const details=(incomingOrders.length===1?String(incomingOrders[0].id):incomingOrders.map(o=>String(o.id)).join(" · "))+
+        " · "+qty+" artículos";
+      showVisual(title,details);
+      sound();
+      systemNotification("🔔 Nuevo pedido Filler Café",details,"filler-new-"+ids[0]);
     }
-    return Object.freeze({enable,incoming,beep,isEnabled:()=>audioEnabled,lastNotice:()=>lastNotice});
+    return Object.freeze({enable,incoming,beep:sound,isEnabled:()=>audioEnabled,
+      permission:()=>("Notification" in window?Notification.permission:"unsupported"),lastNotice:()=>lastNotice});
   }
   window.FillerOrderNotifications=Object.freeze({create});
 })();
