@@ -5,10 +5,7 @@
   const escape=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const money=n=>"$"+Number(n||0).toLocaleString("es-MX",{minimumFractionDigits:0,maximumFractionDigits:2});
   const min=n=>Math.max(0,Math.floor(n/60000));
-  let role=null, orders=[], running=false, alarm=null, sound=false, timer=null;
-  const seenKey="filler_kitchen_seen_orders_v1";
-  let seen=[];
-  try{seen=JSON.parse(localStorage.getItem(seenKey)||"[]");if(!Array.isArray(seen))seen=[];}catch{}
+  let role=null, orders=[], running=false, timer=null;
   const shell=document.createElement("section");
   shell.className="card";
   shell.style.marginBottom="12px";
@@ -17,6 +14,7 @@
   const info=document.getElementById("filler-kitchen-info");
   const access=document.getElementById("filler-kitchen-access");
   function message(m,bad=false){info.textContent=m;info.style.color=bad?"#b64235":"#155b42";}
+  const notifier=FillerOrderNotifications.create({onStatus:message});
   function loginForm(){
     access.innerHTML='<form id="kitchen-login" style="display:grid;gap:10px;max-width:480px;margin:15px 0"><label>Usuario<input name="username" type="text" placeholder="admin o cocina" autocapitalize="none" spellcheck="false" required autocomplete="username"></label><label>Contraseña<input name="password" type="password" required autocomplete="current-password"></label><button type="submit">Entrar a cocina</button></form>';
     const form=document.getElementById("kitchen-login");
@@ -57,39 +55,19 @@
       finally{btn.disabled=false;}
     }));
   }
-  function beep() {
-    if(!sound||!alarm)return;
-    alarm.resume().then(()=>{
-      const now=alarm.currentTime;
-      for(let i=0;i<3;i++){
-        const osc=alarm.createOscillator(),gain=alarm.createGain();
-        osc.type="sine";osc.frequency.value=i===1?740:950;
-        gain.gain.setValueAtTime(0,now+i*.35);
-        gain.gain.linearRampToValueAtTime(.14,now+i*.35+.025);
-        gain.gain.exponentialRampToValueAtTime(.002,now+i*.35+.25);
-        osc.connect(gain);gain.connect(alarm.destination);
-        osc.start(now+i*.35);osc.stop(now+i*.35+.27);
-      }
-    }).catch(err=>message("El navegador bloqueó el audio: "+err.message,true));
-  }
-  function notify(o){
-    beep();
-    if("Notification" in window && Notification.permission==="granted" && document.visibilityState!=="visible"){
-      new Notification("☕ Nuevo pedido Filler Café",{body:o.id+" — "+o.customer,icon:"assets/filler-icon-192.png"});
-    }
-  }
   function activationUI(){
-    access.innerHTML='<div class="actions"><button id="kitchen-sound" type="button">🔊 Activar sonido y probar alarma</button><button id="kitchen-exit" class="secondary" type="button">Cerrar sesión</button><span id="sound-status" class="muted">Sonido pendiente de activar</span></div>';
-    document.getElementById("kitchen-sound").addEventListener("click",async()=>{
-      try {
-        if(!alarm)alarm=new (window.AudioContext||window.webkitAudioContext)();
-        await alarm.resume();sound=true;beep();
-        document.getElementById("sound-status").textContent="✓ Alarma activada (mantén abierta esta pestaña)";
-        if("Notification" in window&&Notification.permission==="default")await Notification.requestPermission();
-      }catch(err){message("No se pudo activar sonido: "+err.message,true);}
+    access.innerHTML='<div class="actions"><button id="kitchen-sound" type="button">🔔 Activar notificaciones y probar sonido</button><button id="kitchen-exit" class="secondary" type="button">Cerrar sesión</button><span id="sound-status" class="muted">Activa las notificaciones en este equipo</span></div>';
+    const test=document.getElementById("kitchen-sound");
+    test.addEventListener("click",async()=>{
+      test.disabled=true;
+      try{
+        const active=await notifier.enable();
+        document.getElementById("sound-status").textContent=active.notifications?"✓ Avisos del sistema habilitados":"El aviso visual funciona; activa permisos para avisos del sistema";
+        test.textContent="🔔 Probar notificación nuevamente";
+      }finally{test.disabled=false;}
     });
     document.getElementById("kitchen-exit").addEventListener("click",()=>{
-      FillerCloud.logout();role=null;sound=false;if(timer)clearTimeout(timer);timer=null;loginForm();message("Sesión cerrada.");
+      FillerCloud.logout();role=null;if(timer)clearTimeout(timer);timer=null;loginForm();message("Sesión cerrada.");
     });
   }
   async function poll(){
@@ -97,12 +75,7 @@
     running=true;
     try{
       const fresh=await FillerCloud.orders();
-      const added=fresh.filter(o=>o.status==="Nuevo"&&!seen.includes(o.uuid)&&Date.now()-o.createdTs<30*60000);
-      for(const o of added){notify(o);}
-      if(added.length){
-        seen=[...new Set([...seen,...added.map(o=>o.uuid)])].slice(-300);
-        try{localStorage.setItem(seenKey,JSON.stringify(seen));}catch{}
-      }
+      notifier.incoming(fresh);
       orders=fresh;render();
       message("En línea con Supabase · "+new Date().toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit",second:"2-digit"})+" · Pedidos sincronizados cada 3 segundos");
     }catch(err){message("Sin conexión a pedidos: "+err.message,true);}
