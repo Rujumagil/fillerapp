@@ -20,18 +20,10 @@
     document.getElementById("monitor-exit")?.addEventListener("click",()=>{role=null;FillerCloud.logout();login();});
   }
   root.addEventListener("click",event=>{
-    const button=event.target.closest("button[data-print],button[data-whatsapp]");
+    const button=event.target.closest("button[data-print]");
     if(!button||!root.contains(button))return;
-    const id=button.dataset.print||button.dataset.whatsapp;
-    const order=currentOrders.find(o=>o.uuid===id);
+    const order=currentOrders.find(o=>o.uuid===button.dataset.print);
     if(!order){msg("No se encontró el pedido; actualiza la pantalla.");return;}
-    if(button.dataset.whatsapp){
-      const url=FillerCloud.readyWhatsappUrl(order);
-      if(!url){msg("El teléfono del pedido no es válido para WhatsApp.");return;}
-      window.open(url,"_blank","noopener,noreferrer");
-      msg("Se abrió WhatsApp. Pulsa Enviar para notificar al cliente.");
-      return;
-    }
     try{FillerTickets.print(order,button.dataset.kind);}
     catch(error){msg("No se pudo imprimir: "+error.message);}
   });
@@ -72,7 +64,7 @@
         const s=status(o);
         const lines=o.items.map(i=>Number(i.qty)+" × "+esc(i.name)+(i.extras?.length?"<br><small>Extras: "+i.extras.map(x=>esc(x.name)).join(", ")+"</small>":"")).join("<br>");
         return '<article class="card '+s.card+'"><span class="badge">'+s.label+'</span><h2>'+esc(o.id)+'</h2><h3>'+esc(o.customer)+'</h3><p class="time">'+s.detail+'</p><p>Recoge: '+esc(o.pickup)+'</p><p>'+lines+'</p><div class="monitor-print-actions"><button type="button" data-print="'+esc(o.uuid)+'" data-kind="cocina">🖨 Comanda</button><button type="button" data-print="'+esc(o.uuid)+'" data-kind="cliente">Ticket cliente</button>'+
-          (o.status==="Listo"?'<button type="button" data-whatsapp="'+esc(o.uuid)+'">📱 Avisar por WhatsApp</button>':"")+
+          (o.status==="Listo"?'<div style="font-size:13px;font-weight:800;width:100%;padding:8px 0">✓ Estado listo publicado en el seguimiento web del cliente</div>':"")+
           '</div></article>';
       }).join(""):'<h2>Sin pedidos activos</h2>';
       bar.innerHTML='<span>🟢 Monitor conectado · Actualizado: '+new Date().toLocaleTimeString("es-MX")+'</span> <button id="monitor-sound" style="margin-left:15px">'+(notifier.isEnabled()?"🔔 Probar notificación nuevamente":"🔔 Activar notificaciones y probar sonido")+'</button> <label style="margin-left:9px">Papel <select id="monitor-paper" style="padding:7px;border-radius:8px"><option value="80">80 mm</option><option value="58">58 mm</option></select></label> <button id="monitor-exit" style="margin-left:8px">Salir</button><div id="monitor-notification-status" style="font-size:13px;margin-top:9px;opacity:.95">'+permissionMessage+'</div>';
