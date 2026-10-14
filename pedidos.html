@@ -19,17 +19,8 @@
     <section class="card"><div id="orders"></div></section>
   </main>
   <script src="pwa.js"></script>
-  <script>
-    let orders=JSON.parse(localStorage.getItem("fillerOrders")||"[]");
-    const escapeHTML=v=>String(v??"").replace(/[&<>"\x27]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","\x27":"&#39;"}[c]));
-    const money=v=>"$"+Number(v||0).toLocaleString("es-MX");
-    const min=ms=>Math.floor(ms/60000);
-    const save=()=>localStorage.setItem("fillerOrders",JSON.stringify(orders));
-    function baseTime(o){return o.createdTs||Date.now()}
-    function stateInfo(o){const now=Date.now();const created=baseTime(o);const updated=o.statusUpdatedAt||created;if((o.status==="Nuevo"||o.status==="Preparando")&&now-created>10*60000)return{cls:"late",line:"alert",label:"Fuera de tiempo",detail:`${min(now-created)} min desde que entro. Meta: 10 min preparacion.`};if(o.status==="Listo"&&now-updated>10*60000)return{cls:"late",line:"alert",label:"Fuera de tiempo",detail:`${min(now-updated)} min esperando recoleccion. Meta: 10 min.`};if(o.status==="Listo")return{cls:"ready",line:"ok",label:"Listo",detail:`Listo desde hace ${min(now-updated)} min.`};if(o.status==="Preparando")return{cls:"prep",line:"wait",label:"Preparando",detail:`${min(now-created)} min de preparacion.`};if(o.status==="Entregado")return{cls:"done",line:"ok",label:"Entregado",detail:"Pedido cerrado."};return{cls:"new",line:"wait",label:"Nuevo",detail:`${min(now-created)} min desde que entro.`}}
-    function render(){document.getElementById("orders").innerHTML=orders.length?orders.map(o=>{const s=stateInfo(o);return `<div class="line ${s.line}"><div class="progress"><span class="dot ${s.cls}">${s.label}</span><span class="timer">${s.detail}</span></div><b>${escapeHTML(o.id)} - ${escapeHTML(o.customer)}</b><br>${escapeHTML(o.phone)} | Recoge ${escapeHTML(o.pickup)}<br>${o.items.map(i=>`${i.qty} x ${escapeHTML(i.name)}${i.extras?.length?`<div class="note"><b>Extras:</b> ${i.extras.map(x=>escapeHTML(x.name)).join(", ")}</div>`:""}`).join("<br>")}<br><b>${money(o.total)}</b>${o.notes?`<div class="note">Notas: ${escapeHTML(o.notes)}</div>`:""}<div class="actions"><button onclick="status('${o.id}','Preparando')">Preparando</button><button onclick="status('${o.id}','Listo')">Listo</button><button onclick="status('${o.id}','Entregado')">Entregado</button></div></div>`}).join(""):`<div class="empty">Sin pedidos.</div>`}
-    function status(id,s){const order=orders.find(o=>o.id===id);if(order){order.status=s;order.statusUpdatedAt=Date.now();if(!order.createdTs)order.createdTs=order.statusUpdatedAt}save();render()}
-    render();setInterval(()=>{orders=JSON.parse(localStorage.getItem("fillerOrders")||"[]");render()},3000);
-  </script>
+  <script src="filler-cloud.js"></script>
+  <script src="kitchen-cloud.js"></script>
+
 </body>
 </html>
