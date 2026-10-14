@@ -51,9 +51,11 @@
       const options={body,icon,badge:icon,tag,renotify:true,data:{url:"./"+path}};
       try{
         if("serviceWorker" in navigator){
-          const registration=await navigator.serviceWorker.ready;
-          await registration.showNotification(label,options);
-          return true;
+          const registration=await navigator.serviceWorker.getRegistration();
+          if(registration?.active && typeof registration.showNotification==="function"){
+            await registration.showNotification(label,options);
+            return true;
+          }
         }
         const msg=new Notification(label,options);
         msg.onclick=()=>{window.focus();document.getElementById("orders")?.scrollIntoView({block:"start"});msg.close();};
