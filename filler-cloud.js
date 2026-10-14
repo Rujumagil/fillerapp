@@ -126,6 +126,25 @@
     if (!result?.code) throw new Error("No hubo confirmación del servidor.");
     return result;
   }
+  async function orderStatus(token) {
+    const safe=String(token||"").trim();
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(safe))
+      throw new Error("Este enlace de seguimiento no es válido.");
+    const value=await request("rpc/filler_order_status",{method:"POST",body:{p_token:safe}});
+    if(!value?.code)throw new Error("No encontramos este pedido. Revisa el enlace.");
+    return value;
+  }
+  function readyWhatsappUrl(order) {
+    if(!order||order.status!=="Listo"||!order.phone)return null;
+    let phone=String(order.phone).replace(/[^0-9]/g,"");
+    if(phone.length===10)phone="52"+phone;
+    if(phone.length<11||phone.length>15)return null;
+    const customer=String(order.customer||"").trim().slice(0,80);
+    const code=String(order.id||"").trim().slice(0,25);
+    const message="Hola"+(customer?" "+customer:"")+", tu pedido "+code+
+      " de Filler Café ya está listo para recoger. ¡Te esperamos! ☕";
+    return "https://wa.me/"+phone+"?text="+encodeURIComponent(message);
+  }
   async function importCatalog(items) {
     if (!Array.isArray(items)||!items.length) throw new Error("No hay platillos para subir.");
     if ((await staffRole())!=="admin") throw new Error("Solo un administrador puede sincronizar el menú.");
@@ -142,5 +161,5 @@
     if (safe.length) await request("filler_extras?on_conflict=id",{method:"POST",staff:true,body:safe,prefer:"resolution=merge-duplicates,return=minimal"});
   }
   function logout(){saveSession(null);}
-  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,catalog,extras,placeOrder,importCatalog,importExtras,present});
+  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,catalog,extras,placeOrder,orderStatus,readyWhatsappUrl,importCatalog,importExtras,present});
 })();
