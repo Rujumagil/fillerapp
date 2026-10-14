@@ -75,7 +75,7 @@
             '<button type="button" class="secondary" data-print="'+escape(o.uuid)+'" data-kind="cliente">Ticket cliente</button>'+
             '</div>'+
             (o.status==="Listo"?
-              '<div class="actions whatsapp-actions"><button type="button" data-whatsapp="'+escape(o.uuid)+'">📱 Avisar al cliente por WhatsApp</button><span class="note">Abre WhatsApp: pulsa Enviar para avisar.</span></div>':"")+
+              '<div class="order-ready-note" role="status">✓ Estado «Listo» publicado en el seguimiento web del cliente.</div>':"")+
             (!["Entregado","Cancelado"].includes(o.status)?'<div class="actions state-actions">'+
             (o.status==="Nuevo"?'<button type="button" data-change="'+escape(o.uuid)+'" data-status="Preparando">Preparando</button>':"")+
             (o.status!=="Listo"?'<button type="button" data-change="'+escape(o.uuid)+'" data-status="Listo">Listo</button>':"")+
@@ -94,14 +94,6 @@
       const order=orders.find(o=>o.uuid===printId);
       if(!order)return message("No se encontró el pedido. Actualiza la lista.",true);
       try{FillerTickets.print(order,button.dataset.kind);}catch(error){message("No se pudo imprimir: "+error.message,true);}
-      return;
-    }
-    if(button.dataset.whatsapp){
-      const order=orders.find(o=>o.uuid===button.dataset.whatsapp);
-      const url=FillerCloud.readyWhatsappUrl(order);
-      if(!url){message("No hay un teléfono válido para enviar WhatsApp a este pedido.",true);return;}
-      window.open(url,"_blank","noopener,noreferrer");
-      message("Se abrió WhatsApp para el pedido "+order.id+". Pulsa Enviar para notificar al cliente.");
       return;
     }
     if(!changeId)return;
