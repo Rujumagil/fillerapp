@@ -18,14 +18,14 @@
   const access=document.getElementById("filler-kitchen-access");
   function message(m,bad=false){info.textContent=m;info.style.color=bad?"#b64235":"#155b42";}
   function loginForm(){
-    access.innerHTML='<form id="kitchen-login" style="display:grid;gap:10px;max-width:480px;margin:15px 0"><label>Correo del personal<input name="email" type="email" required autocomplete="username"></label><label>Contraseña<input name="password" type="password" required autocomplete="current-password"></label><button type="submit">Entrar a cocina</button></form>';
+    access.innerHTML='<form id="kitchen-login" style="display:grid;gap:10px;max-width:480px;margin:15px 0"><label>Usuario<input name="username" type="text" placeholder="admin o cocina" autocapitalize="none" spellcheck="false" required autocomplete="username"></label><label>Contraseña<input name="password" type="password" required autocomplete="current-password"></label><button type="submit">Entrar a cocina</button></form>';
     const form=document.getElementById("kitchen-login");
     form.addEventListener("submit",async ev=>{
       ev.preventDefault(); const submit=form.querySelector("button");submit.disabled=true;
-      try{role=(await FillerCloud.login(form.email.value,form.password.value)).role;start();}catch(err){message(err.message,true);}
+      try{role=(await FillerCloud.login(form.elements.namedItem("username").value,form.elements.namedItem("password").value)).role;start();}catch(err){message(err.message,true);}
       finally{submit.disabled=false;}
     });
-    root.innerHTML='<div class="empty">Inicia sesión para recibir pedidos reales de clientes. Este equipo solo mostrará órdenes autorizadas.</div>';
+    root.innerHTML='<div class="empty">Ingresa con usuario y contraseña para ver los pedidos reales. Usa la cuenta admin o cocina autorizada.</div>';
   }
   function statusRow(o){
     const age=Date.now()-o.createdTs;
