@@ -35,28 +35,74 @@
     if(o.status==="Entregado")return {cls:"done",line:"ok",label:"Entregado",detail:"Pedido cerrado"};
     return {cls:"new",line:"wait",label:"Nuevo",detail:min(age)+" min desde que entró"};
   }
+  const sections=[
+    {title:"🟡 Por preparar",status:"Nuevo"},
+    {title:"🔵 En preparación",status:"Preparando"},
+    {title:"🟢 Listos para entregar",status:"Listo"},
+    {title:"⚪ Entregados",status:"Entregado"}
+  ];
   function render(){
-    root.innerHTML=orders.length ? orders.map(o=>{
-      const s=statusRow(o);
-      const items=o.items.map(i=>'<div style="margin:3px 0">'+Number(i.qty)+' × '+escape(i.name)+
-        (i.extras?.length?'<div class="note"><b>Extras:</b> '+i.extras.map(e=>escape(e.name)).join(", ")+'</div>':"")+'</div>').join("");
-      return '<div class="line '+s.line+'"><div class="progress"><span class="dot '+s.cls+'">'+s.label+'</span><span class="timer">'+s.detail+'</span></div>'+
-        '<b>'+escape(o.id)+' — '+escape(o.customer)+'</b><br><span>'+escape(o.phone)+' | Recoge: '+escape(o.pickup)+'</span>'+
-        '<div>'+items+'</div><b>'+money(o.total)+'</b>'+(o.notes?'<div class="note">Notas: '+escape(o.notes)+'</div>':"")+
-        (o.status!=="Entregado"?'<div class="actions">'+
-        (o.status==="Nuevo"?'<button data-change="'+escape(o.uuid)+'" data-status="Preparando">Preparando</button>':"")+
-        (o.status!=="Listo"?'<button data-change="'+escape(o.uuid)+'" data-status="Listo">Listo</button>':"")+
-        '<button data-change="'+escape(o.uuid)+'" data-status="Entregado">Entregado</button></div>':"")+
-        '</div>';
-    }).join(""):'<div class="empty">No hay pedidos reales registrados en Supabase.</div>';
-    root.querySelectorAll("[data-change]").forEach(btn=>btn.addEventListener("click",async()=>{
-      btn.disabled=true;
-      try{await FillerCloud.updateOrder(btn.dataset.change,btn.dataset.status);await poll();}catch(err){message(err.message,true);}
-      finally{btn.disabled=false;}
-    }));
+    if(!orders.length){
+      root.innerHTML='<div class="empty">No hay pedidos reales registrados en Supabase.</div>';
+      return;
+    }
+    root.innerHTML=sections.map(group=>{
+      const filtered=orders.filter(o=>o.status===group.status)
+        .sort((a,b)=>group.status==="Entregado"?b.createdTs-a.createdTs:a.createdTs-b.createdTs);
+      if(!filtered.length)return "";
+      return '<section class="kitchen-group"><h2>'+group.title+' <small>('+filtered.length+')</small></h2>'+
+        '<div class="kitchen-orders">'+filtered.map(o=>{
+          const s=statusRow(o);
+          const items=(Array.isArray(o.items)?o.items:[]).map(i=>
+            '<div class="order-product"><strong class="order-qty">'+Number(i.qty)+'×</strong><div><b>'+escape(i.name)+'</b>'+
+            (i.extras?.length?'<div class="note"><strong>Extras:</strong> '+i.extras.map(e=>escape(e.name)).join(", ")+'</div>':"")+
+            '</div></div>'
+          ).join("");
+          const date=new Date(o.createdTs);
+          const time=Number.isFinite(date.getTime())?date.toLocaleString("es-MX",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
+          return '<article class="order-card '+s.line+'" data-order-id="'+escape(o.uuid)+'">'+
+            '<div class="progress"><span class="dot '+s.cls+'">'+s.label+'</span><span class="timer">'+escape(s.detail)+'</span></div>'+
+            '<div class="order-heading"><h3>'+escape(o.id)+'</h3><span>'+escape(time)+'</span></div>'+
+            '<div><strong>Cliente:</strong> '+escape(o.customer)+'</div>'+
+            '<div><strong>Recoge:</strong> '+escape(o.pickup)+' · '+escape(o.phone)+'</div>'+
+            '<div class="order-products">'+items+'</div>'+
+            (o.notes?'<div class="order-notes"><strong>Indicaciones:</strong> '+escape(o.notes)+'</div>':"")+
+            '<div class="order-total">Total: '+money(o.total)+'</div>'+
+            '<div class="actions print-actions">'+
+            '<button type="button" data-print="'+escape(o.uuid)+'" data-kind="cocina">🖨 Imprimir comanda</button>'+
+            '<button type="button" class="secondary" data-print="'+escape(o.uuid)+'" data-kind="cliente">Ticket cliente</button>'+
+            '</div>'+
+            (o.status!=="Entregado"?'<div class="actions state-actions">'+
+            (o.status==="Nuevo"?'<button type="button" data-change="'+escape(o.uuid)+'" data-status="Preparando">Preparando</button>':"")+
+            (o.status!=="Listo"?'<button type="button" data-change="'+escape(o.uuid)+'" data-status="Listo">Listo</button>':"")+
+            '<button type="button" data-change="'+escape(o.uuid)+'" data-status="Entregado">Entregado</button></div>':"")+
+            '</article>';
+        }).join("")+'</div></section>';
+    }).join("");
   }
+  // Un único controlador, preservado aunque los pedidos se refresquen cada tres segundos.
+  root.addEventListener("click",async event=>{
+    const button=event.target.closest("button");
+    if(!button||!root.contains(button))return;
+    const printId=button.dataset.print;
+    const changeId=button.dataset.change;
+    if(printId){
+      const order=orders.find(o=>o.uuid===printId);
+      if(!order)return message("No se encontró el pedido. Actualiza la lista.",true);
+      try{FillerTickets.print(order,button.dataset.kind);}catch(error){message("No se pudo imprimir: "+error.message,true);}
+      return;
+    }
+    if(!changeId)return;
+    button.disabled=true;
+    try{await FillerCloud.updateOrder(changeId,button.dataset.status);await poll();}
+    catch(error){message(error.message,true);}
+    finally{button.disabled=false;}
+  });
   function activationUI(){
-    access.innerHTML='<div class="actions"><button id="kitchen-sound" type="button">🔔 Activar notificaciones y probar sonido</button><button id="kitchen-exit" class="secondary" type="button">Cerrar sesión</button><span id="sound-status" class="muted">Activa las notificaciones en este equipo</span></div>';
+    access.innerHTML='<div class="actions"><button id="kitchen-sound" type="button">🔔 Activar notificaciones y probar sonido</button><label class="paper-choice">Papel: <select id="kitchen-paper" aria-label="Ancho de papel"><option value="80">80 mm</option><option value="58">58 mm</option></select></label><button id="kitchen-exit" class="secondary" type="button">Cerrar sesión</button><span id="sound-status" class="muted">Activa las notificaciones en este equipo</span></div>';
+    const paperInput=document.getElementById("kitchen-paper");
+    paperInput.value=FillerTickets.paper();
+    paperInput.addEventListener("change",()=>FillerTickets.setPaper(paperInput.value));
     const test=document.getElementById("kitchen-sound");
     test.addEventListener("click",async()=>{
       test.disabled=true;
