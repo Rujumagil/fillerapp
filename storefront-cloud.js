@@ -18,7 +18,8 @@
   function block(message){enabled=false;button.disabled=true;button.textContent="Pedidos en línea aún no disponibles";status(message,true);}
   async function refresh(){
     try {
-      const products=await FillerCloud.catalog();
+      const [products,extras]=await Promise.all([FillerCloud.catalog(),FillerCloud.extras()]);
+      window.FillerCloudExtras=extras;
       if(!products.length) {block("El menú de la nube aún no está configurado. Estamos preparando los pedidos entre dispositivos.");return;}
       const local=new Map(state.menu.map(i=>[i.id,i]));
       state.menu=products.map(i=>({...i,imageKey:local.get(i.id)?.imageKey||"",image:i.image||local.get(i.id)?.image||""}));
