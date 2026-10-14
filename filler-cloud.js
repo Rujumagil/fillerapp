@@ -46,17 +46,31 @@
     if (!response.ok) throw new Error(payload?.message || payload?.hint || "Error de Supabase ("+response.status+")");
     return payload;
   }
-  async function login(email,password) {
+  // Identificadores internos de Auth: no son contraseñas ni requieren correo al iniciar sesión.
+  // Crear estas cuentas de forma privada en Supabase Authentication > Users.
+  const USER_ACCOUNTS = Object.freeze({
+    admin: "filler.admin@proyectocompas.com",
+    cocina: "filler.cocina@proyectocompas.com"
+  });
+  async function login(username,password) {
+    const account=String(username||"").trim().toLowerCase();
+    const email=USER_ACCOUNTS[account];
+    if(!email || typeof password!=="string" || !password) {
+      throw new Error("Usuario o contraseña incorrectos.");
+    }
     const res=await fetch(BASE+"/auth/v1/token?grant_type=password",{
       method:"POST",headers:{...publicHeaders(),"Content-Type":"application/json"},
       body:JSON.stringify({email,password})
     });
     const data=await res.json();
-    if (!res.ok || !data.access_token) throw new Error(data.error_description || data.msg || data.message || "Correo o contraseña incorrectos.");
+    if (!res.ok || !data.access_token) throw new Error("Usuario o contraseña incorrectos.");
     saveSession(data);
     try {
       const staff = await request("filler_staff?select=user_id,role&user_id=eq."+encodeURIComponent(data.user.id),{staff:true});
       if (!staff?.length) throw new Error("Este usuario todavía no está autorizado para operar Filler Café.");
+      // El perfil Auth y el rol permitido deben coincidir con el nombre de usuario elegido.
+      const expectedRole=account==="admin"?"admin":"cocina";
+      if(staff[0].role!==expectedRole) throw new Error("Los permisos de este usuario necesitan revisión.");
       return staff[0];
     } catch(error) {saveSession(null);throw error;}
   }
