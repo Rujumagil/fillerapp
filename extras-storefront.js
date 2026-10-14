@@ -126,38 +126,13 @@
     document.querySelectorAll("[data-qty]").forEach(b => b.addEventListener("click", () => changeQty(b.dataset.qty, Number(b.dataset.delta))));
     document.getElementById("cart-total").textContent = money(total);
   };
-  sendOrder = function() {
-    const items = cartItems();
-    const customer = document.getElementById("customer-name").value.trim();
-    const phone = document.getElementById("customer-phone").value.trim();
-    if (!items.length) return toast("Agrega al menos un producto.");
-    if (!customer || !phone) return toast("Falta nombre y teléfono.");
-    for (const i of items) {
-      if (i.qty > Number(itemById(i.id)?.stock || 0)) return toast("No hay existencias suficientes.");
-    }
-    const now = Date.now();
-    const order = {
-      id: "F-" + now.toString().slice(-6), date: todayKey,
-      createdAt: new Date(now).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }),
-      createdTs: now, statusUpdatedAt: now, customer, phone,
-      pickup: document.getElementById("pickup-time").value,
-      notes: document.getElementById("notes").value.trim(),
-      status: "Nuevo",
-      items: items.map(i => ({ id: i.id, name: i.name, cat: i.cat, qty: i.qty, price: i.price, extras: i.extras.map(x => ({ ...x })), unitPrice: i.unitPrice })),
-      total: items.reduce((s, i) => s + i.unitPrice * i.qty, 0)
-    };
-    for (const i of items) itemById(i.id).stock -= i.qty;
-    state.orders.unshift(order);
-    try { save(); } catch { state.orders.shift(); for (const i of items) itemById(i.id).stock += i.qty; return toast("No se pudo guardar el pedido."); }
-    state.cart = {}; state.extraSelections = {};
-    document.getElementById("client-status").textContent = "Pedido " + order.id + " guardado en este navegador. La recepción de pedidos en otros dispositivos aún no está conectada.";
-    document.getElementById("client-status").classList.add("show");
-    toast("Pedido registrado en este dispositivo.");
-    render();
-  };
+  // Nunca confirmar pedidos solo en localStorage: la cocina no los recibiría.
+  sendOrder = function() { toast("La recepción de cocina no está conectada. Revisa tu conexión."); };
   const oldSend = document.getElementById("send-order");
   const newSend = oldSend.cloneNode(true);
   oldSend.replaceWith(newSend);
-  newSend.addEventListener("click", () => sendOrder());
+  newSend.disabled = true;
+  newSend.textContent = "Conectando con cocina…";
+  // storefront-cloud.js habilita este botón después de verificar Supabase.
   render();
 })();
