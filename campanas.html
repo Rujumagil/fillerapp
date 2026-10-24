@@ -1,0 +1,57 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#006241"><title>Campañas | Filler Café</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#f7f1e7;color:#1e332b;font-family:Inter,system-ui,sans-serif}main{max-width:960px;margin:auto;padding:24px 16px 60px}header{background:#006241;color:white;padding:20px}header a{color:white}.card{background:white;border:1px solid #d5e4da;border-radius:20px;padding:24px;margin:16px 0;box-shadow:0 10px 25px #06281910}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}@media(max-width:720px){.grid{grid-template-columns:1fr}}label{display:block;font-weight:700;margin:13px 0 6px}input,textarea,select{font:inherit;border:1px solid #afc7b6;border-radius:10px;padding:12px;width:100%;background:white}button{border:0;background:#006241;color:white;border-radius:10px;padding:13px 17px;font:inherit;font-weight:750;cursor:pointer}button:disabled{opacity:.55}.muted{color:#5b7265}#alert{background:#e7f6ea;padding:12px;border-radius:11px}#alert.error{background:#ffe9e5;color:#922d22}[hidden]{display:none!important}.preview{border-radius:14px;background:#eaf4ef;padding:20px;white-space:pre-wrap}.campaign{padding:13px 0;border-bottom:1px solid #ddd}small{font-size:12px}</style></head>
+<body><header><a href="admin.html">← Control Filler</a><h1>Campañas y promociones</h1><div>Centro de preparación de comunicaciones para clientes suscritos</div></header>
+<main><div id="alert" role="status" hidden></div>
+<section class="card" id="access"><h2>Acceso de administración</h2><form id="login"><label>Usuario<input name="username" value="admin" autocomplete="username" required></label><label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label><button type="submit">Ingresar</button></form></section>
+<div id="dashboard" hidden><p class="muted">Los mensajes se guardan como <strong>borradores</strong>. No se envían notificaciones desde esta pantalla. Solo se utilizarán contactos con consentimiento verificable cuando se habilite el servicio.</p>
+<div class="grid"><section class="card"><h2>Nueva campaña</h2><form id="new-campaign">
+<label>Destinatarios</label><select name="audience"><option value="all_opted_in">Clientes suscritos a promociones</option><option value="frequent_opted_in">Clientes frecuentes suscritos</option><option value="inactive_opted_in">Clientes inactivos suscritos</option></select>
+<label>Título</label><input name="title" maxlength="100" minlength="3" required placeholder="☕ ¡Algo especial en Filler!">
+<label>Mensaje</label><textarea name="body" rows="5" maxlength="300" minlength="3" required placeholder="Conoce nuestras promociones de hoy"></textarea>
+<button type="submit">Guardar borrador</button></form></section>
+<section class="card"><h2>Vista previa</h2><div class="preview"><strong id="preview-title">Título de tu campaña</strong><p id="preview-body">Aquí aparecerá el mensaje.</p><small>Filler Café · Borrador, sin envío</small></div><h3>Historial de borradores</h3><div id="drafts" class="muted">Cargando…</div></section></div>
+<button id="signout" type="button">Cerrar sesión</button></div></main>
+<script src="filler-cloud.js"></script><script>
+(() => {
+"use strict";
+const $=id=>document.getElementById(id);
+const safe=s=>String(s??"");
+const alert=(s,err=false)=>{const e=$("alert");e.hidden=false;e.textContent=s;e.className=err?"error":"";};
+let initialized=false;
+async function load(){
+ const rows=await FillerCloud.campaignDrafts();
+ const holder=$("drafts");holder.replaceChildren();
+ if(!rows?.length){holder.textContent="Aún no hay campañas guardadas.";return;}
+ rows.forEach(row=>{
+ const el=document.createElement("div");el.className="campaign";
+ const title=document.createElement("strong");title.textContent=row.title;
+ const description=document.createElement("p");description.textContent=row.body;
+ const meta=document.createElement("small");meta.textContent="Borrador · "+new Date(row.created_at).toLocaleDateString("es-MX");
+ el.append(title,description,meta);holder.append(el);
+ });
+}
+async function start(){
+ if((await FillerCloud.staffRole())!=="admin"){$("access").hidden=false;$("dashboard").hidden=true;return;}
+ $("access").hidden=true;$("dashboard").hidden=false;await load();initialized=true;
+}
+$("login").addEventListener("submit",async event=>{
+event.preventDefault();const form=event.currentTarget,button=form.querySelector("button");button.disabled=true;
+try{await FillerCloud.login(form.elements.username.value,form.elements.password.value);await start();}
+catch(err){alert(err.message,true);}finally{button.disabled=false;}
+});
+const form=$("new-campaign");
+form.addEventListener("input",()=>{
+ $("preview-title").textContent=form.elements.title.value||"Título de tu campaña";
+ $("preview-body").textContent=form.elements.body.value||"Aquí aparecerá el mensaje.";
+});
+form.addEventListener("submit",async event=>{
+event.preventDefault();const b=form.querySelector("button");b.disabled=true;
+try{
+await FillerCloud.createCampaignDraft({title:form.elements.title.value.trim(),body:form.elements.body.value.trim(),audience:form.elements.audience.value});
+form.reset();form.dispatchEvent(new Event("input"));await load();alert("Campaña guardada como borrador. No se envió ninguna notificación.");
+}catch(err){alert(err.message,true);}finally{b.disabled=false;}
+});
+$("signout").addEventListener("click",()=>{FillerCloud.logout();$("dashboard").hidden=true;$("access").hidden=false;alert("Sesión cerrada.");});
+start().catch(e=>alert("No se pudo cargar el módulo: "+e.message,true));
+})();
+</script></body></html>
