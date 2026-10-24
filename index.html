@@ -99,6 +99,13 @@
       .order-bubble{right:12px;bottom:12px}
     }
 
+
+    /* Productos sin foto real: identificador neutral, no ilustración ficticia */
+    .menu-grid .item-photo[data-has-photo="false"]{background:#f5f3ed!important;border:1px solid #e7e6df!important;box-shadow:none!important;display:flex;align-items:center;justify-content:center}
+    .menu-grid .item-photo[data-has-photo="false"]::before{content:"☕";font-size:37px;line-height:1;filter:grayscale(1);opacity:.34;position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+    .menu-grid .item-photo[data-has-photo="false"]::after{content:"Foto pendiente";display:block;position:absolute;bottom:13px;left:0;right:0;background:transparent;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#7b887c;text-align:center;padding:0;}
+    .menu-grid .item-photo[data-has-photo="true"]::before,.menu-grid .item-photo[data-has-photo="true"]::after{display:none!important}
+    @media(max-width:560px){.menu-grid .item-photo[data-has-photo="false"]::before{font-size:27px}.menu-grid .item-photo[data-has-photo="false"]::after{font-size:9px;bottom:9px}}
   </style>
 </head>
 <body>
