@@ -149,6 +149,16 @@
       .map(i=>({id:i.id,name:i.name,price:Number(i.price),enabled:!!i.enabled}));
     if (safe.length) await request("filler_extras?on_conflict=id",{method:"POST",staff:true,body:safe,prefer:"resolution=merge-duplicates,return=minimal"});
   }
+  async function campaignDrafts() {
+    if ((await staffRole())!=="admin") throw new Error("Solo administración puede consultar campañas.");
+    return request("filler_campaigns?select=id,title,body,audience,status,created_at&order=created_at.desc&limit=100",{staff:true});
+  }
+  async function createCampaignDraft({title,body,audience}) {
+    if ((await staffRole())!=="admin") throw new Error("Solo administración puede crear campañas.");
+    if (!["all_opted_in","frequent_opted_in","inactive_opted_in"].includes(audience)) throw new Error("Destinatarios no válidos.");
+    const uid=session?.user?.id;
+    return request("filler_campaigns",{method:"POST",staff:true,prefer:"return=representation",body:{title,body,audience,status:"draft",created_by:uid}});
+  }
   function logout(){saveSession(null);}
-  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,catalog,extras,placeOrder,orderStatus,importCatalog,importExtras,present});
+  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,catalog,extras,placeOrder,orderStatus,importCatalog,importExtras,campaignDrafts,createCampaignDraft,present});
 })();
