@@ -149,6 +149,28 @@
       .map(i=>({id:i.id,name:i.name,price:Number(i.price),enabled:!!i.enabled}));
     if (safe.length) await request("filler_extras?on_conflict=id",{method:"POST",staff:true,body:safe,prefer:"resolution=merge-duplicates,return=minimal"});
   }
+  async function uploadProductPhoto(productId,file) {
+    if ((await staffRole()) !== "admin") throw new Error("Solo el administrador puede publicar fotos.");
+    if (!/^[a-z0-9][a-z0-9_-]{1,120}$/i.test(String(productId||""))) throw new Error("Producto no válido.");
+    if (!(file instanceof Blob) || file.type !== "image/jpeg" || file.size > 3145728) throw new Error("La foto debe ser JPG y pesar menos de 3 MB.");
+    const access = await token();
+    if (!access) throw new Error("Vuelve a iniciar sesión como administrador.");
+    const name = "productos/" + productId + "-" + Date.now() + "-" + Math.random().toString(36).slice(2,8) + ".jpg";
+    const upload = await fetch(BASE + "/storage/v1/object/filler-product-images/" + name, {
+      method:"POST",headers:{...publicHeaders(),Authorization:"Bearer "+access,"Content-Type":"image/jpeg","x-upsert":"false"},body:file
+    });
+    if (!upload.ok) {
+      const data=await upload.json().catch(()=>({}));
+      throw new Error(data.message||data.error||"No se pudo cargar la foto al almacenamiento compartido.");
+    }
+    const imageUrl=BASE + "/storage/v1/object/public/filler-product-images/" + name;
+    const saved=await request("filler_products?id=eq."+encodeURIComponent(productId),{
+      method:"PATCH",staff:true,body:{image_url:imageUrl},prefer:"return=representation"
+    });
+    if (!Array.isArray(saved)||saved.length!==1||saved[0].image_url!==imageUrl)
+      throw new Error("La foto se guardó, pero no se pudo vincular al producto. Revisa los permisos del catálogo.");
+    return imageUrl;
+  }
   function logout(){saveSession(null);}
-  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,catalog,extras,placeOrder,orderStatus,importCatalog,importExtras,present});
+  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,catalog,extras,placeOrder,orderStatus,importCatalog,importExtras,uploadProductPhoto,present});
 })();
