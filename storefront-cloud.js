@@ -48,6 +48,9 @@
     if(!items.length)return toast("El pedido está vacío.");
     if(!customer || customer.length<2 || customer.length>90)return toast("Escribe tu nombre completo (máximo 90 caracteres).");
     if(phone.replace(/\D/g,"").length<8 || phone.length>25)return toast("Escribe un teléfono válido.");
+    renderPickupTimes();
+    const pickupSelect=document.getElementById("pickup-time");
+    if(pickupSelect.disabled || !pickupSelect.value)return toast("Ya no hay horarios disponibles para recoger hoy.");
     const notes=document.getElementById("notes").value.trim();
     if(notes.length>500)return toast("Las notas deben tener máximo 500 caracteres.");
     working=true;button.disabled=true;button.textContent="Enviando a cocina…";
