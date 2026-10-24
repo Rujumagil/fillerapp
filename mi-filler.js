@@ -100,6 +100,57 @@ e.preventDefault();const f=e.currentTarget,b=f.querySelector("button[type=submit
 try{await saveProfile({full_name:f.elements.name.value.trim(),phone:f.elements.phone.value.trim(),promotions_opt_in:f.elements.promotions.checked});showMember();message("Preferencias actualizadas.");}
 catch(err){message(err.message,true);}finally{b.disabled=false;}
 });
+let installPrompt=null;
+window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();installPrompt=event;});
+$("install-app").addEventListener("click",async()=>{
+if(installPrompt){await installPrompt.prompt();installPrompt=null;return;}
+message("En iPhone usa Compartir → Añadir a pantalla de inicio. En Android busca «Instalar app» en el menú del navegador.");
+});
+function pushStatus(text){$("push-status").textContent=text;}
+function decodeVapid(value){
+const base64=value.replace(/-/g,"+").replace(/_/g,"/");
+const padded=base64+"=".repeat((4-base64.length%4)%4);
+return Uint8Array.from(atob(padded),c=>c.charCodeAt(0));
+}
+async function worker(){
+if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window))
+throw Error("Este navegador no admite notificaciones push.");
+return navigator.serviceWorker.ready;
+}
+$("enable-push").addEventListener("click",async()=>{
+const button=$("enable-push");button.disabled=true;
+try{
+if(!session?.user?.id)throw Error("Inicia sesión para activar las notificaciones.");
+const vapid=String(window.FILLER_VAPID_PUBLIC_KEY||"").trim();
+if(!vapid)throw Error("Estamos preparando las notificaciones. Aún no están habilitadas.");
+// El permiso debe solicitarse directamente a partir del clic del usuario.
+const permission=Notification.permission==="default"?await Notification.requestPermission():Notification.permission;
+if(permission!=="granted")throw Error("Debes autorizar los avisos en este dispositivo.");
+const reg=await worker();
+let subscription=await reg.pushManager.getSubscription();
+if(!subscription)subscription=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeVapid(vapid)});
+const json=subscription.toJSON(),keys=json.keys||{};
+if(!json.endpoint||!keys.p256dh||!keys.auth)throw Error("El dispositivo no devolvió una suscripción completa.");
+const rows=await request("filler_push_subscriptions?select=id&endpoint=eq."+encodeURIComponent(json.endpoint));
+if(rows?.length){
+await request("filler_push_subscriptions?endpoint=eq."+encodeURIComponent(json.endpoint),{method:"PATCH",body:{active:true,updated_at:new Date().toISOString()}});
+}else{
+await request("filler_push_subscriptions",{method:"POST",body:{user_id:session.user.id,endpoint:json.endpoint,p256dh:keys.p256dh,auth_secret:keys.auth,active:true}});
+}
+pushStatus("Este dispositivo quedó registrado para notificaciones. La entrega real depende del servicio de envío.");
+}catch(error){pushStatus(error.message);}finally{button.disabled=false;}
+});
+$("disable-push").addEventListener("click",async()=>{
+const button=$("disable-push");button.disabled=true;
+try{
+const reg=await worker(),subscription=await reg.pushManager.getSubscription();
+if(subscription){
+await request("filler_push_subscriptions?endpoint=eq."+encodeURIComponent(subscription.endpoint),{method:"DELETE"});
+await subscription.unsubscribe();
+}
+pushStatus("Notificaciones desactivadas en este equipo.");
+}catch(error){pushStatus("No se pudo desactivar: "+error.message);}finally{button.disabled=false;}
+});
 $("logout").addEventListener("click",async()=>{const access=await token();if(access)fetch(BASE+"/auth/v1/logout",{method:"POST",headers:{...headers(),Authorization:"Bearer "+access}}).catch(()=>{});save(null);profile=null;$("member").hidden=true;$("visitor").hidden=false;tab("login");message("Sesión cerrada.");});
 loadProfile().catch(err=>message("No pudimos recuperar tu perfil: "+err.message,true));
 })();
