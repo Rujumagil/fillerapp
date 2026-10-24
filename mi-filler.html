@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#006241"><link rel="manifest" href="manifest.json"><link rel="icon" href="assets/filler-icon-192.png"><title>Mi Filler | Filler Café</title>
+<style>
+:root{font-family:Inter,system-ui,sans-serif;color:#18352b;background:#faf7f0}*{box-sizing:border-box}body{margin:0}header{background:#006241;color:white;padding:18px 5%;display:flex;align-items:center;justify-content:space-between;gap:12px}header a{color:white;text-decoration:none;font-weight:700}main{max-width:800px;margin:32px auto;padding:0 18px 45px}.card{background:white;border:1px solid #dce7df;border-radius:24px;padding:26px;box-shadow:0 15px 40px #063b2b10}h1{font-size:clamp(28px,5vw,42px);margin:0 0 10px}p{line-height:1.5}.muted{color:#61746b}.stack{display:grid;gap:14px}label{font-weight:700;font-size:14px}input:not([type=checkbox]){display:block;width:100%;margin-top:6px;padding:13px;border:1px solid #adc7b6;border-radius:12px;font:inherit}button{background:#006241;color:white;border:0;border-radius:12px;padding:13px 18px;font:inherit;font-weight:750;cursor:pointer}button:disabled{opacity:.55}button.secondary{background:#e4f2e8;color:#065338}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 22px}.check{display:flex;gap:10px;align-items:start;font-weight:500}.check input{margin-top:4px}.notice{padding:13px 15px;border-radius:12px;background:#e6f5eb;color:#075638;margin-bottom:15px}.notice.error{background:#fff0ec;color:#ab3929}[hidden]{display:none!important}.mini{font-size:13px}a{color:#006241}
+</style></head><body>
+<header><a href="./index.html">☕ Filler Café</a><a href="./index.html">← Menú y pedidos</a></header>
+<main><h1>Mi Filler</h1><p class="muted">Tu cuenta, tus pedidos y tus beneficios. También puedes ordenar sin registrarte.</p>
+<div class="card">
+<div id="message" role="status" aria-live="polite" class="notice" hidden></div>
+<div id="visitor">
+<div class="actions"><button id="tab-register" type="button">Crear cuenta</button><button id="tab-login" class="secondary" type="button">Ya tengo cuenta</button></div>
+<form id="register" class="stack">
+<label>Nombre completo<input name="name" minlength="2" maxlength="90" autocomplete="name" required></label>
+<label>Correo electrónico<input name="email" type="email" autocomplete="email" required></label>
+<label>Contraseña (mínimo 8 caracteres)<input name="password" type="password" minlength="8" autocomplete="new-password" required></label>
+<label class="check"><input name="promotions" type="checkbox"> Quiero recibir promociones de Filler Café. Es opcional y puedo cambiarlo después.</label>
+<label class="check"><input name="privacy" type="checkbox" required> He leído el <a href="./aviso-privacidad.html" target="_blank" rel="noopener">aviso de privacidad</a>.</label>
+<button type="submit">Crear mi cuenta</button><p class="muted mini">Te enviaremos un correo para confirmar tu cuenta. Las notificaciones push del dispositivo se activarán por separado.</p>
+</form>
+<form id="login" class="stack" hidden>
+<label>Correo electrónico<input name="email" type="email" autocomplete="email" required></label>
+<label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label>
+<button type="submit">Iniciar sesión</button>
+</form></div>
+<div id="member" hidden><h2>¡Hola, <span id="member-name"></span>!</h2><p class="muted" id="member-email"></p>
+<form id="preferences" class="stack">
+<label>Nombre completo<input name="name" minlength="2" maxlength="90" required></label>
+<label>Teléfono (opcional)<input name="phone" type="tel" maxlength="25" autocomplete="tel"></label>
+<label class="check"><input name="promotions" type="checkbox"> Acepto recibir promociones y novedades comerciales de Filler Café.</label>
+<button type="submit">Guardar preferencias</button></form>
+<section class="card" style="box-shadow:none;background:#f3faf5;margin:18px 0">
+<h3>Notificaciones de Mi Filler</h3>
+<p class="muted mini">Recibe avisos sobre tus pedidos. Las promociones se enviarán solo si también las aceptaste en tus preferencias.</p>
+<div class="actions"><button id="enable-push" type="button">🔔 Activar notificaciones</button><button id="disable-push" class="secondary" type="button">Desactivar en este equipo</button></div>
+<p id="push-status" class="muted mini" role="status">Las notificaciones push todavía requieren configuración del servidor.</p>
+</section><section class="card" style="box-shadow:none;margin:18px 0">
+<h3>Instala Filler Café</h3><p class="muted mini">Accede al menú y a tu perfil desde la pantalla principal. En iPhone, abre esta página desde Safari y usa Compartir → Añadir a pantalla de inicio.</p>
+<button id="install-app" type="button" class="secondary">📲 Instalar aplicación</button>
+</section>
+<div class="actions"><a href="./index.html">Hacer un pedido</a><button class="secondary" id="logout" type="button">Cerrar sesión</button></div>
+<p class="muted mini">Las promociones push y el historial de pedidos se habilitarán cuando terminemos la conexión con el servidor. Crear una cuenta no activa por sí solo las notificaciones.</p>
+</div></div></main>
+<script src="pwa.js"></script><script src="push-config.js"></script><script src="mi-filler.js"></script></body></html>

@@ -1,0 +1,9 @@
+name = "filler-push"
+main = "src/index.js"
+compatibility_date = "2026-10-24"
+compatibility_flags = ["nodejs_compat"]
+
+# Los secretos se configuran con 'wrangler secret put', nunca aquí.
+
+[vars]
+VAPID_SUBJECT = "mailto:proyectocompas.info@gmail.com"
