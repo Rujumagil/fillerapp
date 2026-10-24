@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v19";
+const CACHE_NAME = "filler-app-v20";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -66,7 +66,7 @@ self.addEventListener("notificationclick", event => {
   const raw=event.notification.data?.url || "./pedidos.html";
   const isPrivateTracking=typeof raw==="string" &&
     /^\.\/pedido\.html#token=[0-9a-f-]{36}$/i.test(raw);
-  const target=isPrivateTracking?raw:(raw==="./monitor.html"?"./monitor.html":"./pedidos.html");
+  const target=isPrivateTracking?raw:(raw==="./pedido.html"?"./pedido.html":(raw==="./monitor.html"?"./monitor.html":"./pedidos.html"));
   const absolute=new URL(target,self.registration.scope).href;
   event.waitUntil((async()=>{
     const all=await clients.matchAll({type:"window",includeUncontrolled:true});
@@ -87,12 +87,16 @@ self.addEventListener("push",event=>{
   if(!event.data)return;
   let payload={};
   try{payload=event.data.json();}catch{payload={body:event.data.text()};}
-  const safeCode=typeof payload.code==="string"?payload.code.slice(0,60):"Nuevo pedido";
-  event.waitUntil(self.registration.showNotification("🔔 Nuevo pedido Filler Café",{
-    body:safeCode,
+  const customer=payload?.type==="customer";
+  const code=typeof payload.code==="string"?payload.code.slice(0,40):"Filler Café";
+  const tracking=typeof payload.tracking_url==="string" && /^\.\/pedido\.html#token=[0-9a-f-]{36}$/i.test(payload.tracking_url)?payload.tracking_url:null;
+  const title=customer?"☕ Aviso de tu pedido Filler":"🔔 Nuevo pedido Filler Café";
+  const body=customer?String(payload.body||"Tu pedido tiene una actualización.").slice(0,160):code;
+  event.waitUntil(self.registration.showNotification(title,{
+    body,
     icon:"./assets/filler-icon-192.png",
     badge:"./assets/filler-icon-192.png",
-    tag:"filler-push-"+safeCode,
-    data:{url:"./pedidos.html"}
+    tag:(customer?"filler-cliente-":"filler-cocina-")+code,
+    data:{url:customer?(tracking||"./pedido.html"):"./pedidos.html"}
   }));
 });
