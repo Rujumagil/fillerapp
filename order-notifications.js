@@ -17,6 +17,8 @@
 
   function create({onStatus=()=>{}}={}) {
     let audio=null, audioEnabled=false, lastNotice=null;
+    const pending=[];
+    let visualOpen=false;
     const overlay=document.createElement("section");
     overlay.id="filler-order-popup";
     overlay.hidden=true;
@@ -40,13 +42,19 @@
     document.head.appendChild(css);
     document.body.appendChild(overlay);
 
-    const close=()=>{overlay.hidden=true;document.title=originalTitle;};
+    const close=()=>{
+      overlay.hidden=true;visualOpen=false;document.title=originalTitle;
+      const next=pending.shift();
+      if(next) showVisual(next.title,next.details);
+    };
     overlay.querySelector("#filler-popup-close").addEventListener("click",close);
     overlay.querySelector("#filler-popup-show").addEventListener("click",()=>{
       close();document.getElementById("orders")?.scrollIntoView({behavior:"smooth",block:"start"});
     });
 
     function showVisual(title,details){
+      if(visualOpen){pending.push({title,details});return;}
+      visualOpen=true;
       overlay.querySelector("#filler-popup-title").textContent=title;
       overlay.querySelector("#filler-popup-details").textContent=details;
       overlay.hidden=false;
