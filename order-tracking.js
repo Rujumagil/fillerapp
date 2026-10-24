@@ -10,6 +10,25 @@
   const token=(tokenParam||lastStored?.token||"").trim();
   let lastStatus=null, audio=null, soundEnabled=false, firstLoad=true, timer=null;
   let hasAlerts=false;
+  const PUSH_API="https://filler-push.proyectocompas-info.workers.dev";
+  const VAPID_PUBLIC="BAbjSZ6EjTAd00X6YZApNN8O2fWj5P2o8XSQbuUJTRX9pbQ5G9dZWne12rSSu3lI3BQhslH9FHhqHtWlYyKp8oQ";
+  function vapidBytes(value){
+    const decoded=atob(value.replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(value.length/4)*4,"="));
+    return Uint8Array.from(decoded,ch=>ch.charCodeAt(0));
+  }
+  async function enableBackgroundPush(){
+    if(!("serviceWorker" in navigator)||!("PushManager" in window))
+      throw new Error("Este navegador no admite avisos con la página cerrada.");
+    const registration=await navigator.serviceWorker.ready;
+    const subscription=await registration.pushManager.getSubscription()||
+      await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidBytes(VAPID_PUBLIC)});
+    const response=await fetch(PUSH_API+"/subscribe",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({tracking_token:token,subscription:subscription.toJSON()})
+    });
+    if(!response.ok)throw new Error("No se pudo registrar el dispositivo ("+response.status+").");
+    return subscription;
+  }
   const feedback=(text,isError=false)=>{el("feedback").textContent=text;el("feedback").className=isError?"error":"";};
   const stages={
     Nuevo:{index:0,title:"¡Ya recibimos tu pedido!",description:"Cocina tiene tu pedido. En cuanto comencemos, verás el cambio aquí."},
@@ -72,6 +91,7 @@
     try{
       const order=await FillerCloud.orderStatus(token);
       updateView(order);
+      try{localStorage.setItem("filler_last_tracking_v1",JSON.stringify({token,code:order.code}));}catch{}
       if(lastStatus!=="Listo" && order.status==="Listo"&&!firstLoad)notifyReady(order.code);
       lastStatus=order.status;
       firstLoad=false;
@@ -84,21 +104,32 @@
     }finally{timer=setTimeout(checkStatus,5000);}
   }
   async function enable(){
+    el("enable-alert").disabled=true;
+    feedback("Activando notificaciones del dispositivo…");
     const request=("Notification" in window && Notification.permission==="default")
       ? Notification.requestPermission()
       : Promise.resolve("Notification" in window?Notification.permission:"unsupported");
-    try{
-      audio=new (window.AudioContext||window.webkitAudioContext)();
-      await audio.resume();soundEnabled=true;
-    }catch{}
+    try{audio=new (window.AudioContext||window.webkitAudioContext)();await audio.resume();soundEnabled=true;}catch{}
     let permission="unsupported";
     try{permission=await request;}catch{}
     hasAlerts=true;
-    el("enable-alert").textContent="🔔 Avisos activados en esta página";
-    el("enable-alert").disabled=true;
-    if(permission==="granted")feedback("✓ Avisos activados. Mantén esta página abierta para recibirlos.");
-    else feedback("✓ Aviso visual"+(soundEnabled?" y sonido":"")+" activados. Las notificaciones del sistema requieren permiso.");
-    if(lastStatus==="Listo")notifyReady(el("folio").textContent);
+    if(permission==="granted"){
+      try{
+        await enableBackgroundPush();
+        el("enable-alert").textContent="✓ Avisos activados, incluso al cerrar";
+        feedback("✓ Te avisaremos cuando cocina marque tu pedido como listo, aunque cierres esta página.");
+        if(lastStatus==="Listo")notifyReady(el("folio").textContent);
+        return;
+      }catch(error){
+        el("enable-alert").textContent="🔔 Reintentar avisos en segundo plano";
+        el("enable-alert").disabled=false;
+        feedback("Puedes recibir avisos con esta página abierta. "+error.message,true);
+        return;
+      }
+    }
+    el("enable-alert").textContent="🔔 Permitir notificaciones";
+    el("enable-alert").disabled=permission==="denied";
+    feedback(permission==="denied"?"Activa el permiso de notificaciones desde la configuración del navegador.":"Avisos visuales activos en esta página; este dispositivo no admite notificaciones del sistema.",permission==="denied");
   }
   el("enable-alert").addEventListener("click",enable);
   el("copy-link").addEventListener("click",async()=>{
