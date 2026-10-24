@@ -3,7 +3,11 @@ main = "src/index.js"
 compatibility_date = "2026-10-24"
 compatibility_flags = ["nodejs_compat"]
 
-# Los secretos se configuran con 'wrangler secret put', nunca aquí.
-
+# Secretos VAPID_PRIVATE_KEY, SUPABASE_SERVICE_ROLE_KEY, FILLER_TEST_TOKEN
+# se mantienen en Cloudflare y nunca se suben al repositorio.
 [vars]
 VAPID_SUBJECT = "mailto:proyectocompas.info@gmail.com"
+VAPID_PUBLIC_KEY = "BAbjSZ6EjTAd00X6YZApNN8O2fWj5P2o8XSQbuUJTRX9pbQ5G9dZWne12rSSu3lI3BQhslH9FHhqHtWlYyKp8oQ"
+
+[triggers]
+crons = ["* * * * *"]
