@@ -29,7 +29,16 @@
 <label>Teléfono (opcional)<input name="phone" type="tel" maxlength="25" autocomplete="tel"></label>
 <label class="check"><input name="promotions" type="checkbox"> Acepto recibir promociones y novedades comerciales de Filler Café.</label>
 <button type="submit">Guardar preferencias</button></form>
+<section class="card" style="box-shadow:none;background:#f3faf5;margin:18px 0">
+<h3>Notificaciones de Mi Filler</h3>
+<p class="muted mini">Recibe avisos sobre tus pedidos. Las promociones se enviarán solo si también las aceptaste en tus preferencias.</p>
+<div class="actions"><button id="enable-push" type="button">🔔 Activar notificaciones</button><button id="disable-push" class="secondary" type="button">Desactivar en este equipo</button></div>
+<p id="push-status" class="muted mini" role="status">Las notificaciones push todavía requieren configuración del servidor.</p>
+</section><section class="card" style="box-shadow:none;margin:18px 0">
+<h3>Instala Filler Café</h3><p class="muted mini">Accede al menú y a tu perfil desde la pantalla principal. En iPhone, abre esta página desde Safari y usa Compartir → Añadir a pantalla de inicio.</p>
+<button id="install-app" type="button" class="secondary">📲 Instalar aplicación</button>
+</section>
 <div class="actions"><a href="./index.html">Hacer un pedido</a><button class="secondary" id="logout" type="button">Cerrar sesión</button></div>
 <p class="muted mini">Las promociones push y el historial de pedidos se habilitarán cuando terminemos la conexión con el servidor. Crear una cuenta no activa por sí solo las notificaciones.</p>
 </div></div></main>
-<script src="mi-filler.js"></script></body></html>
+<script src="pwa.js"></script><script src="push-config.js"></script><script src="mi-filler.js"></script></body></html>
