@@ -16,3 +16,7 @@ Worker de prueba aislado. Solo `POST /send-test` con un token secreto puede envi
 No exponer el token de prueba al navegador. La clave de servicio Supabase es privilegiada y solo pertenece al entorno de servidor.
 
 La activación de avisos al cambiar un pedido a `Listo` requiere un disparador backend con autorización, idempotencia y un vínculo fiable entre pedido y usuario. No está implementada en esta fase.
+
+## Integración Cloudflare
+
+El Worker `filler-push` está conectado a esta rama para iniciar la primera compilación automatizada. Mantener el envío deshabilitado hasta configurar secretos y verificar una notificación autorizada.
