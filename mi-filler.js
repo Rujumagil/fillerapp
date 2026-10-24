@@ -43,8 +43,12 @@ const access=await token();if(!access){$("visitor").hidden=false;$("member").hid
 const rows=await request("filler_customers?select=user_id,full_name,phone,promotions_opt_in&user_id=eq."+encodeURIComponent(session.user.id));
 profile=rows?.[0]||null;
 if(!profile){
-$("visitor").hidden=false;$("member").hidden=true;
-message("Tu correo está confirmado, pero falta completar el perfil. Ingresa de nuevo desde el formulario de acceso.");
+profile={full_name:session.user?.user_metadata?.filler_display_name||"",phone:null,promotions_opt_in:false};
+$("visitor").hidden=true;$("member").hidden=false;
+$("member-name").textContent=profile.full_name||"cliente";
+$("member-email").textContent=session.user?.email||"";
+const form=$("preferences");form.elements.name.value=profile.full_name;form.elements.phone.value="";form.elements.promotions.checked=false;
+message("Completa y guarda tu perfil. Las promociones permanecen desactivadas hasta que las aceptes.");
 return;
 }
 showMember();
