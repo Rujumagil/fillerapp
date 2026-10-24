@@ -15,23 +15,29 @@
     Nuevo:{index:0,title:"¡Ya recibimos tu pedido!",description:"Cocina tiene tu pedido. En cuanto comencemos, verás el cambio aquí."},
     Preparando:{index:1,title:"Estamos preparando tu pedido",description:"Nuestro equipo ya está trabajando para tenerlo listo."},
     Listo:{index:2,title:"¡Tu pedido está listo!",description:"Pasa a recogerlo en Filler Café. ¡Gracias por esperar!"},
-    Entregado:{index:2,title:"¡Pedido entregado!",description:"Esperamos que disfrutes tu pedido. ¡Gracias por visitarnos!"},
+    Entregado:{index:3,title:"¡Pedido entregado!",description:"Esperamos que disfrutes tu pedido. ¡Gracias por visitarnos!"},
     Cancelado:{index:-1,title:"Este pedido fue cancelado",description:"Acércate al personal de Filler Café si necesitas ayuda."}
   };
   function updateView(order) {
     const config=stages[order.status]||stages.Nuevo;
     el("folio").textContent=order.code;
     el("status-pill").textContent=order.status;
+    el("status-pill").dataset.state=order.status;
     el("status-title").textContent=config.title;
     el("status-description").textContent=config.description;
     el("pickup").textContent=order.pickup||"Consultar en mostrador";
     const date=new Date(order.status_updated_at);
     el("updated").textContent=Number.isFinite(date.getTime())?
       date.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"}):"—";
-    document.querySelectorAll("[data-step]").forEach(step=>
-      step.classList.toggle("active",Number(step.dataset.step)<=config.index));
+    document.querySelectorAll("[data-step]").forEach(step=>{
+      const n=Number(step.dataset.step);
+      step.classList.toggle("active",n<=config.index);
+      step.classList.toggle("current",n===config.index);
+    });
     el("ready-banner").hidden=order.status!=="Listo";
     if(order.status==="Listo")document.title="🔔 ¡Tu pedido está listo! · Filler Café";
+    else if(order.status==="Entregado")document.title="✓ Pedido entregado · Filler Café";
+    else document.title="Mi pedido · Filler Café";
   }
   function sound(){
     if(!soundEnabled||!audio)return;
