@@ -36,7 +36,7 @@
       }
       window.FillerOnlineActive = true;
       enabled=true;button.disabled=working;button.textContent="Confirmar pedido";
-      status("✓ Pedidos conectados a cocina · Menú y existencias sincronizados");
+      status("✓ Menú actualizado · Elige tus favoritos y recógelos en Filler Café");
       render();
     }catch(error){block("No se puede comprobar la recepción de pedidos. "+error.message);}
   }
@@ -128,6 +128,7 @@
         notice.appendChild(document.createTextNode("Solicita a cocina información sobre su preparación."));
       }
       notice.classList.add("show");
+      refreshAlerts();
       toast("¡Pedido enviado a cocina!");
       // Pedido confirmado: una recarga fallida del catálogo no cambia su recepción.
       refresh().catch(error=>console.warn("No se pudo actualizar la vista después del pedido:",error));
@@ -139,17 +140,68 @@
   button.addEventListener("click",checkout);
   block("Comprobando conexión segura con cocina…");
   window.FillerCloudModeReady=true;
-  // Acceso al último seguimiento incluso después de recargar el menú.
-  try{
-    const previous=JSON.parse(localStorage.getItem("filler_last_tracking_v1")||"null");
-    if(previous?.token&&/^[0-9a-f-]{36}$/i.test(previous.token)){
-      const link=document.createElement("a");
-      link.href="./pedido.html#token="+encodeURIComponent(previous.token);
-      link.textContent="🔔 Consultar estado de mi último pedido ("+String(previous.code||"")+")";
-      link.style.cssText="display:block;padding:11px 15px;margin:5px 0 16px;border-radius:12px;border:1px solid #acd7b9;background:#f5fff6;color:#006241;font-weight:750;text-decoration:none";
-      banner.after(link);
+  // Centro de avisos: solo muestra el estado obtenido del enlace privado del pedido.
+  const bell=document.getElementById("filler-bell");
+  const alertPanel=document.getElementById("filler-alert-panel");
+  const alertContent=document.getElementById("filler-alert-content");
+  const alertDot=document.getElementById("filler-bell-dot");
+  const trackingTokenPattern=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  function lastTracking(){
+    try{
+      const item=JSON.parse(localStorage.getItem("filler_last_tracking_v1")||"null");
+      return trackingTokenPattern.test(item?.token||"")?item:null;
+    }catch{return null;}
+  }
+  async function refreshAlerts(){
+    const item=lastTracking();
+    alertContent.replaceChildren();
+    if(!item){
+      const text=document.createElement("p");
+      text.textContent="Todavía no tienes avisos. Cuando hagas un pedido, podrás consultar aquí su preparación.";
+      alertContent.appendChild(text);
+      alertDot.hidden=true;
+      return;
     }
-  }catch{}
+    try{
+      const order=await FillerCloud.orderStatus(item.token);
+      const headline=document.createElement("strong");
+      headline.textContent=(order.status==="Listo"?"🎉 ¡Tu pedido está listo!":order.status==="Preparando"?"🍳 Estamos preparando tu pedido":order.status==="Entregado"?"✓ Pedido entregado":order.status==="Cancelado"?"Pedido cancelado":"☕ Recibimos tu pedido");
+      const detail=document.createElement("p");
+      detail.textContent="Pedido "+String(order.code||item.code||"")+" · "+(order.status==="Listo"?"Ya puedes pasar a recogerlo.":"Estado actual: "+String(order.status||"En proceso"));
+      const link=document.createElement("a");
+      link.href="./pedido.html#token="+encodeURIComponent(item.token);
+      link.textContent="Ver seguimiento del pedido";
+      alertContent.append(headline,detail,link);
+      const seenKey="filler_seen_status_"+item.token;
+      const revision=String(order.status||"")+":"+String(order.status_updated_at||"");
+      const opened=alertPanel.hidden===false;
+      if(opened){try{localStorage.setItem(seenKey,revision);}catch{}}
+      alertDot.hidden=opened||localStorage.getItem(seenKey)===revision;
+    }catch{
+      const message=document.createElement("p");
+      message.textContent="No pudimos actualizar los avisos en este momento. Intenta nuevamente.";
+      alertContent.appendChild(message);
+      const link=document.createElement("a");
+      link.href="./pedido.html#token="+encodeURIComponent(item.token);
+      link.textContent="Abrir seguimiento";
+      alertContent.appendChild(link);
+      alertDot.hidden=true;
+    }
+  }
+  function closeAlerts(){alertPanel.hidden=true;bell.setAttribute("aria-expanded","false");}
+  bell.addEventListener("click",()=>{
+    const opening=alertPanel.hidden;
+    alertPanel.hidden=!opening;
+    bell.setAttribute("aria-expanded",String(opening));
+    if(opening)refreshAlerts();
+  });
+  document.getElementById("filler-alert-close").addEventListener("click",closeAlerts);
+  document.addEventListener("keydown",event=>{if(event.key==="Escape")closeAlerts();});
+  document.addEventListener("click",event=>{
+    if(!alertPanel.hidden&&!alertPanel.contains(event.target)&&!bell.contains(event.target))closeAlerts();
+  });
+  refreshAlerts();
+  setInterval(()=>{if(!document.hidden)refreshAlerts();},30000);
   const prev=document.getElementById("client-status");
   if(prev?.textContent?.includes("guardado en este navegador")){prev.textContent="Los pedidos locales anteriores no fueron enviados a cocina. La recepción compartida está en configuración.";}
   loadCustomerAccount();
