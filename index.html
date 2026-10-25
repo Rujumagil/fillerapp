@@ -153,6 +153,34 @@
       .menu-grid .item-add .item-add-plus{font-size:19px}
       .menu-grid .item-stock-badge{top:7px;left:7px;padding:4px 7px;font-size:9px}
     }
+    /* Familias deslizables estilo app de alimentos */
+    .order-layout{grid-template-columns:170px minmax(0,1fr) 325px;gap:15px}
+    .menu-grid{display:flex;flex-direction:column;gap:25px;min-width:0}
+    .filler-family{min-width:0}
+    .filler-family-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px}
+    .filler-family-header h3{font-size:19px;line-height:1.2;margin:0;color:#173a29;letter-spacing:-.025em}
+    .filler-family-header small{color:#728076;font-size:11px}
+    .filler-family-controls{display:flex;gap:6px}
+    .filler-family-arrow{display:grid;place-items:center;background:#fff;color:#23543d;border:1px solid #e4e8de;width:34px;height:34px;padding:0;border-radius:50%;font-size:23px;font-weight:500}
+    .filler-family-arrow:hover{border-color:#f47b20;color:#c85c0b}
+    .filler-family-track{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(172px,43%);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-x:contain;padding:2px 2px 15px;scrollbar-width:thin;scrollbar-color:#e9b58c transparent}
+    .filler-family-track .item{scroll-snap-align:start;height:100%}
+    .filler-promotions{display:grid;grid-template-columns:1fr auto;align-items:center;gap:22px;margin:0 0 27px;padding:22px 26px;border-radius:24px;background:linear-gradient(105deg,#fff0df 0%,#fff7ec 62%,#ffe8cd 100%);border:1px solid #f9d7b7;overflow:hidden}
+    .filler-promotions-kicker{display:inline-flex;color:#a44a08;font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:900}
+    .filler-promotions h3{font-size:clamp(22px,3vw,28px);line-height:1.1;letter-spacing:-.045em;margin:6px 0;color:#61331a}
+    .filler-promotions p{color:#795b44;font-size:13px;line-height:1.5;max-width:540px;margin:0}
+    .filler-promotions .promo-mark{font-size:62px;line-height:1;filter:drop-shadow(0 8px 15px #b96b2d30)}
+    @media(max-width:1080px){.order-layout{grid-template-columns:145px minmax(0,1fr) 285px}}
+    @media(max-width:980px){.order-layout{grid-template-columns:minmax(0,1fr)}.filler-family-track{grid-auto-columns:minmax(170px,31%)}}
+    @media(max-width:700px){
+      .filler-promotions{margin-bottom:20px;padding:18px;border-radius:19px;gap:9px}
+      .filler-promotions h3{font-size:22px}.filler-promotions .promo-mark{font-size:38px}
+      .filler-family-header h3{font-size:18px}
+      .filler-family-controls{display:none}
+      .filler-family-track{grid-auto-columns:minmax(146px,44%);gap:11px;margin:0 -12px;padding:2px 12px 13px;scroll-padding-inline:12px;scrollbar-width:none}
+      .filler-family-track::-webkit-scrollbar{display:none}
+      .menu-grid{gap:22px}
+    }
     .filler-bottom-nav{display:none}
     @media(max-width:700px){
       body{background:#fffaf4}
@@ -206,7 +234,7 @@
     </section>
     <section id="menu">
       <div class="filler-menu-search" role="search"><span aria-hidden="true">⌕</span><input type="search" id="filler-product-search" placeholder="¿Qué se te antoja hoy?" aria-label="Buscar productos en el menú" autocomplete="off"><button id="filler-clear-search" type="button" aria-label="Borrar búsqueda" hidden>✕</button></div>
-      <div class="section-head"><div><h2>Menu Filler</h2><p>Explora nuestros favoritos. Consulta precios y disponibilidad actualizados.</p></div></div>
+      <div class="section-head"><div><h2>Menú Filler</h2><p>Desliza las familias y encuentra algo delicioso para hoy.</p></div></div><section class="filler-promotions" aria-label="Espacio para promociones"><div><span class="filler-promotions-kicker">Promociones Filler</span><h3>Algo rico viene en camino</h3><p>Estamos preparando nuevas promociones y combos para acompañar tu pan favorito. ¡Mantente atento!</p></div><span class="promo-mark" aria-hidden="true">🥐☕</span></section>
       <div class="order-layout" id="pedido"><aside class="filters" id="filters"></aside><div class="menu-grid" id="menu-list"></div><aside class="cart"><h2>Tu pedido</h2><div id="cart-lines"></div><div class="total"><span>Total</span><span id="cart-total">$0</span></div><div id="customer-account" class="notice" style="display:block;background:#f0f8f1;border-radius:13px;padding:13px;margin:14px 0;color:#174a34;font-size:14px"><strong>☕ Compra como invitado</strong><p style="margin:7px 0">Puedes pedir ahora o iniciar sesión para guardar tus datos y pedir más rápido.</p><a href="./mi-filler.html" id="customer-login-link" style="display:inline-block;padding:9px 12px;border-radius:9px;background:#006241;color:white;text-decoration:none;font-weight:800">Ingresar o crear cuenta</a></div><div id="customer-fields"><label>Nombre<input id="customer-name" placeholder="Ej. Juan Perez"></label><label>Teléfono<input id="customer-phone" placeholder="Ej. 3310161443" inputmode="tel"></label></div><label>Hora para recoger<select id="pickup-time"></select><small id="pickup-help" style="font-weight:500;color:#6e796f;line-height:1.4"></small></label><label>Notas<textarea id="notes" placeholder="Sin cebolla, extra salsa, etc."></textarea></label><button id="send-order" type="button" disabled>Conectando con cocina…</button><div class="notice" id="client-status"></div></aside></div>
     </section>
   </main><nav class="filler-bottom-nav" aria-label="Navegación de Filler Café"><a href="#inicio"><span aria-hidden="true">⌂</span><small>Inicio</small></a><a href="#menu"><span aria-hidden="true">☕</span><small>Menú</small></a><a href="./pedido.html"><span aria-hidden="true">▤</span><small>Pedidos</small></a><a href="./mi-filler.html"><span aria-hidden="true">◉</span><small>Mi Filler</small></a></nav><button class="order-bubble" id="order-bubble" onclick="document.querySelector('.cart').scrollIntoView({behavior:'smooth',block:'center'})"><span id="bubble-count">0 productos</span><strong id="bubble-total">Ver pedido</strong></button><div class="toast-msg" id="toast"></div>
