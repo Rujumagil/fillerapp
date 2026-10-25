@@ -118,9 +118,15 @@
     }).filter(Boolean);
   };
   renderMenu = function() {
+    const menu = document.getElementById("menu-list");
+    if (!menu) return;
+    // Mantener la posición de cada carrusel al actualizar el carrito.
+    const priorScroll = new Map(Array.from(menu.querySelectorAll(".filler-family-track")).map(el => [el.dataset.family, el.scrollLeft]));
     const categoryProducts = state.category === "Todos" ? state.menu : state.menu.filter(i => i.cat === state.category);
-    const products=searchQuery?categoryProducts.filter(i=>normalize(i.name+" "+i.cat).includes(searchQuery)):categoryProducts;
-    document.getElementById("menu-list").innerHTML = !products.length ? '<div class="empty" style="grid-column:1/-1">No encontramos productos con ese nombre. Prueba otra búsqueda.</div>' : products.map(item => {
+    const products = searchQuery ? categoryProducts.filter(i => normalize(i.name + " " + i.cat).includes(searchQuery)) : categoryProducts;
+    const families = [...new Set(products.map(item => item.cat || "Otros"))];
+
+    function productCard(item) {
       const available = Number(item.stock) - reserved(item.id);
       const photo = item.image ? 'style="background-image:url(&quot;' + esc(item.image) + '&quot;);background-size:contain;background-position:center center;background-repeat:no-repeat;background-color:#fff"' : "";
       const options = eligible(item) && activeExtras().length;
@@ -128,9 +134,25 @@
       const stockClass = available <= 0 ? "sold-out" : available <= 5 ? "low" : "";
       const addLabel = available <= 0 ? "Agotado" : options ? "Extras +" : "Agregar";
       return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" data-has-photo="' + Boolean(item.image || item.imageKey) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3><div class="item-bottom"><strong class="price">' + money(Number(item.price)) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options ? "Elegir extras de " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(item.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
-    }).join("");
-    FillerPhotos.applyImages(document.getElementById("menu-list"));
-    document.querySelectorAll("[data-add]").forEach(b => b.addEventListener("click", () => addToCart(b.dataset.add)));
+    }
+
+    if (!products.length) {
+      menu.innerHTML = '<div class="empty">No encontramos productos para esta búsqueda. Prueba otra familia o palabra.</div>';
+    } else {
+      menu.innerHTML = families.map((family, idx) => {
+        const items = products.filter(item => (item.cat || "Otros") === family);
+        return '<section class="filler-family"><div class="filler-family-header"><div><h3>' + esc(family) + '</h3><small>' + items.length + (items.length === 1 ? " producto" : " productos") + '</small></div><div class="filler-family-controls"><button type="button" class="filler-family-arrow" data-slide="' + idx + '" data-dir="-1" aria-label="Ver productos anteriores de ' + esc(family) + '">‹</button><button type="button" class="filler-family-arrow" data-slide="' + idx + '" data-dir="1" aria-label="Ver más productos de ' + esc(family) + '">›</button></div></div><div class="filler-family-track" id="filler-family-' + idx + '" data-family="' + esc(family) + '" role="region" aria-label="Productos de ' + esc(family) + '" tabindex="0">' + items.map(productCard).join("") + '</div></section>';
+      }).join("");
+    }
+    FillerPhotos.applyImages(menu);
+    menu.querySelectorAll(".filler-family-track").forEach(el => {
+      if (priorScroll.has(el.dataset.family)) el.scrollLeft = priorScroll.get(el.dataset.family);
+    });
+    menu.querySelectorAll("[data-add]").forEach(b => b.addEventListener("click", () => addToCart(b.dataset.add)));
+    menu.querySelectorAll("[data-slide]").forEach(b => b.addEventListener("click", () => {
+      const track = document.getElementById("filler-family-" + b.dataset.slide);
+      if (track) track.scrollBy({left: Number(b.dataset.dir) * Math.max(180, track.clientWidth * 0.75), behavior: "smooth"});
+    }));
   };
   renderCart = function() {
     try{
