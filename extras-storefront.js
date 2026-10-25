@@ -3,6 +3,19 @@
   const catalogKey = "fillerExtras";
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const keyToId = key => key.split("::")[0];
+  const searchInput=document.getElementById("filler-product-search");
+  const searchClear=document.getElementById("filler-clear-search");
+  const normalize=value=>String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+  let searchQuery="";
+  searchInput?.addEventListener("input",()=>{
+    searchQuery=normalize(searchInput.value.trim());
+    searchClear.hidden=!searchQuery;
+    renderMenu();
+  });
+  searchClear?.addEventListener("click",()=>{
+    searchInput.value="";searchQuery="";searchClear.hidden=true;
+    renderMenu();searchInput.focus();
+  });
   const reserved = id => Object.entries(state.cart).reduce((sum, [key, qty]) => sum + (keyToId(key) === id ? Number(qty || 0) : 0), 0);
   const activeExtras = () => {
     try {
@@ -105,8 +118,9 @@
     }).filter(Boolean);
   };
   renderMenu = function() {
-    const products = state.category === "Todos" ? state.menu : state.menu.filter(i => i.cat === state.category);
-    document.getElementById("menu-list").innerHTML = products.map(item => {
+    const categoryProducts = state.category === "Todos" ? state.menu : state.menu.filter(i => i.cat === state.category);
+    const products=searchQuery?categoryProducts.filter(i=>normalize(i.name+" "+i.cat).includes(searchQuery)):categoryProducts;
+    document.getElementById("menu-list").innerHTML = !products.length ? '<div class="empty" style="grid-column:1/-1">No encontramos productos con ese nombre. Prueba otra búsqueda.</div>' : products.map(item => {
       const available = Number(item.stock) - reserved(item.id);
       const photo = item.image ? 'style="background-image:url(&quot;' + esc(item.image) + '&quot;);background-size:contain;background-position:center center;background-repeat:no-repeat;background-color:#fff"' : "";
       const options = eligible(item) && activeExtras().length;
