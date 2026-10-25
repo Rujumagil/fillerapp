@@ -58,19 +58,22 @@
     else if(order.status==="Entregado")document.title="✓ Pedido entregado · Filler Café";
     else document.title="Mi pedido · Filler Café";
   }
+  // Firma sonora Filler Cliente: tres notas ascendentes de pedido listo.
   function sound(){
     if(!soundEnabled||!audio)return;
     audio.resume().then(()=>{
-      const now=audio.currentTime;
-      [880,1100,880].forEach((hz,i)=>{
-        const osc=audio.createOscillator(),gain=audio.createGain(),t=now+i*.32;
-        osc.frequency.setValueAtTime(hz,t);
-        gain.gain.setValueAtTime(.001,t);
-        gain.gain.linearRampToValueAtTime(.16,t+.03);
-        gain.gain.exponentialRampToValueAtTime(.002,t+.25);
-        osc.connect(gain);gain.connect(audio.destination);
-        osc.start(t);osc.stop(t+.26);
-      });
+      const start=audio.currentTime+.03;
+      [{hz:587.33,at:0,d:.20},{hz:739.99,at:.24,d:.20},{hz:987.77,at:.50,d:.44}]
+        .forEach(note=>{
+          const osc=audio.createOscillator(),gain=audio.createGain(),at=start+note.at;
+          osc.type="sine";
+          osc.frequency.setValueAtTime(note.hz,at);
+          gain.gain.setValueAtTime(.001,at);
+          gain.gain.linearRampToValueAtTime(.16,at+.035);
+          gain.gain.exponentialRampToValueAtTime(.002,at+note.d);
+          osc.connect(gain);gain.connect(audio.destination);
+          osc.start(at);osc.stop(at+note.d+.02);
+        });
     }).catch(()=>{});
   }
   async function notifyReady(code){
