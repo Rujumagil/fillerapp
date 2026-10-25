@@ -40,6 +40,59 @@
       render();
     }catch(error){block("No se puede comprobar la recepción de pedidos. "+error.message);}
   }
+  async function loadCustomerAccount(){
+    const panel=document.getElementById("customer-account");
+    const fields=document.getElementById("customer-fields");
+    const name=document.getElementById("customer-name");
+    const phone=document.getElementById("customer-phone");
+    if(!panel||!fields||!name||!phone)return;
+    const guest=()=>{
+      panel.textContent="";
+      const heading=document.createElement("strong");heading.textContent="☕ Compra como invitado";
+      const info=document.createElement("p");
+      info.textContent="Puedes pedir ahora sin registrarte, o guardar tus datos en Mi Filler para futuras compras.";
+      info.style.margin="7px 0";
+      const link=document.createElement("a");
+      link.href="./mi-filler.html";link.textContent="Ingresar o crear cuenta";
+      link.style.cssText="display:inline-block;padding:9px 12px;border-radius:9px;background:#006241;color:white;text-decoration:none;font-weight:800";
+      panel.append(heading,info,link);
+      fields.hidden=false;
+    };
+    let session;
+    try{session=JSON.parse(sessionStorage.getItem("filler_customer_session_v1")||"null");}catch{}
+    if(!session?.access_token||!session?.user?.id){guest();return;}
+    try{
+      // Verificar sesión con Auth antes de mostrar datos. Nunca confiar únicamente en sessionStorage.
+      const headers={apikey:"sb_publishable_17NekbDHp_ssL_Pf-CnqPg_v0acxqn3",Authorization:"Bearer "+session.access_token};
+      const who=await fetch("https://qwxydjotwhniahaovrff.supabase.co/auth/v1/user",{headers,cache:"no-store"});
+      if(!who.ok){guest();return;}
+      const user=await who.json();
+      if(user.id!==session.user.id){guest();return;}
+      const res=await fetch("https://qwxydjotwhniahaovrff.supabase.co/rest/v1/filler_customers?select=full_name,phone&user_id=eq."+encodeURIComponent(user.id),{headers,cache:"no-store"});
+      if(!res.ok){guest();return;}
+      const rows=await res.json();
+      const customer=rows?.[0]||null;
+      const displayName=String(customer?.full_name||user.user_metadata?.filler_display_name||"").trim();
+      const displayPhone=String(customer?.phone||"").trim();
+      if(displayName)name.value=displayName;
+      if(displayPhone)phone.value=displayPhone;
+      panel.textContent="";
+      const heading=document.createElement("strong");
+      heading.textContent="✓ ¡Hola"+(displayName?", "+displayName.split(" ")[0]:"")+"! Sesión iniciada";
+      const info=document.createElement("p");
+      info.style.margin="7px 0";
+      info.textContent=displayName&&displayPhone?"Tus datos están guardados. Solo elige cuándo recoger.":"Completa los datos que faltan para confirmar este pedido.";
+      const edit=document.createElement("button");
+      edit.type="button";edit.className="secondary";edit.textContent="Editar mis datos";
+      edit.style.cssText="font-size:13px;padding:8px 12px;margin-top:4px";
+      edit.addEventListener("click",()=>{fields.hidden=false;name.focus();});
+      const link=document.createElement("a");
+      link.href="./mi-filler.html";link.textContent="Mi perfil";
+      link.style.cssText="display:inline-block;margin-left:12px;color:#006241;font-weight:750";
+      panel.append(heading,info,edit,link);
+      fields.hidden=Boolean(displayName&&displayPhone);
+    }catch(error){guest();}
+  }
   async function checkout(){
     if(!enabled||working)return;
     const customer=document.getElementById("customer-name").value.trim();
@@ -99,6 +152,8 @@
   }catch{}
   const prev=document.getElementById("client-status");
   if(prev?.textContent?.includes("guardado en este navegador")){prev.textContent="Los pedidos locales anteriores no fueron enviados a cocina. La recepción compartida está en configuración.";}
+  loadCustomerAccount();
+  window.addEventListener("pageshow",loadCustomerAccount);
   refresh();
   setInterval(()=>{if(!working)refresh();},15000);
 })();
