@@ -53,17 +53,28 @@
       document.title="🔔 PEDIDO NUEVO — Filler Café";
       overlay.querySelector("#filler-popup-show").focus({preventScroll:true});
     }
+    // Firma sonora Filler Cocina: cinco notas rítmicas, distintas del aviso al cliente.
     function sound(){
       if(!audioEnabled||!audio)return;
       audio.resume().then(()=>{
-        const t=audio.currentTime;
-        for(let i=0;i<3;i++){
-          const osc=audio.createOscillator(),vol=audio.createGain(),at=t+i*.36;
-          osc.type="sine";osc.frequency.setValueAtTime(i===1?740:980,at);
-          vol.gain.setValueAtTime(.001,at);
-          vol.gain.linearRampToValueAtTime(.20,at+.03);
-          vol.gain.exponentialRampToValueAtTime(.002,at+.29);
-          osc.connect(vol);vol.connect(audio.destination);osc.start(at);osc.stop(at+.30);
+        const start=audio.currentTime+.03;
+        const notes=[
+          {hz:523.25,at:0,d:.15},
+          {hz:659.25,at:.19,d:.15},
+          {hz:783.99,at:.43,d:.21},
+          {hz:659.25,at:.69,d:.15},
+          {hz:1046.5,at:.90,d:.32}
+        ];
+        for(const note of notes){
+          const osc=audio.createOscillator(),gain=audio.createGain();
+          const at=start+note.at;
+          osc.type="triangle";
+          osc.frequency.setValueAtTime(note.hz,at);
+          gain.gain.setValueAtTime(.001,at);
+          gain.gain.linearRampToValueAtTime(.14,at+.025);
+          gain.gain.exponentialRampToValueAtTime(.002,at+note.d);
+          osc.connect(gain);gain.connect(audio.destination);
+          osc.start(at);osc.stop(at+note.d+.02);
         }
       }).catch(error=>onStatus("Sonido bloqueado: "+error.message,true));
     }
