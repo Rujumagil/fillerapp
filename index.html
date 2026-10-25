@@ -220,24 +220,89 @@
       #filler-online-status{font-size:12px;padding:9px 12px!important;margin:0 0 14px!important}
       .cart{scroll-margin-top:83px}
     }
+    /* Carrito como pantalla independiente en móvil; menú sin formulario largo */
+    .filler-cart-header{display:none}
+    .filler-nav-cart-count[hidden],#filler-nav-cart-count[hidden]{display:none!important}
+    @media(max-width:700px){
+      body.filler-cart-open{overflow:hidden}
+      .order-layout{display:block}
+      .order-layout .filters{margin-bottom:14px}
+      .order-layout .menu-grid{width:100%}
+      .order-layout>.cart{display:none}
+      body.filler-cart-open .order-layout>.cart{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:14px;position:fixed;inset:0;z-index:100;width:100%;height:100vh;height:100dvh;max-width:none;max-height:none;overflow-y:auto;overscroll-behavior:contain;background:#fffaf4;border:0;border-radius:0;padding:0 18px calc(35px + env(safe-area-inset-bottom));box-shadow:none}
+      body.filler-cart-open .order-layout>.cart> :not(.filler-cart-header){margin-left:0;margin-right:0}
+      .filler-cart-header{display:block;position:sticky;top:0;z-index:2;margin:0 -18px 5px;padding:14px 18px 14px;background:rgba(255,250,244,.97);backdrop-filter:blur(10px);border-bottom:1px solid #ebe3d7}
+      .filler-cart-back{display:inline-flex;gap:7px;align-items:center;background:transparent;color:#006241;border-radius:10px;padding:7px 2px;font-size:14px;font-weight:800}
+      .filler-cart-back:first-letter{font-size:20px}
+      .filler-cart-header h2{font-size:28px;margin:9px 0 2px;letter-spacing:-.04em}
+      .filler-cart-header p{font-size:13px;color:#607267;margin:0}
+      .filler-bottom-nav :is(a,button){display:grid;position:relative;justify-items:center;align-content:center;gap:3px;background:transparent;color:#4e6257;border:0;border-radius:0;padding:3px 0;font-size:11px;font-weight:750;box-shadow:none;min-width:0}
+      .filler-bottom-nav :is(a,button)>span{font-size:21px;line-height:1.15}
+      .filler-bottom-nav :is(a,button):focus-visible{outline:2px solid var(--filler-orange);outline-offset:2px}
+      .filler-bottom-nav .filler-nav-cart{color:#006241}
+      #filler-nav-cart-count{position:absolute;top:-3px;right:22%;min-width:17px;height:17px;display:grid;place-items:center;padding:0 4px;border-radius:99px;background:var(--filler-orange);color:#fff;font-size:10px;font-weight:900;line-height:1}
+      .menu-grid .item{padding:6px;border-radius:14px}
+      .menu-grid .item-media,.menu-grid .item-photo{border-radius:10px}
+      .menu-grid .item-photo{aspect-ratio:1.55}
+      .menu-grid .item-details{padding:7px 2px 2px;gap:5px}
+      .menu-grid .item-category{display:none}
+      .menu-grid .item h3{font-size:12px;min-height:33px;line-height:1.28}
+      .menu-grid .item .price{font-size:17px}
+      .menu-grid .item-add{min-width:36px;width:36px;height:36px;padding:0;border-radius:10px}
+      .menu-grid .item-add>span:not(.item-add-plus){display:none}
+      .menu-grid .item-add .item-add-plus{font-size:24px;line-height:1}
+      .menu-grid .item-stock-badge{font-size:9px;top:5px;left:5px;padding:4px 6px}
+      .filler-family-track{grid-auto-columns:minmax(137px,43%);gap:9px}
+      .menu-grid{gap:18px}
+    }
 </style>
 </head>
 <body>
-  <header><div class="nav"><div class="brand"><img class="brand-mark" src="assets/filler-logo-oficial.webp" alt="Filler Café" width="95" height="72"><div><h1>Filler Cafe</h1><p>Menu digital para pedir y recoger</p></div></div><nav class="filler-nav-actions"><a href="#menu">Menú</a><a href="./mi-filler.html" aria-label="Mi Filler: registro e inicio de sesión">Mi Filler</a><button type="button" id="filler-bell" class="filler-bell" aria-label="Mis avisos" aria-expanded="false" aria-controls="filler-alert-panel" title="Mis avisos">🔔<span id="filler-bell-dot" class="filler-bell-dot" hidden></span></button><a href="#pedido" class="order-link">Ordenar</a></nav></div><section id="filler-alert-panel" class="filler-alert-panel" hidden aria-label="Centro de notificaciones"><div class="filler-alert-header"><h2>🔔 Mis avisos</h2><button id="filler-alert-close" class="filler-alert-close" type="button" aria-label="Cerrar avisos">✕</button></div><div id="filler-alert-content" role="status"><p>Cargando avisos…</p></div></section></header>
+  <header><div class="nav"><div class="brand"><img class="brand-mark" src="assets/filler-logo-oficial.webp" alt="Filler Café" width="95" height="72"><div><h1>Filler Cafe</h1><p>Menu digital para pedir y recoger</p></div></div><nav class="filler-nav-actions"><a href="#menu">Menú</a><a href="./mi-filler.html" aria-label="Mi Filler: registro e inicio de sesión">Mi Filler</a><button type="button" id="filler-bell" class="filler-bell" aria-label="Mis avisos" aria-expanded="false" aria-controls="filler-alert-panel" title="Mis avisos">🔔<span id="filler-bell-dot" class="filler-bell-dot" hidden></span></button><a href="#menu" class="order-link">Ordenar</a></nav></div><section id="filler-alert-panel" class="filler-alert-panel" hidden aria-label="Centro de notificaciones"><div class="filler-alert-header"><h2>🔔 Mis avisos</h2><button id="filler-alert-close" class="filler-alert-close" type="button" aria-label="Cerrar avisos">✕</button></div><div id="filler-alert-content" role="status"><p>Cargando avisos…</p></div></section></header>
   <main>
     <section class="hero" id="inicio">
       <div class="hero-copy">
         <div><span class="eyebrow">Fresco · rápido · delicioso</span><h2>Tu café favorito, listo cuando llegues.</h2><p>Elige lo que se te antoje. Nosotros lo preparamos para que solo pases a recoger.</p></div>
-        <div class="hero-actions"><button onclick="document.querySelector('#menu').scrollIntoView()">Ver menú</button><button class="secondary" onclick="document.querySelector('#pedido').scrollIntoView()">Ordenar ahora</button><button class="secondary" data-install-app onclick="fillerInstallApp()">Instalar app</button><button class="secondary" onclick="fillerRequestNotifications()">Activar avisos</button></div>
+        <div class="hero-actions"><button onclick="document.querySelector('#menu').scrollIntoView()">Ver menú</button><button class="secondary" onclick="openFillerCart()">Ordenar ahora</button><button class="secondary" data-install-app onclick="fillerInstallApp()">Instalar app</button><button class="secondary" onclick="fillerRequestNotifications()">Activar avisos</button></div>
       </div>
       <div class="hero-gallery"><div class="photo coffee big" data-title="Cafe de especialidad"></div><div class="photo bowl" data-title="Frutas y bowls"></div><div class="photo toast-photo" data-title="Sandwiches"></div><div class="photo cakes big" data-title="Antojos dulces"></div></div>
     </section>
     <section id="menu">
       <div class="filler-menu-search" role="search"><span aria-hidden="true">⌕</span><input type="search" id="filler-product-search" placeholder="¿Qué se te antoja hoy?" aria-label="Buscar productos en el menú" autocomplete="off"><button id="filler-clear-search" type="button" aria-label="Borrar búsqueda" hidden>✕</button></div>
       <div class="section-head"><div><h2>Menú Filler</h2><p>Desliza las familias y encuentra algo delicioso para hoy.</p></div></div><section class="filler-promotions" aria-label="Espacio para promociones"><div><span class="filler-promotions-kicker">Promociones Filler</span><h3>Pan dulce + café americano de 8 oz</h3><p>Próxima promoción: al comprar un pan dulce, recibe un americano de 8 oz sin costo. Disponible cuando confirmemos la presentación y sus existencias.</p></div><span class="promo-mark" aria-hidden="true">🥐☕</span></section>
-      <div class="order-layout" id="pedido"><aside class="filters" id="filters"></aside><div class="menu-grid" id="menu-list"></div><aside class="cart"><h2>Tu pedido</h2><div id="cart-lines"></div><div class="total"><span>Total</span><span id="cart-total">$0</span></div><div id="customer-account" class="notice" style="display:block;background:#f0f8f1;border-radius:13px;padding:13px;margin:14px 0;color:#174a34;font-size:14px"><strong>☕ Compra como invitado</strong><p style="margin:7px 0">Puedes pedir ahora o iniciar sesión para guardar tus datos y pedir más rápido.</p><a href="./mi-filler.html" id="customer-login-link" style="display:inline-block;padding:9px 12px;border-radius:9px;background:#006241;color:white;text-decoration:none;font-weight:800">Ingresar o crear cuenta</a></div><div id="customer-fields"><label>Nombre<input id="customer-name" placeholder="Ej. Juan Perez"></label><label>Teléfono<input id="customer-phone" placeholder="Ej. 3310161443" inputmode="tel"></label></div><label>Hora para recoger<select id="pickup-time"></select><small id="pickup-help" style="font-weight:500;color:#6e796f;line-height:1.4"></small></label><label>Notas<textarea id="notes" placeholder="Sin cebolla, extra salsa, etc."></textarea></label><button id="send-order" type="button" disabled>Conectando con cocina…</button><div class="notice" id="client-status"></div></aside></div>
+      <div class="order-layout" id="pedido"><aside class="filters" id="filters"></aside><div class="menu-grid" id="menu-list"></div><aside class="cart" id="filler-cart" aria-labelledby="filler-cart-title"><div class="filler-cart-header"><button type="button" class="filler-cart-back" onclick="closeFillerCart()" aria-label="Regresar al menú">‹ <span>Seguir comprando</span></button><h2 id="filler-cart-title">Tu pedido</h2><p>Revisa tus productos y elige cuándo recoger.</p></div><div id="cart-lines"></div><div class="total"><span>Total</span><span id="cart-total">$0</span></div><div id="customer-account" class="notice" style="display:block;background:#f0f8f1;border-radius:13px;padding:13px;margin:14px 0;color:#174a34;font-size:14px"><strong>☕ Compra como invitado</strong><p style="margin:7px 0">Puedes pedir ahora o iniciar sesión para guardar tus datos y pedir más rápido.</p><a href="./mi-filler.html" id="customer-login-link" style="display:inline-block;padding:9px 12px;border-radius:9px;background:#006241;color:white;text-decoration:none;font-weight:800">Ingresar o crear cuenta</a></div><div id="customer-fields"><label>Nombre<input id="customer-name" placeholder="Ej. Juan Perez"></label><label>Teléfono<input id="customer-phone" placeholder="Ej. 3310161443" inputmode="tel"></label></div><label>Hora para recoger<select id="pickup-time"></select><small id="pickup-help" style="font-weight:500;color:#6e796f;line-height:1.4"></small></label><label>Notas<textarea id="notes" placeholder="Sin cebolla, extra salsa, etc."></textarea></label><button id="send-order" type="button" disabled>Conectando con cocina…</button><div class="notice" id="client-status"></div></aside></div>
     </section>
-  </main><nav class="filler-bottom-nav" aria-label="Navegación de Filler Café"><a href="#inicio"><span aria-hidden="true">⌂</span><small>Inicio</small></a><a href="#menu"><span aria-hidden="true">☕</span><small>Menú</small></a><a href="./pedido.html"><span aria-hidden="true">▤</span><small>Pedidos</small></a><a href="./mi-filler.html"><span aria-hidden="true">◉</span><small>Mi Filler</small></a></nav><button class="order-bubble" id="order-bubble" onclick="document.querySelector('.cart').scrollIntoView({behavior:'smooth',block:'center'})"><span id="bubble-count">0 productos</span><strong id="bubble-total">Ver pedido</strong></button><div class="toast-msg" id="toast"></div>
+  </main><nav class="filler-bottom-nav" aria-label="Navegación de Filler Café"><a href="#inicio"><span aria-hidden="true">⌂</span><small>Inicio</small></a><a href="#menu"><span aria-hidden="true">☕</span><small>Menú</small></a><button type="button" class="filler-nav-cart" onclick="openFillerCart()" aria-label="Abrir mi pedido"><span aria-hidden="true">▤</span><small>Pedido</small><b id="filler-nav-cart-count" hidden>0</b></button><a href="./mi-filler.html"><span aria-hidden="true">◉</span><small>Mi Filler</small></a></nav><button class="order-bubble" id="order-bubble" onclick="openFillerCart()"><span id="bubble-count">0 productos</span><strong id="bubble-total">Ver pedido</strong></button><div class="toast-msg" id="toast"></div>
+  <script>
+    (function(){
+      let focusBeforeCart=null;
+      function mobileCart(){return window.matchMedia("(max-width:700px)").matches;}
+      function setOpen(open){
+        const cart=document.getElementById("filler-cart");
+        document.body.classList.toggle("filler-cart-open",open&&mobileCart());
+        cart.setAttribute("aria-hidden",(!mobileCart()||open)?"false":"true");
+        if(mobileCart()){cart.setAttribute("role","dialog");cart.setAttribute("aria-modal",open?"true":"false");}
+        else{cart.setAttribute("role","region");cart.removeAttribute("aria-modal");}
+        if(open&&mobileCart()){cart.scrollTop=0;cart.querySelector(".filler-cart-back")?.focus({preventScroll:true});}
+        else if(focusBeforeCart?.isConnected){focusBeforeCart.focus({preventScroll:true});focusBeforeCart=null;}
+      }
+      window.openFillerCart=function(){
+        if(!mobileCart()){document.getElementById("filler-cart").scrollIntoView({behavior:"smooth",block:"center"});return;}
+        if(document.body.classList.contains("filler-cart-open"))return;
+        focusBeforeCart=document.activeElement;
+        history.pushState({fillerCartOpen:true},"","#carrito");
+        setOpen(true);
+      };
+      window.closeFillerCart=function(){
+        if(history.state?.fillerCartOpen){history.back();}
+        else setOpen(false);
+      };
+      window.addEventListener("popstate",()=>setOpen(Boolean(history.state?.fillerCartOpen)));
+      window.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("filler-cart-open")){e.preventDefault();closeFillerCart();}});
+      window.addEventListener("resize",()=>setOpen(Boolean(history.state?.fillerCartOpen)));
+      setOpen(false);
+    })();
+  </script>
   <script src="pwa.js"></script>
   <script src="photo-store.js"></script>
   <script>
