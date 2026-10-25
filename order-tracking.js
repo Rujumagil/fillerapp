@@ -116,6 +116,7 @@
     let permission="unsupported";
     try{permission=await request;}catch{}
     hasAlerts=true;
+    sound(); // Vista previa del tono al activar los avisos.
     if(permission==="granted"){
       try{
         await enableBackgroundPush();
