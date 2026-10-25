@@ -50,9 +50,9 @@ $("recover").addEventListener("submit",async e=>{
   button.disabled=true;
   try{
     const email=form.elements.email.value.trim();
-    const response=await fetch(BASE+"/auth/v1/recover",{
+    const response=await fetch(BASE+"/auth/v1/recover?redirect_to="+encodeURIComponent(location.origin+location.pathname),{
       method:"POST",headers:headers(),
-      body:JSON.stringify({email,redirect_to:location.origin+location.pathname})
+      body:JSON.stringify({email})
     });
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw Error(data.msg||data.error_description||data.message||"No se pudo enviar la recuperación.");
@@ -161,5 +161,5 @@ if(recoveryParams.get("type")==="recovery" && recoveryParams.get("access_token")
 }else if(recoveryParams.get("error")){
   tab("login");message("El enlace de recuperación venció o no es válido. Solicita uno nuevo.",true);
 }
-loadProfile().catch(err=>message("No pudimos recuperar tu perfil: "+err.message,true));
+if(!recoveryAccess)loadProfile().catch(err=>message("No pudimos recuperar tu perfil: "+err.message,true));
 })();
