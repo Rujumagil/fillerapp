@@ -165,6 +165,9 @@
     document.getElementById("bubble-count").textContent = qty === 1 ? "1 producto" : qty + " productos";
     document.getElementById("bubble-total").textContent = "Ver pedido · " + money(total);
     document.getElementById("order-bubble").classList.toggle("show", qty > 0);
+    const navCount = document.getElementById("filler-nav-cart-count");
+    if (navCount) { navCount.textContent = qty > 9 ? "9+" : String(qty); navCount.hidden = qty === 0; }
+
     document.getElementById("cart-lines").innerHTML = items.length ? items.map(i => {
       const extras = i.extras.length ? '<small class="cart-extras">Extras: ' + i.extras.map(x => esc(x.name) + ' (+' + money(x.price) + ')').join(", ") + '</small>' : "";
       return '<div class="cart-line"><div><strong>' + esc(i.name) + '</strong>' + extras + '<span>' + money(i.unitPrice) + ' x ' + i.qty + '</span></div><div class="qty"><button class="secondary" data-qty="' + esc(i.key) + '" data-delta="-1">−</button><b>' + i.qty + '</b><button class="secondary" data-qty="' + esc(i.key) + '" data-delta="1">+</button></div></div>';
