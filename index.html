@@ -294,6 +294,30 @@
       .filler-promotions p{font-size:11.5px;line-height:1.4}
       .filler-promotions .promo-mark{font-size:33px}
     }
+    /* Compra móvil: pasos claros y confirmación siempre a la vista. */
+    .filler-checkout-steps{display:none}
+    .filler-checkout-error{padding:10px 13px;border-radius:12px;background:#fff0e8;color:#a53c17;font-size:13px;font-weight:700;line-height:1.4}
+    .filler-checkout-error[hidden]{display:none!important}
+    .cart [aria-invalid="true"]{border-color:#bc5027!important;box-shadow:0 0 0 3px #fbe4d8!important}
+    .filler-checkout-action{display:grid;gap:9px}
+    .filler-checkout-action-summary{display:none}
+    .filler-checkout-action #send-order{width:100%;margin:0}
+    @media(max-width:700px){
+      .filler-cart-header{margin-bottom:0;padding-bottom:10px}
+      .filler-cart-header h2{font-size:26px;margin:5px 0 2px}
+      .filler-checkout-steps{display:flex;justify-content:space-between;gap:5px;padding:1px 2px 6px}
+      .filler-checkout-steps span{display:flex;align-items:center;gap:5px;color:#527061;font-size:11px;font-weight:800}
+      .filler-checkout-steps b{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#e6f2e8;color:#006241;font-size:11px}
+      .filler-checkout-action{position:sticky;bottom:0;z-index:5;margin:0 -18px!important;padding:11px 18px calc(12px + env(safe-area-inset-bottom));background:rgba(255,250,244,.97);backdrop-filter:blur(12px);border-top:1px solid #e4e4db;box-shadow:0 -12px 26px #173f3010}
+      .filler-checkout-action-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#5c7166;font-size:12px;font-weight:750}
+      .filler-checkout-action-summary strong{color:#006241;font-size:19px}
+      .filler-checkout-action #send-order{min-height:48px;padding:12px;font-size:15px}
+      .cart:not(.cart-has-items) .filler-checkout-action{display:none}
+      .cart .total{font-size:19px}
+      .cart #customer-account{padding:11px 12px!important;margin:3px 0!important;font-size:12px!important}
+      .toast-msg{z-index:130;bottom:calc(105px + env(safe-area-inset-bottom));width:max-content;max-width:calc(100vw - 32px);text-align:center;pointer-events:none}
+      .cart #client-status.show{background:#e6f5eb;border:1px solid #a9d8b9;line-height:1.5}
+    }
 </style>
 </head>
 <body>
@@ -315,7 +339,7 @@
     <section id="menu">
       <div class="filler-menu-search" role="search"><span aria-hidden="true">⌕</span><input type="search" id="filler-product-search" placeholder="¿Qué se te antoja hoy?" aria-label="Buscar productos en el menú" autocomplete="off"><button id="filler-clear-search" type="button" aria-label="Borrar búsqueda" hidden>✕</button></div>
       <div class="section-head"><div><h2>Menú Filler</h2><p>Desliza las familias y encuentra algo delicioso para hoy.</p></div></div><section class="filler-promotions" aria-label="Próxima promoción de pan dulce"><div><span class="filler-promotions-kicker">Próximamente · Filler</span><h3>Pan dulce + americano de 8 oz</h3><p>Estamos preparando un café de regalo con tu pan dulce. Oferta aún no disponible.</p></div><span class="promo-mark" aria-hidden="true">🥐☕</span></section>
-      <div class="order-layout" id="pedido"><aside class="filters" id="filters"></aside><div class="menu-grid" id="menu-list"></div><aside class="cart" id="filler-cart" aria-labelledby="filler-cart-title"><div class="filler-cart-header"><button type="button" class="filler-cart-back" onclick="closeFillerCart()" aria-label="Regresar al menú">‹ <span>Seguir comprando</span></button><h2 id="filler-cart-title">Tu pedido</h2><p>Revisa tus productos y elige cuándo recoger.</p></div><div id="cart-lines"></div><div class="total"><span>Total</span><span id="cart-total">$0</span></div><div id="customer-account" class="notice" style="display:block;background:#f0f8f1;border-radius:13px;padding:13px;margin:14px 0;color:#174a34;font-size:14px"><strong>☕ Compra como invitado</strong><p style="margin:7px 0">Puedes pedir ahora o iniciar sesión para guardar tus datos y pedir más rápido.</p><a href="./mi-filler.html" id="customer-login-link" style="display:inline-block;padding:9px 12px;border-radius:9px;background:#006241;color:white;text-decoration:none;font-weight:800">Ingresar o crear cuenta</a></div><div id="customer-fields"><label>Nombre<input id="customer-name" placeholder="Ej. Juan Perez"></label><label>Teléfono<input id="customer-phone" placeholder="Ej. 3310161443" inputmode="tel"></label></div><label>Hora para recoger<select id="pickup-time"></select><small id="pickup-help" style="font-weight:500;color:#6e796f;line-height:1.4"></small></label><label>Notas<textarea id="notes" placeholder="Sin cebolla, extra salsa, etc."></textarea></label><button id="send-order" type="button" disabled>Conectando con cocina…</button><div class="notice" id="client-status"></div></aside></div>
+      <div class="order-layout" id="pedido"><aside class="filters" id="filters"></aside><div class="menu-grid" id="menu-list"></div><aside class="cart" id="filler-cart" aria-labelledby="filler-cart-title"><div class="filler-cart-header"><button type="button" class="filler-cart-back" onclick="closeFillerCart()" aria-label="Regresar al menú">‹ <span>Seguir comprando</span></button><h2 id="filler-cart-title">Tu pedido</h2><p>Revisa tus productos y elige cuándo recoger.</p></div><div class="filler-checkout-steps" aria-label="Pasos de tu pedido"><span><b>1</b> Revisa</span><span><b>2</b> Tus datos</span><span><b>3</b> Recoge</span></div><div class="notice" id="client-status" role="status" aria-live="polite" tabindex="-1"></div><div id="cart-lines"></div><div class="total"><span>Total</span><span id="cart-total">$0</span></div><div id="customer-account" class="notice" style="display:block;background:#f0f8f1;border-radius:13px;padding:13px;margin:14px 0;color:#174a34;font-size:14px"><strong>☕ Compra como invitado</strong><p style="margin:7px 0">Puedes pedir ahora o iniciar sesión para guardar tus datos y pedir más rápido.</p><a href="./mi-filler.html" id="customer-login-link" style="display:inline-block;padding:9px 12px;border-radius:9px;background:#006241;color:white;text-decoration:none;font-weight:800">Ingresar o crear cuenta</a></div><div id="customer-fields"><label>Nombre<input id="customer-name" placeholder="Ej. Juan Perez"></label><label>Teléfono<input id="customer-phone" placeholder="Ej. 3310161443" inputmode="tel"></label></div><label>Hora para recoger<select id="pickup-time"></select><small id="pickup-help" style="font-weight:500;color:#6e796f;line-height:1.4"></small></label><label>Notas<textarea id="notes" placeholder="Sin cebolla, extra salsa, etc."></textarea></label><div id="filler-checkout-error" class="filler-checkout-error" role="alert" hidden></div><div class="filler-checkout-action"><div class="filler-checkout-action-summary"><span>Total del pedido</span><strong id="filler-sticky-total">$0</strong></div><button id="send-order" type="button" disabled>Conectando con cocina…</button></div></aside></div>
     </section>
   </main><nav class="filler-bottom-nav" aria-label="Navegación de Filler Café"><a href="#inicio"><span aria-hidden="true">⌂</span><small>Inicio</small></a><a href="#menu"><span aria-hidden="true">☕</span><small>Menú</small></a><button type="button" class="filler-nav-cart" onclick="openFillerCart()" aria-label="Abrir mi pedido"><span aria-hidden="true">▤</span><small>Pedido</small><b id="filler-nav-cart-count" hidden>0</b></button><a href="./mi-filler.html"><span aria-hidden="true">◉</span><small>Mi Filler</small></a></nav><button class="order-bubble" id="order-bubble" onclick="openFillerCart()"><span id="bubble-count">0 productos</span><strong id="bubble-total">Ver pedido</strong></button><div class="toast-msg" id="toast"></div>
   <script>
