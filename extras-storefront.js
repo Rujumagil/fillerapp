@@ -167,6 +167,16 @@
     document.getElementById("order-bubble").classList.toggle("show", qty > 0);
     const navCount = document.getElementById("filler-nav-cart-count");
     if (navCount) { navCount.textContent = qty > 9 ? "9+" : String(qty); navCount.hidden = qty === 0; }
+    const cart=document.getElementById("filler-cart");
+    cart.classList.toggle("cart-has-items",qty>0);
+    const stickyTotal=document.getElementById("filler-sticky-total");
+    if(stickyTotal)stickyTotal.textContent=money(total);
+    const priorNotice=document.getElementById("client-status");
+    if(qty>0 && priorNotice?.dataset.confirmed==="true"){
+      priorNotice.replaceChildren();
+      priorNotice.classList.remove("show");
+      delete priorNotice.dataset.confirmed;
+    }
 
     document.getElementById("cart-lines").innerHTML = items.length ? items.map(i => {
       const extras = i.extras.length ? '<small class="cart-extras">Extras: ' + i.extras.map(x => esc(x.name) + ' (+' + money(x.price) + ')').join(", ") + '</small>' : "";
