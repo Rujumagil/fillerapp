@@ -16,7 +16,10 @@
     } catch { return []; }
   };
   const eligible = item => item && (item.allowExtras === true || (item.allowExtras !== false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(item.cat || "")));
-  state.extraSelections = {};
+  try{
+    const saved=JSON.parse(sessionStorage.getItem("filler_extras_cart_v1")||"{}");
+    state.extraSelections=saved&&typeof saved==="object"&&!Array.isArray(saved)?saved:{};
+  }catch{state.extraSelections={};}
   const style = document.createElement("style");
   style.textContent = `
     .fx-modal[hidden]{display:none!important}.fx-modal{position:fixed;inset:0;background:rgba(13,31,24,.65);z-index:99;display:grid;place-items:center;padding:15px}
@@ -113,6 +116,10 @@
     document.querySelectorAll("[data-add]").forEach(b => b.addEventListener("click", () => addToCart(b.dataset.add)));
   };
   renderCart = function() {
+    try{
+      sessionStorage.setItem("filler_cart_v1",JSON.stringify(state.cart));
+      sessionStorage.setItem("filler_extras_cart_v1",JSON.stringify(state.extraSelections));
+    }catch{}
     const items = cartItems();
     const qty = items.reduce((s, i) => s + i.qty, 0);
     const total = items.reduce((s, i) => s + i.unitPrice * i.qty, 0);
