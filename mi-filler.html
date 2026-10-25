@@ -22,6 +22,19 @@
 <label>Correo electrónico<input name="email" type="email" autocomplete="email" required></label>
 <label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label>
 <button type="submit">Iniciar sesión</button>
+<button type="button" class="secondary" id="forgot-link">¿Olvidaste tu contraseña? Recupérala aquí</button>
+</form>
+<form id="recover" class="stack" hidden>
+<h2>Recuperar contraseña</h2><p class="muted">Te enviaremos un enlace para establecer una nueva contraseña.</p>
+<label>Correo de tu cuenta<input name="email" type="email" autocomplete="email" required></label>
+<button type="submit">Enviar enlace de recuperación</button>
+<button type="button" class="secondary" id="back-login">Volver a iniciar sesión</button>
+</form>
+<form id="new-password" class="stack" hidden>
+<h2>Crear nueva contraseña</h2><p class="muted">Elige una contraseña nueva para tu cuenta.</p>
+<label>Contraseña nueva<input name="password" type="password" minlength="8" autocomplete="new-password" required></label>
+<label>Confirmar contraseña<input name="confirm_password" type="password" minlength="8" autocomplete="new-password" required></label>
+<button type="submit">Guardar nueva contraseña</button>
 </form></div>
 <div id="member" hidden><h2>¡Hola, <span id="member-name"></span>!</h2><p class="muted" id="member-email"></p>
 <form id="preferences" class="stack">
