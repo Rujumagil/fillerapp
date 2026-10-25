@@ -48,13 +48,13 @@
     if(!panel||!fields||!name||!phone)return;
     const guest=()=>{
       panel.textContent="";
-      const heading=document.createElement("strong");heading.textContent="☕ Compra como invitado";
+      const heading=document.createElement("strong");heading.textContent="☕ Compra sin registrarte";
       const info=document.createElement("p");
-      info.textContent="Puedes pedir ahora sin registrarte, o guardar tus datos en Mi Filler para futuras compras.";
-      info.style.margin="7px 0";
+      info.textContent="Solo necesitamos tus datos y la hora para recoger.";
+      info.style.margin="5px 0";
       const link=document.createElement("a");
-      link.href="./mi-filler.html";link.textContent="Ingresar o crear cuenta";
-      link.style.cssText="display:inline-block;padding:9px 12px;border-radius:9px;background:#006241;color:white;text-decoration:none;font-weight:800";
+      link.href="./mi-filler.html";link.textContent="¿Quieres guardar tus datos? Ir a Mi Filler";
+      link.style.cssText="display:inline-block;margin-top:2px;color:#006241;text-decoration:underline;text-underline-offset:2px;font-size:12px;font-weight:800";
       panel.append(heading,info,link);
       fields.hidden=false;
     };
@@ -93,19 +93,40 @@
       fields.hidden=Boolean(displayName&&displayPhone);
     }catch(error){guest();}
   }
+  const errorPanel=document.getElementById("filler-checkout-error");
+  function clearCheckoutError(){
+    if(errorPanel){errorPanel.textContent="";errorPanel.hidden=true;}
+    document.querySelectorAll("#filler-cart [aria-invalid='true']").forEach(el=>el.removeAttribute("aria-invalid"));
+  }
+  function showCheckoutError(message,inputId){
+    if(errorPanel){errorPanel.textContent=message;errorPanel.hidden=false;}
+    const input=inputId?document.getElementById(inputId):null;
+    if(input){
+      const fields=document.getElementById("customer-fields");
+      if(fields?.hidden)fields.hidden=false;
+      input.setAttribute("aria-invalid","true");
+      input.scrollIntoView({behavior:"smooth",block:"center"});
+      input.focus({preventScroll:true});
+    }else if(errorPanel){errorPanel.scrollIntoView({behavior:"smooth",block:"center"});}
+    toast(message);
+  }
+  ["customer-name","customer-phone","pickup-time","notes"].forEach(id=>{
+    document.getElementById(id)?.addEventListener("input",clearCheckoutError);
+  });
   async function checkout(){
     if(!enabled||working)return;
+    clearCheckoutError();
     const customer=document.getElementById("customer-name").value.trim();
     const phone=document.getElementById("customer-phone").value.trim();
     const items=cartItems();
-    if(!items.length)return toast("El pedido está vacío.");
-    if(!customer || customer.length<2 || customer.length>90)return toast("Escribe tu nombre completo (máximo 90 caracteres).");
-    if(phone.replace(/\D/g,"").length<8 || phone.length>25)return toast("Escribe un teléfono válido.");
+    if(!items.length)return showCheckoutError("Agrega al menos un producto para continuar.");
+    if(!customer || customer.length<2 || customer.length>90)return showCheckoutError("Escribe tu nombre completo (máximo 90 caracteres).","customer-name");
+    if(phone.replace(/\D/g,"").length<8 || phone.length>25)return showCheckoutError("Escribe un teléfono válido.","customer-phone");
     renderPickupTimes();
     const pickupSelect=document.getElementById("pickup-time");
-    if(pickupSelect.disabled || !pickupSelect.value)return toast("Ya no hay horarios disponibles para recoger hoy.");
+    if(pickupSelect.disabled || !pickupSelect.value)return showCheckoutError("Ya no hay horarios disponibles para recoger hoy.","pickup-time");
     const notes=document.getElementById("notes").value.trim();
-    if(notes.length>500)return toast("Las notas deben tener máximo 500 caracteres.");
+    if(notes.length>500)return showCheckoutError("Las notas deben tener máximo 500 caracteres.","notes");
     working=true;button.disabled=true;button.textContent="Enviando a cocina…";
     try{
       const data=await FillerCloud.placeOrder({
@@ -127,14 +148,19 @@
       }else{
         notice.appendChild(document.createTextNode("Solicita a cocina información sobre su preparación."));
       }
+      notice.dataset.confirmed="true";
       notice.classList.add("show");
+      const cartPanel=document.getElementById("filler-cart");
+      if(document.body.classList.contains("filler-cart-open"))cartPanel.scrollTo({top:0,behavior:"smooth"});
+      else notice.scrollIntoView({behavior:"smooth",block:"center"});
+      notice.focus({preventScroll:true});
       refreshAlerts();
       toast("¡Pedido enviado a cocina!");
       // Pedido confirmado: una recarga fallida del catálogo no cambia su recepción.
       refresh().catch(error=>console.warn("No se pudo actualizar la vista después del pedido:",error));
     }catch(error){
       status("No se pudo confirmar el pedido: "+error.message,true);
-      toast("Pedido no enviado. "+error.message);
+      showCheckoutError("El pedido no se envió. Revisa tu conexión e inténtalo de nuevo.");
     }finally{working=false;button.disabled=!enabled;button.textContent=enabled?"Confirmar pedido":"Pedidos en línea aún no disponibles";}
   }
   button.addEventListener("click",checkout);
