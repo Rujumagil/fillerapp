@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v27";
+const CACHE_NAME = "filler-app-v28";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -19,6 +19,7 @@ const APP_SHELL = [
   "./ticket-printer.js",
   "./ticket-print.css",
   "./kitchen-cloud.js",
+  "./kitchen-messages.js",
   "./monitor-cloud.js",
   "./storefront-cloud.js",
   "./manifest.json",
