@@ -113,6 +113,23 @@
       method:"PATCH", staff:true, body:{ status,status_updated_at:new Date().toISOString() },prefer:"return=minimal"
     });
   }
+  async function orderMessages(orderId) {
+    if (!/^[0-9a-f-]{36}$/i.test(String(orderId||""))) throw new Error("Pedido no válido.");
+    const records=await request("filler_order_messages?select=id,kind,message,created_at&order_id=eq."+
+      encodeURIComponent(orderId)+"&order=created_at.desc&limit=30",{staff:true});
+    return Array.isArray(records)?records.reverse():[];
+  }
+  async function sendOrderMessage(orderId,text,kind="observacion") {
+    const message=String(text||"").trim();
+    if (!/^[0-9a-f-]{36}$/i.test(String(orderId||""))) throw new Error("Pedido no válido.");
+    if (!message || message.length>500) throw new Error("El mensaje debe tener entre 1 y 500 caracteres.");
+    if (!["observacion","informacion","listo"].includes(kind))throw new Error("Tipo de mensaje no permitido.");
+    const rows=await request("filler_order_messages?select=id,kind,message,created_at",{
+      method:"POST",staff:true,body:{order_id:orderId,message,kind},prefer:"return=representation"
+    });
+    if (!Array.isArray(rows)||rows.length!==1)throw new Error("No se pudo confirmar el envío del mensaje.");
+    return rows[0];
+  }
   async function catalog() {
     const rows=await request("filler_products?select=id,category,name,price,stock,image_url,active&active=eq.true&order=category.asc,name.asc");
     return (rows||[]).map(i=>({id:i.id,cat:i.category,name:i.name,price:Number(i.price),stock:Number(i.stock),image:i.image_url||""}));
@@ -172,5 +189,5 @@
     return imageUrl;
   }
   function logout(){saveSession(null);}
-  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,catalog,extras,placeOrder,orderStatus,importCatalog,importExtras,uploadProductPhoto,present});
+  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,orderMessages,sendOrderMessage,catalog,extras,placeOrder,orderStatus,importCatalog,importExtras,uploadProductPhoto,present});
 })();
