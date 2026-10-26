@@ -164,6 +164,8 @@
         " · "+qty+" artículos";
       showVisual(title,details);
       sound();
+      // Complemento háptico para móviles compatibles; no sustituye al sonido.
+      try{if("vibrate" in navigator)navigator.vibrate([220,90,220,90,350]);}catch{}
       remindUntilAcknowledged();
       systemNotification("🔔 Nuevo pedido Filler Café",details,"filler-new-"+ids[0]);
     }
