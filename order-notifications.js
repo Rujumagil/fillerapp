@@ -7,6 +7,16 @@
   const SCREEN=location.pathname.endsWith("/monitor.html")?"monitor":"pedidos";
   const KEY="filler_seen_"+SCREEN+"_v2";
   const MAX_AGE=30*60*1000;
+  const VOLUME_KEY="filler_kitchen_alert_volume_v1";
+  const LEVELS=Object.freeze({normal:.25,alto:.46,max:.67});
+  const readLevel=()=>{
+    try{const value=localStorage.getItem(VOLUME_KEY);return Object.hasOwn(LEVELS,value)?value:"max";}
+    catch{return "max";}
+  };
+  const writeLevel=value=>{
+    if(!Object.hasOwn(LEVELS,value))return;
+    try{localStorage.setItem(VOLUME_KEY,value);}catch{}
+  };
   const originalTitle=document.title;
   let seen=[];
   try{
@@ -16,7 +26,7 @@
   const saveSeen=()=>{try{sessionStorage.setItem(KEY,JSON.stringify(seen));}catch{}};
 
   function create({onStatus=()=>{}}={}) {
-    let audio=null, audioEnabled=false, lastNotice=null;
+    let audio=null, audioEnabled=false, lastNotice=null, reminder=null;
     const overlay=document.createElement("section");
     overlay.id="filler-order-popup";
     overlay.hidden=true;
@@ -40,7 +50,13 @@
     document.head.appendChild(css);
     document.body.appendChild(overlay);
 
-    const close=()=>{overlay.hidden=true;document.title=originalTitle;};
+    const stopReminder=()=>{if(reminder!==null){clearInterval(reminder);reminder=null;}};
+    const close=()=>{stopReminder();overlay.hidden=true;document.title=originalTitle;};
+    function remindUntilAcknowledged(){
+      stopReminder();
+      // Solo mientras el personal no confirme que vio el pedido.
+      reminder=setInterval(()=>{if(!overlay.hidden && audioEnabled && !document.hidden)sound();},11000);
+    }
     overlay.querySelector("#filler-popup-close").addEventListener("click",close);
     overlay.querySelector("#filler-popup-show").addEventListener("click",()=>{
       close();document.getElementById("orders")?.scrollIntoView({behavior:"smooth",block:"start"});
@@ -53,30 +69,45 @@
       document.title="🔔 PEDIDO NUEVO — Filler Café";
       overlay.querySelector("#filler-popup-show").focus({preventScroll:true});
     }
-    // Firma sonora Filler Cocina: cinco notas rítmicas, distintas del aviso al cliente.
+    // Alarma reforzada para cocina: secuencia doble y armónicos audibles en móvil.
+    // No puede aumentar el volumen físico de Android ni cambiar el tono de Web Push cerrado.
     function sound(){
       if(!audioEnabled||!audio)return;
       audio.resume().then(()=>{
-        const start=audio.currentTime+.03;
-        const notes=[
-          {hz:523.25,at:0,d:.15},
-          {hz:659.25,at:.19,d:.15},
-          {hz:783.99,at:.43,d:.21},
-          {hz:659.25,at:.69,d:.15},
-          {hz:1046.5,at:.90,d:.32}
+        const base=audio.currentTime+.025;
+        const peak=LEVELS[readLevel()];
+        const phrase=[
+          {hz:783.99,at:0,d:.18},{hz:987.77,at:.22,d:.18},
+          {hz:880,at:.45,d:.18},{hz:1174.66,at:.69,d:.32}
         ];
-        for(const note of notes){
-          const osc=audio.createOscillator(),gain=audio.createGain();
-          const at=start+note.at;
-          osc.type="triangle";
-          osc.frequency.setValueAtTime(note.hz,at);
-          gain.gain.setValueAtTime(.001,at);
-          gain.gain.linearRampToValueAtTime(.14,at+.025);
-          gain.gain.exponentialRampToValueAtTime(.002,at+note.d);
-          osc.connect(gain);gain.connect(audio.destination);
-          osc.start(at);osc.stop(at+note.d+.02);
+        for(const shift of [0,1.21]){
+          for(const note of phrase){
+            const at=base+shift+note.at;
+            const primary=audio.createOscillator();
+            const harmonic=audio.createOscillator();
+            const harmonicLevel=audio.createGain();
+            const envelope=audio.createGain();
+            primary.type="triangle";
+            primary.frequency.setValueAtTime(note.hz,at);
+            harmonic.type="sine";
+            harmonic.frequency.setValueAtTime(note.hz*2,at);
+            harmonicLevel.gain.setValueAtTime(.15,at);
+            envelope.gain.setValueAtTime(.001,at);
+            envelope.gain.linearRampToValueAtTime(peak,at+.018);
+            envelope.gain.setValueAtTime(peak*.85,at+note.d*.55);
+            envelope.gain.exponentialRampToValueAtTime(.001,at+note.d);
+            primary.connect(envelope);
+            harmonic.connect(harmonicLevel);
+            harmonicLevel.connect(envelope);
+            envelope.connect(audio.destination);
+            primary.start(at);harmonic.start(at);
+            primary.stop(at+note.d+.01);harmonic.stop(at+note.d+.01);
+            primary.onended=()=>{
+              primary.disconnect();harmonic.disconnect();harmonicLevel.disconnect();envelope.disconnect();
+            };
+          }
         }
-      }).catch(error=>onStatus("Sonido bloqueado: "+error.message,true));
+      }).catch(error=>onStatus("El celular bloqueó el sonido de la página. Toca «Activar sonido» de nuevo.",true));
     }
     async function systemNotification(title,details,tag){
       if(!("Notification" in window)||Notification.permission!=="granted")return false;
@@ -133,9 +164,11 @@
         " · "+qty+" artículos";
       showVisual(title,details);
       sound();
+      remindUntilAcknowledged();
       systemNotification("🔔 Nuevo pedido Filler Café",details,"filler-new-"+ids[0]);
     }
     return Object.freeze({enable,incoming,beep:sound,isEnabled:()=>audioEnabled,
+      soundLevel:readLevel,setSoundLevel:writeLevel,
       permission:()=>("Notification" in window?Notification.permission:"unsupported"),lastNotice:()=>lastNotice});
   }
   window.FillerOrderNotifications=Object.freeze({create});
