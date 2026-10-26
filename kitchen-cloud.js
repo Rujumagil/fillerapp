@@ -103,10 +103,17 @@
     finally{button.disabled=false;}
   });
   function activationUI(){
-    access.innerHTML='<div class="actions"><button id="kitchen-sound" type="button">🔔 Activar notificaciones y probar sonido</button><label class="paper-choice">Papel: <select id="kitchen-paper" aria-label="Ancho de papel"><option value="80">80 mm</option><option value="58">58 mm</option></select></label><button id="kitchen-exit" class="secondary" type="button">Cerrar sesión</button><span id="sound-status" class="muted">Activa las notificaciones en este equipo</span></div>';
+    access.innerHTML='<div class="actions"><button id="kitchen-sound" type="button">🔔 Activar alarma y probar sonido</button><label class="paper-choice">Intensidad: <select id="kitchen-volume" aria-label="Intensidad de la alarma de pedidos"><option value="normal">Normal</option><option value="alto">Alto</option><option value="max">Muy alto</option></select></label><label class="paper-choice">Papel: <select id="kitchen-paper" aria-label="Ancho de papel"><option value="80">80 mm</option><option value="58">58 mm</option></select></label><button id="kitchen-exit" class="secondary" type="button">Cerrar sesión</button><span id="sound-status" class="muted">En el celular toca Activar alarma al abrir Cocina; ajusta también el volumen multimedia.</span></div>';
     const paperInput=document.getElementById("kitchen-paper");
     paperInput.value=FillerTickets.paper();
     paperInput.addEventListener("change",()=>FillerTickets.setPaper(paperInput.value));
+    const volumeInput=document.getElementById("kitchen-volume");
+    volumeInput.value=notifier.soundLevel();
+    volumeInput.addEventListener("change",()=>{
+      notifier.setSoundLevel(volumeInput.value);
+      if(notifier.isEnabled())notifier.beep();
+      else document.getElementById("sound-status").textContent="Intensidad guardada. Pulsa «Activar alarma» para escucharla.";
+    });
     const test=document.getElementById("kitchen-sound");
     test.addEventListener("click",async()=>{
       test.disabled=true;
