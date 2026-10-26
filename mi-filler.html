@@ -1,55 +1,121 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#006241"><link rel="manifest" href="manifest.json"><link rel="icon" href="assets/filler-icon-192.png"><title>Mi Filler | Filler Café</title>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#006241">
+<meta name="description" content="Mi Filler: tu cuenta, pedidos y preferencias en Filler Café.">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./assets/filler-icon-192.png">
+<title>Mi Filler | Tu cuenta Filler Café</title>
 <style>
-:root{font-family:Inter,system-ui,sans-serif;color:#18352b;background:#faf7f0}*{box-sizing:border-box}body{margin:0}header{background:#006241;color:white;padding:18px 5%;display:flex;align-items:center;justify-content:space-between;gap:12px}header a{color:white;text-decoration:none;font-weight:700}main{max-width:800px;margin:32px auto;padding:0 18px 45px}.card{background:white;border:1px solid #dce7df;border-radius:24px;padding:26px;box-shadow:0 15px 40px #063b2b10}h1{font-size:clamp(28px,5vw,42px);margin:0 0 10px}p{line-height:1.5}.muted{color:#61746b}.stack{display:grid;gap:14px}label{font-weight:700;font-size:14px}input:not([type=checkbox]){display:block;width:100%;margin-top:6px;padding:13px;border:1px solid #adc7b6;border-radius:12px;font:inherit}button{background:#006241;color:white;border:0;border-radius:12px;padding:13px 18px;font:inherit;font-weight:750;cursor:pointer}button:disabled{opacity:.55}button.secondary{background:#e4f2e8;color:#065338}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 22px}.check{display:flex;gap:10px;align-items:start;font-weight:500}.check input{margin-top:4px}.notice{padding:13px 15px;border-radius:12px;background:#e6f5eb;color:#075638;margin-bottom:15px}.notice.error{background:#fff0ec;color:#ab3929}[hidden]{display:none!important}.mini{font-size:13px}a{color:#006241}.app-settings{margin-top:18px;background:linear-gradient(135deg,#f4fbf5,#fff)}.app-settings h2{margin:0 0 7px;font-size:21px}.app-settings p{margin:0}.app-settings .actions{margin:14px 0 0}.app-settings button{flex:1 1 155px}.app-settings .secondary{border:1px solid #cfe4d6}
-</style></head><body>
-<header><a href="./index.html">☕ Filler Café</a><a href="./index.html">← Menú y pedidos</a></header>
-<main><h1>Mi Filler</h1><p class="muted">Tu cuenta, tus preferencias y tus próximos beneficios. También puedes ordenar sin registrarte.</p>
-<div class="card">
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#183629;background:#fbf8f2;--green:#006241;--dark:#073b2b;--orange:#f47b20;--muted:#64776b;--line:#e1e9df}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(180deg,#faf6ee 0%,#fffdf8 60%,#f8f7f2 100%);min-height:100vh}button,input{font:inherit}a{color:var(--green)}button{cursor:pointer;border:0;border-radius:13px;padding:12px 18px;background:var(--green);color:white;font-weight:800}button:disabled{opacity:.55;cursor:not-allowed}button.secondary{background:#eaf4ee;color:#075b3f}.brand-bar{background:#fffdf8;border-bottom:1px solid var(--line)}.brand-inner{max-width:1040px;margin:auto;padding:12px 22px;display:flex;justify-content:space-between;align-items:center;gap:15px}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:#193a2b;font-weight:900;letter-spacing:-.03em;font-size:19px}.brand img{width:58px;height:48px;object-fit:contain}.back-link{display:inline-flex;align-items:center;gap:7px;text-decoration:none;font-size:13px;font-weight:800;color:var(--green);background:#edf6ef;padding:11px 15px;border-radius:12px}
+main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0}.page-eyebrow{color:#0d7652;font-size:11px;text-transform:uppercase;font-weight:900;letter-spacing:.13em}.page-heading{margin:0 0 8px;font-size:clamp(29px,4vw,39px);line-height:1.12;letter-spacing:-.055em}.page-intro{margin:0 0 24px;color:var(--muted);font-size:14px;line-height:1.55}.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:23px;box-shadow:0 10px 32px rgba(20,46,30,.048)}.muted{color:var(--muted)}.mini{font-size:12px;line-height:1.55}.stack{display:grid;gap:14px}label{display:grid;gap:7px;font-size:13px;font-weight:750;color:#294a38}input:not([type=checkbox]){width:100%;padding:12px 13px;border:1px solid #c8dacc;border-radius:11px;color:#183629;background:#fcfdfb;min-width:0}input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #f4a35c;outline-offset:2px}.check{display:flex;gap:10px;align-items:flex-start;line-height:1.45;font-weight:550}.check input{width:18px;height:18px;accent-color:var(--green);flex:0 0 auto;margin:2px 0 0}.actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.notice{padding:13px 16px;background:#e7f6ed;color:#075b3c;border:1px solid #c5e6d1;border-radius:13px;font-size:13px;font-weight:750;line-height:1.5;margin:0 0 17px}.notice.error{background:#fff0e8;color:#9d3d1c;border-color:#f4d6c9}[hidden]{display:none!important}
+.visitor-shell{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:20px;align-items:stretch}.visitor-intro{background:linear-gradient(150deg,#053d2c,#006241);color:white;border-radius:24px;padding:31px;display:flex;flex-direction:column;justify-content:space-between;min-height:390px}.visitor-intro img{width:105px;height:72px;object-fit:contain;background:#fff;border-radius:17px;padding:6px}.visitor-intro h2{font-size:33px;line-height:1.07;letter-spacing:-.055em;margin:24px 0 13px}.visitor-intro p{color:#d9efe2;font-size:14px;line-height:1.6}.visitor-intro small{color:#cae7d7;font-size:12px}.auth-card{padding:27px}.auth-card .actions{margin-bottom:23px}.auth-card .actions button{flex:1}.auth-card form>button[type=submit]{width:100%;min-height:45px}.auth-card .stack h2{margin:0;font-size:22px}.auth-card .stack p{margin-bottom:0}
+.member-hero{display:flex;align-items:center;gap:20px;min-height:182px;padding:27px 30px;border-radius:24px;background:linear-gradient(125deg,#063b2c,#006342 73%,#0a7653);color:white;position:relative;overflow:hidden}.member-hero:after{content:"";position:absolute;width:220px;height:220px;border:1px solid rgba(255,255,255,.12);border-radius:50%;right:-58px;bottom:-154px;box-shadow:0 0 0 32px rgba(255,255,255,.035),0 0 0 75px rgba(255,255,255,.025);pointer-events:none}.avatar{display:grid;place-items:center;flex:0 0 78px;width:78px;height:78px;border:2px solid #ffffff5c;border-radius:50%;background:#ffffff24;color:#fff;font-size:25px;font-weight:850;letter-spacing:-.035em}.member-hero-content{min-width:0;position:relative;z-index:1}.member-hero .eyebrow{margin-bottom:9px;color:#c6efdc;font-size:11px;letter-spacing:.13em;font-weight:850;text-transform:uppercase}.member-hero h2{margin:0 0 5px;color:white;font-size:clamp(23px,3.4vw,36px);letter-spacing:-.045em;line-height:1.1;overflow-wrap:anywhere}.member-hero p{margin:0;color:#d0e8d9;font-size:14px;overflow-wrap:anywhere}.member-hero .subline{margin-top:11px;color:#b9dcc8;font-size:12px}
+.quick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:16px 0 23px}.quick-card{display:grid;grid-template-columns:42px 1fr;align-items:center;gap:12px;min-width:0;min-height:105px;background:#fff;border:1px solid #e2e8df;border-radius:19px;padding:18px;text-decoration:none;color:#183629;box-shadow:0 7px 24px rgba(20,46,30,.04)}a.quick-card:hover{border-color:#a8d1b8;background:#fbfffc}.quick-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:#e9f3ec;color:#006241;font-size:23px}.quick-icon.orange{background:#fff0e4;color:#d96b14}.quick-card strong{display:block;margin-bottom:5px;font-size:14px}.quick-card small{display:block;color:#64776b;font-size:11px;line-height:1.4}.quick-card.is-inactive{background:#fafbf8}.quick-card[aria-disabled=true]{pointer-events:none}
+.member-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:17px;align-items:start}.section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:17px}.section-heading h3{font-size:20px;letter-spacing:-.035em;margin:0;color:#173c2c}.section-heading button{font-size:12px;padding:9px 12px}.profile-list{display:grid;gap:0}.profile-row{display:grid;grid-template-columns:27px 1fr;align-items:start;gap:10px;padding:13px 0;border-bottom:1px solid #eef0ea;min-width:0}.profile-row:last-child{border-bottom:0;padding-bottom:3px}.profile-row .symbol{color:#54816a;font-size:20px;line-height:1.15}.profile-row small{display:block;color:#748578;font-size:11px;margin-bottom:4px}.profile-row strong{display:block;font-size:14px;line-height:1.4;font-weight:730;overflow-wrap:anywhere}.edit-fields{padding-top:17px;border-top:1px solid #e7eee7;margin-top:13px;gap:12px}.form-footer{display:flex;gap:9px;flex-wrap:wrap}.form-footer button{flex:1}.profile-save{margin-top:13px;width:100%}.promo-card{background:#f5faf5;border-color:#dbeadd}.promo-card p{font-size:12px;line-height:1.55;margin-bottom:15px}.promo-save{margin-top:14px;font-size:12px;padding:10px 13px;width:100%}.promo-card .check{font-size:13px}.profile-logout{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:19px 0 0}.profile-logout .order-cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 21px;border-radius:13px;background:var(--orange);color:white;text-decoration:none;font-size:14px;font-weight:900}.profile-logout .order-cta:hover{background:#d86312}.logout-button{background:transparent!important;color:#527064!important;font-size:13px;padding:11px 12px!important}
+.app-card{background:#fffdf9;margin-top:19px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}.app-card h3{font-size:19px;margin:0 0 6px;letter-spacing:-.025em}.app-card p{font-size:12px;line-height:1.55;margin:0;color:var(--muted);max-width:520px}.app-actions{display:flex;flex-wrap:wrap;gap:8px}.app-actions button{font-size:12px;padding:11px 14px}.app-actions button:first-child{background:var(--orange)}.app-actions button:first-child:hover{background:#d86312}.foot-note{padding:20px 0 0;text-align:center;color:#8a9b8e;font-size:11px}
+@media(max-width:740px){main{padding:21px 14px 80px}.brand-inner{padding:9px 14px}.visitor-shell,.member-grid{grid-template-columns:1fr}.visitor-intro{min-height:205px;padding:23px}.visitor-intro h2{font-size:27px;margin:17px 0 7px}.visitor-intro img{width:77px;height:53px}.visitor-intro p{margin-bottom:10px}.auth-card{padding:20px}.member-hero{padding:24px 19px;min-height:163px}.avatar{width:62px;height:62px;flex-basis:62px;font-size:21px}.member-hero h2{font-size:26px}.quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0 17px}.quick-card{padding:13px;min-height:105px;grid-template-columns:36px 1fr;gap:9px}.quick-icon{width:36px;height:36px;font-size:20px}.quick-card:last-child{grid-column:1/-1;min-height:75px}.card{padding:19px}.app-card{grid-template-columns:1fr}.app-actions button{flex:1}.profile-logout{align-items:stretch}.profile-logout .order-cta{flex:1}}
+@media(max-width:420px){.brand{font-size:16px}.brand img{width:48px;height:42px}.back-link{font-size:11px;padding:9px 10px}.member-hero{gap:12px}.member-hero h2{font-size:23px}.member-hero p{font-size:12px}.quick-card{grid-template-columns:1fr;gap:8px}.quick-card:last-child{grid-template-columns:36px 1fr}.quick-card strong{font-size:12px}.quick-card small{font-size:10px}.profile-logout{flex-wrap:wrap}.profile-logout .order-cta{width:100%;flex:auto}}
+</style>
+</head>
+<body>
+<header class="brand-bar"><div class="brand-inner">
+<a class="brand" href="./index.html"><img src="./assets/filler-logo-oficial.webp" alt="" width="58" height="48"><span>Filler Café</span></a>
+<a class="back-link" href="./index.html">← Volver al menú</a>
+</div></header>
+<main>
+<div class="page-eyebrow">TU ESPACIO PERSONAL</div>
+<h1 class="page-heading">Mi Filler</h1>
+<p class="page-intro">Todo lo que necesitas para pedir, consultar y personalizar tu experiencia en Filler Café.</p>
 <div id="message" role="status" aria-live="polite" class="notice" hidden></div>
-<div id="visitor">
-<div class="actions"><button id="tab-register" type="button">Crear cuenta</button><button id="tab-login" class="secondary" type="button">Ya tengo cuenta</button></div>
+<section id="visitor" class="visitor-shell" aria-label="Acceso a Mi Filler">
+<div class="visitor-intro">
+<div><img src="./assets/filler-logo-oficial.webp" alt="Filler Café"><h2>Tu café favorito, más cerca.</h2><p>Crea tu cuenta para guardar tus datos y hacer tu próximo pedido con mayor facilidad.</p></div>
+<small>¿Tienes antojo? También puedes ordenar sin registrarte.</small>
+</div>
+<div class="card auth-card">
+<div class="actions"><button id="tab-register" type="button">Crear cuenta</button><button id="tab-login" class="secondary" type="button">Iniciar sesión</button></div>
 <form id="register" class="stack">
 <label>Nombre completo<input name="name" minlength="2" maxlength="90" autocomplete="name" required></label>
 <label>Correo electrónico<input name="email" type="email" autocomplete="email" required></label>
 <label>Contraseña (mínimo 8 caracteres)<input name="password" type="password" minlength="8" autocomplete="new-password" required></label>
 <label class="check"><input name="promotions" type="checkbox"> Quiero recibir promociones de Filler Café. Es opcional y puedo cambiarlo después.</label>
 <label class="check"><input name="privacy" type="checkbox" required> He leído el <a href="./aviso-privacidad.html" target="_blank" rel="noopener">aviso de privacidad</a>.</label>
-<button type="submit">Crear mi cuenta</button><p class="muted mini">Te enviaremos un correo para confirmar tu cuenta. Las notificaciones push del dispositivo se activarán por separado.</p>
+<button type="submit">Crear mi cuenta</button><p class="muted mini">Te enviaremos un enlace para confirmar tu cuenta.</p>
 </form>
 <form id="login" class="stack" hidden>
 <label>Correo electrónico<input name="email" type="email" autocomplete="email" required></label>
 <label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label>
 <button type="submit">Iniciar sesión</button>
-<button type="button" class="secondary" id="forgot-link">¿Olvidaste tu contraseña? Recupérala aquí</button>
+<button type="button" class="secondary" id="forgot-link">¿Olvidaste tu contraseña?</button>
 </form>
 <form id="recover" class="stack" hidden>
-<h2>Recuperar contraseña</h2><p class="muted">Te enviaremos un enlace para establecer una nueva contraseña.</p>
+<h2>Recuperar contraseña</h2><p class="muted mini">Te enviaremos un enlace para crear una contraseña nueva.</p>
 <label>Correo de tu cuenta<input name="email" type="email" autocomplete="email" required></label>
 <button type="submit">Enviar enlace de recuperación</button>
 <button type="button" class="secondary" id="back-login">Volver a iniciar sesión</button>
 </form>
 <form id="new-password" class="stack" hidden>
-<h2>Crear nueva contraseña</h2><p class="muted">Elige una contraseña nueva para tu cuenta.</p>
+<h2>Crear nueva contraseña</h2>
 <label>Contraseña nueva<input name="password" type="password" minlength="8" autocomplete="new-password" required></label>
 <label>Confirmar contraseña<input name="confirm_password" type="password" minlength="8" autocomplete="new-password" required></label>
 <button type="submit">Guardar nueva contraseña</button>
-</form></div>
-<div id="member" hidden><h2>¡Hola, <span id="member-name"></span>!</h2><p class="muted" id="member-email"></p>
-<form id="preferences" class="stack">
-<label>Nombre completo<input name="name" minlength="2" maxlength="90" required></label>
-<label>Teléfono (opcional)<input name="phone" type="tel" maxlength="25" autocomplete="tel"></label>
-<label class="check"><input name="promotions" type="checkbox"> Acepto recibir promociones y novedades comerciales de Filler Café.</label>
-<button type="submit">Guardar preferencias</button></form>
-<section class="card" style="box-shadow:none;background:#f3faf5;margin:18px 0"><h3>Próximamente: notificaciones</h3><p class="muted mini">Estamos terminando los avisos de pedidos y promociones. Por ahora puedes crear tu cuenta y administrar tu consentimiento.</p></section>
-<div class="actions"><a href="./index.html">Hacer un pedido</a><button class="secondary" id="logout" type="button">Cerrar sesión</button></div>
-<p class="muted mini">El historial de pedidos y las notificaciones se habilitarán por separado. Crear una cuenta no activa automáticamente mensajes promocionales.</p>
-</div></div>
-<section class="card app-settings" aria-label="Opciones de Filler Café">
-<h2>Tu app Filler</h2>
-<p class="muted mini">Instala Filler en tu celular o permite las notificaciones del navegador. Los avisos automáticos de pedidos se habilitarán próximamente.</p>
-<div class="actions"><button type="button" data-install-app onclick="fillerInstallApp()">Instalar app</button><button type="button" class="secondary" onclick="fillerRequestNotifications()">Activar avisos</button></div>
+</form>
+</div>
 </section>
+<section id="member" hidden aria-label="Mi cuenta">
+<div class="member-hero">
+<div class="avatar" id="avatar-initials" aria-hidden="true">FC</div>
+<div class="member-hero-content">
+<div class="eyebrow">MI CUENTA FILLER</div>
+<h2>¡Hola, <span id="member-name"></span>!</h2>
+<p id="member-email"></p>
+<div class="subline">Tu espacio para pedir, recoger y disfrutar.</div>
+</div>
+</div>
+<div class="quick-grid">
+<a class="quick-card" id="member-orders-link" href="./pedido.html" aria-label="Consultar seguimiento de mi pedido">
+<span class="quick-icon" aria-hidden="true">▤</span><span><strong>Mi último pedido</strong><small id="member-orders-description">Consulta su seguimiento</small></span></a>
+<div class="quick-card is-inactive" aria-label="Mis beneficios, próximamente">
+<span class="quick-icon orange" aria-hidden="true">✦</span><span><strong>Mis beneficios</strong><small>Promociones y recompensas próximamente</small></span></div>
+<a class="quick-card" href="#app-settings"><span class="quick-icon" aria-hidden="true">▣</span><span><strong>Mi app</strong><small>Instalación y permisos del celular</small></span></a>
+</div>
+<div class="member-grid">
+<div class="card">
+<div class="section-heading"><h3>Mis datos</h3><button id="edit-profile" type="button" class="secondary" aria-expanded="false" aria-controls="profile-edit">Editar datos</button></div>
+<div class="profile-list" id="profile-display">
+<div class="profile-row"><span class="symbol" aria-hidden="true">♙</span><div><small>Nombre completo</small><strong id="profile-view-name">—</strong></div></div>
+<div class="profile-row"><span class="symbol" aria-hidden="true">✉</span><div><small>Correo de acceso</small><strong id="profile-view-email">—</strong></div></div>
+<div class="profile-row"><span class="symbol" aria-hidden="true">♧</span><div><small>Teléfono</small><strong id="profile-view-phone">Sin registrar</strong></div></div>
+</div>
+<div id="profile-edit" hidden class="stack edit-fields">
+<label>Nombre completo<input id="profile-name-editor" name="name" form="preferences" minlength="2" maxlength="90" autocomplete="name" required></label>
+<label>Teléfono de contacto<input id="profile-phone-editor" name="phone" form="preferences" type="tel" maxlength="25" autocomplete="tel"></label>
+<div class="form-footer">
+<button type="button" class="secondary" id="cancel-profile-edit">Cancelar</button>
+<button type="submit" form="preferences" id="save-profile">Guardar cambios</button>
+</div>
+</div>
+</div>
+<form id="preferences" class="card promo-card">
+<div class="section-heading"><h3>Mis preferencias</h3></div>
+<p class="muted">Elige si quieres recibir novedades comerciales. Los avisos de tus pedidos se consultan por separado.</p>
+<label class="check"><input name="promotions" type="checkbox"> Quiero recibir promociones y novedades de Filler Café.</label>
+<button type="submit" class="secondary promo-save" id="save-preferences">Guardar preferencia</button>
+</form>
+</div>
+<div class="profile-logout"><a class="order-cta" href="./index.html#menu">Hacer un pedido <span aria-hidden="true">→</span></a><button class="logout-button secondary" type="button" id="logout">Cerrar sesión</button></div>
+</section>
+<section class="card app-card" id="app-settings" aria-label="Opciones de la aplicación">
+<div><h3>Filler Café en tu celular</h3><p>Instala la app para entrar más rápido. Puedes permitir notificaciones del navegador; para los avisos de un pedido, abre su seguimiento.</p></div>
+<div class="app-actions"><button type="button" data-install-app onclick="fillerInstallApp()">Instalar app</button><button type="button" class="secondary" onclick="fillerRequestNotifications()">Permitir avisos</button></div>
+</section>
+<p class="foot-note">Filler Café · Tus datos y preferencias permanecen en tu cuenta.</p>
 </main>
-<script src="pwa.js"></script><script src="mi-filler.js"></script></body></html>
+<script src="./pwa.js"></script>
+<script src="./mi-filler.js?v=26"></script>
+</body>
+</html>
