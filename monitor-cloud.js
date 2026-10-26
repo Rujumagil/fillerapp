@@ -34,6 +34,11 @@
   const notifier=FillerOrderNotifications.create({onStatus:msg});
   bar.addEventListener("change",event=>{
     if(event.target.id==="monitor-paper")FillerTickets.setPaper(event.target.value);
+    if(event.target.id==="monitor-volume"){
+      notifier.setSoundLevel(event.target.value);
+      if(notifier.isEnabled())notifier.beep();
+      else permissionMessage="Intensidad guardada. Toca activar notificaciones para escuchar la alarma.";
+    }
   });
   function status(o){
     const now=Date.now(),age=now-o.createdTs,wait=now-o.statusUpdatedAt;
@@ -67,8 +72,9 @@
           (o.status==="Listo"?'<div style="font-size:13px;font-weight:800;width:100%;padding:8px 0">✓ Estado listo publicado en el seguimiento web del cliente</div>':"")+
           '</div></article>';
       }).join(""):'<h2>Sin pedidos activos</h2>';
-      bar.innerHTML='<span>🟢 Monitor conectado · Actualizado: '+new Date().toLocaleTimeString("es-MX")+'</span> <button id="monitor-sound" style="margin-left:15px">'+(notifier.isEnabled()?"🔔 Probar notificación nuevamente":"🔔 Activar notificaciones y probar sonido")+'</button> <label style="margin-left:9px">Papel <select id="monitor-paper" style="padding:7px;border-radius:8px"><option value="80">80 mm</option><option value="58">58 mm</option></select></label> <button id="monitor-exit" style="margin-left:8px">Salir</button><div id="monitor-notification-status" style="font-size:13px;margin-top:9px;opacity:.95">'+permissionMessage+'</div>';
+      bar.innerHTML='<span>🟢 Monitor conectado · Actualizado: '+new Date().toLocaleTimeString("es-MX")+'</span> <button id="monitor-sound" style="margin-left:15px">'+(notifier.isEnabled()?"🔔 Probar notificación nuevamente":"🔔 Activar notificaciones y probar sonido")+'</button> <label style="margin-left:9px">Volumen <select id="monitor-volume" aria-label="Intensidad de alarma"><option value="normal">Normal</option><option value="alto">Alto</option><option value="max">Muy alto</option></select></label> <label style="margin-left:9px">Papel <select id="monitor-paper" style="padding:7px;border-radius:8px"><option value="80">80 mm</option><option value="58">58 mm</option></select></label> <button id="monitor-exit" style="margin-left:8px">Salir</button><div id="monitor-notification-status" style="font-size:13px;margin-top:9px;opacity:.95">'+permissionMessage+'</div>';
       document.getElementById("monitor-paper").value=FillerTickets.paper();
+      document.getElementById("monitor-volume").value=notifier.soundLevel();
       enableControls();
     }catch(err){msg("No se pudo actualizar: "+err.message);}
     if(role)setTimeout(refresh,3000);
