@@ -133,7 +133,22 @@ $("cancel-profile-edit").addEventListener("click",()=>{
   editProfile(false);
 });
 async function loadProfile(){
-const access=await token();if(!access){$("visitor").hidden=false;$("member").hidden=true;return;}
+const access=await token();
+if(!access){$("visitor").hidden=false;$("member").hidden=true;$("temporary-password-required").hidden=true;return;}
+// Leer el estado actual desde el servidor; nunca confiar solamente en la sesión guardada.
+const accountResponse=await fetch(BASE+"/auth/v1/user",{
+  headers:{"apikey":KEY,"Authorization":"Bearer "+access},cache:"no-store"
+});
+if(!accountResponse.ok)throw Error("Tu sesión necesita actualizarse. Inicia sesión otra vez.");
+const currentUser=await accountResponse.json();
+session.user=currentUser;save(session);
+if(currentUser.app_metadata?.filler_require_password_change===true){
+  $("visitor").hidden=true;$("member").hidden=true;
+  $("temporary-password-required").hidden=false;
+  message("Para seguir usando Mi Filler, reemplaza la contraseña temporal que te proporcionó administración.");
+  return;
+}
+$("temporary-password-required").hidden=true;
 const rows=await request("filler_customers?select=user_id,full_name,phone,promotions_opt_in&user_id=eq."+encodeURIComponent(session.user.id));
 profile=rows?.[0]||null;
 if(!profile){
@@ -144,6 +159,36 @@ return;
 }
 showMember();
 }
+$("temporary-password-form").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const form=e.currentTarget,button=form.querySelector("button[type=submit]");
+  const password=form.elements.password.value;
+  if(password.length<10||!/[A-Za-z]/.test(password)||!/[0-9]/.test(password)){
+    message("Usa al menos 10 caracteres, incluyendo letras y números.",true);return;
+  }
+  if(password!==form.elements.confirm_password.value){
+    message("Las contraseñas nuevas no coinciden.",true);return;
+  }
+  button.disabled=true;
+  try{
+    const access=await token();
+    if(!access)throw Error("Tu sesión terminó. Inicia sesión nuevamente.");
+    const response=await fetch(BASE+"/functions/v1/filler-clientes-admin",{
+      method:"POST",headers:{"apikey":KEY,"authorization":"Bearer "+access,"content-type":"application/json"},
+      body:JSON.stringify({action:"complete_temporary_password",password}),
+      cache:"no-store"
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok||!data.ok)throw Error(data.error||"No se pudo guardar tu contraseña.");
+    form.reset();
+    save(null);profile=null;
+    $("temporary-password-required").hidden=true;
+    $("visitor").hidden=false;$("member").hidden=true;
+    tab("login");
+    message("✓ Contraseña personal guardada. Ya puedes iniciar sesión con tu nueva contraseña.");
+  }catch(error){message(error.message,true)}
+  finally{button.disabled=false;}
+});
 $("register").addEventListener("submit",async e=>{
 e.preventDefault();const form=e.currentTarget,button=form.querySelector("button[type=submit]");
 button.disabled=true;
