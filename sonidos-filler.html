@@ -9,25 +9,98 @@
 <style>
 :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#183e2c;background:#fbf8f2}
 *{box-sizing:border-box}body{margin:0;min-height:100vh}main{max-width:900px;margin:auto;padding:24px 16px 65px}.header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}.header a{color:#006241;text-decoration:none;font-size:13px;font-weight:800}.header img{width:88px;height:66px;object-fit:contain}.hero{border-radius:27px;background:linear-gradient(130deg,#073d2c,#006241);padding:28px;color:white}.eyebrow{font-size:11px;font-weight:850;letter-spacing:.14em;color:#d0edda}.hero h1{font-size:clamp(28px,5vw,43px);letter-spacing:-.04em;line-height:1.12;margin:9px 0}.hero p{color:#d3eadd;font-size:14px;line-height:1.6;margin:0;max-width:620px}.settings{display:flex;gap:11px;align-items:end;flex-wrap:wrap;padding:17px 0}.settings label{font-size:12px;font-weight:850;display:grid;gap:6px}.settings select{border:1px solid #b7d1bf;border-radius:11px;background:#fff;padding:11px 13px;color:#10432f;min-width:155px}.settings span{font-size:12px;color:#60776b;padding-bottom:12px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.card{background:#fff;border:1px solid #e1e8de;box-shadow:0 10px 30px #0f35200b;border-radius:20px;padding:23px;display:flex;flex-direction:column;gap:10px}.icon{width:55px;height:55px;border-radius:16px;display:grid;place-items:center;background:#e8f4ec;font-size:28px}.card:nth-child(2) .icon{background:#fff2dc}.card:nth-child(3) .icon{background:#eaf1fa}.card h2{font-size:20px;letter-spacing:-.02em;margin:3px 0 0}.card p{color:#5f7668;line-height:1.5;font-size:13px;margin:0 0 10px;flex:1}.card button{background:#006241;color:white;border:0;border-radius:12px;padding:13px 12px;font:800 13px inherit;cursor:pointer;font-size:13px;font-weight:850}.card button:disabled{opacity:.6;cursor:wait}.info{margin:16px 0 0;padding:17px;border:1px solid #ecd7ad;border-radius:14px;background:#fffaf0;color:#684e2b;font-size:12px;line-height:1.6}.status{margin:16px 0 0;color:#065c3c;font-size:13px;font-weight:750;min-height:22px}.status.error{color:#a13d24}.footer{margin-top:24px;text-align:center;font-size:11px;color:#748678}@media(max-width:700px){.grid{grid-template-columns:1fr}.card{padding:18px}.hero{padding:23px}.card p{margin-bottom:4px}.header img{width:70px}}
+ 
+.sound-admin{margin-top:21px;padding:23px;border:1px solid #dbe7de;border-radius:22px;background:#fff;box-shadow:0 9px 27px #062b1811}
+.sound-admin h2{margin:0 0 6px;letter-spacing:-.035em;font-size:25px}
+.sound-admin .muted{color:#64796c;font-size:13px;line-height:1.5}
+.sound-admin-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-top:17px}
+.sound-upload-card{border:1px solid #dce8dd;border-radius:15px;padding:16px;background:#fafffb;min-width:0}
+.sound-upload-card h3{font-size:16px;margin:0 0 5px}
+.sound-upload-card p{font-size:11px;line-height:1.45;color:#607969}
+.sound-upload-card label{display:grid;gap:8px;margin:12px 0;font-size:12px;font-weight:850}
+.sound-upload-card input[type=file]{width:100%;font-size:12px;max-width:100%}
+.sound-upload-card button,.sound-login button{padding:11px 12px;border-radius:11px;border:0;background:#006241;color:#fff;font-weight:800;cursor:pointer;font-size:12px;width:100%;margin-top:6px}
+.sound-upload-card button.restore{background:#edf5ef;color:#006241}
+.sound-upload-card button:disabled{opacity:.52;cursor:wait}
+.sound-mode{display:inline-block;background:#edf5ef;border-radius:100px;padding:5px 9px;color:#155e3c;font-size:11px;font-weight:850}
+.sound-mode.custom{background:#fff0df;color:#9a590f}
+.sound-login{max-width:340px;display:grid;gap:8px;margin:16px 0}
+.sound-login label{display:grid;gap:7px;color:#294939;font-size:13px;font-weight:800}
+.sound-login input{border:1px solid #bfd4c2;border-radius:11px;padding:12px;width:100%;font:inherit}
+.sound-note{margin-top:12px;font-size:12px;color:#5e7566;line-height:1.55}
+.sound-admin-notice{margin-top:10px;padding:12px;border-radius:12px;background:#e9f6eb;color:#0b5c3a;font-size:12px;font-weight:800}
+.sound-admin-notice.error{background:#fff0e9;color:#9d4324}
+.sound-admin [hidden]{display:none!important}
+@media(max-width:700px){.sound-admin-grid{grid-template-columns:1fr}.sound-admin{padding:18px}}
 </style>
 </head>
 <body><main>
 <header class="header"><img src="./assets/filler-logo-oficial.webp" alt="Filler Café"><a href="./admin.html">← Control General</a></header>
-<section class="hero"><span class="eyebrow">IDENTIDAD SONORA · FILLER CAFÉ</span><h1>Así suena Filler</h1><p>Cuatro notas originales, cálidas y reconocibles. Adaptamos el mismo motivo para cocina y para las notificaciones de nuestros clientes.</p></section>
+<section class="hero"><span class="eyebrow">IDENTIDAD SONORA · FILLER CAFÉ</span><h1>Así suena Filler</h1><p>Ahora con una versión moderna, tipo notificación premium. También puedes cargar tus propios archivos de audio para Cocina, Pedido listo y mensajes.</p></section>
 <div class="settings"><label>Intensidad para la prueba<select id="filler-sound-level"><option value="normal">Normal</option><option value="alto">Alto</option><option value="max" selected>Muy alto</option></select></label><span>Usa el volumen multimedia de tu celular para escuchar la diferencia.</span></div>
 <section class="grid" aria-label="Pruebas de los sonidos Filler">
-<article class="card"><span class="icon" aria-hidden="true">🔔</span><h2>Nuevo pedido</h2><p>Alarma distintiva de dos vueltas para que Cocina y Monitor detecten un pedido pendiente.</p><button data-sound="newOrder">▶ Escuchar Cocina</button></article>
-<article class="card"><span class="icon" aria-hidden="true">☕</span><h2>Pedido listo</h2><p>Melodía de bienvenida que escucha el cliente cuando cambia su pedido a «Listo».</p><button data-sound="ready">▶ Escuchar Pedido listo</button></article>
-<article class="card"><span class="icon" aria-hidden="true">✉️</span><h2>Mensaje de cocina</h2><p>Dos notas breves para una observación o mensaje nuevo durante el seguimiento.</p><button data-sound="message">▶ Escuchar Mensaje</button></article>
+<article class="card"><span class="icon" aria-hidden="true">🔔</span><h2>Nuevo pedido</h2><p>Tono moderno más brillante y claro. Cocina y Monitor repiten la alarma hasta que se reconoce el pedido.</p><button data-sound="newOrder">▶ Escuchar Cocina</button><button data-modern="newOrder" style="background:#eaf4ee;color:#006241">Escuchar versión moderna</button></article>
+<article class="card"><span class="icon" aria-hidden="true">☕</span><h2>Pedido listo</h2><p>Una firma sonora corta y agradable que escucha el cliente cuando su pedido está listo.</p><button data-sound="ready">▶ Escuchar Pedido listo</button><button data-modern="ready" style="background:#eaf4ee;color:#006241">Escuchar versión moderna</button></article>
+<article class="card"><span class="icon" aria-hidden="true">✉️</span><h2>Mensaje de cocina</h2><p>Dos notas breves para una observación o mensaje nuevo durante el seguimiento.</p><button data-sound="message">▶ Escuchar Mensaje</button><button data-modern="message" style="background:#eaf4ee;color:#006241">Escuchar versión moderna</button></article>
 </section>
 <p class="status" id="filler-sound-status" role="status" aria-live="polite"></p>
+<section class="sound-admin" id="filler-sound-admin" aria-labelledby="sound-admin-title">
+<h2 id="sound-admin-title">Personaliza los sonidos de Filler</h2>
+<p class="muted">Sube un archivo creado por ustedes para cada alerta. Los cambios se sincronizan entre dispositivos. Los audios deben ser breves y originales, en MP3 o WAV, máximo 3 MB y 12 segundos.</p>
+<div id="sound-admin-guest">
+<form id="sound-admin-login" class="sound-login">
+<label>Acceso administrador<input name="user" value="admin" autocomplete="username" readonly></label>
+<label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label>
+<button type="submit">Entrar para subir audios</button>
+</form></div>
+<div id="sound-admin-editor" hidden>
+<div class="sound-admin-grid">
+<article class="sound-upload-card" data-kind="newOrder">
+<h3>🔔 Nuevo pedido</h3><p>El aviso más importante de Cocina y Monitor.</p>
+<span class="sound-mode" data-mode>Consultando…</span>
+<label>Archivo MP3 o WAV<input type="file" accept=".mp3,.wav,audio/mpeg,audio/wav,audio/x-wav" data-file></label>
+<button type="button" data-listen-file>▶ Probar este archivo</button>
+<button type="button" data-publish>Subir y activar audio propio</button>
+<button type="button" class="restore" data-restore>Usar tono moderno</button>
+</article>
+<article class="sound-upload-card" data-kind="ready">
+<h3>☕ Pedido listo</h3><p>Sonido amable de entrega para el cliente.</p>
+<span class="sound-mode" data-mode>Consultando…</span>
+<label>Archivo MP3 o WAV<input type="file" accept=".mp3,.wav,audio/mpeg,audio/wav,audio/x-wav" data-file></label>
+<button type="button" data-listen-file>▶ Probar este archivo</button>
+<button type="button" data-publish>Subir y activar audio propio</button>
+<button type="button" class="restore" data-restore>Usar tono moderno</button>
+</article>
+<article class="sound-upload-card" data-kind="message">
+<h3>✉️ Mensaje de Cocina</h3><p>Aviso corto para observaciones al cliente.</p>
+<span class="sound-mode" data-mode>Consultando…</span>
+<label>Archivo MP3 o WAV<input type="file" accept=".mp3,.wav,audio/mpeg,audio/wav,audio/x-wav" data-file></label>
+<button type="button" data-listen-file>▶ Probar este archivo</button>
+<button type="button" data-publish>Subir y activar audio propio</button>
+<button type="button" class="restore" data-restore>Usar tono moderno</button>
+</article>
+</div>
+<p class="sound-note">Únicamente los administradores pueden publicar. Puedes escuchar el archivo antes de activarlo; ningún sonido se publica automáticamente al seleccionarlo. El tono moderno queda como respaldo si falla la conexión o el formato no es compatible.</p>
+</div>
+<p id="sound-admin-notice" class="sound-admin-notice" role="status" aria-live="polite" hidden></p>
+</section>
 <div class="info"><strong>Importante:</strong> estos sonidos personalizados funcionan cuando tienes abierta la página y autorizaste el audio. Si la app está cerrada, las notificaciones push usan el sonido que el sistema operativo permita para el navegador o la app instalada; la web no puede imponer esta melodía como tono del sistema. No se crea ningún pedido al escuchar las pruebas.</div>
 <footer class="footer">Filler Café · Identidad sonora propia · No se usan archivos ni sonidos de terceros</footer>
 </main>
 <script src="./pwa.js"></script>
-<script src="./filler-sounds.js?v=34"></script>
+<script src="./filler-sounds.js?v=35"></script>
 <script>
 const message=document.getElementById("filler-sound-status");
+document.querySelectorAll("button[data-modern]").forEach(button=>{
+ button.addEventListener("click",async()=>{
+  button.disabled=true;message.classList.remove("error");
+  try{
+    await window.FillerSounds.preview(button.dataset.modern,document.getElementById("filler-sound-level").value,{modernOnly:true});
+    message.textContent="✓ Reproduciendo la versión moderna de Filler.";
+  }catch(error){message.classList.add("error");message.textContent=error.message;}
+  finally{button.disabled=false;}
+ });
+});
 document.querySelectorAll("button[data-sound]").forEach(button=>{
  button.addEventListener("click",async()=>{
   if(button.disabled)return;
@@ -40,5 +113,7 @@ document.querySelectorAll("button[data-sound]").forEach(button=>{
  });
 });
 </script>
+<script src="./filler-cloud.js?v=35"></script>
+<script src="./filler-sound-admin.js?v=35"></script>
 </body>
 </html>
