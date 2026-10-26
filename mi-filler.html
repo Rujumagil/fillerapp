@@ -19,6 +19,7 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 .app-card{background:#fffdf9;margin-top:19px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}.app-card h3{font-size:19px;margin:0 0 6px;letter-spacing:-.025em}.app-card p{font-size:12px;line-height:1.55;margin:0;color:var(--muted);max-width:520px}.app-actions{display:flex;flex-wrap:wrap;gap:8px}.app-actions button{font-size:12px;padding:11px 14px}.app-actions button:first-child{background:var(--orange)}.app-actions button:first-child:hover{background:#d86312}.foot-note{padding:20px 0 0;text-align:center;color:#8a9b8e;font-size:11px}
 @media(max-width:740px){main{padding:21px 14px 80px}.brand-inner{padding:9px 14px}.visitor-shell,.member-grid{grid-template-columns:1fr}.visitor-intro{min-height:205px;padding:23px}.visitor-intro h2{font-size:27px;margin:17px 0 7px}.visitor-intro img{width:77px;height:53px}.visitor-intro p{margin-bottom:10px}.auth-card{padding:20px}.member-hero{padding:24px 19px;min-height:163px}.avatar{width:62px;height:62px;flex-basis:62px;font-size:21px}.member-hero h2{font-size:26px}.quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0 17px}.quick-card{padding:13px;min-height:105px;grid-template-columns:36px 1fr;gap:9px}.quick-icon{width:36px;height:36px;font-size:20px}.quick-card:last-child{grid-column:1/-1;min-height:75px}.card{padding:19px}.app-card{grid-template-columns:1fr}.app-actions button{flex:1}.profile-logout{align-items:stretch}.profile-logout .order-cta{flex:1}}
 @media(max-width:420px){.brand{font-size:16px}.brand img{width:48px;height:42px}.back-link{font-size:11px;padding:9px 10px}.member-hero{gap:12px}.member-hero h2{font-size:23px}.member-hero p{font-size:12px}.quick-card{grid-template-columns:1fr;gap:8px}.quick-card:last-child{grid-template-columns:36px 1fr}.quick-card strong{font-size:12px}.quick-card small{font-size:10px}.profile-logout{flex-wrap:wrap}.profile-logout .order-cta{width:100%;flex:auto}}
+ .visitor-intro .card{color:#183629} #temporary-password-required .auth-card{align-self:start}
 </style>
 </head>
 <body>
@@ -65,6 +66,16 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <button type="submit">Guardar nueva contraseña</button>
 </form>
 </div>
+</section>
+<section id="temporary-password-required" hidden aria-label="Cambiar contraseña temporal" class="visitor-shell">
+<div class="visitor-intro"><div><img src="./assets/filler-logo-oficial.webp" alt="Filler Café"><h2>Protege tu cuenta Filler.</h2><p>Tu acceso fue restablecido por el administrador. Establece una contraseña privada antes de continuar.</p></div><small>La nueva contraseña será solo tuya.</small></div>
+<div class="card auth-card"><form id="temporary-password-form" class="stack">
+<h2>Crear tu contraseña</h2>
+<p class="muted mini">Por seguridad, no puedes continuar con la contraseña temporal. Elige una propia de al menos 10 caracteres, con letras y números.</p>
+<label>Contraseña nueva<input name="password" type="password" minlength="10" maxlength="100" autocomplete="new-password" required></label>
+<label>Confirmar contraseña nueva<input name="confirm_password" type="password" minlength="10" maxlength="100" autocomplete="new-password" required></label>
+<button type="submit">Guardar contraseña y continuar</button>
+</form></div>
 </section>
 <section id="member" hidden aria-label="Mi cuenta">
 <div class="member-hero">
@@ -116,6 +127,6 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <p class="foot-note">Filler Café · Tus datos y preferencias permanecen en tu cuenta.</p>
 </main>
 <script src="./pwa.js"></script>
-<script src="./mi-filler.js?v=26"></script>
+<script src="./mi-filler.js?v=29"></script>
 </body>
 </html>
