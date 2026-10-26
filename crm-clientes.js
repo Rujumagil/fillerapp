@@ -30,6 +30,28 @@
     if(!result.ok)throw Error(data.error||"No pudimos conectar con el CRM ("+result.status+").");
     return data;
   }
+  async function loadDirectory(){
+    const jwt=await authHeader();
+    const response=await fetch(
+      "https://qwxydjotwhniahaovrff.supabase.co/rest/v1/rpc/filler_admin_customer_directory",
+      {
+        method:"POST",mode:"cors",cache:"no-store",
+        headers:{
+          "authorization":"Bearer "+jwt,
+          "apikey":"sb_publishable_17NekbDHp_ssL_Pf-CnqPg_v0acxqn3",
+          "content-type":"application/json"
+        },
+        body:"{}"
+      }
+    );
+    const data=await response.json().catch(()=>null);
+    if(!response.ok||!Array.isArray(data)){
+      if(response.status===401||response.status===403)
+        throw Error("Tu acceso de administrador necesita validación. Cierra sesión y vuelve a ingresar.");
+      throw Error("No se pudo recuperar el directorio de Supabase ("+response.status+").");
+    }
+    return {customers:data,total:data.length,partial:false};
+  }
   function rowCell(tr,text,small=""){
     const td=tr.insertCell();
     const name=document.createElement("strong");name.textContent=text;
@@ -78,13 +100,22 @@
   async function load(){
     el("crm-refresh").disabled=true;notice("Actualizando registros…");
     try{
-      const response=await call("list");
+      const response=await loadDirectory();
       if(!Array.isArray(response.customers))throw Error("El servidor no devolvió un directorio válido.");
       customers=response.customers;
       draw();
       notice(response.partial?"Mostramos parte del directorio. Contacta al administrador para revisar el límite de registros.":"✓ Directorio actualizado.");
     }catch(error){
-      customers=[];draw();notice("No se pudieron cargar los clientes: "+error.message,true);
+      // Un error de red no significa que el CRM tenga cero clientes.
+      if(!customers.length){
+        for(const id of ["crm-count","crm-confirmed","crm-pending"])el(id).textContent="—";
+        const tr=document.createElement("tr"),td=tr.insertCell();
+        td.colSpan=5;td.className="empty";
+        td.textContent="No pudimos consultar los registros. Intenta «Actualizar».";
+        el("crm-rows").replaceChildren(tr);
+        el("crm-showing").textContent="Datos no disponibles temporalmente.";
+      }
+      notice("No se pudieron cargar los clientes: "+error.message,true);
     }finally{el("crm-refresh").disabled=false;}
   }
   async function enter(){
