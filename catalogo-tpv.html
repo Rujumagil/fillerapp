@@ -32,7 +32,7 @@ main{max-width:1180px;margin:auto;padding:25px 16px 70px}.top{display:flex;justi
 </head>
 <body><main>
 <header class="top"><div class="logo"><img src="./assets/filler-logo-oficial.webp" alt="Filler Café"><div><strong>Control Filler</strong><small>Códigos y productos TPV</small></div></div><a href="./admin.html">← Control General</a></header>
-<section class="hero"><h1>Catálogo oficial del menú</h1><p>Menú del 26 de octubre de 2026 · Productos TPV y TPVS de ARROW DELI. Los precios se administran aquí; las existencias se controlan de forma interna y nunca se muestran a los clientes.</p></section>
+<section class="hero"><h1>Catálogo oficial del menú</h1><p>Catálogo de ARROW DELI actualizado con el resumen de ventas del 1 al 21 de octubre de 2026. Productos preparados, bebidas, botanas y artículos empaquetados. Las existencias se administran internamente y no aparecen en el menú público.</p></section>
 <p id="tpv-notice" class="notifier" role="status" aria-live="polite" hidden></p>
 <section id="tpv-login" class="card login">
 <h2>Acceso de administración</h2>
@@ -42,7 +42,7 @@ main{max-width:1180px;margin:auto;padding:25px 16px 70px}.top{display:flex;justi
 <section id="tpv-dashboard" hidden>
 <div class="stats"><div class="stat"><small>Productos con código</small><strong id="tpv-count-all">—</strong></div><div class="stat"><small>Pendientes de activar</small><strong id="tpv-count-pending">—</strong></div><div class="stat"><small>Extras / tipos de leche</small><strong id="tpv-count-extras">—</strong></div></div>
 <div class="card">
-<div class="help"><strong>Información importante:</strong> los artículos nuevos se registraron con precio pendiente y desactivados, ya que el documento no proporciona precios. Asigna el precio real antes de publicar. Las cantidades del PDF <strong>no fueron importadas</strong> y nunca se muestran al cliente. Si un producto no tiene existencia interna, seguirá apareciendo como agotado aunque esté publicado.</div>
+<div class="help"><strong>Información importante:</strong> los precios identificados en el resumen de ventas ya están registrados. Los artículos nuevos permanecen <strong>sin publicar</strong> hasta confirmar su inventario interno; algunos productos aún no tienen precio en las ventas. Captura y guarda las existencias únicamente desde este panel administrativo. <strong>Las cantidades vendidas no se usaron como existencias</strong> y nunca se muestran números de inventario al cliente.</div>
 <div class="toolbar"><label>Buscar código o producto<input type="search" id="tpv-search" placeholder="Ej. TPV052, cuernito, smoothie…"></label><button class="secondary" id="tpv-refresh" type="button">↻ Actualizar</button><button class="outline" id="tpv-exit" type="button">Cerrar sesión</button></div>
 <div class="tabs" id="tpv-tabs"><button data-view="pending" aria-pressed="true" type="button">Pendientes</button><button data-view="published" aria-pressed="false" type="button">Publicados</button><button data-view="extras" aria-pressed="false" type="button">Extras</button><button data-view="all" aria-pressed="false" type="button">Todos</button></div>
 <p class="count" id="tpv-showing">Cargando productos…</p>
@@ -52,5 +52,5 @@ main{max-width:1180px;margin:auto;padding:25px 16px 70px}.top{display:flex;justi
 </main>
 <script src="./pwa.js"></script>
 <script src="./filler-cloud.js?v=32"></script>
-<script src="./catalogo-tpv.js?v=32"></script>
+<script src="./catalogo-tpv.js?v=33"></script>
 </body></html>
