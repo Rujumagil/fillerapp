@@ -79,23 +79,67 @@ $("new-password").addEventListener("submit",async e=>{
     message("✓ Contraseña actualizada. Ahora inicia sesión con tu nueva contraseña.");
   }catch(err){message(err.message,true);}finally{button.disabled=false;}
 });
-function showMember(){
-$("visitor").hidden=true;$("member").hidden=false;
-$("member-name").textContent=profile.full_name;
-$("member-email").textContent=session.user?.email||"";
-const f=$("preferences");f.elements.name.value=profile.full_name;f.elements.phone.value=profile.phone||"";f.elements.promotions.checked=!!profile.promotions_opt_in;
+function editProfile(open){
+  const fields=$("profile-edit"),toggle=$("edit-profile"),summary=$("profile-display");
+  if(!fields||!toggle)return;
+  fields.hidden=!open;
+  if(summary)summary.hidden=open;
+  toggle.setAttribute("aria-expanded",String(open));
+  toggle.textContent=open?"Cerrar edición":"Editar datos";
+  const name=$("profile-name-editor");if(name)name.required=open;
+  if(open)name?.focus();
 }
+function updateLastOrder(){
+  const link=$("member-orders-link"),description=$("member-orders-description");
+  if(!link||!description)return;
+  let saved=null;
+  try{saved=JSON.parse(localStorage.getItem("filler_last_tracking_v1")||"null");}catch{}
+  const tokenValue=String(saved?.token||"");
+  const valid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(tokenValue);
+  // Este acceso es del navegador actual, no un historial ligado a la cuenta.
+  description.textContent=valid?"Ver seguimiento guardado en este dispositivo":"Sin pedidos guardados en este dispositivo";
+  if(valid){
+    link.href="./pedido.html#token="+encodeURIComponent(tokenValue);
+    link.removeAttribute("aria-disabled");link.removeAttribute("tabindex");
+    link.classList.remove("is-inactive");
+  }else{
+    link.removeAttribute("href");link.setAttribute("aria-disabled","true");link.tabIndex=-1;
+    link.classList.add("is-inactive");
+  }
+}
+function showMember(){
+  $("visitor").hidden=true;$("member").hidden=false;
+  const display=String(profile?.full_name||session?.user?.user_metadata?.filler_display_name||"cliente").trim()||"cliente";
+  $("member-name").textContent=display;
+  $("member-email").textContent=session?.user?.email||"";
+  const initials=display.split(/\\s+/).filter(Boolean).slice(0,2).map(part=>part[0].toUpperCase()).join("");
+  $("avatar-initials").textContent=initials||"FC";
+  $("profile-view-name").textContent=display;
+  $("profile-view-email").textContent=session?.user?.email||"—";
+  $("profile-view-phone").textContent=profile?.phone||"Sin registrar";
+  const f=$("preferences");f.elements.name.value=display;
+  f.elements.phone.value=profile?.phone||"";
+  f.elements.promotions.checked=!!profile?.promotions_opt_in;
+  editProfile(false);
+  updateLastOrder();
+}
+$("edit-profile").addEventListener("click",()=>{
+  editProfile($("profile-edit").hidden);
+});
+$("cancel-profile-edit").addEventListener("click",()=>{
+  const f=$("preferences");
+  f.elements.name.value=profile?.full_name||"";
+  f.elements.phone.value=profile?.phone||"";
+  editProfile(false);
+});
 async function loadProfile(){
 const access=await token();if(!access){$("visitor").hidden=false;$("member").hidden=true;return;}
 const rows=await request("filler_customers?select=user_id,full_name,phone,promotions_opt_in&user_id=eq."+encodeURIComponent(session.user.id));
 profile=rows?.[0]||null;
 if(!profile){
 profile={full_name:session.user?.user_metadata?.filler_display_name||"",phone:null,promotions_opt_in:false};
-$("visitor").hidden=true;$("member").hidden=false;
-$("member-name").textContent=profile.full_name||"cliente";
-$("member-email").textContent=session.user?.email||"";
-const form=$("preferences");form.elements.name.value=profile.full_name;form.elements.phone.value="";form.elements.promotions.checked=false;
-message("Completa y guarda tu perfil. Las promociones permanecen desactivadas hasta que las aceptes.");
+showMember();
+message("Completa tus datos desde «Editar datos». Las promociones están desactivadas hasta que las aceptes.");
 return;
 }
 showMember();
