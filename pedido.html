@@ -45,6 +45,12 @@
     .notice{font-size:13px;color:var(--muted);margin-top:20px;line-height:1.6}
     .ready{background:#e1f7e7;border-radius:14px;padding:14px;font-weight:850;margin-top:15px;color:#0d603c}
     .error{color:#9e372b}
+    .customer-messages{margin-top:19px;padding:17px;border:1px solid #cae4d1;border-radius:18px;background:#f3fbf5}
+    .customer-messages h2{font-size:17px;letter-spacing:-.02em;margin:0 0 12px;color:#0d5838}
+    .customer-message{padding:13px 14px;border-radius:13px;background:#fff;margin-bottom:9px;border:1px solid #e0eee2}
+    .customer-message:last-child{margin-bottom:0}
+    .customer-message .customer-message-date{display:block;color:#697c70;font-size:11px;margin:0 0 7px;font-weight:750}
+    .customer-message p{color:#163f2b;font-size:14px;line-height:1.55;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
     [hidden]{display:none!important}
     @media(min-width:650px){main{padding-top:45px}}
   </style>
@@ -65,6 +71,10 @@
         <div class="step" data-step="3" role="listitem"><div class="symbol">✓</div>Entregado</div>
       </div>
       <div id="ready-banner" class="ready" hidden>🎉 ¡Tu pedido ya está listo! Puedes pasar a recogerlo.</div>
+      <section class="customer-messages" id="customer-messages" aria-label="Mensajes de cocina" aria-live="polite" hidden>
+        <h2>✉ Mensajes de Filler Café</h2>
+        <div id="customer-message-list"></div>
+      </section>
       <div class="info">
         <div class="details"><span class="label">Recolección</span><span class="value" id="pickup">—</span></div>
         <div class="details"><span class="label">Actualizado</span><span class="value" id="updated">—</span></div>
@@ -78,7 +88,7 @@
     <p class="notice">El estado se actualiza aproximadamente cada 5 segundos. Activa los avisos en tu dispositivo para recibir una notificación cuando cocina marque tu pedido como listo, incluso si cierras esta página. Requiere conexión y permisos de notificaciones. Conserva tu enlace de seguimiento en privado.</p>
   </main>
   <script src="pwa.js"></script>
-  <script src="filler-cloud.js"></script>
-  <script src="order-tracking.js"></script>
+  <script src="filler-cloud.js?v=28"></script>
+  <script src="order-tracking.js?v=28"></script>
 </body>
 </html>
