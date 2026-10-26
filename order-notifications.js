@@ -69,45 +69,21 @@
       document.title="🔔 PEDIDO NUEVO — Filler Café";
       overlay.querySelector("#filler-popup-show").focus({preventScroll:true});
     }
-    // Alarma reforzada para cocina: secuencia doble y armónicos audibles en móvil.
-    // No puede aumentar el volumen físico de Android ni cambiar el tono de Web Push cerrado.
+    // Sonido oficial Filler Café: versión de cocina del motivo do-mi-sol-do.
     function sound(){
       if(!audioEnabled||!audio)return;
       audio.resume().then(()=>{
-        const base=audio.currentTime+.025;
-        const peak=LEVELS[readLevel()];
-        const phrase=[
-          {hz:783.99,at:0,d:.18},{hz:987.77,at:.22,d:.18},
-          {hz:880,at:.45,d:.18},{hz:1174.66,at:.69,d:.32}
-        ];
-        for(const shift of [0,1.21]){
-          for(const note of phrase){
-            const at=base+shift+note.at;
-            const primary=audio.createOscillator();
-            const harmonic=audio.createOscillator();
-            const harmonicLevel=audio.createGain();
-            const envelope=audio.createGain();
-            primary.type="triangle";
-            primary.frequency.setValueAtTime(note.hz,at);
-            harmonic.type="sine";
-            harmonic.frequency.setValueAtTime(note.hz*2,at);
-            harmonicLevel.gain.setValueAtTime(.15,at);
-            envelope.gain.setValueAtTime(.001,at);
-            envelope.gain.linearRampToValueAtTime(peak,at+.018);
-            envelope.gain.setValueAtTime(peak*.85,at+note.d*.55);
-            envelope.gain.exponentialRampToValueAtTime(.001,at+note.d);
-            primary.connect(envelope);
-            harmonic.connect(harmonicLevel);
-            harmonicLevel.connect(envelope);
-            envelope.connect(audio.destination);
-            primary.start(at);harmonic.start(at);
-            primary.stop(at+note.d+.01);harmonic.stop(at+note.d+.01);
-            primary.onended=()=>{
-              primary.disconnect();harmonic.disconnect();harmonicLevel.disconnect();envelope.disconnect();
-            };
-          }
-        }
-      }).catch(error=>onStatus("El celular bloqueó el sonido de la página. Toca «Activar sonido» de nuevo.",true));
+        if(window.FillerSounds?.play(audio,"newOrder",readLevel()))return;
+        // Respaldo sencillo si el archivo de identidad sonora no cargó.
+        const at=audio.currentTime+.02,osc=audio.createOscillator(),gain=audio.createGain();
+        osc.type="triangle";osc.frequency.setValueAtTime(783.99,at);
+        gain.gain.setValueAtTime(.001,at);
+        gain.gain.linearRampToValueAtTime(.25,at+.02);
+        gain.gain.exponentialRampToValueAtTime(.001,at+.50);
+        osc.connect(gain);gain.connect(audio.destination);
+        osc.start(at);osc.stop(at+.52);
+        osc.onended=()=>{osc.disconnect();gain.disconnect();};
+      }).catch(()=>onStatus("El celular bloqueó el audio. Toca «Activar alarma» para habilitarlo.",true));
     }
     async function systemNotification(title,details,tag){
       if(!("Notification" in window)||Notification.permission!=="granted")return false;
