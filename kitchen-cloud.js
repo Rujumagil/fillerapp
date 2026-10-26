@@ -73,6 +73,7 @@
             '<div class="actions print-actions">'+
             '<button type="button" data-print="'+escape(o.uuid)+'" data-kind="cocina">🖨 Imprimir comanda</button>'+
             '<button type="button" class="secondary" data-print="'+escape(o.uuid)+'" data-kind="cliente">Ticket cliente</button>'+
+            '<button type="button" class="secondary" data-message="'+escape(o.uuid)+'">✉ Mensaje al cliente</button>'+
             '</div>'+
             (o.status==="Listo"?
               '<div class="order-ready-note" role="status">✓ Estado «Listo» publicado en el seguimiento web del cliente.</div>':"")+
@@ -88,6 +89,14 @@
   root.addEventListener("click",async event=>{
     const button=event.target.closest("button");
     if(!button||!root.contains(button))return;
+    const messageId=button.dataset.message;
+    if(messageId){
+      const order=orders.find(o=>o.uuid===messageId);
+      if(!order)return message("No se encontró este pedido.",true);
+      if(!window.FillerKitchenMessages)return message("El panel de mensajes aún está cargando; actualiza Cocina.",true);
+      window.FillerKitchenMessages.open(order);
+      return;
+    }
     const printId=button.dataset.print;
     const changeId=button.dataset.change;
     if(printId){
