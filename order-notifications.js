@@ -73,6 +73,7 @@
     function sound(){
       if(!audioEnabled||!audio)return;
       audio.resume().then(()=>{
+        window.FillerSounds?.prepare(audio).catch(()=>{});
         if(window.FillerSounds?.play(audio,"newOrder",readLevel()))return;
         // Respaldo sencillo si el archivo de identidad sonora no cargó.
         const at=audio.currentTime+.02,osc=audio.createOscillator(),gain=audio.createGain();
@@ -113,6 +114,7 @@
       try{
         if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();
         await audio.resume();audioEnabled=true;
+        await window.FillerSounds?.prepare(audio).catch(()=>{});
       }catch(error){onStatus("Audio no disponible: "+error.message,true);}
       let permission="unsupported";
       try{permission=await permissionRequest;}catch{}
