@@ -112,7 +112,7 @@ function showMember(){
   const display=String(profile?.full_name||session?.user?.user_metadata?.filler_display_name||"cliente").trim()||"cliente";
   $("member-name").textContent=display;
   $("member-email").textContent=session?.user?.email||"";
-  const initials=display.split(/\\s+/).filter(Boolean).slice(0,2).map(part=>part[0].toUpperCase()).join("");
+  const initials=display.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0].toUpperCase()).join("");
   $("avatar-initials").textContent=initials||"FC";
   $("profile-view-name").textContent=display;
   $("profile-view-email").textContent=session?.user?.email||"—";
