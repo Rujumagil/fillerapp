@@ -10,6 +10,7 @@
   const token=(tokenParam||lastStored?.token||"").trim();
   let lastStatus=null, audio=null, soundEnabled=false, firstLoad=true, timer=null;
   let hasAlerts=false;
+  let messagesLoaded=false,knownMessages=new Set();
   const PUSH_API="https://filler-push.proyectocompas-info.workers.dev";
   const VAPID_PUBLIC="BAbjSZ6EjTAd00X6YZApNN8O2fWj5P2o8XSQbuUJTRX9pbQ5G9dZWne12rSSu3lI3BQhslH9FHhqHtWlYyKp8oQ";
   function vapidBytes(value){
@@ -58,6 +59,42 @@
     else if(order.status==="Entregado")document.title="✓ Pedido entregado · Filler Café";
     else document.title="Mi pedido · Filler Café";
   }
+  function renderKitchenMessages(items){
+    const panel=el("customer-messages"),list=el("customer-message-list");
+    if(!panel||!list)return;
+    const messages=Array.isArray(items)?items.filter(m=>m&&typeof m.message==="string"):[];
+    const fresh=messagesLoaded?messages.filter(m=>m.id&&!knownMessages.has(m.id)):[];
+    knownMessages=new Set(messages.map(m=>m.id).filter(Boolean));
+    messagesLoaded=true;
+    panel.hidden=messages.length===0;
+    list.replaceChildren();
+    for(const m of messages){
+      const card=document.createElement("article");
+      card.className="customer-message";
+      const date=document.createElement("small");
+      date.className="customer-message-date";
+      const moment=new Date(m.created_at);
+      date.textContent=(m.kind==="listo"?"✅ Listo · ":"☕ Cocina · ")+
+        (Number.isFinite(moment.getTime())?moment.toLocaleString("es-MX",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"");
+      const content=document.createElement("p");
+      content.textContent=m.message;
+      card.append(date,content);list.append(card);
+    }
+    const extra=fresh.find(m=>m.kind!=="listo");
+    if(extra && hasAlerts && !document.hidden){
+      sound();
+      if("Notification" in window&&Notification.permission==="granted"){
+        const options={body:String(extra.message).slice(0,140),tag:"filler-message-"+extra.id,
+          icon:"./assets/filler-icon-192.png",data:{url:"./pedido.html"+location.hash}};
+        try{
+          navigator.serviceWorker?.getRegistration().then(reg=>{
+            if(reg?.active)reg.showNotification("☕ Mensaje de Filler Café",options);
+            else new Notification("☕ Mensaje de Filler Café",options);
+          }).catch(()=>{});
+        }catch{}
+      }
+    }
+  }
   // Firma sonora Filler Cliente: tres notas ascendentes de pedido listo.
   function sound(){
     if(!soundEnabled||!audio)return;
@@ -94,6 +131,7 @@
     try{
       const order=await FillerCloud.orderStatus(token);
       updateView(order);
+      renderKitchenMessages(order.messages);
       try{localStorage.setItem("filler_last_tracking_v1",JSON.stringify({token,code:order.code}));}catch{}
       if(lastStatus!=="Listo" && order.status==="Listo"&&!firstLoad)notifyReady(order.code);
       lastStatus=order.status;
