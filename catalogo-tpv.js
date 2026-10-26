@@ -31,7 +31,7 @@ async function load(){
  el("tpv-refresh").disabled=true;notify("Consultando productos y códigos oficiales…");
  try{
   const [a,b]=await Promise.all([
-   request("filler_products?select=id,tpv_code,name,category,price,active&tpv_code=not.is.null&order=tpv_code.asc"),
+   request("filler_products?select=id,tpv_code,name,category,price,stock,active&tpv_code=not.is.null&order=tpv_code.asc"),
    request("filler_extras?select=id,tpv_code,name,price,enabled&tpv_code=not.is.null&order=tpv_code.asc")
   ]);
   products=Array.isArray(a)?a:[];extras=Array.isArray(b)?b:[];
@@ -75,6 +75,15 @@ function display(){
   price.setAttribute("aria-label","Precio de "+item.name);
   label.append(price);
   const buttons=element("div","product-actions");
+  const inventoryLabel=isExtra?null:element("label","","Existencia interna (no se muestra al cliente)");
+  const inventory=isExtra?null:element("input");
+  if(inventory){
+    inventory.type="number";inventory.min="0";inventory.step="1";
+    inventory.value=String(item.stock||0);
+    inventory.setAttribute("aria-label","Existencia interna de "+item.name);
+    inventoryLabel.append(inventory);
+  }
+
   const save=element("button","secondary","Guardar precio");
   const toggle=element("button",isActive?"outline":"",""+(isActive?"Retirar":"Publicar"));
   const text=element("small","muted",isActive?"Actualmente visible para clientes.":"No disponible para pedido hasta publicarlo.");
@@ -83,6 +92,10 @@ function display(){
    const raw=price.value.trim(),cost=Number(raw);
    if(raw===""||!Number.isFinite(cost)||cost<0||cost>100000){notify("Introduce un precio válido para "+item.name+".",true);price.focus();return;}
    if(activeChange===true&&cost<=0){notify("Define un precio mayor que cero antes de publicar "+item.name+".",true);price.focus();return;}
+   if(activeChange===true&&!isExtra&&Number(item.stock)<=0){
+     notify("Antes de publicar "+item.name+", configura su existencia interna. Las ventas de octubre no indican inventario disponible.",true);
+     inventory.focus();return;
+   }
    if(activeChange===true&&!confirm("¿Publicar "+item.name+" ("+item.tpv_code+") a "+money(cost)+"? Verifica que las existencias internas estén configuradas."))return;
    if(activeChange===false&&!confirm("¿Retirar "+item.name+" del menú público? No modifica existencias."))return;
    busy=true;save.disabled=true;toggle.disabled=true;
@@ -98,10 +111,33 @@ function display(){
    }catch(error){notify("No se guardó "+item.tpv_code+": "+error.message,true)}
    finally{busy=false;save.disabled=false;toggle.disabled=false;}
   };
+  let stockButton=null;
+  if(inventory){
+    stockButton=element("button","secondary","Guardar existencia");
+    stockButton.addEventListener("click",async()=>{
+      if(busy)return;
+      const newStock=Number(inventory.value);
+      if(inventory.value.trim()===""||!Number.isInteger(newStock)||newStock<0||newStock>1000000){
+        notify("La existencia debe ser un número entero igual o mayor que cero.",true);
+        inventory.focus();return;
+      }
+      busy=true;stockButton.disabled=true;
+      try{
+        const updated=await request("filler_products?id=eq."+encodeURIComponent(item.id),"PATCH",{stock:newStock});
+        if(!Array.isArray(updated)||updated.length!==1)throw Error("No se pudo confirmar la actualización.");
+        Object.assign(item,updated[0]);
+        notify("✓ Existencia interna actualizada para "+item.tpv_code+". El número nunca aparece en el menú público.");
+        display();
+      }catch(error){notify("No se actualizó la existencia: "+error.message,true);}
+      finally{busy=false;stockButton.disabled=false;}
+    });
+  }
   save.addEventListener("click",()=>send(null));
   toggle.addEventListener("click",()=>send(!isActive));
   buttons.append(save,toggle);
-  bottom.append(label,buttons);
+  if(stockButton)buttons.append(stockButton);
+  if(inventoryLabel)bottom.append(label,inventoryLabel,buttons);
+  else bottom.append(label,buttons);
   card.append(top,bottom,text);
   host.append(card);
  }
