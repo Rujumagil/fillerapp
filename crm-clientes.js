@@ -8,6 +8,36 @@
     box.textContent=text;box.classList.toggle("error",error);box.hidden=!text;
   };
   let customers=[],selected=null,secret="",working=false;
+  const HIDDEN_KEY="filler_crm_hidden_customers_v1";
+  let hiddenView=false,hideSelection=null;
+  let hiddenIds=new Set();
+  try{
+    const ids=JSON.parse(localStorage.getItem(HIDDEN_KEY)||"[]");
+    if(Array.isArray(ids))hiddenIds=new Set(ids.filter(x=>typeof x==="string"));
+  }catch{}
+  function saveHidden(){
+    localStorage.setItem(HIDDEN_KEY,JSON.stringify([...hiddenIds]));
+  }
+  function toggleHidden(open){
+    hiddenView=!!open;
+    const button=el("crm-hidden-toggle");
+    button.setAttribute("aria-pressed",String(hiddenView));
+    button.textContent=(hiddenView?"← Volver a activos":"Ocultos ("+customers.filter(c=>hiddenIds.has(c.id)).length+")");
+    el("crm-search").value="";
+    draw();
+  }
+  function closeHide(){
+    const dialog=el("crm-hide-dialog");
+    if(dialog.open)dialog.close();
+    hideSelection=null;
+  }
+  function showHide(c){
+    if(!c)return;
+    hideSelection=c;
+    el("crm-hide-customer").textContent="Cliente: "+c.name+" · "+c.email;
+    el("crm-hide-dialog").showModal();
+  }
+
   const date=value=>{
     if(!value)return "Sin actividad";
     const d=new Date(value);
@@ -61,17 +91,21 @@
   }
   function draw(){
     const term=el("crm-search").value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
-    const view=customers.filter(c=>{
+    const visible=customers.filter(c=>!hiddenIds.has(c.id));
+    const scope=hiddenView?customers.filter(c=>hiddenIds.has(c.id)):visible;
+    const view=scope.filter(c=>{
       const haystack=[c.name,c.email,c.phone].join(" ").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
       return haystack.includes(term);
     });
-    el("crm-count").textContent=customers.length;
-    el("crm-confirmed").textContent=customers.filter(c=>c.confirmed).length;
-    el("crm-pending").textContent=customers.filter(c=>!c.confirmed).length;
+    el("crm-count").textContent=visible.length;
+    el("crm-confirmed").textContent=visible.filter(c=>c.confirmed).length;
+    el("crm-pending").textContent=visible.filter(c=>!c.confirmed).length;
+    const toggle=el("crm-hidden-toggle");
+    toggle.textContent=hiddenView?"← Volver a activos":"Ocultos ("+customers.filter(c=>hiddenIds.has(c.id)).length+")";
     const body=el("crm-rows");body.replaceChildren();
     if(!view.length){
       const tr=document.createElement("tr"),td=tr.insertCell();
-      td.colSpan=5;td.className="empty";td.textContent=term?"No encontramos clientes con esta búsqueda.":"Todavía no hay registros de Mi Filler.";
+      td.colSpan=5;td.className="empty";td.textContent=term?"No encontramos clientes con esta búsqueda.":(hiddenView?"No tienes clientes ocultos en este navegador.":"No hay clientes visibles en este listado.");
       body.append(tr);
     }
     for(const c of view){
@@ -93,9 +127,23 @@
       button.title=c.confirmed?"Generar contraseña temporal":"Primero debe confirmar su correo";
       button.addEventListener("click",()=>openReset(c.id));
       action.append(button);
+      const hide=document.createElement("button");
+      hide.type="button";hide.className="secondary";
+      hide.style.marginLeft="7px";
+      hide.style.marginTop="6px";
+      hide.textContent=hiddenView?"↶ Restaurar":"Ocultar";
+      hide.title=hiddenView?"Volver a mostrar en este navegador":"Ocultar solo en este navegador, no borra cuenta de Supabase";
+      hide.addEventListener("click",()=>{
+        if(hiddenView){
+          hiddenIds.delete(c.id);
+          try{saveHidden();draw();notice("✓ Cliente restaurado en este navegador.");}
+          catch(error){hiddenIds.add(c.id);notice("No se pudo guardar el cambio de visibilidad.",true);}
+        }else showHide(c);
+      });
+      action.append(hide);
       body.append(tr);
     }
-    el("crm-showing").textContent="Mostrando "+view.length+" de "+customers.length+" cuentas"+(term?" para la búsqueda":"")+".";
+    el("crm-showing").textContent="Mostrando "+view.length+" de "+scope.length+" registros "+(hiddenView?"ocultos":"visibles")+(term?" para la búsqueda":"")+". Esto solo afecta la vista de este navegador.";
   }
   async function load(){
     el("crm-refresh").disabled=true;notice("Actualizando registros…");
@@ -171,6 +219,21 @@
     if(!secret)return;
     try{await navigator.clipboard.writeText(secret);el("crm-copy-temp").textContent="✓ Copiada";setTimeout(()=>{el("crm-copy-temp").textContent="Copiar contraseña";},2300);}
     catch{notice("No pudimos copiar la contraseña automáticamente.",true);}
+  });
+  el("crm-hidden-toggle").addEventListener("click",()=>toggleHidden(!hiddenView));
+  el("crm-hide-cancel").addEventListener("click",closeHide);
+  el("crm-hide-dialog").addEventListener("cancel",()=>{hideSelection=null;});
+  el("crm-hide-confirm").addEventListener("click",()=>{
+    if(!hideSelection)return;
+    const clientId=hideSelection.id;
+    hiddenIds.add(clientId);
+    try{
+      saveHidden();closeHide();draw();
+      notice("✓ Cliente oculto en este navegador. Su cuenta en Supabase sigue activa.");
+    }catch(error){
+      hiddenIds.delete(clientId);
+      notice("No se pudo guardar la preferencia local. Intenta de nuevo.",true);
+    }
   });
   el("crm-refresh").addEventListener("click",load);
   el("crm-search").addEventListener("input",draw);
