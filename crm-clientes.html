@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#006241">
+<meta name="robots" content="noindex,nofollow">
+<title>CRM de clientes | Control Filler Café</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./assets/filler-icon-192.png">
+<style>
+:root{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#203d30;background:#f8f6ef;--green:#006241;--dark:#073c2c;--line:#e0e7df;--muted:#677a6e;--orange:#f47b20}*{box-sizing:border-box}body{margin:0;background:#f8f6ef;min-height:100vh}a{color:var(--green)}button,input{font:inherit}button{border:0;cursor:pointer;background:var(--green);color:#fff;font-size:13px;font-weight:800;padding:12px 17px;border-radius:12px}button:disabled{opacity:.54;cursor:not-allowed}button.secondary{background:#eef5f0;color:var(--green)}button.outline{border:1px solid #b8d1bf;background:white;color:var(--green)}button.warning{background:var(--orange);color:white}main{max-width:1140px;margin:auto;padding:24px 18px 70px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:21px}.top a{text-decoration:none;font-size:13px;font-weight:850}.logo{display:flex;gap:12px;align-items:center}.logo img{width:73px;height:55px;object-fit:contain}.logo strong{display:block;font-size:17px}.logo small{color:var(--muted);font-weight:600}.hero{background:linear-gradient(130deg,#083d2d,#006241);border-radius:23px;padding:27px;color:white;margin-bottom:17px;display:flex;align-items:center;justify-content:space-between;gap:15px}.hero h1{font-size:clamp(26px,4vw,38px);margin:0 0 7px;letter-spacing:-.04em}.hero p{margin:0;color:#d2ebdc;font-size:13px;line-height:1.55;max-width:640px}.hero-icon{font-size:51px;opacity:.8}.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:21px;margin-bottom:16px;box-shadow:0 8px 29px rgba(25,53,31,.045)}.notice{margin:0 0 15px;padding:12px 14px;color:#075537;background:#eaf5ed;border:1px solid #c5e5ce;border-radius:11px;font-size:13px;line-height:1.55}.notice.error{background:#fff1ec;color:#a23a24;border-color:#ebcebf}[hidden]{display:none!important}.muted{color:var(--muted)}.mini{font-size:12px;line-height:1.55}.stack{display:grid;gap:12px}label{display:grid;gap:6px;font-size:13px;font-weight:750}input{border:1px solid #bdd0c2;border-radius:11px;padding:12px 13px;width:100%;max-width:100%;color:#1a3d2c;background:#fff}input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #ffa44d;outline-offset:2px}.login{max-width:450px;margin:0 auto}.login h2{margin:0;font-size:24px}.login button{width:100%}.dashboard{display:grid;gap:15px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{background:white;border:1px solid var(--line);border-radius:17px;padding:18px}.stat small{color:var(--muted);display:block;font-size:11px;font-weight:800;letter-spacing:.02em}.stat strong{display:block;margin-top:5px;font-size:30px;letter-spacing:-.045em;color:#0b573b}.toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}.toolbar h2{margin:0;font-size:21px}.toolbar .buttons{display:flex;gap:8px;flex-wrap:wrap}.search{position:relative;max-width:390px}.results-table{width:100%;border-collapse:collapse}.results-table th{font-size:11px;text-align:left;color:#68796e;letter-spacing:.07em;text-transform:uppercase;background:#f4f8f4;padding:12px}.results-table td{padding:14px 12px;border-bottom:1px solid #e7eee7;vertical-align:middle;font-size:13px}.results-table tr:last-child td{border-bottom:0}.results-table td strong{display:block;font-size:13px;overflow-wrap:anywhere}.results-table td small{display:block;font-size:11px;color:#697a6d;margin-top:4px}.table-wrap{overflow-x:auto}.status{display:inline-flex;gap:4px;align-items:center;border-radius:100px;padding:6px 9px;background:#e5f5ea;color:#0b6a41;font-size:11px;font-weight:850;white-space:nowrap}.status.pending{background:#fff3db;color:#8d6114}.status.reset{background:#fff0e5;color:#b55119}.results-table button{white-space:nowrap}.empty{padding:35px 14px;text-align:center;color:#6b7d70}.help{display:grid;gap:9px;background:#fffdf7;border:1px solid #f1dfc8;border-radius:13px;padding:15px;font-size:12px;line-height:1.55;color:#655443;margin-top:15px}.temporary-dialog{border:0;border-radius:24px;padding:0;width:min(94vw,520px);max-height:90dvh;overflow:auto;box-shadow:0 25px 90px #0923177d;color:#204131}.temporary-dialog::backdrop{background:#071e15bc}.dialog-inner{padding:26px}.dialog-inner h2{font-size:23px;margin:0 0 8px}.dialog-inner p{font-size:13px;line-height:1.55}.temp-output{margin:16px 0;padding:16px;border-radius:13px;background:#f1f7f2;border:1px dashed #9dc8aa;font-size:19px;line-height:1.4;font-weight:800;letter-spacing:.04em;overflow-wrap:anywhere;text-align:center;font-family:ui-monospace,Consolas,monospace}.dialog-actions{display:flex;gap:9px;flex-wrap:wrap}.dialog-actions button{flex:1}.security{background:#fff1e1;color:#80521e;border-radius:12px;padding:13px;font-size:12px;line-height:1.55;margin:12px 0}.footer{font-size:11px;color:#859388;text-align:center;padding:14px}@media(max-width:750px){.hero{padding:22px}.hero-icon{display:none}.stats{grid-template-columns:repeat(3,1fr);gap:8px}.stat{padding:13px}.stat strong{font-size:24px}.results-table{min-width:650px}.card{padding:17px}.dialog-inner{padding:21px}}
+</style>
+</head>
+<body><main>
+<header class="top"><div class="logo"><img src="./assets/filler-logo-oficial.webp" alt="Filler Café"><div><strong>Control Filler</strong><small>Administración de clientes</small></div></div><a href="./admin.html">← Control general</a></header>
+<section class="hero"><div><h1>CRM de clientes</h1><p>Consulta los registros de Mi Filler, verifica el estado de las cuentas y ayuda con la recuperación de acceso desde un área segura.</p></div><div class="hero-icon" aria-hidden="true">👥</div></section>
+<p id="crm-notice" class="notice" role="status" aria-live="polite" hidden></p>
+<section id="crm-login" class="card login" aria-label="Acceso administrativo">
+<h2>Acceso de administrador</h2><p class="muted mini">Inicia sesión con la cuenta <strong>admin</strong> de Filler Café. Cocina y los clientes no tienen acceso a este módulo.</p>
+<form id="crm-login-form" class="stack">
+<label>Usuario<input name="username" value="admin" required readonly autocomplete="username"></label>
+<label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label>
+<button type="submit">Entrar al CRM</button>
+</form>
+</section>
+<section id="crm-dashboard" class="dashboard" hidden>
+<div class="stats">
+<div class="stat"><small>Clientes registrados</small><strong id="crm-count">—</strong></div>
+<div class="stat"><small>Correo confirmado</small><strong id="crm-confirmed">—</strong></div>
+<div class="stat"><small>Por activar</small><strong id="crm-pending">—</strong></div>
+</div>
+<div class="card">
+<div class="toolbar"><h2>Directorio de clientes</h2><div class="buttons"><button id="crm-refresh" class="secondary" type="button">↻ Actualizar</button><button id="crm-logout" class="outline" type="button">Cerrar sesión</button></div></div>
+<label class="search">Buscar por nombre, correo o teléfono<input id="crm-search" type="search" placeholder="Buscar cliente…" autocomplete="off"></label>
+<div class="table-wrap"><table class="results-table"><thead><tr><th>Cliente</th><th>Contacto</th><th>Registro</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="crm-rows"><tr><td colspan="5">Cargando…</td></tr></tbody></table></div>
+<p id="crm-showing" class="mini muted"></p>
+<div class="help"><strong>Protección de las cuentas</strong><span>Las contraseñas actuales nunca son visibles. Confirma la identidad del cliente antes de restablecer su acceso. La contraseña temporal se mostrará una sola vez y el cliente tendrá que reemplazarla al iniciar sesión. No la compartas en grupos ni la guardes en hojas de cálculo.</span></div>
+</div>
+</section>
+<dialog class="temporary-dialog" id="crm-reset-dialog" aria-labelledby="crm-reset-title">
+<div class="dialog-inner"><h2 id="crm-reset-title">Restablecer acceso</h2><p id="crm-reset-customer"></p>
+<div id="crm-reset-start"><p>Esta acción reemplazará la contraseña anterior del cliente. Confirma su identidad antes de continuar.</p><div class="security">La nueva contraseña se mostrará solo una vez. El cliente debe entrar a Mi Filler y cambiarla por una contraseña personal.</div><div class="dialog-actions"><button id="crm-reset-cancel" type="button" class="secondary">Cancelar</button><button id="crm-reset-confirm" type="button" class="warning">Generar temporal</button></div></div>
+<div id="crm-reset-result" hidden><p>Contraseña temporal generada correctamente:</p><div id="crm-temp-value" class="temp-output" aria-label="Contraseña temporal generada"></div><div class="security">Entrégala únicamente al titular de la cuenta. No se enviará automáticamente por correo ni por WhatsApp.</div><div class="dialog-actions"><button id="crm-copy-temp" type="button">Copiar contraseña</button><button id="crm-reset-close" type="button" class="secondary">Cerrar y ocultar</button></div></div>
+<p id="crm-reset-error" class="notice error" role="alert" hidden></p></div>
+</dialog>
+<p class="footer">Filler Café · Acceso exclusivo de administración · Los cambios de contraseña quedan registrados sin guardar la contraseña.</p>
+</main>
+<script src="./pwa.js"></script>
+<script src="./filler-cloud.js?v=29"></script>
+<script src="./crm-clientes.js?v=29"></script>
+</body>
+</html>
