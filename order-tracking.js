@@ -99,6 +99,7 @@
   function sound(kind="ready"){
     if(!soundEnabled||!audio)return;
     audio.resume().then(()=>{
+      window.FillerSounds?.prepare(audio).catch(()=>{});
       if(window.FillerSounds?.play(audio,kind,"alto"))return;
       const at=audio.currentTime+.02,osc=audio.createOscillator(),gain=audio.createGain();
       osc.type="sine";osc.frequency.setValueAtTime(kind==="message"?659.25:783.99,at);
@@ -147,7 +148,7 @@
     const request=("Notification" in window && Notification.permission==="default")
       ? Notification.requestPermission()
       : Promise.resolve("Notification" in window?Notification.permission:"unsupported");
-    try{audio=new (window.AudioContext||window.webkitAudioContext)();await audio.resume();soundEnabled=true;}catch{}
+    try{audio=new (window.AudioContext||window.webkitAudioContext)();await audio.resume();soundEnabled=true;await window.FillerSounds?.prepare(audio).catch(()=>{});}catch{}
     let permission="unsupported";
     try{permission=await request;}catch{}
     hasAlerts=true;
