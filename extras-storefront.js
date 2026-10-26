@@ -130,7 +130,7 @@
       const available = Number(item.stock) - reserved(item.id);
       const photo = item.image ? 'style="background-image:url(&quot;' + esc(item.image) + '&quot;);background-size:contain;background-position:center center;background-repeat:no-repeat;background-color:#fff"' : "";
       const options = eligible(item) && activeExtras().length;
-      const stockLabel = available <= 0 ? "Agotado" : available <= 5 ? "¡Últimas " + available + "!" : "Disponible";
+      const stockLabel = available <= 0 ? "Agotado" : "Disponible";
       const stockClass = available <= 0 ? "sold-out" : available <= 5 ? "low" : "";
       const addLabel = available <= 0 ? "Agotado" : options ? "Extras +" : "Agregar";
       return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" data-has-photo="' + Boolean(item.image || item.imageKey) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3><div class="item-bottom"><strong class="price">' + money(Number(item.price)) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options ? "Elegir extras de " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(item.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
