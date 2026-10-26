@@ -82,7 +82,7 @@
     }
     const extra=fresh.find(m=>m.kind!=="listo");
     if(extra && hasAlerts && !document.hidden){
-      sound();
+      sound("message");
       if("Notification" in window&&Notification.permission==="granted"){
         const options={body:String(extra.message).slice(0,140),tag:"filler-message-"+extra.id,
           icon:"./assets/filler-icon-192.png",data:{url:"./pedido.html"+location.hash}};
@@ -95,22 +95,19 @@
       }
     }
   }
-  // Firma sonora Filler Cliente: tres notas ascendentes de pedido listo.
-  function sound(){
+  // Motivo original Filler: aviso cálido de pedido listo y nota suave para observaciones.
+  function sound(kind="ready"){
     if(!soundEnabled||!audio)return;
     audio.resume().then(()=>{
-      const start=audio.currentTime+.03;
-      [{hz:587.33,at:0,d:.20},{hz:739.99,at:.24,d:.20},{hz:987.77,at:.50,d:.44}]
-        .forEach(note=>{
-          const osc=audio.createOscillator(),gain=audio.createGain(),at=start+note.at;
-          osc.type="sine";
-          osc.frequency.setValueAtTime(note.hz,at);
-          gain.gain.setValueAtTime(.001,at);
-          gain.gain.linearRampToValueAtTime(.16,at+.035);
-          gain.gain.exponentialRampToValueAtTime(.002,at+note.d);
-          osc.connect(gain);gain.connect(audio.destination);
-          osc.start(at);osc.stop(at+note.d+.02);
-        });
+      if(window.FillerSounds?.play(audio,kind,"alto"))return;
+      const at=audio.currentTime+.02,osc=audio.createOscillator(),gain=audio.createGain();
+      osc.type="sine";osc.frequency.setValueAtTime(kind==="message"?659.25:783.99,at);
+      gain.gain.setValueAtTime(.001,at);
+      gain.gain.linearRampToValueAtTime(.16,at+.025);
+      gain.gain.exponentialRampToValueAtTime(.001,at+.36);
+      osc.connect(gain);gain.connect(audio.destination);
+      osc.start(at);osc.stop(at+.38);
+      osc.onended=()=>{osc.disconnect();gain.disconnect();};
     }).catch(()=>{});
   }
   async function notifyReady(code){
