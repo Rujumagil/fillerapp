@@ -1,0 +1,616 @@
+{
+  "source": "Ingresos de Menu 26 10 26.pdf",
+  "date": "2026-10-26",
+  "note": "Sin cantidades de almacén ni precios inferidos. Los productos sin precio quedan pendientes en control interno.",
+  "rows": [
+    {
+      "code": "TPV001",
+      "name": "Chilaquiles rojos",
+      "category": "Chilaquiles",
+      "existing_id": "chilaquiles-rojos-sencillos",
+      "kind": "product"
+    },
+    {
+      "code": "TPV002",
+      "name": "Chilaquiles verdes",
+      "category": "Chilaquiles",
+      "existing_id": "verdes-sencillos",
+      "kind": "product"
+    },
+    {
+      "code": "TPV010",
+      "name": "Sincronizada de jamón y queso manchego",
+      "category": "Sándwiches y más",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV012",
+      "name": "Pan de dulce",
+      "category": "Antojo",
+      "existing_id": "pan-dulce",
+      "kind": "product"
+    },
+    {
+      "code": "TPV013",
+      "name": "Sándwich de jamón",
+      "category": "Sándwiches y más",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV014",
+      "name": "Sándwich de atún",
+      "category": "Sándwiches y más",
+      "existing_id": "sandwich-atun",
+      "kind": "product"
+    },
+    {
+      "code": "TPV015",
+      "name": "Sándwich de pollo",
+      "category": "Sándwiches y más",
+      "existing_id": "sandwich-pollo",
+      "kind": "product"
+    },
+    {
+      "code": "TPV016",
+      "name": "Sándwich de salchicha",
+      "category": "Sándwiches y más",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV017",
+      "name": "Torta de milanesa",
+      "category": "Sándwiches y más",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV018",
+      "name": "Torta de jamón",
+      "category": "Sándwiches y más",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV020",
+      "name": "Torta de salchicha",
+      "category": "Sándwiches y más",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV021",
+      "name": "Cuernito de jamón y queso",
+      "category": "Sándwiches y más",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV028",
+      "name": "Smoothie de mango",
+      "category": "Bebidas frías",
+      "existing_id": "smoothie-mango",
+      "kind": "product"
+    },
+    {
+      "code": "TPV029",
+      "name": "Smoothie de yogur de manzana",
+      "category": "Bebidas frías",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV031",
+      "name": "Smoothie de piña colada",
+      "category": "Bebidas frías",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV032",
+      "name": "Frappé Oreo",
+      "category": "Bebidas frías",
+      "existing_id": "frappe-oreo",
+      "kind": "product"
+    },
+    {
+      "code": "TPV033",
+      "name": "Frappé de café",
+      "category": "Bebidas frías",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV034",
+      "name": "Frappé de cajeta",
+      "category": "Bebidas frías",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV035",
+      "name": "Frappé de fresa",
+      "category": "Bebidas frías",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV036",
+      "name": "Frappé de vainilla",
+      "category": "Bebidas frías",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV046",
+      "name": "Ensalada de pollo",
+      "category": "Ensaladas",
+      "existing_id": "ensalada-pollo",
+      "kind": "product"
+    },
+    {
+      "code": "TPV047",
+      "name": "Ensalada de atún",
+      "category": "Ensaladas",
+      "existing_id": "ensalada-de-atun-75939",
+      "kind": "product"
+    },
+    {
+      "code": "TPV052",
+      "name": "Café americano Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV053",
+      "name": "Café con leche Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV054",
+      "name": "Cappuccino Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV055",
+      "name": "Latte Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV057",
+      "name": "Cappuccino vainilla Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV058",
+      "name": "Latte vainilla Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV059",
+      "name": "Chocolate Abuelita Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV060",
+      "name": "Moka canela Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV061",
+      "name": "Mokaccino Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV062",
+      "name": "Chocovainilla Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV063",
+      "name": "Café americano Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV064",
+      "name": "Café con leche Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV065",
+      "name": "Cappuccino Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV066",
+      "name": "Latte Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV068",
+      "name": "Cappuccino vainilla Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV069",
+      "name": "Latte vainilla Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV070",
+      "name": "Chocolate Abuelita Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV071",
+      "name": "Moka canela Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV072",
+      "name": "Mokaccino Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV073",
+      "name": "Chocovainilla Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV074",
+      "name": "Café americano Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV075",
+      "name": "Café con leche Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV076",
+      "name": "Cappuccino Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV077",
+      "name": "Latte Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV079",
+      "name": "Cappuccino vainilla Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV080",
+      "name": "Latte vainilla Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV081",
+      "name": "Chocolate Abuelita Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV082",
+      "name": "Moka canela Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV083",
+      "name": "Mokaccino Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV084",
+      "name": "Chocovainilla Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV091",
+      "name": "Crudité",
+      "category": "Frutas y bowls",
+      "existing_id": "crudite-1792010318907-147",
+      "kind": "product"
+    },
+    {
+      "code": "TPV092",
+      "name": "Cóctel de frutas",
+      "category": "Frutas y bowls",
+      "existing_id": "coctel-fruta",
+      "kind": "product"
+    },
+    {
+      "code": "TPV099",
+      "name": "Chilaquiles rojos con pollo",
+      "category": "Chilaquiles",
+      "existing_id": "rojos-con-pollo",
+      "kind": "product"
+    },
+    {
+      "code": "TPV100",
+      "name": "Chilaquiles verdes con pollo",
+      "category": "Chilaquiles",
+      "existing_id": "verdes-con-pollo",
+      "kind": "product"
+    },
+    {
+      "code": "TPV103",
+      "name": "Chilaquiles rojos con huevo",
+      "category": "Chilaquiles",
+      "existing_id": "rojos-con-huevo",
+      "kind": "product"
+    },
+    {
+      "code": "TPV104",
+      "name": "Chilaquiles verdes con huevo",
+      "category": "Chilaquiles",
+      "existing_id": "verdes-con-huevo",
+      "kind": "product"
+    },
+    {
+      "code": "TPV105",
+      "name": "Huevo con jamón y queso",
+      "category": "De la plancha",
+      "existing_id": "huevo-jamon-queso",
+      "kind": "product"
+    },
+    {
+      "code": "TPV106",
+      "name": "Huevos con tocino",
+      "category": "De la plancha",
+      "existing_id": "huevos-tocino",
+      "kind": "product"
+    },
+    {
+      "code": "TPV107",
+      "name": "Huevos de espinaca con queso",
+      "category": "De la plancha",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV109",
+      "name": "Mollete con tocino",
+      "category": "Sándwiches y más",
+      "existing_id": "molletes-con-tocino-1792010418029-535",
+      "kind": "product"
+    },
+    {
+      "code": "TPV111",
+      "name": "Extra huevo",
+      "category": "Extras",
+      "existing_id": null,
+      "kind": "extra"
+    },
+    {
+      "code": "TPV112",
+      "name": "Extra pechuga de pavo",
+      "category": "Extras",
+      "existing_id": null,
+      "kind": "extra"
+    },
+    {
+      "code": "TPV113",
+      "name": "Vaso de fruta",
+      "category": "Frutas y bowls",
+      "existing_id": "vaso-de-fruta-1792010561706-701",
+      "kind": "product"
+    },
+    {
+      "code": "TPV114",
+      "name": "Mix de frutos secos",
+      "category": "Frutas y bowls",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPV115",
+      "name": "Licuado de leche con chocolate",
+      "category": "Bebidas frías",
+      "existing_id": "licuado-de-lecho-con-chocolate-1792010613542-188",
+      "kind": "product"
+    },
+    {
+      "code": "TPV116",
+      "name": "Licuado de plátano",
+      "category": "Bebidas frías",
+      "existing_id": "licuado-de-platano-1792010641761-563",
+      "kind": "product"
+    },
+    {
+      "code": "TPV117",
+      "name": "Leche deslactosada",
+      "category": "Extras",
+      "existing_id": null,
+      "kind": "extra"
+    },
+    {
+      "code": "TPV118",
+      "name": "Leche de almendra",
+      "category": "Extras",
+      "existing_id": null,
+      "kind": "extra"
+    },
+    {
+      "code": "TPV119",
+      "name": "Leche de coco",
+      "category": "Extras",
+      "existing_id": null,
+      "kind": "extra"
+    },
+    {
+      "code": "TPV121",
+      "name": "Café americano 12 oz",
+      "category": "Bebidas calientes",
+      "existing_id": "americano-12",
+      "kind": "product"
+    },
+    {
+      "code": "TPV124",
+      "name": "Jugo verde",
+      "category": "Bebidas frías",
+      "existing_id": "jugo-verde-1792010789028-489",
+      "kind": "product"
+    },
+    {
+      "code": "TPV125",
+      "name": "Chapata",
+      "category": "Sándwiches y más",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPVS016",
+      "name": "Huevo a la mexicana",
+      "category": "De la plancha",
+      "existing_id": "huevo-mexicana",
+      "kind": "product"
+    },
+    {
+      "code": "TPVS018",
+      "name": "Brusquetas (avocado toast)",
+      "category": "Sándwiches y más",
+      "existing_id": "avocado-toast",
+      "kind": "product"
+    },
+    {
+      "code": "TPVS021",
+      "name": "Overnight (avena o chía con yogur natural)",
+      "category": "Frutas y bowls",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPVS022",
+      "name": "Parfait",
+      "category": "Frutas y bowls",
+      "existing_id": "parfait",
+      "kind": "product"
+    },
+    {
+      "code": "TPVS024",
+      "name": "Sándwich de jamón y queso panela en pan de 12 granos",
+      "category": "Sándwiches y más",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPVS025",
+      "name": "Sándwich de atún saludable en pan de 12 granos",
+      "category": "Sándwiches y más",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPVS026",
+      "name": "Sándwich de pollo saludable en pan de 12 granos",
+      "category": "Sándwiches y más",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPVS027",
+      "name": "Club sándwich",
+      "category": "Sándwiches y más",
+      "existing_id": "club-sandwich",
+      "kind": "product"
+    },
+    {
+      "code": "TPVS030",
+      "name": "Croque Madame",
+      "category": "Sándwiches y más",
+      "existing_id": "croque-madame-1792010869308-203",
+      "kind": "product"
+    },
+    {
+      "code": "TPVS055",
+      "name": "Jugo de naranja",
+      "category": "Bebidas frías",
+      "existing_id": "jugo-naranja",
+      "kind": "product"
+    },
+    {
+      "code": "TPVS065",
+      "name": "Molletes",
+      "category": "Sándwiches y más",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPVS068",
+      "name": "Plato de fruta",
+      "category": "Frutas y bowls",
+      "existing_id": null,
+      "kind": "product"
+    },
+    {
+      "code": "TPVS071",
+      "name": "Extra aguacate",
+      "category": "Extras",
+      "existing_id": null,
+      "kind": "extra"
+    }
+  ]
+}
