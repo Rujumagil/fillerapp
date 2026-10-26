@@ -197,9 +197,16 @@
       const link=document.createElement("a");
       link.href="./pedido.html#token="+encodeURIComponent(item.token);
       link.textContent="Ver seguimiento del pedido";
-      alertContent.append(headline,detail,link);
+      const notes=Array.isArray(order.messages)?order.messages:[];
+      const latest=notes.length?notes[notes.length-1]:null;
+      if(latest?.message){
+        const note=document.createElement("p");
+        note.style.cssText="white-space:pre-wrap;background:#eaf5ec;color:#174b34;padding:11px;border-radius:11px;font-weight:750;overflow-wrap:anywhere";
+        note.textContent="✉ Cocina: "+String(latest.message);
+        alertContent.append(headline,detail,note,link);
+      }else{alertContent.append(headline,detail,link);}
       const seenKey="filler_seen_status_"+item.token;
-      const revision=String(order.status||"")+":"+String(order.status_updated_at||"");
+      const revision=String(order.status||"")+":"+String(order.status_updated_at||"")+":"+String(latest?.id||"");
       const opened=alertPanel.hidden===false;
       if(opened){try{localStorage.setItem(seenKey,revision);}catch{}}
       alertDot.hidden=opened||localStorage.getItem(seenKey)===revision;
