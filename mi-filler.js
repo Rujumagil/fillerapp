@@ -3,6 +3,7 @@
 const BASE="https://qwxydjotwhniahaovrff.supabase.co";
 const KEY="sb_publishable_17NekbDHp_ssL_Pf-CnqPg_v0acxqn3";
 const STORE="filler_customer_session_v1";
+const AUTH_RETURN="https://rujumagil.github.io/fillerapp/mi-filler.html";
 const $=id=>document.getElementById(id);
 let session=null,profile=null,recoveryAccess=null;
 const message=(text,bad=false)=>{const el=$("message");el.hidden=false;el.textContent=text;el.className="notice"+(bad?" error":"");};
@@ -50,7 +51,7 @@ $("recover").addEventListener("submit",async e=>{
   button.disabled=true;
   try{
     const email=form.elements.email.value.trim();
-    const response=await fetch(BASE+"/auth/v1/recover?redirect_to="+encodeURIComponent(location.origin+location.pathname),{
+    const response=await fetch(BASE+"/auth/v1/recover?redirect_to="+encodeURIComponent(AUTH_RETURN),{
       method:"POST",headers:headers(),
       body:JSON.stringify({email})
     });
@@ -106,7 +107,7 @@ try{
 const name=form.elements.name.value.trim(),email=form.elements.email.value.trim(),password=form.elements.password.value;
 if(name.length<2)throw Error("Ingresa tu nombre completo.");
 const accepted=form.elements.promotions.checked;
-const response=await auth("signup",{email,password,data:{filler_display_name:name}});
+const response=await auth("signup?redirect_to="+encodeURIComponent(AUTH_RETURN),{email,password,data:{filler_display_name:name}});
 if(response.user && Array.isArray(response.user.identities) && response.user.identities.length===0){
   $("login").elements.email.value=email;
   tab("login");
@@ -152,6 +153,39 @@ try{await saveProfile({full_name:f.elements.name.value.trim(),phone:f.elements.p
 catch(err){message(err.message,true);}finally{b.disabled=false;}
 });
 $("logout").addEventListener("click",async()=>{const access=await token();if(access)fetch(BASE+"/auth/v1/logout",{method:"POST",headers:{...headers(),Authorization:"Bearer "+access}}).catch(()=>{});save(null);profile=null;$("member").hidden=true;$("visitor").hidden=false;tab("login");message("Sesión cerrada.");});
+// El enlace de confirmación de Supabase regresa con los tokens en el fragmento.
+async function receiveEmailConfirmation(params){
+  const access=params.get("access_token"), refresh=params.get("refresh_token");
+  if(params.get("type")!=="signup" || !access || !refresh)return false;
+  try{
+    const response=await fetch(BASE+"/auth/v1/user",{headers:{apikey:KEY,Authorization:"Bearer "+access},cache:"no-store"});
+    if(!response.ok)throw Error("No pudimos validar el enlace de confirmación.");
+    const user=await response.json();
+    save({access_token:access,refresh_token:refresh,user,expires_at:Math.floor(Date.now()/1000)+Number(params.get("expires_in")||3600)});
+    history.replaceState(null,"",location.pathname);
+    await loadProfile();
+    message("✓ Tu correo quedó confirmado. Bienvenido a Mi Filler. Completa tu perfil si te faltan datos.");
+  }catch(error){
+    history.replaceState(null,"",location.pathname);
+    tab("login");
+    message("No pudimos completar la activación. Intenta iniciar sesión o solicita un nuevo enlace.",true);
+  }
+  return true;
+}
+const resend=document.createElement("button");
+resend.type="button";resend.className="secondary";resend.textContent="Reenviar correo de activación";
+resend.style.marginTop="8px";
+$("login").appendChild(resend);
+resend.addEventListener("click",async()=>{
+  const email=$("login").elements.email.value.trim();
+  if(!email){message("Primero escribe el correo de tu cuenta.",true);$("login").elements.email.focus();return;}
+  resend.disabled=true;
+  try{
+    const response=await auth("resend",{type:"signup",email,options:{email_redirect_to:AUTH_RETURN}});
+    message("Si tu cuenta está pendiente de activación, recibirás un nuevo enlace. Revisa tu bandeja y spam.");
+  }catch(error){message("No se pudo solicitar el enlace: "+error.message,true);}
+  finally{resend.disabled=false;}
+});
 const recoveryParams=new URLSearchParams(location.hash.slice(1));
 if(recoveryParams.get("type")==="recovery" && recoveryParams.get("access_token")){
   recoveryAccess=recoveryParams.get("access_token");
@@ -161,5 +195,5 @@ if(recoveryParams.get("type")==="recovery" && recoveryParams.get("access_token")
 }else if(recoveryParams.get("error")){
   tab("login");message("El enlace de recuperación venció o no es válido. Solicita uno nuevo.",true);
 }
-if(!recoveryAccess)loadProfile().catch(err=>message("No pudimos recuperar tu perfil: "+err.message,true));
+if(!recoveryAccess){receiveEmailConfirmation(recoveryParams).then(handled=>{if(!handled)loadProfile().catch(err=>message("No pudimos recuperar tu perfil: "+err.message,true));});}
 })();
