@@ -25,7 +25,7 @@
     });
     root.innerHTML='<div class="empty">Ingresa con usuario y contraseña para ver los pedidos reales. Usa la cuenta admin o cocina autorizada.</div>';
   }
-  const mexicoToday=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+  const mexicoToday=()=>{const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());const p=k=>parts.find(x=>x.type===k)?.value||"";return p("year")+"-"+p("month")+"-"+p("day");};
   function isScheduled(o){const m=String(o.pickup||"").match(/^(20\d{2}-\d{2}-\d{2})\s/);return !!m && m[1]>mexicoToday() && o.status==="Nuevo";}
   function statusRow(o){
     if(isScheduled(o))return {cls:"new",line:"wait",label:"Programado",detail:"Para mañana · no preparar todavía"};
