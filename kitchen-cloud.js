@@ -25,7 +25,10 @@
     });
     root.innerHTML='<div class="empty">Ingresa con usuario y contraseña para ver los pedidos reales. Usa la cuenta admin o cocina autorizada.</div>';
   }
+  const mexicoToday=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+  function isScheduled(o){const m=String(o.pickup||"").match(/^(20\d{2}-\d{2}-\d{2})\s/);return !!m && m[1]>mexicoToday() && o.status==="Nuevo";}
   function statusRow(o){
+    if(isScheduled(o))return {cls:"new",line:"wait",label:"Programado",detail:"Para mañana · no preparar todavía"};
     const age=Date.now()-o.createdTs;
     const since=Date.now()-o.statusUpdatedAt;
     if(["Nuevo","Preparando"].includes(o.status)&&age>600000) return {cls:"late",line:"alert",label:"Fuera de tiempo",detail:min(age)+" min desde que entró"};
@@ -37,6 +40,7 @@
     return {cls:"new",line:"wait",label:"Nuevo",detail:min(age)+" min desde que entró"};
   }
   const sections=[
+    {title:"📅 Programados para mañana",status:"Programado"},
     {title:"🟡 Por preparar",status:"Nuevo"},
     {title:"🔵 En preparación",status:"Preparando"},
     {title:"🟢 Listos para entregar",status:"Listo"},
@@ -49,7 +53,7 @@
       return;
     }
     root.innerHTML=sections.map(group=>{
-      const filtered=orders.filter(o=>o.status===group.status)
+      const filtered=orders.filter(o=>group.status==="Programado"?isScheduled(o):(o.status===group.status&&!isScheduled(o)))
         .sort((a,b)=>group.status==="Entregado"?b.createdTs-a.createdTs:a.createdTs-b.createdTs);
       if(!filtered.length)return "";
       return '<section class="kitchen-group"><h2>'+group.title+' <small>('+filtered.length+')</small></h2>'+
@@ -78,9 +82,9 @@
             (o.status==="Listo"?
               '<div class="order-ready-note" role="status">✓ Estado «Listo» publicado en el seguimiento web del cliente.</div>':"")+
             (!["Entregado","Cancelado"].includes(o.status)?'<div class="actions state-actions">'+
-            (o.status==="Nuevo"?'<button type="button" data-change="'+escape(o.uuid)+'" data-status="Preparando">Preparando</button>':"")+
-            (o.status!=="Listo"?'<button type="button" data-change="'+escape(o.uuid)+'" data-status="Listo">Listo</button>':"")+
-            '<button type="button" data-change="'+escape(o.uuid)+'" data-status="Entregado">Entregado</button></div>':"")+
+            (o.status==="Nuevo"&&!isScheduled(o)?'<button type="button" data-change="'+escape(o.uuid)+'" data-status="Preparando">Preparando</button>':"")+
+            (o.status!=="Listo"&&!isScheduled(o)?'<button type="button" data-change="'+escape(o.uuid)+'" data-status="Listo">Listo</button>':"")+
+            (isScheduled(o)?'<span class="muted">Se preparará mañana</span>':'<button type="button" data-change="'+escape(o.uuid)+'" data-status="Entregado">Entregado</button>')+'</div>':"")+
             '</article>';
         }).join("")+'</div></section>';
     }).join("");
@@ -141,7 +145,7 @@
     running=true;
     try{
       const fresh=await FillerCloud.orders();
-      notifier.incoming(fresh);
+      notifier.incoming(fresh.filter(o=>!isScheduled(o)));
       orders=fresh;render();
       message("En línea con Supabase · "+new Date().toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit",second:"2-digit"})+" · Pedidos sincronizados cada 3 segundos");
     }catch(err){message("Sin conexión a pedidos: "+err.message,true);}
