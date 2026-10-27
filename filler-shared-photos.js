@@ -1,4 +1,4 @@
-/* Fotografías oficiales compartidas de Filler Café. Requiere sesión de personal admin. */
+/* Fotografías oficiales compartidas de Fiiller Café. Requiere sesión de personal admin. */
 (() => {
   "use strict";
   const section=document.createElement("section");
