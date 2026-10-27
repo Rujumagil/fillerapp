@@ -1,4 +1,4 @@
-/* Filler Café: catálogo local configurable de extras. */
+/* Fiiller Café: catálogo local configurable de extras. */
 (() => {
   const KEY = "fillerExtras";
   const defaults = [
