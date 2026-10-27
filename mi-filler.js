@@ -207,22 +207,15 @@ try{
 const name=form.elements.name.value.trim(),email=form.elements.email.value.trim(),password=form.elements.password.value;
 if(name.length<2)throw Error("Ingresa tu nombre completo.");
 const accepted=form.elements.promotions.checked;
-const response=await auth("signup?redirect_to="+encodeURIComponent(AUTH_RETURN),{email,password,data:{filler_display_name:name}});
-if(response.user && Array.isArray(response.user.identities) && response.user.identities.length===0){
-  $("login").elements.email.value=email;
-  tab("login");
-  message("Tu cuenta ya está registrada. Si no recuerdas tu contraseña, haz clic en «¿Olvidaste tu contraseña? Recupérala aquí».");
-}else if(response.access_token && response.user){
-save(response);
-await saveProfile({full_name:name,phone:null,promotions_opt_in:accepted});
-await loadProfile();
-message("Cuenta creada. Ya puedes administrar tus preferencias.");
-}else{
+const response=await fetch(BASE+"/functions/v1/filler-branded-signup",{
+ method:"POST",headers:headers(),body:JSON.stringify({name,email,password}),cache:"no-store"
+});
+const data=await response.json().catch(()=>({}));
+if(!response.ok)throw Error(data.message||"No fue posible registrar tu cuenta. Intenta de nuevo.");
 try{sessionStorage.setItem("filler_pending_signup_v1",JSON.stringify({email,name,accepted}));}catch{}
 form.reset();tab("login");
 $("login").elements.email.value=email;
-message("Si es tu primera vez, revisa el correo de activación. Si ya tienes cuenta, inicia sesión. ¿No recuerdas tu contraseña? Haz clic en «¿Olvidaste tu contraseña? Recupérala aquí».");
-}
+message(data.message||"Revisa tu correo para activar tu cuenta Mi Fiiller. Si ya tienes una cuenta, inicia sesión.");
 }catch(err){message(err.message,true);}finally{button.disabled=false;}
 });
 async function saveProfile(data){
