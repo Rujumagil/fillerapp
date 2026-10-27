@@ -51,12 +51,12 @@ $("recover").addEventListener("submit",async e=>{
   button.disabled=true;
   try{
     const email=form.elements.email.value.trim();
-    const response=await fetch(BASE+"/functions/v1/filler-branded-recovery",{
+    const response=await fetch(BASE+"/auth/v1/recover?redirect_to="+encodeURIComponent(AUTH_RETURN),{
       method:"POST",headers:headers(),
       body:JSON.stringify({email})
     });
     const data=await response.json().catch(()=>({}));
-    if(!response.ok)throw Error("No se pudo solicitar el correo de recuperación de Fiiller. Intenta de nuevo más tarde.");
+    if(!response.ok)throw Error(data.msg||data.error_description||data.message||"No se pudo enviar el correo de recuperación.");
     message("Si tu correo está registrado, recibirás un enlace para recuperar tu contraseña. Revisa también spam y promociones.");
   }catch(err){message(err.message,true);}finally{button.disabled=false;}
 });
