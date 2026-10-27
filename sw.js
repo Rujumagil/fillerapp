@@ -98,9 +98,9 @@ self.addEventListener("push",event=>{
   let payload={};
   try{payload=event.data.json();}catch{payload={body:event.data.text()};}
   const customer=payload?.type==="customer";
-  const code=typeof payload.code==="string"?payload.code.slice(0,40):"Filler Café";
+  const code=typeof payload.code==="string"?payload.code.slice(0,40):"Fiiller Café";
   const tracking=typeof payload.tracking_url==="string" && /^\.\/pedido\.html#token=[0-9a-f-]{36}$/i.test(payload.tracking_url)?payload.tracking_url:null;
-  const title=customer?"☕ Aviso de tu pedido Filler":"🔔 Nuevo pedido Filler Café";
+  const title=customer?"☕ Aviso de tu pedido Fiiller":"🔔 Nuevo pedido Fiiller Café";
   const body=customer?String(payload.body||"Tu pedido tiene una actualización.").slice(0,160):code;
   event.waitUntil(self.registration.showNotification(title,{
     body,
