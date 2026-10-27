@@ -3,7 +3,7 @@
 const BASE="https://qwxydjotwhniahaovrff.supabase.co";
 const KEY="sb_publishable_17NekbDHp_ssL_Pf-CnqPg_v0acxqn3";
 const STORE="filler_customer_session_v1";
-const AUTH_RETURN="https://rujumagil.github.io/fillerapp/mi-filler.html";
+const AUTH_RETURN=new URL("./mi-filler.html",window.location.href).href;
 const $=id=>document.getElementById(id);
 let session=null,profile=null,recoveryAccess=null;
 const message=(text,bad=false)=>{const el=$("message");el.hidden=false;el.textContent=text;el.className="notice"+(bad?" error":"");};
