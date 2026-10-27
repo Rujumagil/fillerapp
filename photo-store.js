@@ -1,4 +1,4 @@
-/* Filler Café: fotografías en IndexedDB para no agotar localStorage.
+/* Fiiller Café: fotografías en IndexedDB para no agotar localStorage.
    Las imágenes permanecen en el navegador hasta que se conecte el almacenamiento compartido. */
 (function () {
   "use strict";
@@ -14,7 +14,7 @@
       };
       request.onsuccess = () => { request.result.onversionchange = () => request.result.close(); resolve(request.result); };
       request.onerror = () => reject(request.error || new Error("No se pudo abrir el almacenamiento de fotos."));
-      request.onblocked = () => reject(new Error("Cierra otras pestañas de Filler Café y vuelve a intentarlo."));
+      request.onblocked = () => reject(new Error("Cierra otras pestañas de Fiiller Café y vuelve a intentarlo."));
     }).catch(error => { connection = null; throw error; });
     return connection;
   }
