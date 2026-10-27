@@ -1,4 +1,4 @@
-/* Seguimiento privado del pedido de Filler Café, sin exponer datos personales. */
+/* Seguimiento privado del pedido de Fiiller Café, sin exponer datos personales. */
 (() => {
   "use strict";
   const el=id=>document.getElementById(id);
@@ -34,9 +34,9 @@
   const stages={
     Nuevo:{index:0,title:"¡Ya recibimos tu pedido!",description:"Cocina tiene tu pedido. En cuanto comencemos, verás el cambio aquí."},
     Preparando:{index:1,title:"Estamos preparando tu pedido",description:"Nuestro equipo ya está trabajando para tenerlo listo."},
-    Listo:{index:2,title:"¡Tu pedido está listo!",description:"Pasa a recogerlo en Filler Café. ¡Gracias por esperar!"},
+    Listo:{index:2,title:"¡Tu pedido está listo!",description:"Pasa a recogerlo en Fiiller Café. ¡Gracias por esperar!"},
     Entregado:{index:3,title:"¡Pedido entregado!",description:"Esperamos que disfrutes tu pedido. ¡Gracias por visitarnos!"},
-    Cancelado:{index:-1,title:"Este pedido fue cancelado",description:"Acércate al personal de Filler Café si necesitas ayuda."}
+    Cancelado:{index:-1,title:"Este pedido fue cancelado",description:"Acércate al personal de Fiiller Café si necesitas ayuda."}
   };
   function updateView(order) {
     const config=stages[order.status]||stages.Nuevo;
@@ -55,9 +55,9 @@
       step.classList.toggle("current",n===config.index);
     });
     el("ready-banner").hidden=order.status!=="Listo";
-    if(order.status==="Listo")document.title="🔔 ¡Tu pedido está listo! · Filler Café";
-    else if(order.status==="Entregado")document.title="✓ Pedido entregado · Filler Café";
-    else document.title="Mi pedido · Filler Café";
+    if(order.status==="Listo")document.title="🔔 ¡Tu pedido está listo! · Fiiller Café";
+    else if(order.status==="Entregado")document.title="✓ Pedido entregado · Fiiller Café";
+    else document.title="Mi pedido · Fiiller Café";
   }
   function renderKitchenMessages(items){
     const panel=el("customer-messages"),list=el("customer-message-list");
@@ -88,14 +88,14 @@
           icon:"./assets/filler-icon-192.png",data:{url:"./pedido.html"+location.hash}};
         try{
           navigator.serviceWorker?.getRegistration().then(reg=>{
-            if(reg?.active)reg.showNotification("☕ Mensaje de Filler Café",options);
-            else new Notification("☕ Mensaje de Filler Café",options);
+            if(reg?.active)reg.showNotification("☕ Mensaje de Fiiller Café",options);
+            else new Notification("☕ Mensaje de Fiiller Café",options);
           }).catch(()=>{});
         }catch{}
       }
     }
   }
-  // Motivo original Filler: aviso cálido de pedido listo y nota suave para observaciones.
+  // Motivo original Fiiller: aviso cálido de pedido listo y nota suave para observaciones.
   function sound(kind="ready"){
     if(!soundEnabled||!audio)return;
     audio.resume().then(()=>{
@@ -116,7 +116,7 @@
     sound();
     if("Notification" in window&&Notification.permission==="granted"){
       const title="☕ ¡Tu pedido "+code+" está listo!";
-      const options={body:"Pasa a recogerlo en Filler Café.",icon:"./assets/filler-icon-192.png",
+      const options={body:"Pasa a recogerlo en Fiiller Café.",icon:"./assets/filler-icon-192.png",
         tag:"filler-ready-"+code,requireInteraction:true,data:{url:"./pedido.html"+location.hash}};
       try{
         const registration="serviceWorker" in navigator?await navigator.serviceWorker.getRegistration():null;
