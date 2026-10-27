@@ -1,4 +1,4 @@
-/* Filler Café — mensajes de cocina asociados a una comanda real. */
+/* Fiiller Café — mensajes de cocina asociados a una comanda real. */
 (() => {
   "use strict";
   const style=document.createElement("style");
@@ -56,10 +56,10 @@
   const status=get("filler-msg-result"),history=get("filler-msg-list");
   let current=null,kind="observacion",previousFocus=null,busy=false,sequence=0;
   const templates={
-    ready:"Tu pedido está listo. Puedes pasar a recogerlo en Filler Café. ¡Gracias por esperar!",
+    ready:"Tu pedido está listo. Puedes pasar a recogerlo en Fiiller Café. ¡Gracias por esperar!",
     prep:"Ya estamos preparando tu pedido. ¡Gracias por tu paciencia!",
     delay:"Tu pedido tendrá un pequeño retraso. Estamos trabajando para entregártelo lo antes posible.",
-    counter:"Por favor, acércate al mostrador de Filler Café para consultar tu pedido."
+    counter:"Por favor, acércate al mostrador de Fiiller Café para consultar tu pedido."
   };
   function setStatus(value,error=false){status.textContent=value;status.classList.toggle("error",error);}
   function updateAction(){
