@@ -1,4 +1,4 @@
-/* Filler Café: monitor de cocina con acceso autenticado y actualización automática */
+/* Fiiller Café: monitor de cocina con acceso autenticado y actualización automática */
 (() => {
   "use strict";
   const root=document.getElementById("orders");
