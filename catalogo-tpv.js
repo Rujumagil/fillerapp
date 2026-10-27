@@ -11,7 +11,7 @@ const notify=(message,error=false)=>{
 const money=value=>new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:2}).format(Number(value||0));
 async function authorization(){
  const role=await FillerCloud.staffRole();
- if(role!=="admin")throw Error("Solo la cuenta admin de Filler Café puede editar este catálogo.");
+ if(role!=="admin")throw Error("Solo la cuenta admin de Fiiller Café puede editar este catálogo.");
  let session;
  try{session=JSON.parse(sessionStorage.getItem("filler_staff_session_v1")||"null");}catch{}
  if(!session?.access_token)throw Error("Tu sesión terminó. Vuelve a entrar.");
@@ -106,7 +106,7 @@ function display(){
     const result=await request(name+"?id=eq."+encodeURIComponent(item.id),"PATCH",update);
     if(!Array.isArray(result)||result.length!==1)throw Error("No se pudo verificar el guardado.");
     Object.assign(item,result[0]);
-    notify("✓ "+item.tpv_code+" actualizado en el catálogo de Filler Café.");
+    notify("✓ "+item.tpv_code+" actualizado en el catálogo de Fiiller Café.");
     display();
    }catch(error){notify("No se guardó "+item.tpv_code+": "+error.message,true)}
    finally{busy=false;save.disabled=false;toggle.disabled=false;}
