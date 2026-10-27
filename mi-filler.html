@@ -100,27 +100,16 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <div id="member-orders-summary" style="font-weight:750;color:#006241;margin:12px 0"></div>
 <div id="member-orders-list" aria-live="polite" style="display:grid;gap:12px"><p class="muted">Cargando tu historial…</p></div>
 </section>
-<section class="card" id="feedback-survey" style="margin:18px 0 22px;padding:20px;background:linear-gradient(140deg,#ffffff,#f0f7ef)" aria-label="Encuesta de satisfacción Fiiller">
-<div class="section-heading"><h3>☕ Tu opinión mejora Fiiller</h3></div>
-<p class="muted mini">Responde 10 preguntas con una escala del 1 al 5 y sugiere dos platillos, bebidas o productos que te gustaría encontrar. Tu participación es opcional.</p>
-<form id="filler-feedback-form" class="stack" style="display:grid;gap:13px">
-<label style="display:block;border:1px solid #e1e9df;padding:14px;border-radius:12px;background:#fff"><span style="display:block;font-weight:750;margin-bottom:8px">1. ¿El personal te atendió de manera amable y respetuosa?</span><select name="q1" required style="width:100%"><option value="">Selecciona una calificación</option><option value="5">5 · Excelente</option><option value="4">4 · Muy bien</option><option value="3">3 · Regular</option><option value="2">2 · Malo</option><option value="1">1 · Muy malo</option></select></label>
-<label style="display:block;border:1px solid #e1e9df;padding:14px;border-radius:12px;background:#fff"><span style="display:block;font-weight:750;margin-bottom:8px">2. ¿El personal resolvió tus dudas o solicitudes correctamente?</span><select name="q2" required style="width:100%"><option value="">Selecciona una calificación</option><option value="5">5 · Excelente</option><option value="4">4 · Muy bien</option><option value="3">3 · Regular</option><option value="2">2 · Malo</option><option value="1">1 · Muy malo</option></select></label>
-<label style="display:block;border:1px solid #e1e9df;padding:14px;border-radius:12px;background:#fff"><span style="display:block;font-weight:750;margin-bottom:8px">3. ¿Cómo calificas la atención general durante tu compra?</span><select name="q3" required style="width:100%"><option value="">Selecciona una calificación</option><option value="5">5 · Excelente</option><option value="4">4 · Muy bien</option><option value="3">3 · Regular</option><option value="2">2 · Malo</option><option value="1">1 · Muy malo</option></select></label>
-<label style="display:block;border:1px solid #e1e9df;padding:14px;border-radius:12px;background:#fff"><span style="display:block;font-weight:750;margin-bottom:8px">4. ¿Qué tan satisfecho quedaste con el sabor de los alimentos?</span><select name="q4" required style="width:100%"><option value="">Selecciona una calificación</option><option value="5">5 · Excelente</option><option value="4">4 · Muy bien</option><option value="3">3 · Regular</option><option value="2">2 · Malo</option><option value="1">1 · Muy malo</option></select></label>
-<label style="display:block;border:1px solid #e1e9df;padding:14px;border-radius:12px;background:#fff"><span style="display:block;font-weight:750;margin-bottom:8px">5. ¿Los alimentos se entregaron frescos y a la temperatura adecuada?</span><select name="q5" required style="width:100%"><option value="">Selecciona una calificación</option><option value="5">5 · Excelente</option><option value="4">4 · Muy bien</option><option value="3">3 · Regular</option><option value="2">2 · Malo</option><option value="1">1 · Muy malo</option></select></label>
-<label style="display:block;border:1px solid #e1e9df;padding:14px;border-radius:12px;background:#fff"><span style="display:block;font-weight:750;margin-bottom:8px">6. ¿Cómo calificas la presentación y las porciones?</span><select name="q6" required style="width:100%"><option value="">Selecciona una calificación</option><option value="5">5 · Excelente</option><option value="4">4 · Muy bien</option><option value="3">3 · Regular</option><option value="2">2 · Malo</option><option value="1">1 · Muy malo</option></select></label>
-<label style="display:block;border:1px solid #e1e9df;padding:14px;border-radius:12px;background:#fff"><span style="display:block;font-weight:750;margin-bottom:8px">7. ¿El menú ofrece suficiente variedad de platillos?</span><select name="q7" required style="width:100%"><option value="">Selecciona una calificación</option><option value="5">5 · Excelente</option><option value="4">4 · Muy bien</option><option value="3">3 · Regular</option><option value="2">2 · Malo</option><option value="1">1 · Muy malo</option></select></label>
-<label style="display:block;border:1px solid #e1e9df;padding:14px;border-radius:12px;background:#fff"><span style="display:block;font-weight:750;margin-bottom:8px">8. ¿Encuentras opciones que se ajusten a tus gustos y necesidades?</span><select name="q8" required style="width:100%"><option value="">Selecciona una calificación</option><option value="5">5 · Excelente</option><option value="4">4 · Muy bien</option><option value="3">3 · Regular</option><option value="2">2 · Malo</option><option value="1">1 · Muy malo</option></select></label>
-<label style="display:block;border:1px solid #e1e9df;padding:14px;border-radius:12px;background:#fff"><span style="display:block;font-weight:750;margin-bottom:8px">9. ¿Tu pedido estuvo listo a la hora indicada?</span><select name="q9" required style="width:100%"><option value="">Selecciona una calificación</option><option value="5">5 · Excelente</option><option value="4">4 · Muy bien</option><option value="3">3 · Regular</option><option value="2">2 · Malo</option><option value="1">1 · Muy malo</option></select></label>
-<label style="display:block;border:1px solid #e1e9df;padding:14px;border-radius:12px;background:#fff"><span style="display:block;font-weight:750;margin-bottom:8px">10. ¿Cómo calificas el tiempo total de preparación?</span><select name="q10" required style="width:100%"><option value="">Selecciona una calificación</option><option value="5">5 · Excelente</option><option value="4">4 · Muy bien</option><option value="3">3 · Regular</option><option value="2">2 · Malo</option><option value="1">1 · Muy malo</option></select></label>
-<div style="border-top:1px solid #dce9dc;padding-top:16px"><h4 style="margin:0 0 9px;color:#006241">Tus dos sugerencias para el menú</h4><p class="muted mini">Pueden ser platillos, bebidas, postres u otros productos.</p></div>
-<label>11. Primera sugerencia<input name="suggested_dish" maxlength="120" placeholder="Ej. Ensalada de pollo"></label>
-<label>12. Segunda sugerencia<input name="suggested_product_2" maxlength="120" placeholder="Ej. Matcha frío"></label>
-<label>Comentario adicional (opcional)<textarea name="comment" maxlength="500" rows="3" placeholder="¿Qué podríamos mejorar?"></textarea></label>
-<p id="filler-feedback-message" role="status" aria-live="polite" class="muted mini"></p>
-<button id="send-filler-feedback" type="submit">Enviar encuesta</button>
-</form></section>
+<section class="card" id="feedback-survey" style="margin:18px 0 22px;padding:22px;background:linear-gradient(120deg,#f1f8f3,#fff);border:1px solid #dbe9dd;border-radius:19px">
+<div style="display:flex;align-items:flex-start;gap:15px">
+  <div style="background:#e3f2e7;color:#006241;border-radius:15px;width:52px;height:52px;display:grid;place-items:center;font-size:26px;flex-shrink:0" aria-hidden="true">★</div>
+  <div style="flex:1;min-width:0">
+    <div class="section-heading"><h3 style="margin:0 0 7px">Tu opinión mejora Fiiller</h3></div>
+    <p style="margin:0 0 14px;color:#697d6b;font-size:14px;line-height:1.55">Califica la atención, los alimentos, la variedad y la rapidez con 5 estrellas. También puedes sugerir dos platillos o productos.</p>
+    <a href="./encuesta-satisfaccion.html" style="display:inline-flex;align-items:center;gap:9px;background:#006241;color:white;text-decoration:none;padding:12px 17px;border-radius:12px;font-size:14px;font-weight:800">Responder encuesta <span aria-hidden="true">→</span></a>
+  </div>
+</div>
+</section>
 <div class="member-grid">
 <div class="card">
 <div class="section-heading"><h3>Mis datos</h3><button id="edit-profile" type="button" class="secondary" aria-expanded="false" aria-controls="profile-edit">Editar datos</button></div>
@@ -155,6 +144,6 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 </main>
 <script src="./pwa.js"></script>
 <script src="./mi-filler.js?v=48"></script>
-<script src="./filler-feedback.js?v=50"></script>
+
 </body>
 </html>
