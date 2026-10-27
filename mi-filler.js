@@ -145,7 +145,7 @@ session.user=currentUser;save(session);
 if(currentUser.app_metadata?.filler_require_password_change===true){
   $("visitor").hidden=true;$("member").hidden=true;
   $("temporary-password-required").hidden=false;
-  message("Para seguir usando Mi Filler, reemplaza la contraseña temporal que te proporcionó administración.");
+  message("Para seguir usando Mi Fiiller, reemplaza la contraseña temporal que te proporcionó administración.");
   return;
 }
 $("temporary-password-required").hidden=true;
@@ -253,7 +253,7 @@ async function receiveEmailConfirmation(params){
     save({access_token:access,refresh_token:refresh,user,expires_at:Math.floor(Date.now()/1000)+Number(params.get("expires_in")||3600)});
     history.replaceState(null,"",location.pathname);
     await loadProfile();
-    message("✓ Tu correo quedó confirmado. Bienvenido a Mi Filler. Completa tu perfil si te faltan datos.");
+    message("✓ Tu correo quedó confirmado. Bienvenido a Mi Fiiller. Completa tu perfil si te faltan datos.");
   }catch(error){
     history.replaceState(null,"",location.pathname);
     tab("login");
