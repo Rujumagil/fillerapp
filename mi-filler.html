@@ -100,6 +100,22 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <div id="member-orders-summary" style="font-weight:750;color:#006241;margin:12px 0"></div>
 <div id="member-orders-list" aria-live="polite" style="display:grid;gap:12px"><p class="muted">Cargando tu historial…</p></div>
 </section>
+<section class="card" id="feedback-survey" style="margin:18px 0 22px;padding:20px;background:linear-gradient(140deg,#ffffff,#f0f7ef)" aria-label="Encuesta de satisfacción Fiiller">
+<div class="section-heading"><h3>☕ Tu opinión mejora Fiiller</h3></div>
+<p class="muted mini">Encuesta rápida y opcional. Cuéntanos cómo fue tu experiencia y qué platillo te gustaría encontrar en el menú.</p>
+<form id="filler-feedback-form" class="stack" style="display:grid;gap:13px">
+<label>¿Qué calificación nos das? <strong style="color:#006241">(obligatorio)</strong>
+<select name="rating" required><option value="">Selecciona de 1 a 5</option><option value="5">★★★★★ · Excelente</option><option value="4">★★★★☆ · Muy buena</option><option value="3">★★★☆☆ · Regular</option><option value="2">★★☆☆☆ · Necesita mejorar</option><option value="1">★☆☆☆☆ · Mala</option></select></label>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+<label>Calidad de alimentos<select name="food_rating"><option value="">Sin evaluar</option><option value="5">5 · Excelente</option><option value="4">4 · Muy buena</option><option value="3">3 · Regular</option><option value="2">2 · Mala</option><option value="1">1 · Muy mala</option></select></label>
+<label>Rapidez del servicio<select name="speed_rating"><option value="">Sin evaluar</option><option value="5">5 · Excelente</option><option value="4">4 · Muy buena</option><option value="3">3 · Regular</option><option value="2">2 · Mala</option><option value="1">1 · Muy mala</option></select></label>
+</div>
+<label>¿Qué deberíamos mejorar?<select name="improvement"><option value="ninguno">Todo estuvo bien</option><option value="sabor">Sabor y preparación</option><option value="variedad">Variedad del menú</option><option value="precio">Precios</option><option value="tiempo">Tiempo de entrega</option><option value="atencion">Atención</option><option value="otro">Otro</option></select></label>
+<label>¿Qué platillo o bebida te gustaría que agregáramos?<input name="suggested_dish" maxlength="120" placeholder="Ej. Ensalada de pollo, matcha frío…"></label>
+<label>Comentario o sugerencia adicional<textarea name="comment" maxlength="500" rows="3" placeholder="Ayúdanos a mejorar"></textarea></label>
+<p id="filler-feedback-message" role="status" aria-live="polite" class="muted mini"></p>
+<button id="send-filler-feedback" type="submit">Enviar mi opinión</button>
+</form></section>
 <div class="member-grid">
 <div class="card">
 <div class="section-heading"><h3>Mis datos</h3><button id="edit-profile" type="button" class="secondary" aria-expanded="false" aria-controls="profile-edit">Editar datos</button></div>
@@ -134,5 +150,6 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 </main>
 <script src="./pwa.js"></script>
 <script src="./mi-filler.js?v=48"></script>
+<script src="./filler-feedback.js?v=49"></script>
 </body>
 </html>
