@@ -96,6 +96,8 @@
       try {
         const src = await getURL(key);
         if (!el.isConnected || el.dataset.photoKey !== key || !src) continue;
+        // La foto auténtica siempre tiene prioridad sobre el logo provisional.
+        el.dataset.hasPhoto = "true";
         if (el.tagName === "IMG") {
           el.src = src;
         } else {
