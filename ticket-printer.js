@@ -1,4 +1,4 @@
-/* Filler Café - Impresión individual de cada pedido.
+/* Fiiller Café - Impresión individual de cada pedido.
  * Requiere ticket-print.css en la página. No crea ni altera pedidos.
  */
 (() => {
@@ -30,7 +30,7 @@
         '</div><strong class="tp-qty">'+qty+'×</strong></div>';
     }).join("");
     const totalUnits=items.reduce((n,item)=>n+(Number(item.qty)||0),0);
-    return '<div class="tp-title">FILLER CAFÉ</div>'+
+    return '<div class="tp-title">FIILLER CAFÉ</div>'+
       '<div class="tp-subtitle">'+(isClient?"TICKET DEL CLIENTE":"COMANDA DE COCINA")+'</div>'+
       '<hr class="tp-rule"><div class="tp-code">'+esc(order.id)+'</div>'+
       '<div class="tp-meta"><strong>Pedido:</strong> '+dateTime(order.createdTs)+'</div>'+
