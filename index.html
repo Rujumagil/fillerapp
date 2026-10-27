@@ -369,7 +369,13 @@
         cart.setAttribute("aria-hidden",(!mobileCart()||open)?"false":"true");
         if(mobileCart()){cart.setAttribute("role","dialog");cart.setAttribute("aria-modal",open?"true":"false");}
         else{cart.setAttribute("role","region");cart.removeAttribute("aria-modal");}
-        if(open&&mobileCart()){cart.scrollTop=0;cart.querySelector(".filler-cart-back")?.focus({preventScroll:true});}
+        if(open&&mobileCart()){
+          const active=document.activeElement;
+          const editing=active&&cart.contains(active)&&(
+            active.matches("input, textarea, select, [contenteditable='true']")
+          );
+          if(!editing){cart.scrollTop=0;cart.querySelector(".filler-cart-back")?.focus({preventScroll:true});}
+        }
         else if(focusBeforeCart?.isConnected){focusBeforeCart.focus({preventScroll:true});focusBeforeCart=null;}
       }
       window.openFillerCart=function(){
@@ -385,7 +391,12 @@
       };
       window.addEventListener("popstate",()=>setOpen(Boolean(history.state?.fillerCartOpen)));
       window.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("filler-cart-open")){e.preventDefault();closeFillerCart();}});
-      window.addEventListener("resize",()=>setOpen(Boolean(history.state?.fillerCartOpen)));
+      // El teclado virtual provoca eventos resize en iOS/Android.
+      // No reabrir ni reenfocar el carrito mientras se escribe.
+      const cartMedia=window.matchMedia("(max-width:700px)");
+      const onCartBreakpointChange=()=>setOpen(Boolean(history.state?.fillerCartOpen));
+      if(cartMedia.addEventListener)cartMedia.addEventListener("change",onCartBreakpointChange);
+      else cartMedia.addListener(onCartBreakpointChange);
       setOpen(false);
     })();
   </script>
