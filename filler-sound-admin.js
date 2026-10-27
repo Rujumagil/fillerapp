@@ -1,4 +1,4 @@
-/* Configuración de audio Filler Café — solo admin, sin credenciales de servicio. */
+/* Configuración de audio Fiiller Café — solo admin, sin credenciales de servicio. */
 (()=>{
   "use strict";
   const BASE="https://qwxydjotwhniahaovrff.supabase.co";
@@ -19,7 +19,7 @@
     throw Error("Tu sesión de administración terminó. Vuelve a iniciar sesión.");
   }
   async function requireAdmin(){
-    if((await FillerCloud.staffRole())!=="admin")throw Error("Únicamente el administrador de Filler Café puede editar los sonidos.");
+    if((await FillerCloud.staffRole())!=="admin")throw Error("Únicamente el administrador de Fiiller Café puede editar los sonidos.");
     return sessionToken();
   }
   async function updateSetting(kind,mode,objectPath=null){
@@ -139,7 +139,7 @@
       info("✓ Sonido propio de "+duration.toFixed(1)+" segundos activado. Los equipos abiertos lo descargarán al actualizar.");
     }));
     card.querySelector("[data-restore]").addEventListener("click",()=>run(card,async()=>{
-      if(!confirm("¿Volver al sonido moderno de Filler para este aviso?"))return;
+      if(!confirm("¿Volver al sonido moderno de Fiiller para este aviso?"))return;
       await updateSetting(kind,"modern",null);
       await FillerSounds.reload();
       info("✓ Sonido moderno restaurado. Se aplicará en los equipos.");
