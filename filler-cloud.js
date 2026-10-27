@@ -1,4 +1,4 @@
-/* Filler Café: funciones de datos compartidos. Solo usa una clave pública. */
+/* Fiiller Café: funciones de datos compartidos. Solo usa una clave pública. */
 (() => {
   "use strict";
   const BASE = "https://qwxydjotwhniahaovrff.supabase.co";
@@ -57,7 +57,7 @@
     const account=USER_ACCOUNTS[raw]?raw:Object.keys(USER_ACCOUNTS).find(k=>USER_ACCOUNTS[k]===raw);
     const email=account?USER_ACCOUNTS[account]:null;
     if(!email)throw new Error('Usuario no reconocido. Escribe "admin" o "cocina".');
-    if(typeof password!=="string" || !password)throw new Error("Escribe tu contraseña de Filler Café.");
+    if(typeof password!=="string" || !password)throw new Error("Escribe tu contraseña de Fiiller Café.");
     let res;
     try {
       res=await fetch(BASE+"/auth/v1/token?grant_type=password",{
@@ -84,7 +84,7 @@
     saveSession(data);
     try {
       const staff = await request("filler_staff?select=user_id,role&user_id=eq."+encodeURIComponent(data.user.id),{staff:true});
-      if (!staff?.length) throw new Error("Este usuario todavía no está autorizado para operar Filler Café.");
+      if (!staff?.length) throw new Error("Este usuario todavía no está autorizado para operar Fiiller Café.");
       // El perfil Auth y el rol permitido deben coincidir con el nombre de usuario elegido.
       const expectedRole=account==="admin"?"admin":"cocina";
       if(staff[0].role!==expectedRole) throw new Error("Los permisos de este usuario necesitan revisión.");
