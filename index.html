@@ -412,7 +412,7 @@
       const target=selectedTomorrow?tomorrow:today;
       const slots=[];
       if(selectedTomorrow||current<16*60){
-        for(let hour=8;hour<16;hour++)for(const minute of [0,30]){
+        for(let hour=8;hour<=16;hour++)for(const minute of [0,30]){
           const value=hour*60+minute;
           if(selectedTomorrow||value>=current+10){
             const time=String(hour).padStart(2,"0")+":"+String(minute).padStart(2,"0");
@@ -428,7 +428,7 @@
       select.disabled=!slots.length;
       if(slots.some(x=>x.value===previous))select.value=previous;
       const note=document.getElementById("pickup-help");
-      if(note)note.textContent=selectedTomorrow?"Pedido programado para mañana ("+tomorrow+"). Recogida de 8:00 a 15:30 h.":"Pedidos del día hasta las 16:00 h (hora de Guadalajara). Recolección con mínimo 10 minutos de anticipación.";
+      if(note)note.textContent=selectedTomorrow?"Pedido programado para mañana ("+tomorrow+"). Recogida de 8:00 a 16:30 h.":"Pedidos del día hasta las 16:00 h (hora de Guadalajara). Recolección con mínimo 10 minutos de anticipación.";
     }function sendOrder(){const items=cartItems();const name=document.getElementById("customer-name").value.trim();const phone=document.getElementById("customer-phone").value.trim();if(!items.length)return toast("Agrega al menos un producto.");if(!name||!phone)return toast("Falta nombre y telefono.");items.forEach(l=>itemById(l.id).stock=Math.max(0,itemById(l.id).stock-l.qty));const now=Date.now();const order={id:"F-"+now.toString().slice(-6),date:todayKey,createdAt:new Date(now).toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"}),createdTs:now,statusUpdatedAt:now,customer:name,phone,pickup:document.getElementById("pickup-time").value,notes:document.getElementById("notes").value.trim(),status:"Nuevo",items,total:items.reduce((s,i)=>s+i.price*i.qty,0)};state.orders.unshift(order);state.cart={};save();document.getElementById("client-status").textContent=`Pedido ${order.id} recibido. Te avisaremos al ${phone} cuando este listo.`;document.getElementById("client-status").classList.add("show");toast("Pedido enviado a cocina.");fillerNotify("Pedido recibido",`Tu pedido ${order.id} ya esta en cocina.`);render()}function render(){
   // Una misma categoría jamás debe aparecer dos veces por tildes o espacios.
   for(const item of state.menu)item.cat=canonicalCategory(item.cat);
