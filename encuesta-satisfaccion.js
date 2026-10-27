@@ -36,7 +36,35 @@ form.querySelectorAll(".stars").forEach(group=>{
   group.addEventListener("pointerleave",()=>group.querySelectorAll(".star-choice").forEach(el=>el.classList.remove("preview")));
 });
 selected();
-const today=()=>{const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());const get=k=>parts.find(p=>p.type===k)?.value||"";return get("year")+"-"+get("month")+"-"+get("day");};
+// Mes calendario basado en el reloj de Guadalajara, nunca en el del celular.
+const monthWindow=()=>{
+  const parts=new Intl.DateTimeFormat("en-GB",{
+    timeZone:"America/Mexico_City",year:"numeric",month:"2-digit"
+  }).formatToParts(new Date());
+  const get=type=>Number(parts.find(p=>p.type===type)?.value||0);
+  const year=get("year"),month=get("month");
+  if(!year||!month)throw Error("No se pudo calcular el período mensual.");
+  const start=year+"-"+String(month).padStart(2,"0")+"-01";
+  const next=new Date(Date.UTC(year,month,1));
+  const end=next.toISOString().slice(0,10);
+  const nextLabel=new Intl.DateTimeFormat("es-MX",{
+    timeZone:"UTC",day:"numeric",month:"long",year:"numeric"
+  }).format(next);
+  const label=new Intl.DateTimeFormat("es-MX",{
+    timeZone:"UTC",month:"long",year:"numeric"
+  }).format(new Date(Date.UTC(year,month-1,1)));
+  return {start,end,nextLabel,label};
+};
+let checkedMonth=monthWindow().start;
+function showPeriod(){
+ const p=monthWindow();
+ const period=document.getElementById("survey-month-period");
+ if(period)period.textContent="Encuesta de "+p.label+". Se permite una respuesta por cliente y mes.";
+ const renewal=document.getElementById("survey-renewal");
+ if(renewal)renewal.textContent="Nueva encuesta disponible desde el "+p.nextLabel+".";
+ return p;
+}
+showPeriod();
 async function access(){
   let session;
   try{session=JSON.parse(sessionStorage.getItem("filler_customer_session_v1")||"null");}catch{return null;}
@@ -57,12 +85,20 @@ async function request(path,opts={}){
   if(!r.ok){const data=await r.json().catch(()=>({}));const err=Error(data.message||"No se pudo guardar la encuesta.");err.code=data.code;throw err;}
   return r.status===204?null:await r.json().catch(()=>null);
 }
-function completed(){form.querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=true);output.textContent="✓ ¡Gracias por participar! Tu opinión quedó registrada. Podrás responder nuevamente mañana.";output.scrollIntoView({behavior:"smooth",block:"center"});}
+function completed(){
+  const p=showPeriod();
+  form.querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=true);
+  output.textContent="✓ Ya recibimos tu encuesta de "+p.label+". Gracias por participar. Podrás responder de nuevo el "+p.nextLabel+".";
+  output.scrollIntoView({behavior:"smooth",block:"center"});
+}
 async function check(){
   try{
-    const rows=await request("filler_feedback?select=id&survey_date=eq."+today()+"&limit=1");
+    const p=showPeriod();
+    const rows=await request("filler_feedback?select=id&survey_date=gte."+p.start+
+      "&survey_date=lt."+p.end+"&limit=1");
     if(rows?.length)completed();
-  }catch(error){output.textContent=error.message;}
+    else{output.textContent="Puedes responder la encuesta de "+p.label+". Una respuesta por mes.";button.disabled=false;}
+  }catch(error){output.textContent="No fue posible validar si ya respondiste: "+error.message;button.disabled=true;}
 }
 form.addEventListener("submit",async event=>{
   event.preventDefault();
@@ -84,7 +120,14 @@ form.addEventListener("submit",async event=>{
   };
   button.disabled=true;output.textContent="Enviando tu opinión…";
   try{await request("filler_feedback",{method:"POST",body:payload});completed();}
-  catch(err){button.disabled=false;output.textContent=err.code==="23505"?"Ya registramos tu opinión de hoy. ¡Gracias!":err.message;}
+  catch(err){
+    if(err.code==="23505"){
+      completed();
+    }else{
+      button.disabled=false;
+      output.textContent=err.message;
+    }
+  }
 });
 (async()=>{
   try{
@@ -98,4 +141,9 @@ form.addEventListener("submit",async event=>{
     await check();
   }catch(error){output.textContent="No pudimos verificar tu sesión: "+error.message;button.disabled=true;}
 })();
+// Si la encuesta quedó abierta hasta el siguiente mes, recuperar su disponibilidad
+// al regresar a la pestaña sin exigir al cliente que recuerde recargarla.
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden&&monthWindow().start!==checkedMonth)location.reload();
+});
 })();
