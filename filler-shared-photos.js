@@ -48,7 +48,12 @@
     rows.forEach(row=>{
       const line=document.createElement("div");line.className="line item-line";
       const pic=document.createElement("img");pic.className="thumb";pic.alt="Foto de "+row.name;pic.loading="lazy";
-      if(row.image)pic.src=row.image;else pic.style.background="#f0f3ed";
+      pic.src=row.image||"./assets/filler-logo-oficial.webp";
+      pic.addEventListener("error",()=>{
+        pic.onerror=null;
+        if(!pic.src.endsWith("/assets/filler-logo-oficial.webp"))
+          pic.src="./assets/filler-logo-oficial.webp";
+      },{once:true});
       const area=document.createElement("div");
       const heading=document.createElement("strong");heading.textContent=row.name;
       const state=document.createElement("div");state.className="muted";state.style.fontSize="12px";state.textContent=row.image?"Foto publicada ✓":"Sin foto pública";
