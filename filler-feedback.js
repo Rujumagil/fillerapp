@@ -1,4 +1,4 @@
-/* Encuesta privada de Fiiller Café: una respuesta por cliente cada día. */
+/* Encuesta privada de Fiiller Café: una respuesta por cliente cada mes. */
 (()=>{
 "use strict";
 const BASE="https://qwxydjotwhniahaovrff.supabase.co";
@@ -7,7 +7,16 @@ const form=document.getElementById("filler-feedback-form");
 if(!form)return;
 const output=document.getElementById("filler-feedback-message");
 const button=document.getElementById("send-filler-feedback");
-const today=()=>{const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());const get=k=>parts.find(p=>p.type===k)?.value||"";return get("year")+"-"+get("month")+"-"+get("day");};
+const monthRange=()=>{
+  const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit"}).formatToParts(new Date());
+  const get=k=>Number(parts.find(p=>p.type===k)?.value||0);
+  const y=get("year"),m=get("month");
+  const start=y+"-"+String(m).padStart(2,"0")+"-01";
+  const date=new Date(Date.UTC(y,m,1));
+  const end=date.toISOString().slice(0,10);
+  const next=new Intl.DateTimeFormat("es-MX",{timeZone:"UTC",day:"numeric",month:"long",year:"numeric"}).format(date);
+  return {start,end,next};
+};
 async function access(){
   let session;
   try{session=JSON.parse(sessionStorage.getItem("filler_customer_session_v1")||"null");}catch{return null;}
@@ -28,10 +37,11 @@ async function request(path,opts={}){
   if(!r.ok){const data=await r.json().catch(()=>({}));const err=Error(data.message||"No se pudo guardar la encuesta.");err.code=data.code;throw err;}
   return r.status===204?null:await r.json().catch(()=>null);
 }
-function completed(){form.querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=true);output.textContent="✓ Gracias por compartir tu opinión. Puedes volver a responder mañana.";}
+function completed(){form.querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=true);output.textContent="✓ Gracias por compartir tu opinión. Próxima encuesta disponible el "+monthRange().next+".";}
 async function check(){
   try{
-    const rows=await request("filler_feedback?select=id&survey_date=eq."+today()+"&limit=1");
+    const period=monthRange();
+    const rows=await request("filler_feedback?select=id&survey_date=gte."+period.start+"&survey_date=lt."+period.end+"&limit=1");
     if(rows?.length)completed();
   }catch(error){output.textContent=error.message;}
 }
@@ -55,7 +65,7 @@ form.addEventListener("submit",async event=>{
   };
   button.disabled=true;output.textContent="Enviando tu opinión…";
   try{await request("filler_feedback",{method:"POST",body:payload});completed();}
-  catch(err){button.disabled=false;output.textContent=err.code==="23505"?"Ya registramos tu opinión de hoy. ¡Gracias!":err.message;}
+  catch(err){button.disabled=false;output.textContent=err.code==="23505"?"Ya registramos tu opinión de este mes. ¡Gracias!":err.message;}
 });
 if(!document.getElementById("member").hidden)check();
 const observer=new MutationObserver(()=>{if(!document.getElementById("member").hidden){observer.disconnect();check();}});
