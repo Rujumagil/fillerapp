@@ -39,10 +39,20 @@ form.addEventListener("submit",async event=>{
   event.preventDefault();
   if(button.disabled)return;
   const fields=new FormData(form);
-  const rating=Number(fields.get("rating"));
-  if(!Number.isInteger(rating)||rating<1||rating>5){output.textContent="Elige una calificación de 1 a 5.";return;}
-  const optional=key=>fields.get(key)?Number(fields.get(key)):null;
-  const payload={rating,food_rating:optional("food_rating"),speed_rating:optional("speed_rating"),improvement:String(fields.get("improvement")||"ninguno"),comment:String(fields.get("comment")||"").trim().slice(0,500)||null,suggested_dish:String(fields.get("suggested_dish")||"").trim().slice(0,120)||null};
+  const values=Array.from({length:10},(_,i)=>Number(fields.get("q"+(i+1))));
+  if(values.some(n=>!Number.isInteger(n)||n<1||n>5)){output.textContent="Responde las 10 preguntas con una calificación de 1 a 5.";return;}
+  const question_ratings=Object.fromEntries(values.map((n,i)=>["q"+(i+1),n]));
+  const average=(a)=>Math.round(a.reduce((x,y)=>x+y,0)/a.length);
+  const payload={
+    rating:average(values),
+    food_rating:average(values.slice(3,6)),
+    speed_rating:average(values.slice(8,10)),
+    improvement:"ninguno",
+    question_ratings,
+    comment:String(fields.get("comment")||"").trim().slice(0,500)||null,
+    suggested_dish:String(fields.get("suggested_dish")||"").trim().slice(0,120)||null,
+    suggested_product_2:String(fields.get("suggested_product_2")||"").trim().slice(0,120)||null
+  };
   button.disabled=true;output.textContent="Enviando tu opinión…";
   try{await request("filler_feedback",{method:"POST",body:payload});completed();}
   catch(err){button.disabled=false;output.textContent=err.code==="23505"?"Ya registramos tu opinión de hoy. ¡Gracias!":err.message;}
