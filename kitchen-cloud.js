@@ -1,4 +1,4 @@
-/* Filler Café - cocina conectada, pedidos de la nube y alarma audible. */
+/* Fiiller Café - cocina conectada, pedidos de la nube y alarma audible. */
 (() => {
   "use strict";
   const root=document.getElementById("orders");
