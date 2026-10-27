@@ -139,8 +139,35 @@
     return (rows||[]).map(i=>({id:i.id,name:i.name,price:Number(i.price),enabled:true}));
   }
   async function placeOrder(data) {
-    const result=await request("rpc/filler_place_order",{method:"POST",body:data});
-    if (!result?.code) throw new Error("No hubo confirmación del servidor.");
+    // Cuando el cliente inició sesión en Mi Fiiller, asociar el pedido a su
+    // usuario validado por Supabase; el invitado conserva el flujo habitual.
+    let customerAccess=null;
+    try{
+      const customer=JSON.parse(sessionStorage.getItem("filler_customer_session_v1")||"null");
+      if(customer?.user?.id && customer?.access_token){
+        if(customer.expires_at && customer.expires_at <= Math.floor(Date.now()/1000)+60 && customer.refresh_token){
+          const refreshRes=await fetch(BASE+"/auth/v1/token?grant_type=refresh_token",{
+            method:"POST",headers:{...publicHeaders(),"Content-Type":"application/json"},
+            body:JSON.stringify({refresh_token:customer.refresh_token})
+          });
+          if(refreshRes.ok){
+            const updated=await refreshRes.json();
+            sessionStorage.setItem("filler_customer_session_v1",JSON.stringify(updated));
+            customerAccess=updated.access_token;
+          }
+        }else if(!customer.expires_at || customer.expires_at > Math.floor(Date.now()/1000)+60){
+          customerAccess=customer.access_token;
+        }
+      }
+    }catch(error){console.warn("Historial de cliente sin sesión válida:",error);}
+    const orderHeaders={...publicHeaders(),"Content-Type":"application/json"};
+    if(customerAccess)orderHeaders.Authorization="Bearer "+customerAccess;
+    const response=await fetch(BASE+"/rest/v1/rpc/filler_place_order",{
+      method:"POST",headers:orderHeaders,body:JSON.stringify(data),cache:"no-store"
+    });
+    let result=await response.json().catch(()=>null);
+    if(!response.ok)throw new Error(result?.message||"No se pudo confirmar el pedido.");
+    if(!result?.code)throw new Error("No hubo confirmación del servidor.");
     return result;
   }
   async function orderStatus(token) {
