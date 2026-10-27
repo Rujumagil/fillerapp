@@ -64,9 +64,13 @@ footer{text-align:center;color:#829088;font-size:12px;padding-bottom:22px}
 <header class="site-head"><div class="head-inner"><a href="./index.html" class="brand"><img src="./assets/filler-logo-oficial.webp" alt=""><span>Fiiller Café</span></a><a class="back" href="./mi-filler.html">← Mi Fiiller</a></div></header>
 <main>
 <section class="hero"><span class="eyebrow">EXPERIENCIA FIILLER</span><h1>Tu opinión nos ayuda a mejorar cada día.</h1><p>Califica tu experiencia de forma sencilla y cuéntanos qué te gustaría encontrar en nuestro menú. Nos importa cada detalle.</p></section>
+<div class="progress-panel" aria-label="Periodo mensual de la encuesta" style="background:#f4faf5;margin-bottom:0;border-color:#d1e7d7">
+  <p id="survey-month-period" style="margin:0 0 6px;font-weight:850;color:#075c3b">Una encuesta por cliente y mes</p>
+  <p id="survey-renewal" style="margin:0;color:#567367;font-size:13px">Se renueva automáticamente el día 1 de cada mes.</p>
+</div>
 <div class="login-gate" id="login-gate" hidden>Para enviar tu encuesta necesitas iniciar sesión en <a href="./mi-filler.html">Mi Fiiller</a>. Si ya tienes cuenta, entra y regresa a esta página.</div>
 <form id="filler-feedback-form">
-<div class="progress-panel"><div class="progress-head"><span>Tu avance en la encuesta</span><strong id="survey-progress-label">0 de 10 preguntas</strong></div><div class="progress-track"><div class="progress-fill" id="survey-progress"></div></div><p class="legend">Toca de 1 a 5 estrellas en cada pregunta: 1 = Muy malo · 5 = Excelente.</p></div>
+<div class="progress-panel"><div class="progress-head"><span>Tu avance en la encuesta</span><strong id="survey-progress-label">0 de 10 preguntas</strong></div><div class="progress-track"><div class="progress-fill" id="survey-progress"></div></div><p class="legend">Toca de 1 a 5 estrellas en cada pregunta: 1 = Muy malo · 5 = Excelente. Cada cliente puede participar una vez por mes.</p></div>
 <section class="survey-section" aria-labelledby="category-01"><header class="section-heading"><span class="category-icon">☺</span><div><span class="section-kicker">BLOQUE 01 DE 04</span><h2 id="category-01">Atención</h2></div><span class="section-count">3 preguntas</span></header><div class="question-list"><div class="question-card" data-question="1">
   <div class="q-top"><span class="q-number">01</span><p id="question-title-1">¿El personal te atendió de manera amable y respetuosa?</p></div>
   <div class="rating-row" role="radiogroup" aria-labelledby="question-title-1">
@@ -132,8 +136,8 @@ footer{text-align:center;color:#829088;font-size:12px;padding-bottom:22px}
   </div>
 </div></div></section>
 <section class="survey-section" aria-labelledby="suggestions-heading"><header class="section-heading"><span class="category-icon">✧</span><div><span class="section-kicker">TU VOZ CUENTA</span><h2 id="suggestions-heading">¿Qué te gustaría probar?</h2></div></header><div class="suggestion-fields"><div class="suggestion-card"><label for="suggested-dish">Primera sugerencia</label><input id="suggested-dish" name="suggested_dish" maxlength="120" placeholder="Ej. Chapata vegetariana"></div><div class="suggestion-card"><label for="suggested-product-2">Segunda sugerencia</label><input id="suggested-product-2" name="suggested_product_2" maxlength="120" placeholder="Ej. Café frío con vainilla"></div></div><div class="suggestion-card comment-box"><label for="survey-comment">¿Quieres contarnos algo más? <span style="font-weight:400;color:#73857a">(opcional)</span></label><textarea id="survey-comment" name="comment" maxlength="500" rows="3" placeholder="Comparte aquí tus comentarios o ideas"></textarea></div></section>
-<div class="submit-card"><p id="filler-feedback-message" class="message" role="status" aria-live="polite"></p><button type="submit" id="send-filler-feedback">Enviar mi opinión</button><span style="color:#76877c;font-size:12px;text-align:center">La encuesta es opcional. Puedes responder una vez al día.</span></div>
+<div class="submit-card"><p id="filler-feedback-message" class="message" role="status" aria-live="polite"></p><button type="submit" id="send-filler-feedback">Enviar mi opinión</button><span style="color:#76877c;font-size:12px;text-align:center">La encuesta es opcional. Solo se permite una respuesta por mes, y se renueva el día 1.</span></div>
 </form>
 </main><footer>© Fiiller Café · Crecemos con tus ideas.</footer>
-<script src="./encuesta-satisfaccion.js?v=51"></script>
+<script src="./encuesta-satisfaccion.js?v=52"></script>
 </body></html>
