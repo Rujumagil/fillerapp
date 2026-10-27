@@ -94,6 +94,12 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <span class="quick-icon orange" aria-hidden="true">✦</span><span><strong>Mis beneficios</strong><small>Promociones y recompensas próximamente</small></span></div>
 <a class="quick-card" href="#app-settings"><span class="quick-icon" aria-hidden="true">▣</span><span><strong>Mi app</strong><small>Instalación y permisos del celular</small></span></a>
 </div>
+<section class="card" id="member-order-history" style="margin:18px 0 22px;padding:19px" aria-label="Historial de pedidos de la quincena">
+<div class="section-heading" style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h3>Mis pedidos · últimos 15 días</h3><button type="button" class="secondary" id="refresh-my-orders">Actualizar</button></div>
+<p class="muted mini">Consulta tus pedidos de la quincena, productos, importes y estado. Solo tú puedes verlos al iniciar sesión.</p>
+<div id="member-orders-summary" style="font-weight:750;color:#006241;margin:12px 0"></div>
+<div id="member-orders-list" aria-live="polite" style="display:grid;gap:12px"><p class="muted">Cargando tu historial…</p></div>
+</section>
 <div class="member-grid">
 <div class="card">
 <div class="section-heading"><h3>Mis datos</h3><button id="edit-profile" type="button" class="secondary" aria-expanded="false" aria-controls="profile-edit">Editar datos</button></div>
@@ -127,6 +133,6 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <p class="foot-note">Fiiller Café · Tus datos y preferencias permanecen en tu cuenta.</p>
 </main>
 <script src="./pwa.js"></script>
-<script src="./mi-filler.js?v=43"></script>
+<script src="./mi-filler.js?v=48"></script>
 </body>
 </html>
