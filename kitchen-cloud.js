@@ -29,7 +29,8 @@
   function isScheduled(o){const m=String(o.pickup||"").match(/^(20\d{2}-\d{2}-\d{2})\s/);return !!m && m[1]>mexicoToday() && o.status==="Nuevo";}
   function statusRow(o){
     if(isScheduled(o))return {cls:"new",line:"wait",label:"Programado",detail:"Para mañana · no preparar todavía"};
-    const age=Date.now()-o.createdTs;
+    const scheduled=String(o.pickup||"").match(/^(20\d{2}-\d{2}-\d{2}) (\d{2}:\d{2})$/);
+    const age=scheduled ? Math.max(0,Date.now()-Math.max(o.createdTs,new Date(scheduled[1]+"T"+scheduled[2]+":00-06:00").getTime()-30*60000)) : Date.now()-o.createdTs;
     const since=Date.now()-o.statusUpdatedAt;
     if(["Nuevo","Preparando"].includes(o.status)&&age>600000) return {cls:"late",line:"alert",label:"Fuera de tiempo",detail:min(age)+" min desde que entró"};
     if(o.status==="Listo"&&since>600000) return {cls:"late",line:"alert",label:"Fuera de tiempo",detail:min(since)+" min esperando recolección"};
