@@ -1,4 +1,4 @@
-/* Filler Café — avisos visuales de pedidos mientras Cocina/Monitor están abiertos.
+/* Fiiller Café — avisos visuales de pedidos mientras Cocina/Monitor están abiertos.
  * La ventana visual no requiere permisos de Windows; el aviso del sistema sí.
  * El push con el navegador cerrado requiere un servidor VAPID.
  */
@@ -66,10 +66,10 @@
       overlay.querySelector("#filler-popup-title").textContent=title;
       overlay.querySelector("#filler-popup-details").textContent=details;
       overlay.hidden=false;
-      document.title="🔔 PEDIDO NUEVO — Filler Café";
+      document.title="🔔 PEDIDO NUEVO — Fiiller Café";
       overlay.querySelector("#filler-popup-show").focus({preventScroll:true});
     }
-    // Sonido oficial Filler Café: versión de cocina del motivo do-mi-sol-do.
+    // Sonido oficial Fiiller Café: versión de cocina del motivo do-mi-sol-do.
     function sound(){
       if(!audioEnabled||!audio)return;
       audio.resume().then(()=>{
@@ -120,7 +120,7 @@
       try{permission=await permissionRequest;}catch{}
       showVisual("🔔 Prueba de notificación","Prueba visual. No se creó ningún pedido.");
       sound();
-      await systemNotification("🔔 Prueba Filler Café","Notificación de prueba, sin pedido real.","filler-test-"+SCREEN);
+      await systemNotification("🔔 Prueba Fiiller Café","Notificación de prueba, sin pedido real.","filler-test-"+SCREEN);
       if(permission==="granted")onStatus("✓ Alerta visual, sonido y avisos del sistema habilitados.");
       else onStatus("✓ Alerta visual y sonido activos. Avisos del sistema: "+(permission==="denied"?"permiso bloqueado":"permiso pendiente")+".");
       return {sound:audioEnabled,notifications:permission==="granted",permission};
@@ -145,7 +145,7 @@
       // Complemento háptico para móviles compatibles; no sustituye al sonido.
       try{if("vibrate" in navigator)navigator.vibrate([220,90,220,90,350]);}catch{}
       remindUntilAcknowledged();
-      systemNotification("🔔 Nuevo pedido Filler Café",details,"filler-new-"+ids[0]);
+      systemNotification("🔔 Nuevo pedido Fiiller Café",details,"filler-new-"+ids[0]);
     }
     return Object.freeze({enable,incoming,beep:sound,isEnabled:()=>audioEnabled,
       soundLevel:readLevel,setSoundLevel:writeLevel,
