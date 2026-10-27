@@ -57,7 +57,7 @@
       e.preventDefault();const f=e.currentTarget,button=f.querySelector("button");button.disabled=true;
       try {
         const staff=await FillerCloud.login(f.elements.namedItem("username").value,f.elements.namedItem("password").value);
-        if(staff.role!=="admin"){FillerCloud.logout();throw new Error("Este usuario no tiene permiso de administrador Filler Café.");}
+        if(staff.role!=="admin"){FillerCloud.logout();throw new Error("Este usuario no tiene permiso de administrador Fiiller Café.");}
         await showAdmin();
       }catch(err){notify(err.message,true);}finally{button.disabled=false;}
     });
