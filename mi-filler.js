@@ -51,13 +51,24 @@ $("recover").addEventListener("submit",async e=>{
   button.disabled=true;
   try{
     const email=form.elements.email.value.trim();
-    const response=await fetch(BASE+"/auth/v1/recover?redirect_to="+encodeURIComponent(AUTH_RETURN),{
-      method:"POST",headers:headers(),
-      body:JSON.stringify({email})
-    });
-    const data=await response.json().catch(()=>({}));
-    if(!response.ok)throw Error(data.msg||data.error_description||data.message||"No se pudo enviar el correo de recuperación.");
-    message("Si tu correo está registrado, recibirás un enlace para recuperar tu contraseña. Revisa también spam y promociones.");
+    // Primero correo de marca Fiiller. Ante un fallo de Resend, restaurar el proveedor de Auth.
+    let response;
+    try{
+      response=await fetch(BASE+"/functions/v1/filler-branded-recovery",{
+        method:"POST",headers:headers(),body:JSON.stringify({email}),cache:"no-store"
+      });
+    }catch{response=null;}
+    if(response?.status===429)throw Error("Ya solicitaste un correo recientemente. Revisa la bandeja o espera unos minutos antes de repetir.");
+    if(!response?.ok){
+      response=await fetch(BASE+"/auth/v1/recover?redirect_to="+encodeURIComponent(AUTH_RETURN),{
+        method:"POST",headers:headers(),body:JSON.stringify({email}),cache:"no-store"
+      });
+      const fallback=await response.json().catch(()=>({}));
+      if(!response.ok)throw Error(fallback.msg||fallback.error_description||fallback.message||"No se pudo enviar la recuperación.");
+      message("Solicitud recibida por el servicio de respaldo. Revisa tu bandeja, spam y promociones.");
+    }else{
+      message("Solicitud de recuperación de Fiiller enviada. Revisa tu bandeja, spam y promociones.");
+    }
   }catch(err){message(err.message,true);}finally{button.disabled=false;}
 });
 $("new-password").addEventListener("submit",async e=>{
