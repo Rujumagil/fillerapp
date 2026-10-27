@@ -1,7 +1,7 @@
 {
-  "name": "Filler Café",
-  "short_name": "Filler",
-  "description": "Menú digital para ordenar y recoger en Filler Café.",
+  "name": "Fiiller Café",
+  "short_name": "Fiiller",
+  "description": "Menú digital para ordenar y recoger en Fiiller Café.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
