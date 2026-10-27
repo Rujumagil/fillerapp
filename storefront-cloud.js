@@ -36,7 +36,7 @@
       }
       window.FillerOnlineActive = true;
       enabled=true;button.disabled=working;button.textContent="Confirmar pedido";
-      status("✓ Menú actualizado · Elige tus favoritos y recógelos en Filler Café");
+      status("✓ Menú actualizado · Elige tus favoritos y recógelos en Fiiller Café");
       render();
     }catch(error){block("No se puede comprobar la recepción de pedidos. "+error.message);}
   }
@@ -53,7 +53,7 @@
       info.textContent="Solo necesitamos tus datos y la hora para recoger.";
       info.style.margin="5px 0";
       const link=document.createElement("a");
-      link.href="./mi-filler.html";link.textContent="¿Quieres guardar tus datos? Ir a Mi Filler";
+      link.href="./mi-filler.html";link.textContent="¿Quieres guardar tus datos? Ir a Mi Fiiller";
       link.style.cssText="display:inline-block;margin-top:2px;color:#006241;text-decoration:underline;text-underline-offset:2px;font-size:12px;font-weight:800";
       panel.append(heading,info,link);
       fields.hidden=false;
