@@ -253,6 +253,12 @@ async function receiveEmailConfirmation(params){
     save({access_token:access,refresh_token:refresh,user,expires_at:Math.floor(Date.now()/1000)+Number(params.get("expires_in")||3600)});
     history.replaceState(null,"",location.pathname);
     await loadProfile();
+    // Correo adicional de bienvenida con marca Fiiller: jamás envía credenciales ni bloquea el acceso.
+    fetch(BASE+"/functions/v1/filler-welcome-email",{
+      method:"POST",
+      headers:{"apikey":KEY,"authorization":"Bearer "+access,"content-type":"application/json"},
+      body:"{}",cache:"no-store"
+    }).catch(()=>{});
     message("✓ Tu correo quedó confirmado. Bienvenido a Mi Fiiller. Completa tu perfil si te faltan datos.");
   }catch(error){
     history.replaceState(null,"",location.pathname);
