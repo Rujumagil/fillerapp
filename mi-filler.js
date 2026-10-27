@@ -118,6 +118,40 @@ function updateLastOrder(){
     link.classList.add("is-inactive");
   }
 }
+const escHistory=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function loadMyOrderHistory(){
+  const list=$("member-orders-list"),summary=$("member-orders-summary");
+  if(!list||!summary||!session?.user?.id)return;
+  list.innerHTML='<p class="muted">Consultando tus pedidos…</p>';
+  try{
+    const since=new Date(Date.now()-15*24*60*60*1000).toISOString();
+    // Supabase RLS comprueba auth.uid() tanto en órdenes como en sus artículos.
+    const path="filler_orders?select=id,public_code,pickup,status,total,created_at,filler_order_items(name,qty,price)&customer_user_id=eq."+
+      encodeURIComponent(session.user.id)+"&created_at=gte."+encodeURIComponent(since)+"&order=created_at.desc&limit=100";
+    const rows=await request(path);
+    const orders=Array.isArray(rows)?rows:[];
+    const money=value=>"$"+Number(value||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
+    summary.textContent=orders.length+" pedido"+(orders.length===1?"":"s")+" en los últimos 15 días · Total registrado "+money(orders.reduce((n,o)=>n+Number(o.total||0),0));
+    if(!orders.length){
+      list.innerHTML='<p class="muted">Todavía no tienes pedidos asociados a tu cuenta en esta quincena. Inicia sesión antes de hacer tu siguiente pedido para guardarlo aquí.</p>';
+      return;
+    }
+    list.innerHTML=orders.map(o=>{
+      const items=(o.filler_order_items||[]).map(i=>escHistory(i.qty)+" × "+escHistory(i.name)).join(" · ");
+      const date=new Date(o.created_at).toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"});
+      const pickup=String(o.pickup||"");
+      return '<article style="border:1px solid #d6e6d8;background:#f9fcf9;border-radius:14px;padding:14px;display:grid;gap:6px">'+
+        '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><strong>'+escHistory(o.public_code)+'</strong><strong style="color:#006241">'+escHistory(o.status)+'</strong></div>'+
+        '<span class="muted" style="font-size:12px">Registrado: '+escHistory(date)+' · Recoger: '+escHistory(pickup)+'</span>'+
+        '<div style="font-size:13px">'+(items||"Productos registrados")+'</div>'+
+        '<strong style="text-align:right">'+money(o.total)+'</strong></article>';
+    }).join("");
+  }catch(error){
+    summary.textContent="";
+    list.textContent="No se pudo consultar tu historial: "+error.message;
+  }
+}
+$("refresh-my-orders")?.addEventListener("click",loadMyOrderHistory);
 function showMember(){
   $("visitor").hidden=true;$("member").hidden=false;
   const display=String(profile?.full_name||session?.user?.user_metadata?.filler_display_name||"cliente").trim()||"cliente";
@@ -133,6 +167,7 @@ function showMember(){
   f.elements.promotions.checked=!!profile?.promotions_opt_in;
   editProfile(false);
   updateLastOrder();
+  loadMyOrderHistory();
 }
 $("edit-profile").addEventListener("click",()=>{
   editProfile($("profile-edit").hidden);
