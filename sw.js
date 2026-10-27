@@ -1,8 +1,10 @@
-const CACHE_NAME = "filler-app-v50";
+const CACHE_NAME = "filler-app-v51";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./mi-filler.html",
+  "./encuesta-satisfaccion.html",
+  "./encuesta-satisfaccion.js",
   "./mi-filler.js",
   "./pedido.html",
   "./order-tracking.js",
