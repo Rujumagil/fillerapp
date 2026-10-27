@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Recuperar acceso</title></head>
+<body style="margin:0;padding:24px 12px;background:#f5f1e9;font-family:Arial,Helvetica,sans-serif">
+{{ if .Data.filler_display_name }}
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:580px;margin:auto;background:#fff;border-radius:18px;overflow:hidden">
+<tr><td style="background:#006241;padding:28px 20px;text-align:center"><img src="https://fiillercafe.app/assets/filler-logo-oficial.webp" alt="Fiiller Café" width="170" style="max-width:100%;height:auto;display:block;margin:auto"><p style="color:#fff;letter-spacing:2px;font-size:12px">MI FIILLER · TU CAFÉ, A TU RITMO</p></td></tr>
+<tr><td style="padding:32px;color:#183629"><h1 style="font-size:26px">Recupera tu acceso a Mi Fiiller ☕</h1><p>Hola, {{ .Data.filler_display_name }}:</p><p>Recibimos una solicitud para restablecer la contraseña de tu cuenta. Utiliza el siguiente enlace seguro para crear una nueva.</p><p style="text-align:center;margin:30px 0"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#006241;color:#fff;padding:16px 26px;border-radius:9px;text-decoration:none;font-weight:bold">Restablecer mi contraseña</a></p><p style="font-size:13px;color:#5d7065">Si no solicitaste este cambio, ignora el mensaje. Tu contraseña permanecerá igual.</p></td></tr>
+<tr><td style="background:#eef4ee;padding:22px;text-align:center;color:#35614b;font-size:12px">Fiiller Café · fiillercafe.app</td></tr>
+</table>
+{{ else }}
+<div style="max-width:580px;margin:auto;background:#fff;padding:32px;color:#222">
+<h2>Reset your password</h2>
+<p>We received a request to reset your password. Follow the link below to choose a new one.</p>
+<p><a href="{{ .ConfirmationURL }}">Reset password</a></p>
+<p>If you didn't request this, you can safely ignore this email.</p>
+</div>
+{{ end }}
+</body></html>
