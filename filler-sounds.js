@@ -1,4 +1,4 @@
-/* Filler Café — identidad sonora moderna + sonidos personalizados compartidos.
+/* Fiiller Café — identidad sonora moderna + sonidos personalizados compartidos.
  * Sonidos modernos generados con Web Audio. Audios propios en Supabase Storage;
  * solo administración puede publicarlos. Nada de claves privadas en cliente.
  */
