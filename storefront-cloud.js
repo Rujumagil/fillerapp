@@ -110,7 +110,7 @@
     }else if(errorPanel){errorPanel.scrollIntoView({behavior:"smooth",block:"center"});}
     toast(message);
   }
-  ["customer-name","customer-phone","pickup-time","notes"].forEach(id=>{
+  ["customer-name","customer-phone","pickup-time","pickup-date","notes"].forEach(id=>{
     document.getElementById(id)?.addEventListener("input",clearCheckoutError);
   });
   async function checkout(){
@@ -124,7 +124,7 @@
     if(phone.replace(/\D/g,"").length<8 || phone.length>25)return showCheckoutError("Escribe un teléfono válido.","customer-phone");
     renderPickupTimes();
     const pickupSelect=document.getElementById("pickup-time");
-    if(pickupSelect.disabled || !pickupSelect.value)return showCheckoutError("Ya no hay horarios disponibles para recoger hoy.","pickup-time");
+    if(pickupSelect.disabled || !pickupSelect.value)return showCheckoutError("Selecciona mañana para programar tu pedido, o elige un horario disponible.","pickup-time");
     const notes=document.getElementById("notes").value.trim();
     if(notes.length>500)return showCheckoutError("Las notas deben tener máximo 500 caracteres.","notes");
     working=true;button.disabled=true;button.textContent="Enviando a cocina…";
@@ -137,7 +137,7 @@
       state.cart={};state.extraSelections={};
       render();
       const notice=document.getElementById("client-status");
-      notice.textContent="✓ Pedido "+data.code+" recibido en cocina · Total confirmado $"+Number(data.total).toLocaleString("es-MX")+". ";
+      notice.textContent="✓ Pedido "+data.code+" registrado para recoger el "+pickupSelect.value.replace(" "," a las ")+" h · Total confirmado $"+Number(data.total).toLocaleString("es-MX")+". ";
       if(data.tracking_token && /^[0-9a-f-]{36}$/i.test(data.tracking_token)){
         try{localStorage.setItem("filler_last_tracking_v1",JSON.stringify({token:data.tracking_token,code:data.code}));}catch{}
         const link=document.createElement("a");
@@ -155,12 +155,12 @@
       else notice.scrollIntoView({behavior:"smooth",block:"center"});
       notice.focus({preventScroll:true});
       refreshAlerts();
-      toast("¡Pedido enviado a cocina!");
+      toast(document.getElementById("pickup-date")?.value==="tomorrow"?"¡Pedido programado para mañana!":"¡Pedido enviado a cocina!");
       // Pedido confirmado: una recarga fallida del catálogo no cambia su recepción.
       refresh().catch(error=>console.warn("No se pudo actualizar la vista después del pedido:",error));
     }catch(error){
       status("No se pudo confirmar el pedido: "+error.message,true);
-      showCheckoutError("El pedido no se envió. Revisa tu conexión e inténtalo de nuevo.");
+      showCheckoutError("El pedido no se envió: "+(error?.message||"Revisa tu conexión e inténtalo de nuevo."));
     }finally{working=false;button.disabled=!enabled;button.textContent=enabled?"Confirmar pedido":"Pedidos en línea aún no disponibles";}
   }
   button.addEventListener("click",checkout);
