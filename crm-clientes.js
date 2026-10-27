@@ -1,4 +1,4 @@
-/* CRM de clientes Filler Café — acceso administrativo exclusivamente desde Supabase Auth. */
+/* CRM de clientes Fiiller Café — acceso administrativo exclusivamente desde Supabase Auth. */
 (() => {
   "use strict";
   const API="https://qwxydjotwhniahaovrff.supabase.co/functions/v1/filler-clientes-admin";
