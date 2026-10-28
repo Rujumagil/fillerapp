@@ -6,7 +6,7 @@ const $=id=>document.getElementById(id);
 const money=n=>Number(n||0).toLocaleString("es-MX",{style:"currency",currency:"MXN"});
 const nfmt=n=>Number(n||0).toLocaleString("es-MX",{maximumFractionDigits:3});
 const escape=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let inventory=[],movements=[],counts=[],lots=[];
+let inventory=[],movements=[],counts=[],lots=[],barcodes=[],barcodeSelected=null;
 function message(s,bad=false){$("message").textContent=s;$("message").classList.toggle("danger",bad);}
 async function call(path,{body,method="GET"}={}){
  const data=JSON.parse(sessionStorage.getItem("filler_staff_session_v1")||"null");
@@ -85,6 +85,7 @@ function render(){
 const paneLabels={
  overview:["Resumen de almacén","Visibilidad total de existencias y alertas de cocina."],
  inventory:["Inventario general","Cada insumo en un solo lugar, con filtros y registro."],
+ barcode:["Escaneo rápido","Identifica productos por código de barras y confirma existencias en segundos."],
  counts:["Conteo físico de hoy","Verifica cada insumo y registra las diferencias contra el sistema."],
  movements:["Movimientos","Registro y trazabilidad de entradas y salidas."],
  expiry:["Caducidades y lotes","Registra las fechas reales de vencimiento de cada lote."],
@@ -93,6 +94,7 @@ const paneLabels={
 };
 function navigate(key){
  const chosen=paneLabels[key]?key:"overview";
+ if(chosen!=="barcode" && cameraStream)stopBarcodeCamera();
  document.querySelectorAll("[data-pane]").forEach(b=>{b.classList.toggle("active",b.dataset.pane===chosen);b.setAttribute("aria-current",b.dataset.pane===chosen?"page":"false");});
  document.querySelectorAll("[data-view]").forEach(p=>p.classList.toggle("active",p.dataset.view===chosen));
  $("workspace-title").textContent=paneLabels[chosen][0];
@@ -100,6 +102,7 @@ function navigate(key){
  if(location.hash!=="#"+chosen)history.replaceState(null,"","#"+chosen);
 }
 document.querySelectorAll("[data-pane]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.pane)));
+$("quick-scan").addEventListener("click",()=>{navigate("barcode");$("barcode-input").focus();});
 $("quick-product").addEventListener("click",()=>{navigate("inventory");$("create-form").scrollIntoView({behavior:"smooth",block:"start"});});
 $("quick-movement").addEventListener("click",()=>{navigate("movements");$("movement-form").scrollIntoView({behavior:"smooth",block:"start"});});
 window.addEventListener("hashchange",()=>navigate(location.hash.replace("#","")));
@@ -258,9 +261,162 @@ $("lot-form").addEventListener("submit",async e=>{
  f.reset();await load();message("✓ Lote y caducidad registrados. Las existencias totales no se modificaron.");
  }catch(err){message(err.message,true);}finally{b.disabled=false;}
 });
+
+/* Registro rápido por código de barras */
+let cameraStream=null,cameraFrame=0,cameraBusy=false,cameraDetector=null,lastScanned="";
+function barcodeMessage(text,bad=false){
+ const el=$("barcode-status");el.textContent=text;el.classList.toggle("danger",bad);
+}
+function barcodeClean(value){return String(value??"").trim();}
+function barcodeItem(id){return inventory.find(i=>i.id===id);}
+function barcodeOptions(){
+ const previous=$("barcode-link-item").value;
+ $("barcode-link-item").innerHTML='<option value="">Selecciona un insumo del catálogo…</option>'+
+ inventory.map(i=>'<option value="'+escape(i.id)+'">'+escape(i.code)+' · '+escape(i.name)+'</option>').join("");
+ if(barcodeItem(previous))$("barcode-link-item").value=previous;
+}
+function barcodeRenderLinks(){
+ $("barcode-linked-total").textContent=barcodes.length+" códigos";
+ $("barcode-link-list").innerHTML=barcodes.slice(0,60).map(link=>{
+  const item=barcodeItem(link.item_id);
+  return '<div class="barcode-link-row"><div><strong>'+escape(item?.name||"Insumo")+'</strong><span>'+escape(link.barcode)+'</span></div><small>'+escape(item?.unit||"")+'</small></div>';
+ }).join("")||'<div class="empty-state"><strong>Aún no hay códigos vinculados</strong>Escanea el primero y asígnalo a su producto OCS.</div>';
+}
+async function loadBarcodes(){
+ barcodes=await call("filler_inventory_barcodes?select=barcode,item_id,created_at&order=created_at.desc&limit=1000")||[];
+ barcodeOptions();
+ barcodeRenderLinks();
+ if(barcodeSelected){
+  const current=barcodeItem(barcodeSelected.id);
+  barcodeSelected=current||null;
+  if(current)barcodeShow(current);
+ }
+}
+function barcodeShow(item){
+ barcodeSelected=item;
+ $("barcode-product").classList.add("matched");
+ $("barcode-product").innerHTML='<strong>'+escape(item.name)+'</strong><span>Código OCS: '+escape(item.code)+' · Familia: '+escape(item.category)+'</span><span>Existencia actual: <strong>'+nfmt(item.quantity)+' '+escape(item.unit)+'</strong> · Mínimo: '+nfmt(item.min_quantity)+' '+escape(item.unit)+'</span>';
+ $("barcode-system-qty").value=nfmt(item.quantity)+" "+item.unit;
+ $("barcode-count-form").hidden=false;
+ $("barcode-link-form").hidden=true;
+ $("barcode-physical-qty").value="";
+ barcodeMessage("Producto identificado. Introduce lo encontrado y confirma el conteo.");
+}
+function barcodeUnknown(code){
+ barcodeSelected=null;
+ $("barcode-product").classList.remove("matched");
+ $("barcode-product").innerHTML='<strong>Código sin vincular: '+escape(code)+'</strong><span>Selecciona a qué insumo de los 193 registrados pertenece. No se creará un producto duplicado.</span>';
+ $("barcode-link-form").hidden=false;
+ $("barcode-count-form").hidden=true;
+ barcodeMessage("Este código todavía no está registrado. Vincúlalo a su insumo.");
+}
+async function barcodeLookup(input){
+ const code=barcodeClean(input);
+ if(!/^[0-9A-Za-z_-]{4,64}$/.test(code)){barcodeMessage("Escribe un código válido de 4 a 64 caracteres.",true);return;}
+ $("barcode-input").value=code;
+ const matched=barcodes.find(b=>b.barcode===code);
+ const byCode=inventory.find(i=>i.code.toLowerCase()===code.toLowerCase());
+ const item=matched?barcodeItem(matched.item_id):byCode;
+ if(item){barcodeShow(item);return;}
+ barcodeUnknown(code);
+}
+$("barcode-lookup").addEventListener("click",()=>barcodeLookup($("barcode-input").value));
+$("barcode-input").addEventListener("keydown",ev=>{
+ if(ev.key==="Enter"){ev.preventDefault();barcodeLookup($("barcode-input").value);}
+});
+$("barcode-link-form").addEventListener("submit",async ev=>{
+ ev.preventDefault();
+ const f=ev.currentTarget,b=f.querySelector("button"),code=barcodeClean($("barcode-input").value);
+ if(!barcodeItem(f.elements.item.value)){barcodeMessage("Selecciona el insumo correcto.",true);return;}
+ b.disabled=true;
+ try{
+  await call("rpc/filler_inventory_barcode_link",{method:"POST",body:{p_barcode:code,p_item:f.elements.item.value}});
+  await loadBarcodes();
+  await barcodeLookup(code);
+  barcodeMessage("✓ Código vinculado. Ahora puedes registrar su existencia.");
+ }catch(err){barcodeMessage(err.message,true);}
+ finally{b.disabled=false;}
+});
+$("barcode-count-form").addEventListener("submit",async ev=>{
+ ev.preventDefault();
+ const f=ev.currentTarget,b=f.querySelector("button"),item=barcodeSelected;
+ if(!item){barcodeMessage("Escanea primero un producto.",true);return;}
+ const number=Number(f.elements.physical.value);
+ if(!String(f.elements.physical.value).trim()||!Number.isFinite(number)||number<0||number>1000000){barcodeMessage("Introduce una cantidad física válida.",true);return;}
+ const difference=number-Number(item.quantity);
+ if(!window.confirm("Confirmar conteo de "+item.name+"\nSistema: "+nfmt(item.quantity)+" "+item.unit+"\nFísico: "+nfmt(number)+" "+item.unit+"\nDiferencia: "+nfmt(difference)+" "+item.unit+"\n\n¿Actualizar el almacén?"))return;
+ b.disabled=true;
+ try{
+  await call("rpc/filler_inventory_count",{method:"POST",body:{p_item:item.id,p_physical:number,p_reason:String(f.elements.note.value||"").trim()||"Conteo rápido con código de barras"}});
+  await load();
+  const saved=barcodeItem(item.id);
+  if(saved)barcodeShow(saved);
+  barcodeMessage("✓ Conteo registrado. Diferencia: "+nfmt(difference)+" "+item.unit+". Puedes escanear el siguiente producto.");
+  $("barcode-input").value="";
+  $("barcode-input").focus();
+ }catch(err){barcodeMessage(err.message,true);}
+ finally{b.disabled=false;}
+});
+function stopBarcodeCamera(){
+ if(cameraFrame)cancelAnimationFrame(cameraFrame);
+ cameraFrame=0;
+ if(cameraStream)cameraStream.getTracks().forEach(track=>track.stop());
+ cameraStream=null;cameraDetector=null;
+ $("barcode-video").srcObject=null;
+ $("barcode-camera-wrap").hidden=true;
+ $("barcode-camera-start").hidden=false;
+ $("barcode-camera-stop").hidden=true;
+ cameraBusy=false;
+}
+async function scanBarcodeFrame(){
+ if(!cameraStream||!cameraDetector)return;
+ if(!cameraBusy && $("barcode-video").readyState>=2){
+  cameraBusy=true;
+  try{
+   const found=await cameraDetector.detect($("barcode-video"));
+   if(found.length&&cameraStream){
+    const code=barcodeClean(found[0].rawValue);
+    if(code&&code!==lastScanned){
+     lastScanned=code;
+     stopBarcodeCamera();
+     await barcodeLookup(code);
+     return;
+    }
+   }
+  }catch(error){barcodeMessage("No se pudo leer este cuadro. Acerca el producto e ilumina el código.",true);}
+  finally{cameraBusy=false;}
+ }
+ if(cameraStream)cameraFrame=requestAnimationFrame(scanBarcodeFrame);
+}
+$("barcode-camera-start").addEventListener("click",async()=>{
+ if(!navigator.mediaDevices?.getUserMedia){barcodeMessage("Este navegador no permite abrir la cámara. Usa un lector externo o captura el código manualmente.",true);return;}
+ if(!("BarcodeDetector" in window)){barcodeMessage("La lectura automática no está disponible en este navegador. Puedes utilizar lector USB/Bluetooth o escribir el código manualmente.",true);return;}
+ try{
+  let formats=["ean_13","ean_8","upc_a","upc_e","code_128","code_39","itf","qr_code"];
+  if(typeof BarcodeDetector.getSupportedFormats==="function"){
+   const supported=await BarcodeDetector.getSupportedFormats();
+   formats=formats.filter(f=>supported.includes(f));
+  }
+  if(!formats.length)throw Error("El navegador no tiene formatos de código de barras compatibles.");
+  cameraDetector=new BarcodeDetector({formats});
+  cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},audio:false});
+  $("barcode-video").srcObject=cameraStream;
+  await $("barcode-video").play();
+  $("barcode-camera-wrap").hidden=false;
+  $("barcode-camera-start").hidden=true;
+  $("barcode-camera-stop").hidden=false;
+  lastScanned="";
+  barcodeMessage("Apunta al código dentro del recuadro. La lectura será automática.");
+  cameraFrame=requestAnimationFrame(scanBarcodeFrame);
+ }catch(err){stopBarcodeCamera();barcodeMessage("No fue posible iniciar el escáner: "+err.message+" Puedes capturar el código manualmente.",true);}
+});
+$("barcode-camera-stop").addEventListener("click",()=>{stopBarcodeCamera();barcodeMessage("Cámara detenida.");});
+document.addEventListener("visibilitychange",()=>{if(document.hidden)stopBarcodeCamera();});
+window.addEventListener("pagehide",stopBarcodeCamera);
+
 async function load(){
  const [i,m,c,l]=await Promise.all([call("filler_inventory_items?select=*&order=name.asc&limit=1000"),call("filler_inventory_movements?select=id,item_id,type,quantity_change,note,created_at&order=created_at.desc&limit=30"),call("filler_inventory_counts?select=id,item_id,system_quantity,physical_quantity,difference,count_date,counted_at&count_date=eq."+today()+"&order=counted_at.desc&limit=1000"),call("filler_inventory_lots?select=id,item_id,lot_code,expiration_date,quantity,received_at&order=expiration_date.asc.nullslast&limit=1000")]);
- inventory=i||[];movements=m||[];counts=c||[];lots=l||[];renderExtra();render();renderAudit();message("Datos del almacén actualizados.");
+ inventory=i||[];movements=m||[];counts=c||[];lots=l||[];renderExtra();render();renderAudit();await loadBarcodes();message("Datos del almacén actualizados.");
 }
 async function show(){
  const role=await FillerCloud.staffRole();
