@@ -64,7 +64,7 @@ async function show(){
  const salesByDate=new Map(monthSales.map(x=>[x.sale_date,Number(x.amount)]));
  const ticketByDate=new Map(rows.map(x=>[x.sale_date,Number(x.ticket_count)]));
  const dayOfMonth=Number(monthNow.slice(-2));
- const dates=Array.from({length:dayOfMonth},(_,i)=>firstDay.slice(0,8)+String(i+1).padStart(2,"0"));
+ const dates=Array.from({length:dayOfMonth},(_,i)=>firstDay.slice(0,8)+String(i+1).padStart(2,"0")).filter(day=>{const weekday=new Date(day+"T12:00:00Z").getUTCDay();return weekday!==0&&weekday!==6;});
  renderSalesTrend(dates,salesByDate,firstDay);
  const monthTickets=dates.reduce((sum,d)=>sum+(ticketByDate.get(d)||0),0);
  const monthAmount=dates.reduce((sum,d)=>sum+(salesByDate.get(d)||0),0);
