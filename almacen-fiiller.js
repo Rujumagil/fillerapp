@@ -28,7 +28,7 @@ function expiryDays(iso){
  return Math.round((d-t)/86400000);
 }
 function render(){
- const low=inventory.filter(i=>Number(i.quantity)<=Number(i.min_quantity));
+ const low=inventory.filter(i=>(Number(i.min_quantity)>0&&Number(i.quantity)<=Number(i.min_quantity)));
  const exp=inventory.filter(i=>{let d=expiryDays(i.expiration_date);return d!==null&&d<=7;});
  $("k-items").textContent=inventory.length;$("k-low").textContent=low.length;$("k-exp").textContent=exp.length;
  $("k-value").textContent=money(inventory.reduce((a,i)=>a+Number(i.quantity)*Number(i.unit_cost),0));
@@ -38,7 +38,7 @@ function render(){
  const results=inventory.filter(i=>{
   if(!(i.name+" "+i.code+" "+i.category).toLocaleLowerCase("es-MX").includes(filter))return false;
   if(family&&i.category!==family)return false;
-  const low=Number(i.quantity)<=Number(i.min_quantity);
+  const low=(Number(i.min_quantity)>0&&Number(i.quantity)<=Number(i.min_quantity));
   const d=expiryDays(i.expiration_date);
   if(status==="low"&&!low)return false;
   if(status==="expiry"&&!(d!==null&&d<=7))return false;
@@ -47,8 +47,8 @@ function render(){
  });
  $("inventory-list").innerHTML=results.map(i=>{
    const d=expiryDays(i.expiration_date);
-   const label=d!==null&&d<0?"Caducado":d!==null&&d<=7?"Caduca pronto":Number(i.quantity)<=Number(i.min_quantity)?"Bajo mínimo":"Correcto";
-   const cls=d!==null&&d<=7?"exp":Number(i.quantity)<=Number(i.min_quantity)?"low":"";
+   const label=d!==null&&d<0?"Caducado":d!==null&&d<=7?"Caduca pronto":(Number(i.min_quantity)>0&&Number(i.quantity)<=Number(i.min_quantity))?"Bajo mínimo":"Correcto";
+   const cls=d!==null&&d<=7?"exp":(Number(i.min_quantity)>0&&Number(i.quantity)<=Number(i.min_quantity))?"low":"";
    return '<tr><td><strong>'+escape(i.code)+'</strong></td><td>'+escape(i.name)+'</td><td>'+escape(i.category)+'</td><td>'+nfmt(i.quantity)+' '+escape(i.unit)+'</td><td>'+nfmt(i.min_quantity)+'</td><td>'+escape(i.expiration_date||"—")+'</td><td><span class="pill '+cls+'">'+label+'</span></td></tr>';
  }).join("")||'<tr><td colspan="7">Todavía no hay insumos registrados para esta búsqueda.</td></tr>';
  const previous=$("movement-item").value;
@@ -99,7 +99,7 @@ function renderExtra(){
  $("family-summary").innerHTML=[...famCount].sort((a,b)=>b[1]-a[1]).map(([name,count])=>
  '<div class="summary-row"><span>'+escape(name)+'</span><strong>'+count+' insumos</strong></div>').join("")
  ||'<div class="empty-state"><strong>Aún no hay insumos registrados</strong>Agrega el primer producto desde Inventario general.</div>';
- const low=inventory.filter(i=>Number(i.quantity)<=Number(i.min_quantity));
+ const low=inventory.filter(i=>(Number(i.min_quantity)>0&&Number(i.quantity)<=Number(i.min_quantity)));
  const expired=inventory.filter(i=>{const days=expiryDays(i.expiration_date);return days!==null&&days<0});
  const soon=inventory.filter(i=>{const days=expiryDays(i.expiration_date);return days!==null&&days>=0&&days<=7});
  $("priority-alerts").innerHTML=[
