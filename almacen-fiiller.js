@@ -270,10 +270,10 @@ function barcodeMessage(text,bad=false){
 function barcodeClean(value){return String(value??"").trim();}
 function barcodeItem(id){return inventory.find(i=>i.id===id);}
 function barcodeOptions(){
- const previous=$("barcode-link-item").value;
- $("barcode-link-item").innerHTML='<option value="">Selecciona un insumo del catálogo…</option>'+
- inventory.map(i=>'<option value="'+escape(i.id)+'">'+escape(i.code)+' · '+escape(i.name)+'</option>').join("");
- if(barcodeItem(previous))$("barcode-link-item").value=previous;
+ if(barcodeSelected){
+  $("barcode-link-item").value=barcodeSelected.id;
+  $("barcode-link-name").value=barcodeSelected.name+" · "+barcodeSelected.code;
+ }
 }
 function barcodeRenderLinks(){
  $("barcode-linked-total").textContent=barcodes.length+" códigos";
