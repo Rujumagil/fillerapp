@@ -7,6 +7,30 @@ const money=n=>Number(n||0).toLocaleString("es-MX",{style:"currency",currency:"M
 const fmt=n=>Number(n||0).toLocaleString("es-MX",{maximumFractionDigits:0});
 const escape=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function status(s,error=false){$("status").textContent=s;$("status").classList.toggle("error",error);}
+
+function renderSalesTrend(dates,salesByDate,firstDay){
+ const node=$("sales-trend-chart");
+ const values=dates.map((date,index)=>({date,index,value:salesByDate.has(date)?Number(salesByDate.get(date)):null})).filter(p=>p.value!==null&&Number.isFinite(p.value));
+ if(!values.length){node.textContent="Sin cortes de venta confirmados para este mes.";return;}
+ const width=1000,height=320,left=76,right=24,top=24,bottom=55;
+ const plotWidth=width-left-right,plotHeight=height-top-bottom;
+ const maximum=Math.max(1000,Math.ceil(Math.max(...values.map(p=>p.value))/1000)*1000);
+ const X=i=>left+plotWidth*i/Math.max(1,dates.length-1);
+ const Y=v=>top+plotHeight*(1-v/maximum);
+ let grid="";
+ for(let i=0;i<=4;i++){const value=maximum*i/4,y=Y(value);grid+='<line x1="'+left+'" y1="'+y+'" x2="'+(width-right)+'" y2="'+y+'" stroke="#e4ede6" stroke-width="1"/><text x="'+(left-12)+'" y="'+(y+5)+'" text-anchor="end" fill="#60776a" font-size="13">'+escape("$"+fmt(value))+'</text>';}
+ let labels="";
+ dates.forEach((d,i)=>{if(i===0||(i+1)%3===0||i===dates.length-1)labels+='<text x="'+X(i)+'" y="'+(height-18)+'" text-anchor="middle" font-size="12" fill="#60776a">'+(i+1)+'</text>';});
+ let lines="";
+ for(let i=1;i<values.length;i++){
+   const a=values[i-1],b=values[i],missing=b.index-a.index>1;
+   lines+='<line x1="'+X(a.index)+'" y1="'+Y(a.value)+'" x2="'+X(b.index)+'" y2="'+Y(b.value)+'" stroke="'+(missing?"#96a99d":"#08764e")+'" stroke-width="'+(missing?2:3.5)+'" stroke-linecap="round" '+(missing?'stroke-dasharray="6 7"':'')+'/>';
+ }
+ const dots=values.map(p=>'<circle cx="'+X(p.index)+'" cy="'+Y(p.value)+'" r="5.5" fill="#08764e" stroke="#fff" stroke-width="2"><title>'+escape(p.date+": "+money(p.value))+'</title></circle>').join("");
+ node.innerHTML='<svg viewBox="0 0 '+width+' '+height+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;min-width:650px" aria-label="Ventas oficiales diarias; los tramos punteados indican días sin información" role="img">'+grid+lines+dots+labels+'<text x="'+(width/2)+'" y="'+(height-1)+'" text-anchor="middle" fill="#60776a" font-size="13">Día del mes</text></svg>';
+ $("sales-trend-title").textContent="Historial de ventas · "+new Date(firstDay+"T12:00:00Z").toLocaleDateString("es-MX",{month:"long",year:"numeric",timeZone:"UTC"});
+}
+
 async function show(){
  const role=await FillerCloud.staffRole();
  if(role!=="admin"){$("login-card").hidden=false;$("dashboard").hidden=true;status(role?"Este tablero requiere acceso de administrador.":"Inicia sesión con tu cuenta de administrador.");return;}
@@ -26,6 +50,7 @@ async function show(){
  const ticketByDate=new Map(rows.map(x=>[x.sale_date,Number(x.ticket_count)]));
  const dayOfMonth=Number(monthNow.slice(-2));
  const dates=Array.from({length:dayOfMonth},(_,i)=>firstDay.slice(0,8)+String(i+1).padStart(2,"0"));
+ renderSalesTrend(dates,salesByDate,firstDay);
  const monthTickets=dates.reduce((sum,d)=>sum+(ticketByDate.get(d)||0),0);
  const monthAmount=dates.reduce((sum,d)=>sum+(salesByDate.get(d)||0),0);
  $("month-table-title").textContent="Ventas diarias · "+new Date(firstDay+"T12:00:00Z").toLocaleDateString("es-MX",{timeZone:"UTC",month:"long",year:"numeric"});
@@ -49,9 +74,6 @@ async function show(){
  $("inventory-value").textContent=money(inventory.value);
  $("rating").textContent=feedback.rating===null?"Sin respuestas":Number(feedback.rating).toFixed(1)+" / 5";
  $("responses").textContent=fmt(feedback.responses);
- const days=(data.sales_days||[]).slice(-10);
- const maxDay=Math.max(...days.map(d=>Number(d.amount||0)),1);
- $("sales-chart").innerHTML=days.map(d=>'<div class="day-line"><span>'+escape(d.date)+'</span><div class="bar"><div class="fill" style="width:'+Math.round(100*Number(d.amount||0)/maxDay)+'%"></div></div><strong>'+money(d.amount)+'</strong></div>').join("")||'<p class="small">Todavía no hay cortes Arrow en el período.</p>';
  const products=data.top_products||[];
  const maxQ=Math.max(...products.map(d=>Number(d.qty||0)),1);
  $("top-products").innerHTML=products.map((d,i)=>'<div class="list-line"><span class="num">'+(i+1)+'</span><span class="name">'+escape(d.name)+'<br><span class="small">'+fmt(d.qty)+' unidades</span></span><div class="bar"><div class="fill" style="width:'+Math.round(100*Number(d.qty||0)/maxQ)+'%"></div></div></div>').join("")||'<p class="small">Aún no hay suficientes pedidos de la app para mostrar un ranking.</p>';
