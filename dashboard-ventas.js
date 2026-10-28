@@ -15,11 +15,11 @@ async function show(){
  const response=await fetch(BASE+"/rest/v1/rpc/filler_operations_kpis",{method:"POST",headers:{"apikey":KEY,"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json"},body:"{}",cache:"no-store"});
  const data=await response.json().catch(()=>null);
  if(!response.ok)throw Error(data?.message||"No se pudieron consultar los KPIs.");
- const sales=data.sales||{},orders=data.orders||{},inventory=data.inventory||{},feedback=data.feedback||{};
+ const manual=await fetch(BASE+"/rest/v1/filler_arrow_ticket_counts?select=sale_date,ticket_count",{headers:{"apikey":KEY,"Authorization":"Bearer "+session.access_token},cache:"no-store"});if(!manual.ok)throw Error("No se pudieron leer los tickets Arrow.");const rows=await manual.json();const min=new Date(Date.now()-29*86400000).toLocaleDateString("sv-SE",{timeZone:"America/Mexico_City"});const actualTickets=rows.filter(x=>x.sale_date>=min).reduce((a,x)=>a+Number(x.ticket_count),0);const sales=data.sales||{},orders=data.orders||{},inventory=data.inventory||{},feedback=data.feedback||{};
  $("login-card").hidden=true;$("dashboard").hidden=false;
  $("sales-amount").textContent=money(sales.amount);
- $("sales-tickets").textContent=fmt(sales.tickets);
- $("ticket-average").textContent=Number(sales.tickets)>0?money(Number(sales.amount)/Number(sales.tickets)):"—";
+ $("sales-tickets").textContent=fmt(actualTickets);
+ $("ticket-average").textContent=actualTickets>0?money(Number(sales.amount)/actualTickets):"—";
  $("latest-day").textContent=sales.last_day||"Sin cortes";
  $("orders-total").textContent=fmt(orders.total);
  $("orders-open").textContent=fmt(orders.open);
