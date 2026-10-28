@@ -33,7 +33,18 @@ function render(){
  $("k-items").textContent=inventory.length;$("k-low").textContent=low.length;$("k-exp").textContent=exp.length;
  $("k-value").textContent=money(inventory.reduce((a,i)=>a+Number(i.quantity)*Number(i.unit_cost),0));
  const filter=$("search").value.trim().toLocaleLowerCase("es-MX");
- const results=inventory.filter(i=>(i.name+" "+i.code+" "+i.category).toLocaleLowerCase("es-MX").includes(filter));
+ const family=$("family-filter")?.value||"";
+ const status=$("status-filter")?.value||"";
+ const results=inventory.filter(i=>{
+  if(!(i.name+" "+i.code+" "+i.category).toLocaleLowerCase("es-MX").includes(filter))return false;
+  if(family&&i.category!==family)return false;
+  const low=Number(i.quantity)<=Number(i.min_quantity);
+  const d=expiryDays(i.expiration_date);
+  if(status==="low"&&!low)return false;
+  if(status==="expiry"&&!(d!==null&&d<=7))return false;
+  if(status==="ok"&&(low||(d!==null&&d<=7)))return false;
+  return true;
+ });
  $("inventory-list").innerHTML=results.map(i=>{
    const d=expiryDays(i.expiration_date);
    const label=d!==null&&d<0?"Caducado":d!==null&&d<=7?"Caduca pronto":Number(i.quantity)<=Number(i.min_quantity)?"Bajo mínimo":"Correcto";
@@ -48,9 +59,88 @@ function render(){
    return '<div class="item"><div><strong>'+escape(item?.name||"Insumo")+'</strong><br><small>'+escape(m.type)+' · '+new Date(m.created_at).toLocaleString("es-MX")+'</small><br><small>'+escape(m.note||"Sin nota")+'</small></div><strong>'+((Number(m.quantity_change)>0)?"+":"")+nfmt(m.quantity_change)+'</strong></div>';
  }).join("")||'<p class="muted">Todavía no hay movimientos registrados.</p>';
 }
+
+const paneLabels={
+ overview:["Resumen de almacén","Visibilidad total de existencias y alertas de cocina."],
+ inventory:["Inventario general","Cada insumo en un solo lugar, con filtros y registro."],
+ movements:["Movimientos","Registro y trazabilidad de entradas y salidas."],
+ expiry:["Caducidades","Prioridad a productos próximos a vencer."],
+ purchase:["Compras sugeridas","Reposiciones calculadas con existencias y mínimos."],
+ recipes:["Recetas y consumo","Conexión del menú con costos e ingredientes."]
+};
+function navigate(key){
+ const chosen=paneLabels[key]?key:"overview";
+ document.querySelectorAll("[data-pane]").forEach(b=>{b.classList.toggle("active",b.dataset.pane===chosen);b.setAttribute("aria-current",b.dataset.pane===chosen?"page":"false");});
+ document.querySelectorAll("[data-view]").forEach(p=>p.classList.toggle("active",p.dataset.view===chosen));
+ $("workspace-title").textContent=paneLabels[chosen][0];
+ $("workspace-description").textContent=paneLabels[chosen][1];
+ if(location.hash!=="#"+chosen)history.replaceState(null,"","#"+chosen);
+}
+document.querySelectorAll("[data-pane]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.pane)));
+$("quick-product").addEventListener("click",()=>{navigate("inventory");$("create-form").scrollIntoView({behavior:"smooth",block:"start"});});
+$("quick-movement").addEventListener("click",()=>{navigate("movements");$("movement-form").scrollIntoView({behavior:"smooth",block:"start"});});
+window.addEventListener("hashchange",()=>navigate(location.hash.replace("#","")));
+navigate(location.hash.replace("#",""));
+function recommendations(){
+ return inventory.filter(i=>Number(i.quantity)<Number(i.min_quantity)).map(i=>({
+  code:i.code,name:i.name,category:i.category,unit:i.unit,have:Number(i.quantity),
+  minimum:Number(i.min_quantity),needed:Number(i.min_quantity)-Number(i.quantity),
+  estimate:(Number(i.min_quantity)-Number(i.quantity))*Number(i.unit_cost)
+ })).sort((a,b)=>b.needed-a.needed);
+}
+function renderExtra(){
+ const families=[...new Set(inventory.map(i=>i.category))].sort((a,b)=>a.localeCompare(b,"es"));
+ const fam=$("family-filter"),saved=fam.value;
+ fam.innerHTML='<option value="">Todas las familias</option>'+families.map(x=>'<option value="'+escape(x)+'">'+escape(x)+'</option>').join("");
+ if(families.includes(saved))fam.value=saved;
+ const famCount=new Map();
+ inventory.forEach(i=>famCount.set(i.category,(famCount.get(i.category)||0)+1));
+ $("family-summary").innerHTML=[...famCount].sort((a,b)=>b[1]-a[1]).map(([name,count])=>
+ '<div class="summary-row"><span>'+escape(name)+'</span><strong>'+count+' insumos</strong></div>').join("")
+ ||'<div class="empty-state"><strong>Aún no hay insumos registrados</strong>Agrega el primer producto desde Inventario general.</div>';
+ const low=inventory.filter(i=>Number(i.quantity)<=Number(i.min_quantity));
+ const expired=inventory.filter(i=>{const days=expiryDays(i.expiration_date);return days!==null&&days<0});
+ const soon=inventory.filter(i=>{const days=expiryDays(i.expiration_date);return days!==null&&days>=0&&days<=7});
+ $("priority-alerts").innerHTML=[
+  '<div class="summary-row"><span>🔴 Caducados</span><strong>'+expired.length+'</strong></div>',
+  '<div class="summary-row"><span>🟠 Caducan en 7 días</span><strong>'+soon.length+'</strong></div>',
+  '<div class="summary-row"><span>⚠️ Bajo mínimo o agotados</span><strong>'+low.length+'</strong></div>',
+  '<div class="summary-row"><span>✓ Insumos registrados</span><strong>'+inventory.length+'</strong></div>'
+ ].join("");
+ const expiring=inventory.filter(i=>expiryDays(i.expiration_date)!==null).sort((a,b)=>a.expiration_date.localeCompare(b.expiration_date));
+ const label=i=>{const days=expiryDays(i.expiration_date);return days<0?"Caducado hace "+Math.abs(days)+" días":days===0?"Caduca hoy":"En "+days+" días";};
+ $("upcoming-expiry").innerHTML=expiring.slice(0,5).map(i=>
+ '<div class="summary-row"><span>'+escape(i.name)+'<br><small>'+escape(i.expiration_date)+'</small></span><strong class="'+(expiryDays(i.expiration_date)<=7?"is-danger":"")+'">'+label(i)+'</strong></div>').join("")
+ ||'<div class="empty-state"><strong>Sin caducidades registradas</strong>Agrega la fecha al crear cada insumo.</div>';
+ const filter=$("expiry-filter").value;
+ const dayLimit=filter==="all"?Infinity:Number(filter);
+ $("expiry-items").innerHTML=expiring.filter(i=>expiryDays(i.expiration_date)<=dayLimit).map(i=>
+ '<div class="summary-row"><span><strong>'+escape(i.name)+'</strong><br><small>'+escape(i.code)+' · '+nfmt(i.quantity)+' '+escape(i.unit)+'</small></span><span class="'+(expiryDays(i.expiration_date)<=7?"is-danger":"")+'">'+label(i)+'</span></div>').join("")
+ ||'<div class="empty-state"><strong>Sin insumos en este rango</strong>Cuando captures fechas de caducidad aparecerán aquí.</div>';
+ const purchases=recommendations();
+ const purchaseRow=i=>'<div class="summary-row"><span><strong>'+escape(i.name)+'</strong><br><small>'+escape(i.code)+' · Actual: '+nfmt(i.have)+' · Mínimo: '+nfmt(i.minimum)+'</small></span><strong>'+nfmt(i.needed)+' '+escape(i.unit)+'</strong></div>';
+ $("overview-purchases").innerHTML=purchases.slice(0,5).map(purchaseRow).join("")
+ ||'<div class="empty-state"><strong>Sin reposiciones sugeridas</strong>Los mínimos definidos están cubiertos.</div>';
+ $("purchase-list").innerHTML=purchases.map(purchaseRow).join("")
+ ||'<div class="empty-state"><strong>Sin compras urgentes</strong>Los insumos están por encima de su mínimo.</div>';
+}
+$("family-filter").addEventListener("change",render);
+$("status-filter").addEventListener("change",render);
+$("expiry-filter").addEventListener("change",renderExtra);
+$("export-purchases").addEventListener("click",()=>{
+ const items=recommendations();
+ if(!items.length){message("No hay compras sugeridas por el momento.");return;}
+ const csv=[["Código","Insumo","Familia","Existencia","Mínimo","Cantidad sugerida","Unidad","Costo estimado"],
+ ...items.map(i=>[i.code,i.name,i.category,i.have,i.minimum,i.needed,i.unit,i.estimate])]
+ .map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+ const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="fiiller-pedido-sugerido.csv";a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+
 async function load(){
  const [i,m]=await Promise.all([call("filler_inventory_items?select=*&order=name.asc&limit=1000"),call("filler_inventory_movements?select=id,item_id,type,quantity_change,note,created_at&order=created_at.desc&limit=30")]);
- inventory=i||[];movements=m||[];render();message("Datos del almacén actualizados.");
+ inventory=i||[];movements=m||[];renderExtra();render();message("Datos del almacén actualizados.");
 }
 async function show(){
  const role=await FillerCloud.staffRole();
