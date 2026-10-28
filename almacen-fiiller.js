@@ -6,7 +6,7 @@ const $=id=>document.getElementById(id);
 const money=n=>Number(n||0).toLocaleString("es-MX",{style:"currency",currency:"MXN"});
 const nfmt=n=>Number(n||0).toLocaleString("es-MX",{maximumFractionDigits:3});
 const escape=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let inventory=[],movements=[];
+let inventory=[],movements=[],counts=[],lots=[];
 function message(s,bad=false){$("message").textContent=s;$("message").classList.toggle("danger",bad);}
 async function call(path,{body,method="GET"}={}){
  const data=JSON.parse(sessionStorage.getItem("filler_staff_session_v1")||"null");
@@ -63,8 +63,9 @@ function render(){
 const paneLabels={
  overview:["Resumen de almacén","Visibilidad total de existencias y alertas de cocina."],
  inventory:["Inventario general","Cada insumo en un solo lugar, con filtros y registro."],
+ counts:["Conteo físico de hoy","Verifica cada insumo y registra las diferencias contra el sistema."],
  movements:["Movimientos","Registro y trazabilidad de entradas y salidas."],
- expiry:["Caducidades","Prioridad a productos próximos a vencer."],
+ expiry:["Caducidades y lotes","Registra las fechas reales de vencimiento de cada lote."],
  purchase:["Compras sugeridas","Reposiciones calculadas con existencias y mínimos."],
  recipes:["Recetas y consumo","Conexión del menú con costos e ingredientes."]
 };
@@ -138,9 +139,74 @@ $("export-purchases").addEventListener("click",()=>{
  setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
 
+
+function renderAudit(){
+ const chosen=$("count-item").value,lotChosen=$("lot-item").value;
+ const options='<option value="">Selecciona un insumo…</option>'+inventory.map(i=>
+ '<option value="'+escape(i.id)+'">'+escape(i.code)+' · '+escape(i.name)+' ('+nfmt(i.quantity)+' '+escape(i.unit)+')</option>').join("");
+ $("count-item").innerHTML=options;
+ $("lot-item").innerHTML=options;
+ if(inventory.some(i=>i.id===chosen))$("count-item").value=chosen;
+ if(inventory.some(i=>i.id===lotChosen))$("lot-item").value=lotChosen;
+ updateSystemQuantity();
+ const doneIds=new Set(counts.map(x=>x.item_id));
+ $("count-total").textContent=inventory.length;
+ $("count-done").textContent=doneIds.size;
+ $("count-pending").textContent=inventory.length-doneIds.size;
+ const filter=$("count-filter").value;
+ const countRows=inventory.filter(i=>filter==="all"||(filter==="done"?doneIds.has(i.id):!doneIds.has(i.id)));
+ const countInfo=new Map();
+ counts.forEach(c=>{if(!countInfo.has(c.item_id))countInfo.set(c.item_id,c);});
+ $("count-list").innerHTML=countRows.map(i=>{
+ const c=countInfo.get(i.id);
+ return '<div class="summary-row"><span><strong>'+escape(i.name)+'</strong><br><small>'+escape(i.code)+' · '+escape(i.category)+' · Sistema: '+nfmt(i.quantity)+' '+escape(i.unit)+'</small>'+(c?'<br><small>Último conteo: '+nfmt(c.physical_quantity)+' · Diferencia: '+nfmt(c.difference)+'</small>':'')+'</span><button type="button" class="secondary" data-count-select="'+escape(i.id)+'">'+(c?'Recontar':'Contar')+'</button></div>';
+ }).join("")||'<div class="empty-state"><strong>No hay registros para este filtro.</strong></div>';
+ $("count-list").querySelectorAll("[data-count-select]").forEach(b=>b.addEventListener("click",()=>{
+  $("count-item").value=b.dataset.countSelect;updateSystemQuantity();
+  $("count-form").scrollIntoView({behavior:"smooth",block:"start"});$("count-physical").focus();
+ }));
+ $("lot-count").textContent=lots.length+" lotes";
+ $("lot-list").innerHTML=lots.map(l=>{
+ const item=inventory.find(i=>i.id===l.item_id);
+ const d=expiryDays(l.expiration_date);
+ const status=d===null?"Sin fecha":d<0?"Caducado":d===0?"Caduca hoy":d<=7?"Próximo a vencer":"Vigente";
+ return '<div class="summary-row"><span><strong>'+escape(item?.name||"Insumo")+'</strong><br><small>Lote '+escape(l.lot_code)+' · '+nfmt(l.quantity)+' '+escape(item?.unit||"")+' · '+escape(l.expiration_date||"Sin fecha")+'</small></span><span class="pill '+(d!==null&&d<=7?'exp':'')+'">'+status+'</span></div>';
+ }).join("")||'<div class="empty-state"><strong>No hay lotes registrados</strong>Durante la revisión física captura el número de lote y la caducidad indicada en cada producto.</div>';
+}
+function updateSystemQuantity(){
+ const item=inventory.find(i=>i.id===$("count-item").value);
+ $("count-system").value=item?nfmt(item.quantity)+" "+item.unit:"Selecciona un insumo";
+ $("count-physical").placeholder=item?"Cantidad en "+item.unit:"Cantidad encontrada";
+}
+$("count-item").addEventListener("change",updateSystemQuantity);
+$("count-filter").addEventListener("change",renderAudit);
+$("count-form").addEventListener("submit",async e=>{
+ e.preventDefault();const f=e.currentTarget,b=f.querySelector("button");b.disabled=true;
+ try{
+ const d=new FormData(f),item=inventory.find(i=>i.id===d.get("item"));
+ if(!item)throw Error("Selecciona un insumo válido.");
+ const physical=Number(d.get("physical"));
+ if(!Number.isFinite(physical)||physical<0)throw Error("Escribe la existencia física encontrada.");
+ const current=Number(item.quantity),difference=physical-current;
+ const answer=window.confirm("Confirmar conteo de "+item.name+"\nSistema: "+nfmt(current)+" "+item.unit+"\nFísico: "+nfmt(physical)+" "+item.unit+"\nDiferencia: "+nfmt(difference)+" "+item.unit+"\n\n¿Guardar el conteo y ajustar la existencia?");
+ if(!answer)return;
+ await call("rpc/filler_inventory_count",{method:"POST",body:{p_item:item.id,p_physical:physical,p_reason:String(d.get("reason")||"").trim()||"Conteo físico de cocina"}});
+ f.elements.physical.value="";f.elements.reason.value="";
+ await load();$("count-item").value=item.id;updateSystemQuantity();message("✓ Conteo guardado y existencia actualizada. Diferencia: "+nfmt(difference)+" "+item.unit);
+ }catch(err){message(err.message,true);}finally{b.disabled=false;}
+});
+$("lot-form").addEventListener("submit",async e=>{
+ e.preventDefault();const f=e.currentTarget,b=f.querySelector("button");b.disabled=true;
+ try{
+ const d=new FormData(f);
+ if(!inventory.some(i=>i.id===d.get("item")))throw Error("Selecciona un insumo válido.");
+ await call("rpc/filler_inventory_lot_save",{method:"POST",body:{p_item:d.get("item"),p_lot:String(d.get("lot")||"").trim(),p_expiry:d.get("expiry"),p_quantity:Number(d.get("quantity")),p_received:d.get("received")||null}});
+ f.reset();await load();message("✓ Lote y caducidad registrados. Las existencias totales no se modificaron.");
+ }catch(err){message(err.message,true);}finally{b.disabled=false;}
+});
 async function load(){
- const [i,m]=await Promise.all([call("filler_inventory_items?select=*&order=name.asc&limit=1000"),call("filler_inventory_movements?select=id,item_id,type,quantity_change,note,created_at&order=created_at.desc&limit=30")]);
- inventory=i||[];movements=m||[];renderExtra();render();message("Datos del almacén actualizados.");
+ const [i,m,c,l]=await Promise.all([call("filler_inventory_items?select=*&order=name.asc&limit=1000"),call("filler_inventory_movements?select=id,item_id,type,quantity_change,note,created_at&order=created_at.desc&limit=30"),call("filler_inventory_counts?select=id,item_id,system_quantity,physical_quantity,difference,count_date,counted_at&count_date=eq."+today()+"&order=counted_at.desc&limit=1000"),call("filler_inventory_lots?select=id,item_id,lot_code,expiration_date,quantity,received_at&order=expiration_date.asc.nullslast&limit=1000")]);
+ inventory=i||[];movements=m||[];counts=c||[];lots=l||[];renderExtra();render();renderAudit();message("Datos del almacén actualizados.");
 }
 async function show(){
  const role=await FillerCloud.staffRole();
