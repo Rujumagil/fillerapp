@@ -27,11 +27,33 @@ function expiryDays(iso){
  const t=new Date(today()+"T12:00:00Z");
  return Math.round((d-t)/86400000);
 }
+// Identifica posibles errores de captura/unidad heredados de la hoja OCS.
+function unusualMinimum(i){
+ const qty=Number(i.quantity),min=Number(i.min_quantity),max=Number(i.max_quantity||0);
+ return (i.unit==="kg" && min>=25) ||
+   (i.unit==="g" && qty>0 && qty<10 && min>=20) ||
+   (qty>0 && min>=20 && min/qty>=20) ||
+   (max>0 && min>max);
+}
+function safePurchaseItems(){
+ return inventory.filter(i=>!unusualMinimum(i) && Number(i.min_quantity)>0 &&
+ Number(i.quantity)<Number(i.min_quantity));
+}
+function htmlSafe(s){return escape(s)}
 function render(){
- const low=inventory.filter(i=>(Number(i.min_quantity)>0&&Number(i.quantity)<=Number(i.min_quantity)));
- const exp=inventory.filter(i=>{let d=expiryDays(i.expiration_date);return d!==null&&d<=7;});
- $("k-items").textContent=inventory.length;$("k-low").textContent=low.length;$("k-exp").textContent=exp.length;
- $("k-value").textContent=money(inventory.reduce((a,i)=>a+Number(i.quantity)*Number(i.unit_cost),0));
+ const low=inventory.filter(i=>Number(i.min_quantity)>0&&Number(i.quantity)<=Number(i.min_quantity));
+ const missingExpiry=inventory.filter(i=>!i.expiration_date).length;
+ const physicalCounted=new Set(counts.map(x=>x.item_id)).size;
+ const priced=inventory.filter(i=>Number(i.unit_cost)>0);
+ const estimated=priced.reduce((a,i)=>a+Number(i.quantity)*Number(i.unit_cost),0);
+ $("k-items").textContent=inventory.length;
+ $("k-low").textContent=low.length;
+ $("k-noexpiry").textContent=missingExpiry;
+ $("k-counted").textContent=physicalCounted+" / "+inventory.length;
+ $("k-counted-sub").textContent=(inventory.length-physicalCounted)+" pendientes de conteo";
+ $("k-value").textContent=priced.length?money(estimated):"Sin costos";
+ $("k-value-note").textContent=priced.length?priced.length+" de "+inventory.length+" insumos con costo":"Captura costos para valorar inventario";
+ $("k-items-detail").textContent=inventory.filter(i=>Number(i.quantity)>0).length+" con existencia positiva";
  const filter=$("search").value.trim().toLocaleLowerCase("es-MX");
  const family=$("family-filter")?.value||"";
  const status=$("status-filter")?.value||"";
@@ -83,7 +105,7 @@ $("quick-movement").addEventListener("click",()=>{navigate("movements");$("movem
 window.addEventListener("hashchange",()=>navigate(location.hash.replace("#","")));
 navigate(location.hash.replace("#",""));
 function recommendations(){
- return inventory.filter(i=>Number(i.quantity)<Number(i.min_quantity)).map(i=>({
+ return safePurchaseItems().map(i=>({
   code:i.code,name:i.name,category:i.category,unit:i.unit,have:Number(i.quantity),
   minimum:Number(i.min_quantity),needed:Number(i.min_quantity)-Number(i.quantity),
   estimate:(Number(i.min_quantity)-Number(i.quantity))*Number(i.unit_cost)
@@ -96,23 +118,40 @@ function renderExtra(){
  if(families.includes(saved))fam.value=saved;
  const famCount=new Map();
  inventory.forEach(i=>famCount.set(i.category,(famCount.get(i.category)||0)+1));
+ const peak=Math.max(...famCount.values(),1);
  $("family-summary").innerHTML=[...famCount].sort((a,b)=>b[1]-a[1]).map(([name,count])=>
- '<div class="summary-row"><span>'+escape(name)+'</span><strong>'+count+' insumos</strong></div>').join("")
- ||'<div class="empty-state"><strong>Aún no hay insumos registrados</strong>Agrega el primer producto desde Inventario general.</div>';
+ '<div class="family-row"><span class="family-name">'+escape(name)+'</span><strong class="family-number">'+count+'</strong><div class="family-track"><div class="family-fill" style="width:'+Math.round(100*count/peak)+'%"></div></div></div>').join("")
+ ||'<div class="compact-empty"><strong>Aún no hay insumos</strong>Agrega productos en Inventario.</div>';
  const low=inventory.filter(i=>(Number(i.min_quantity)>0&&Number(i.quantity)<=Number(i.min_quantity)));
  const expired=inventory.filter(i=>{const days=expiryDays(i.expiration_date);return days!==null&&days<0});
  const soon=inventory.filter(i=>{const days=expiryDays(i.expiration_date);return days!==null&&days>=0&&days<=7});
+ const suspect=inventory.filter(unusualMinimum);
+ const withoutCost=inventory.filter(i=>Number(i.unit_cost)<=0).length;
  $("priority-alerts").innerHTML=[
-  '<div class="summary-row"><span>🔴 Caducados</span><strong>'+expired.length+'</strong></div>',
-  '<div class="summary-row"><span>🟠 Caducan en 7 días</span><strong>'+soon.length+'</strong></div>',
-  '<div class="summary-row"><span>⚠️ Bajo mínimo o agotados</span><strong>'+low.length+'</strong></div>',
-  '<div class="summary-row"><span>✓ Insumos registrados</span><strong>'+inventory.length+'</strong></div>'
- ].join("");
+  ['expiry','red','◷','Capturar fechas de caducidad',inventory.filter(i=>!i.expiration_date).length,'No se registraron vencimientos en la migración'],
+  ['inventory','orange','!','Insumos bajo mínimo',low.length,'Revisar existencias y puntos de reposición','low'],
+  ['purchase','orange','≋','Mínimos y unidades por validar',suspect.length,'No generar compras sin confirmar unidades'],
+  ['counts','','✓','Conteo físico pendiente',inventory.length-new Set(counts.map(c=>c.item_id)).size,'Comparar cantidades reales con sistema']
+ ].map(([pane,color,symbol,title,count,subtitle,filter])=>
+ '<button type="button" class="priority-action" data-priority="'+pane+'" '+(filter?'data-filter="'+filter+'"':'')+'><span class="priority-symbol '+color+'">'+symbol+'</span><span class="priority-copy"><strong>'+title+'</strong><small>'+subtitle+'</small></span><strong class="priority-count">'+count+'</strong><span aria-hidden="true">›</span></button>').join("");
+ $("priority-alerts").querySelectorAll("[data-priority]").forEach(button=>button.addEventListener("click",()=>{
+   navigate(button.dataset.priority);
+   if(button.dataset.filter && $("status-filter")){ $("status-filter").value=button.dataset.filter;render();}
+ }));
+ const done=new Set(counts.map(c=>c.item_id)).size;
+ const percent=inventory.length?Math.round(100*done/inventory.length):0;
+ $("dashboard-date").textContent=new Intl.DateTimeFormat("es-MX",{timeZone:"America/Mexico_City",day:"numeric",month:"long",year:"numeric"}).format(new Date());
+ $("count-progress-pct").textContent=percent+"%";
+ $("count-progress-fill").style.width=percent+"%";
+ $("count-completed").textContent=done;
+ $("count-remaining").textContent=inventory.length-done;
+ $("data-quality").innerHTML='<strong>Calidad de datos:</strong> '+withoutCost+' insumos sin costo unitario registrado; '+suspect.length+' requieren revisar mínimos o unidades. Las compras sugeridas excluyen temporalmente los valores sospechosos. <button type="button" data-quality-action="purchase">Revisar prioridades →</button>';
+ $("data-quality").querySelector("button").addEventListener("click",()=>navigate("purchase"));
  const expiring=inventory.filter(i=>expiryDays(i.expiration_date)!==null).sort((a,b)=>a.expiration_date.localeCompare(b.expiration_date));
  const label=i=>{const days=expiryDays(i.expiration_date);return days<0?"Caducado hace "+Math.abs(days)+" días":days===0?"Caduca hoy":"En "+days+" días";};
- $("upcoming-expiry").innerHTML=expiring.slice(0,5).map(i=>
- '<div class="summary-row"><span>'+escape(i.name)+'<br><small>'+escape(i.expiration_date)+'</small></span><strong class="'+(expiryDays(i.expiration_date)<=7?"is-danger":"")+'">'+label(i)+'</strong></div>').join("")
- ||'<div class="empty-state"><strong>Sin caducidades registradas</strong>Agrega la fecha al crear cada insumo.</div>';
+ $("upcoming-expiry").innerHTML=expiring.slice(0,4).map(i=>
+ '<div class="compact-item"><span><strong>'+escape(i.name)+'</strong><small>'+escape(i.expiration_date)+'</small></span><span class="amount">'+label(i)+'</span></div>').join("")
+ ||'<div class="compact-empty"><strong>Aún no hay caducidades capturadas</strong>Registra los lotes durante la revisión de hoy.</div>';
  const filter=$("expiry-filter").value;
  const dayLimit=filter==="all"?Infinity:Number(filter);
  $("expiry-items").innerHTML=expiring.filter(i=>expiryDays(i.expiration_date)<=dayLimit).map(i=>
@@ -120,11 +159,21 @@ function renderExtra(){
  ||'<div class="empty-state"><strong>Sin insumos en este rango</strong>Cuando captures fechas de caducidad aparecerán aquí.</div>';
  const purchases=recommendations();
  const purchaseRow=i=>'<div class="summary-row"><span><strong>'+escape(i.name)+'</strong><br><small>'+escape(i.code)+' · Actual: '+nfmt(i.have)+' · Mínimo: '+nfmt(i.minimum)+'</small></span><strong>'+nfmt(i.needed)+' '+escape(i.unit)+'</strong></div>';
- $("overview-purchases").innerHTML=purchases.slice(0,5).map(purchaseRow).join("")
- ||'<div class="empty-state"><strong>Sin reposiciones sugeridas</strong>Los mínimos definidos están cubiertos.</div>';
+ $("overview-purchases").innerHTML=purchases.slice(0,4).map(i=>
+ '<div class="compact-item"><span><strong>'+escape(i.name)+'</strong><small>Actual '+nfmt(i.have)+' · Mínimo '+nfmt(i.minimum)+'</small></span><span class="amount">+'+nfmt(i.needed)+' '+escape(i.unit)+'</span></div>').join("")
+ ||'<div class="compact-empty"><strong>Sin reposiciones validadas</strong>Los mínimos heredados pueden requerir revisión.</div>';
  $("purchase-list").innerHTML=purchases.map(purchaseRow).join("")
  ||'<div class="empty-state"><strong>Sin compras urgentes</strong>Los insumos están por encima de su mínimo.</div>';
 }
+document.querySelectorAll("[data-jump]").forEach(button=>button.addEventListener("click",()=>{
+ navigate(button.dataset.jump);
+ if(button.dataset.setStatus && $("status-filter")){ $("status-filter").value=button.dataset.setStatus;render(); }
+}));
+$("source-info-toggle").addEventListener("click",()=>{
+ const detail=$("source-info-detail"),open=detail.hidden;
+ detail.hidden=!open;
+ $("source-info-toggle").setAttribute("aria-expanded",String(open));
+});
 $("family-filter").addEventListener("change",render);
 $("status-filter").addEventListener("change",render);
 $("expiry-filter").addEventListener("change",renderExtra);
