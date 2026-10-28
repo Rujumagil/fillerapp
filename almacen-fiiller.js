@@ -7,6 +7,7 @@ const money=n=>Number(n||0).toLocaleString("es-MX",{style:"currency",currency:"M
 const nfmt=n=>Number(n||0).toLocaleString("es-MX",{maximumFractionDigits:3});
 const escape=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let inventory=[],movements=[],counts=[],lots=[],barcodes=[],barcodeSelected=null;
+let cameraStream=null,cameraFrame=0,cameraBusy=false,cameraDetector=null,lastScanned="";
 function message(s,bad=false){$("message").textContent=s;$("message").classList.toggle("danger",bad);}
 async function call(path,{body,method="GET"}={}){
  const data=JSON.parse(sessionStorage.getItem("filler_staff_session_v1")||"null");
@@ -263,7 +264,6 @@ $("lot-form").addEventListener("submit",async e=>{
 });
 
 /* Registro rápido por código de barras */
-let cameraStream=null,cameraFrame=0,cameraBusy=false,cameraDetector=null,lastScanned="";
 function barcodeMessage(text,bad=false){
  const el=$("barcode-status");el.textContent=text;el.classList.toggle("danger",bad);
 }
