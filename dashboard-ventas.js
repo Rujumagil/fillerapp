@@ -10,27 +10,41 @@ function status(s,error=false){$("status").textContent=s;$("status").classList.t
 
 function renderSalesTrend(dates,salesByDate,firstDay){
  const node=$("sales-trend-chart");
- const values=dates.map((date,index)=>({date,index,value:salesByDate.has(date)?Number(salesByDate.get(date)):null})).filter(p=>p.value!==null&&Number.isFinite(p.value));
- if(!values.length){node.textContent="Sin cortes de venta confirmados para este mes.";return;}
- const width=1000,height=320,left=76,right=24,top=24,bottom=55;
- const plotWidth=width-left-right,plotHeight=height-top-bottom;
- const maximum=Math.max(1000,Math.ceil(Math.max(...values.map(p=>p.value))/1000)*1000);
- const X=i=>left+plotWidth*i/Math.max(1,dates.length-1);
- const Y=v=>top+plotHeight*(1-v/maximum);
+ const entries=dates.filter(d=>salesByDate.has(d)).map(date=>({date,value:Number(salesByDate.get(date))})).filter(x=>Number.isFinite(x.value));
+ if(!entries.length){node.textContent="Todavía no hay ventas confirmadas este mes.";return;}
+ const sum=entries.reduce((n,e)=>n+e.value,0),average=sum/entries.length;
+ const highest=entries.reduce((a,b)=>b.value>a.value?b:a);
+ const lowest=entries.reduce((a,b)=>b.value<a.value?b:a);
+ $("trend-average").textContent=money(average);
+ $("trend-high").textContent=money(highest.value);
+ $("trend-high-date").textContent="Día "+Number(highest.date.slice(-2));
+ $("trend-days").textContent=fmt(entries.length);
+ const pending=dates.filter(d=>!salesByDate.has(d));
+ $("trend-pending").textContent=pending.length?("Fechas sin corte: "+pending.map(d=>Number(d.slice(-2))).join(", ")+". No se consideran ventas de $0."):"Todas las fechas del período tienen corte.";
+ const width=Math.max(1040,entries.length*73+90),height=370,left=75,right=45,top=56,bottom=72;
+ const w=width-left-right,h=height-top-bottom;
+ const max=Math.max(1000,Math.ceil(Math.max(...entries.map(e=>e.value),average)*1.18/1000)*1000);
+ const X=i=>left+(entries.length===1?w/2:(w*i/(entries.length-1)));
+ const Y=v=>top+h*(1-v/max);
+ const fmtShort=v=>v>=1000?"$"+(v/1000).toFixed(v%1000===0?0:1)+"k":"$"+fmt(v);
  let grid="";
- for(let i=0;i<=4;i++){const value=maximum*i/4,y=Y(value);grid+='<line x1="'+left+'" y1="'+y+'" x2="'+(width-right)+'" y2="'+y+'" stroke="#e4ede6" stroke-width="1"/><text x="'+(left-12)+'" y="'+(y+5)+'" text-anchor="end" fill="#60776a" font-size="13">'+escape("$"+fmt(value))+'</text>';}
- let labels="";
- dates.forEach((d,i)=>{if(i===0||(i+1)%3===0||i===dates.length-1)labels+='<text x="'+X(i)+'" y="'+(height-18)+'" text-anchor="middle" font-size="12" fill="#60776a">'+(i+1)+'</text>';});
- let lines="";
- for(let i=1;i<values.length;i++){
-   const a=values[i-1],b=values[i],missing=b.index-a.index>1;
-   lines+='<line x1="'+X(a.index)+'" y1="'+Y(a.value)+'" x2="'+X(b.index)+'" y2="'+Y(b.value)+'" stroke="'+(missing?"#96a99d":"#08764e")+'" stroke-width="'+(missing?2:3.5)+'" stroke-linecap="round" '+(missing?'stroke-dasharray="6 7"':'')+'/>';
- }
- const dots=values.map(p=>'<circle cx="'+X(p.index)+'" cy="'+Y(p.value)+'" r="5.5" fill="#08764e" stroke="#fff" stroke-width="2"><title>'+escape(p.date+": "+money(p.value))+'</title></circle>').join("");
- node.innerHTML='<svg viewBox="0 0 '+width+' '+height+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;min-width:650px" aria-label="Ventas oficiales diarias; los tramos punteados indican días sin información" role="img">'+grid+lines+dots+labels+'<text x="'+(width/2)+'" y="'+(height-1)+'" text-anchor="middle" fill="#60776a" font-size="13">Día del mes</text></svg>';
- $("sales-trend-title").textContent="Historial de ventas · "+new Date(firstDay+"T12:00:00Z").toLocaleDateString("es-MX",{month:"long",year:"numeric",timeZone:"UTC"});
+ for(let i=0;i<=4;i++){const v=max*i/4,y=Y(v);grid+='<line x1="'+left+'" x2="'+(width-right)+'" y1="'+y+'" y2="'+y+'" stroke="#e2ece6" stroke-width="1"/><text x="'+(left-12)+'" y="'+(y+5)+'" fill="#667b6d" text-anchor="end" font-size="13">'+escape(fmtShort(v))+'</text>';}
+ const avgY=Y(average);
+ const avgLine='<line x1="'+left+'" x2="'+(width-right)+'" y1="'+avgY+'" y2="'+avgY+'" stroke="#d99a24" stroke-width="2" stroke-dasharray="7 5"/>';
+ const points=entries.map((e,i)=>X(i)+","+Y(e.value)).join(" ");
+ const trend=entries.length>1?'<polyline points="'+points+'" fill="none" stroke="#087650" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>':"";
+ const labels=entries.map((e,i)=>{
+   const x=X(i),y=Y(e.value),isPeak=e.date===highest.date;
+   const valueY=Math.max(21,y-18);
+   return '<g><circle cx="'+x+'" cy="'+y+'" r="'+(isPeak?8:6)+'" fill="'+(isPeak?"#f0ad38":"#087650")+'" stroke="white" stroke-width="3"><title>'+escape(e.date+": "+money(e.value))+'</title></circle>'+
+   '<text x="'+x+'" y="'+valueY+'" text-anchor="middle" font-size="13" font-weight="'+(isPeak?800:650)+'" fill="#174431">'+escape(fmtShort(e.value))+'</text>'+
+   '<text x="'+x+'" y="'+(height-37)+'" text-anchor="middle" font-size="13" font-weight="700" fill="#234d39">'+Number(e.date.slice(-2))+'</text></g>';
+ }).join("");
+ const chart='<svg viewBox="0 0 '+width+' '+height+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Movimiento de ventas por fecha confirmada en '+escape(firstDay.slice(0,7))+'. Cada punto muestra la venta del día; la línea amarilla indica el promedio." style="display:block;min-width:'+width+'px;width:100%;height:auto">'+grid+avgLine+trend+labels+
+ '<text x="'+(width/2)+'" y="'+(height-8)+'" text-anchor="middle" font-size="13" fill="#738778">Día de octubre con venta confirmada</text></svg>';
+ node.innerHTML=chart;
+ $("sales-trend-title").textContent="Movimiento de ventas · "+new Date(firstDay+"T12:00:00Z").toLocaleDateString("es-MX",{month:"long",year:"numeric",timeZone:"UTC"});
 }
-
 async function show(){
  const role=await FillerCloud.staffRole();
  if(role!=="admin"){$("login-card").hidden=false;$("dashboard").hidden=true;status(role?"Este tablero requiere acceso de administrador.":"Inicia sesión con tu cuenta de administrador.");return;}
