@@ -324,12 +324,20 @@ function barcodeShow(item){
  barcodeMessage("Producto identificado. Introduce lo encontrado y confirma el conteo.");
 }
 function barcodeUnknown(code){
+ if(barcodeSelected && barcodeItem(barcodeSelected.id)){
+  barcodeShow(barcodeItem(barcodeSelected.id));
+  barcodeOptions();
+  $("barcode-link-form").hidden=false;
+  barcodeMessage("Código nuevo detectado. Comprueba el producto seleccionado y vincúlalo.");
+  return;
+ }
  barcodeSelected=null;
  $("barcode-product").classList.remove("matched");
- $("barcode-product").innerHTML='<strong>Código sin vincular: '+escape(code)+'</strong><span>Selecciona a qué insumo de los 193 registrados pertenece. No se creará un producto duplicado.</span>';
- $("barcode-link-form").hidden=false;
+ $("barcode-product").innerHTML='<strong>Código sin registrar: '+escape(code)+'</strong><span>Busca arriba el nombre y elige el insumo correcto antes de guardarlo.</span>';
+ $("barcode-link-form").hidden=true;
  $("barcode-count-form").hidden=true;
- barcodeMessage("Este código todavía no está registrado. Vincúlalo a su insumo.");
+ barcodeMessage("Código nuevo. Busca el nombre del producto y selecciónalo.");
+ $("barcode-name-search").focus();
 }
 async function barcodeLookup(input){
  const code=barcodeClean(input);
