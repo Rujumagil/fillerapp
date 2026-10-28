@@ -275,6 +275,27 @@ function barcodeOptions(){
   $("barcode-link-name").value=barcodeSelected.name+" · "+barcodeSelected.code;
  }
 }
+function barcodeFindByName(){
+ const term=String($("barcode-name-search").value||"").toLocaleLowerCase("es-MX").trim();
+ const items=term?inventory.filter(i=>(i.name+" "+i.code+" "+i.category).toLocaleLowerCase("es-MX").includes(term)):inventory.slice(0,8);
+ $("barcode-search-counter").textContent=term?items.length+" coincidencias":inventory.length+" insumos";
+ $("barcode-name-results").innerHTML=items.slice(0,25).map(i=>'<button type="button" class="barcode-search-result" data-barcode-item="'+escape(i.id)+'"><span><strong>'+escape(i.name)+'</strong><small>'+escape(i.code)+' · '+escape(i.category)+'</small></span><span class="count-chip">'+nfmt(i.quantity)+' '+escape(i.unit)+'</span></button>').join("")||'<p class="barcode-search-help">Sin coincidencias. Prueba otra palabra.</p>';
+ $("barcode-name-results").querySelectorAll("[data-barcode-item]").forEach(btn=>btn.addEventListener("click",()=>{
+  const item=barcodeItem(btn.dataset.barcodeItem);
+  if(!item)return;
+  barcodeShow(item);
+  barcodeOptions();
+  $("barcode-name-search").value=item.name;
+  $("barcode-name-results").innerHTML="";
+  const code=barcodeClean($("barcode-input").value);
+  if(code&&!barcodes.some(b=>b.barcode===code)&&/^[0-9A-Za-z_-]{4,64}$/.test(code)){
+   $("barcode-link-form").hidden=false;
+   barcodeMessage("Insumo seleccionado. Vincula el nuevo código de barras sin modificar existencias.");
+  }
+ }));
+}
+$("barcode-name-search").addEventListener("input",barcodeFindByName);
+$("barcode-name-search").addEventListener("focus",barcodeFindByName);
 function barcodeRenderLinks(){
  $("barcode-linked-total").textContent=barcodes.length+" códigos";
  $("barcode-link-list").innerHTML=barcodes.slice(0,60).map(link=>{
