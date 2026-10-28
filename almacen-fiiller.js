@@ -157,6 +157,11 @@ function renderExtra(){
  $("expiry-items").innerHTML=expiring.filter(i=>expiryDays(i.expiration_date)<=dayLimit).map(i=>
  '<div class="summary-row"><span><strong>'+escape(i.name)+'</strong><br><small>'+escape(i.code)+' · '+nfmt(i.quantity)+' '+escape(i.unit)+'</small></span><span class="'+(expiryDays(i.expiration_date)<=7?"is-danger":"")+'">'+label(i)+'</span></div>').join("")
  ||'<div class="empty-state"><strong>Sin insumos en este rango</strong>Cuando captures fechas de caducidad aparecerán aquí.</div>';
+ const suspects=inventory.filter(unusualMinimum).sort((a,b)=>Number(b.min_quantity)-Number(a.min_quantity));
+ $("suspicious-count").textContent=suspects.length+" por revisar";
+ $("suspicious-list").innerHTML=suspects.map(i=>
+ '<div class="summary-row"><span><strong>'+escape(i.name)+'</strong><br><small>'+escape(i.code)+' · Existencia '+nfmt(i.quantity)+' '+escape(i.unit)+' · Mínimo '+nfmt(i.min_quantity)+' '+escape(i.unit)+'</small></span><span class="count-chip">Validar</span></div>').join("")
+ ||'<div class="empty-state"><strong>Sin inconsistencias evidentes</strong>Confirma siempre la unidad de cada insumo durante el conteo.</div>';
  const purchases=recommendations();
  const purchaseRow=i=>'<div class="summary-row"><span><strong>'+escape(i.name)+'</strong><br><small>'+escape(i.code)+' · Actual: '+nfmt(i.have)+' · Mínimo: '+nfmt(i.minimum)+'</small></span><strong>'+nfmt(i.needed)+' '+escape(i.unit)+'</strong></div>';
  $("overview-purchases").innerHTML=purchases.slice(0,4).map(i=>
