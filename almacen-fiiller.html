@@ -64,6 +64,86 @@ main{max-width:1450px;padding:0 20px 70px}
 @media(max-width:980px){.warehouse-shell{grid-template-columns:185px minmax(0,1fr);gap:15px}#dashboard .grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-blocks{grid-template-columns:1fr}}
 @media(max-width:700px){header{padding:10px 12px}main{padding:0 12px 48px}.warehouse-shell{display:block;padding-top:12px}.warehouse-side{position:static;min-height:0;padding:9px;margin-bottom:15px;border-radius:14px}.side-title,.side-subtitle,.side-label,.side-foot{display:none}.side-nav{display:flex;gap:5px;overflow-x:auto;scrollbar-width:thin;padding:2px;white-space:nowrap}.side-nav button{flex-shrink:0;width:auto;font-size:12px;padding:11px 12px}.workspace-top{padding-top:12px}.workspace-actions button{font-size:11px}#dashboard .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.warehouse-filterbar{align-items:stretch}.warehouse-filterbar input,.warehouse-filterbar select{width:100%}.card{padding:15px}}
 #count-list .summary-row{align-items:center}#count-list .summary-row button{padding:7px 10px;font-size:11px}#count-filter{border:1px solid #d8e4d9;padding:9px;border-radius:10px;background:#fff}#count-system[readonly]{background:#f0f5f0;font-weight:800;color:#006241}#lot-list .summary-row{gap:12px}.count-chip{font-weight:750;font-size:11px;background:#eef5ee;border-radius:8px;padding:5px 8px;color:#42624c}@media(max-width:630px){.warehouse-pane[data-view="counts"] .grid{grid-template-columns:repeat(3,minmax(0,1fr))}.warehouse-pane[data-view="counts"] .metric{font-size:20px}}
+
+/* Executive operations dashboard v57 */
+:root{--surface:#fff;--background:#f6f7f4;--ink:#213a2d;--muted:#728479;--soft-line:#e9eee8}
+body{background:var(--background)}
+header{border-bottom:1px solid #e9eee9}
+.warehouse-shell{grid-template-columns:228px minmax(0,1fr);gap:25px}
+.warehouse-side{border-color:#e7ede7;box-shadow:0 9px 30px rgba(20,53,34,.035);border-radius:19px;padding:20px 12px;min-height:unset}
+.side-title{font-size:17px}.side-subtitle{padding-bottom:18px}
+.side-nav{gap:2px}.side-nav button{min-height:44px}
+.side-nav button.active{background:#e6f4ec;color:#006241}
+.workspace-top{padding:7px 0 18px}.workspace-top h1{font-size:29px}
+.workspace-actions button{border-radius:10px;min-height:43px}
+.warehouse-main .source-note{display:flex;gap:12px;align-items:center;background:#f0f6f0;border:1px solid #dcebdd;border-radius:13px;padding:12px 16px;margin:1px 0 19px;font-size:12px;line-height:1.55;color:#54745b}
+.source-dot{background:#24a263;height:9px;width:9px;flex:none;border-radius:50%;box-shadow:0 0 0 4px #e0f3e8}
+.source-note strong{color:#145b37}
+.source-note>span:nth-child(2){flex:1}
+.source-more{background:transparent!important;color:#146544!important;border:0!important;padding:4px 7px!important;white-space:nowrap;font-size:12px!important}
+.source-details{font-size:12px;line-height:1.6;color:#65776a;margin:-8px 0 18px;padding:13px 17px;border:1px solid #e6ece5;border-radius:12px;background:white}
+#message.status{min-height:0;margin:0 0 10px;font-size:12px}
+.welcome-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.welcome-strip h2{font-size:23px;letter-spacing:-.04em;margin:4px 0 5px;color:#1f402f}
+.welcome-strip p{font-size:12px;color:#7e8d81;margin:0}.welcome-strip button{font-size:12px}
+.kpi-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.kpi-card{min-width:0;padding:17px 18px!important;min-height:137px;display:flex;flex-direction:column;justify-content:space-between;border-color:#e6ece5!important;border-radius:15px!important;box-shadow:0 5px 20px #173f2608!important}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;gap:7px;font-size:11px;font-weight:750;color:#6d8174}
+.kpi-top>span:first-child{min-width:0}.kpi-icon{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;font-size:15px;font-weight:850;flex-shrink:0}
+.kpi-icon.green{background:#e3f3e8;color:#006241}.kpi-icon.orange{background:#fff3e1;color:#bf751d}.kpi-icon.red{background:#fff0ec;color:#bb563d}.kpi-icon.blue{background:#e9f3fb;color:#4275a2}.kpi-icon.neutral{background:#f1f2ed;color:#7b8779}
+.kpi-card .metric{font-size:34px!important;letter-spacing:-.05em;font-weight:850;line-height:1.15;color:#1c4831}.kpi-card .metric.kpi-warn{color:#bd6b26}
+.kpi-card .metric.small-value{font-size:24px!important;letter-spacing:-.035em}
+.kpi-bottom{font-size:10px;color:#859589;line-height:1.4}
+.kpi-link{display:block;border:0;background:transparent!important;text-align:left;color:#158056!important;font-size:11px!important;padding:0!important;font-weight:800}
+.priority-layout{display:grid;grid-template-columns:minmax(0,1.72fr) minmax(260px,.88fr);gap:14px;margin:18px 0 23px}
+.focus-panel,.progress-panel,.insight-card{margin:0!important;border-color:#e6ece5!important;min-width:0}
+.panel-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 15px}
+.panel-header h3,.section-headline h3{font-size:16px;line-height:1.25;color:#253f31;margin:2px 0}
+.panel-overline{font-size:9px;letter-spacing:.12em;font-weight:850;color:#8c9b90}
+.panel-badge{font-size:10px;font-weight:850;background:#fff4e6;color:#c27b2b;padding:6px 10px;border-radius:100px}
+.priority-list{display:grid;gap:8px}
+.priority-action{width:100%;border:1px solid #e9eee8;border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;text-align:left;background:#fff!important;color:#244537!important;min-height:62px}
+.priority-action:hover{background:#f8fbf7!important;border-color:#bad7c3}
+.priority-symbol{display:grid;place-items:center;width:34px;height:34px;flex:none;border-radius:10px;font-size:17px;background:#eaf4eb;color:#146642}
+.priority-symbol.orange{background:#fff2dd;color:#b9741c}.priority-symbol.red{background:#fff0e9;color:#af4b3a}
+.priority-copy{display:grid;gap:3px;flex:1;min-width:0}
+.priority-copy strong{font-size:12px}.priority-copy small{font-size:11px;color:#8a978e}
+.priority-count{color:#144f35;font-size:17px;font-weight:850;white-space:nowrap}
+.progress-mini{background:#e7f4eb;color:#1e7951;padding:7px 9px;border-radius:100px;font-size:12px;font-weight:850}
+.progress-graphic{padding:12px 0}
+.progress-bar{height:9px;border-radius:20px;overflow:hidden;background:#e9f0e9}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#006241,#58b787);border-radius:20px;transition:width .2s}
+.progress-numbers{display:flex;justify-content:space-between;margin:14px 0 18px;gap:10px}
+.progress-numbers>div{display:flex;flex-direction:column;gap:3px}
+.progress-numbers strong{font-size:24px;color:#174c32}
+.progress-numbers span{color:#8b9c8f;font-size:11px}
+.panel-action{background:#e8f5ed!important;color:#006241!important;padding:11px 15px!important;width:100%;text-align:center;font-size:12px;border-radius:10px}
+.section-headline{margin:0 0 13px}
+.insights-layout{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
+.insight-card{padding:18px!important}
+.text-action{border:0;background:transparent!important;color:#18805b!important;font-size:11px!important;padding:3px!important;white-space:nowrap}
+.family-bars,.compact-list{display:grid;gap:10px}
+.family-row{display:grid;grid-template-columns:minmax(0,1fr) 46px;gap:7px;align-items:center}
+.family-name{color:#4f6856;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.family-number{font-size:11px;text-align:right;font-weight:800;color:#22573a}
+.family-track{height:5px;background:#eef2ed;border-radius:20px;overflow:hidden;grid-column:1/-1}
+.family-fill{height:100%;background:#72ae8b;border-radius:20px}
+.compact-item{display:flex;align-items:start;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #f0f2ef}
+.compact-item:last-child{border:0}
+.compact-item strong{font-size:11px;color:#244a36;display:block;line-height:1.45}
+.compact-item small{font-size:10px;color:#90a093;display:block;margin-top:3px;line-height:1.4}
+.compact-item .amount{color:#1b7950;white-space:nowrap;font-size:11px;font-weight:850}
+.compact-empty{background:#f6faf6;border:1px dashed #e2ebe2;border-radius:12px;padding:20px 14px;text-align:center;color:#87978a;font-size:11px;line-height:1.6}
+.compact-empty strong{color:#53765e;font-size:12px;display:block;margin-bottom:4px}
+.data-quality{margin:16px 0;background:#fff9ef;border:1px solid #f2e4c9;border-radius:13px;padding:15px 18px;font-size:12px;line-height:1.6;color:#866b42}
+.data-quality strong{color:#815e2b}
+.data-quality button{background:transparent!important;border:0!important;color:#986a29!important;text-decoration:underline;font-size:11px;padding:0 4px}
+#dashboard .grid:not(.kpi-grid){margin:0 0 18px}
+@media(min-width:1150px){.warehouse-main{max-width:calc(100vw - 335px)}}
+@media(max-width:1250px){.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.insights-layout{grid-template-columns:1fr 1fr}.insight-card:last-child{grid-column:1/-1}.warehouse-shell{gap:16px}}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.priority-layout{grid-template-columns:1fr}.insights-layout{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.warehouse-main{max-width:100%}.insights-layout{grid-template-columns:1fr}.insight-card:last-child{grid-column:auto}.welcome-strip{align-items:flex-start}.workspace-top h1{font-size:25px}.source-note{align-items:flex-start!important;flex-wrap:wrap}.source-more{margin-left:20px!important}.priority-layout{margin-top:12px}}
+@media(max-width:430px){.kpi-grid{gap:8px}.kpi-card{min-height:130px;padding:14px!important}.kpi-card .metric{font-size:29px!important}.kpi-card .metric.small-value{font-size:20px!important}.welcome-strip{flex-wrap:wrap}.workspace-actions{width:100%}.workspace-actions button{flex:1}}
 </style></head><body><header><div class="head"><img src="./assets/filler-logo-oficial.webp" alt="Fiiller Café"><a href="./admin.html">← Control Fiiller</a></div><div class="hero"><small>OCS · OPERACIÓN DE CAFETERÍA</small><h1>Control de almacén</h1><div class="sub">Insumos, movimientos, mínimos y caducidades en un solo lugar.</div></div></header>
 <main><div class="warehouse-shell">
 <aside class="warehouse-side" aria-label="Secciones de almacén"><div class="side-title">☕ Fiiller Control</div><div class="side-subtitle">Administración de cocina</div>
@@ -78,16 +158,33 @@ main{max-width:1450px;padding:0 20px 70px}
 </div><div class="side-foot">Fiiller Café · Control interno de insumos y operaciones</div>
 </aside><div class="warehouse-main">
 <div class="workspace-top"><div><div class="workspace-eyebrow">OPERACIONES / ALMACÉN</div><h1 id="workspace-title">Resumen de almacén</h1><p id="workspace-description">Visibilidad total de existencias y alertas de cocina.</p></div><div class="workspace-actions"><button type="button" id="quick-movement" class="outline">↕ Registrar movimiento</button><button type="button" id="quick-product">＋ Nuevo insumo</button></div></div>
-<div class="info"><strong>Fuente de datos:</strong> nuevo almacén Fiiller en Supabase. El inventario OCS anterior sigue separado hasta conciliar insumos, lotes y cantidades. No se descuentan ingredientes automáticamente por pedidos.</div>
+<div class="source-note"><span class="source-dot"></span><span><strong>Inventario OCS migrado · 28 oct 2026.</strong> Las existencias son de referencia hasta completar el conteo físico. Las caducidades y los costos faltantes requieren captura. No se descuenta por receta automáticamente.</span><button type="button" id="source-info-toggle" aria-expanded="false" aria-controls="source-info-detail" class="source-more">Detalles <span aria-hidden="true">⌄</span></button></div>
+<div id="source-info-detail" class="source-details" hidden>Datos procedentes del control OCS. La hoja original permanece intacta. Antes de tomar decisiones de compra debemos validar los mínimos, unidades, lotes y costos. Los pedidos digitales y las ventas Arrow todavía no consumen automáticamente estos insumos.</div>
 <p id="message" class="status" role="status"></p>
 <section id="login-card" class="card" hidden><h2>Inicia sesión como administrador</h2><form id="login-form" class="stack" style="max-width:350px"><label>Usuario<input name="username" value="admin" required></label><label>Contraseña<input type="password" name="password" required></label><button>Ingresar</button></form></section>
 <div id="dashboard" hidden>
-<section class="warehouse-pane active" data-view="overview"><div class="pane-title"><div><h2>Estado general de tu cocina</h2><p>Indicadores actualizados con el inventario registrado.</p></div><button class="secondary" type="button" id="refresh">↻ Actualizar</button></div>
-<div class="grid"><div class="card"><div class="label">Insumos registrados</div><div id="k-items" class="metric">—</div></div><div class="card"><div class="label">Por debajo del mínimo</div><div id="k-low" class="metric">—</div></div><div class="card"><div class="label">Caducan en 7 días</div><div id="k-exp" class="metric">—</div></div><div class="card"><div class="label">Valor estimado del inventario</div><div id="k-value" class="metric">—</div></div></div>
-
-<div class="dashboard-blocks"><section class="card" id="alert-panel"><h3>◉ Alertas que requieren atención</h3><div id="priority-alerts" class="summary-list"><p class="muted">Consultando alertas…</p></div></section>
-<section class="card"><h3>Existencias por familia</h3><div id="family-summary" class="summary-list"><p class="muted">Sin datos todavía.</p></div></section></div>
-<div class="dashboard-blocks"><section class="card"><h3>Próximas caducidades</h3><div id="upcoming-expiry"></div></section><section class="card"><h3>Insumos que debes pedir</h3><div id="overview-purchases"></div></section></div>
+<section class="warehouse-pane active" data-view="overview">
+<div class="welcome-strip"><div><span class="workspace-eyebrow">CENTRO DE OPERACIONES · ALMACÉN</span><h2>Tu almacén, bajo control.</h2><p id="dashboard-context">Existencias y prioridades del almacén Fiiller · <span id="dashboard-date">28 de octubre</span></p></div><button class="secondary" id="refresh" type="button">↻ Actualizar datos</button></div>
+<div class="kpi-grid">
+ <div class="card kpi-card"><div class="kpi-top"><span>Inventario registrado</span><span class="kpi-icon green">▣</span></div><div id="k-items" class="metric">—</div><div class="kpi-bottom" id="k-items-detail">Insumos del catálogo</div></div>
+ <div class="card kpi-card"><div class="kpi-top"><span>Stock bajo / agotado</span><span class="kpi-icon orange">!</span></div><div id="k-low" class="metric kpi-warn">—</div><button class="kpi-link" type="button" data-jump="inventory" data-set-status="low">Ver insumos →</button></div>
+ <div class="card kpi-card"><div class="kpi-top"><span>Caducidades pendientes</span><span class="kpi-icon red">◷</span></div><div id="k-noexpiry" class="metric kpi-warn">—</div><button class="kpi-link" type="button" data-jump="expiry">Revisar lotes →</button></div>
+ <div class="card kpi-card"><div class="kpi-top"><span>Conteo físico de hoy</span><span class="kpi-icon blue">✓</span></div><div id="k-counted" class="metric">—</div><div class="kpi-bottom" id="k-counted-sub">Pendientes de revisión</div></div>
+ <div class="card kpi-card"><div class="kpi-top"><span>Valor documentado</span><span class="kpi-icon neutral">$</span></div><div id="k-value" class="metric small-value">—</div><div class="kpi-bottom" id="k-value-note">Solo con costos capturados</div></div>
+</div>
+<div class="priority-layout">
+<section class="card focus-panel" id="alert-panel"><div class="panel-header"><div><span class="panel-overline">ACCIÓN PRIORITARIA</span><h3>Lo que necesita tu atención</h3></div><span class="panel-badge">Hoy</span></div><div id="priority-alerts" class="priority-list"><p class="muted">Cargando alertas…</p></div></section>
+<section class="card progress-panel"><div class="panel-header"><div><span class="panel-overline">AVANCE DEL DÍA</span><h3>Conteo físico</h3></div><span class="progress-mini" id="count-progress-pct">0%</span></div>
+<div class="progress-graphic"><div class="progress-bar"><div id="count-progress-fill" class="progress-bar-fill" style="width:0%"></div></div></div>
+<div class="progress-numbers"><div><strong id="count-completed">—</strong><span>Contados</span></div><div><strong id="count-remaining">—</strong><span>Pendientes</span></div></div>
+<button type="button" class="panel-action" data-jump="counts">Continuar conteo físico <span aria-hidden="true">→</span></button>
+</section></div>
+<div class="section-headline"><div><span class="panel-overline">ANÁLISIS DEL ALMACÉN</span><h3>Existencias y próximos pasos</h3></div></div>
+<div class="insights-layout">
+<section class="card insight-card"><div class="panel-header"><h3>Inventario por familia</h3><button class="text-action" type="button" data-jump="inventory">Ver inventario →</button></div><div id="family-summary" class="family-bars"><p class="muted">Cargando familias…</p></div></section>
+<section class="card insight-card"><div class="panel-header"><h3>Compras por validar</h3><button class="text-action" type="button" data-jump="purchase">Ver compras →</button></div><div id="overview-purchases" class="compact-list"></div></section>
+<section class="card insight-card"><div class="panel-header"><h3>Próximas caducidades</h3><button class="text-action" type="button" data-jump="expiry">Ver lotes →</button></div><div id="upcoming-expiry" class="compact-list"></div></section></div>
+<div id="data-quality" class="data-quality" role="note"></div>
 </section>
 <section class="warehouse-pane" data-view="inventory"><div class="pane-title"><div><h2>Inventario general</h2><p>Consulta productos, stock mínimo, familia y caducidad.</p></div></div>
 <div class="warehouse-filterbar"><input id="search" placeholder="Buscar insumo, código o familia…" aria-label="Buscar insumos"><select id="family-filter" aria-label="Filtrar familia"><option value="">Todas las familias</option></select><select id="status-filter" aria-label="Filtrar estado"><option value="">Todos los estados</option><option value="low">Bajo mínimo o agotado</option><option value="expiry">Por caducar</option><option value="ok">Existencia correcta</option></select></div>
@@ -119,4 +216,4 @@ main{max-width:1450px;padding:0 20px 70px}
 <div class="card"><div class="section-head"><h2>Lotes registrados</h2><span id="lot-count" class="pill">0 lotes</span></div><div id="lot-list"></div></div></section>
 <section class="warehouse-pane" data-view="purchase"><div class="pane-title"><div><h2>Pedido sugerido de insumos</h2><p>Calculado a partir del mínimo configurado y la existencia actual.</p></div><button type="button" id="export-purchases" class="secondary">↓ Descargar CSV</button></div><div class="card"><div id="purchase-list"></div></div><p class="muted">Estas cantidades indican cuánto falta para alcanzar el mínimo. El cálculo de compra ideal por demanda se activará cuando tengamos máximos y consumo histórico confiables.</p></section>
 <section class="warehouse-pane" data-view="recipes"><div class="pane-title"><div><h2>Recetas y consumo</h2><p>Conecta cada producto vendido con sus ingredientes, cantidades y costos.</p></div></div><a class="quick-link" href="https://ocs-filler.proyectocompas-info.workers.dev/recetario.html" target="_blank" rel="noopener">Recetario actual de OCS <span>↗ Abrir</span></a><a class="quick-link" href="./dashboard-ventas.html">Dashboard de KPIs de ventas <span>↗ Abrir</span></a><div class="info"><strong>Pendiente:</strong> confirmar equivalencias entre productos del menú Fiiller y recetas OCS antes de descontar ingredientes del almacén.</div></section>
-</div></div></div></main><script src="./filler-cloud.js?v=54"></script><script src="./almacen-fiiller.js?v=56"></script></body></html>
+</div></div></div></main><script src="./filler-cloud.js?v=54"></script><script src="./almacen-fiiller.js?v=57"></script></body></html>
