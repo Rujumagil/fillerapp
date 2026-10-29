@@ -31,6 +31,8 @@
   const milkIds = new Set(["fiiller-leche-entera","tpv117","tpv119","tpv118"]);
   const isFiillerCoffee = item => item && /^fiiller-cafe-(8|12|16)$/.test(String(item.id));
   const extrasFor = item => activeExtras().filter(e => isFiillerCoffee(item) ? milkIds.has(e.id) : !milkIds.has(e.id));
+  const featuredIds = ["pan-dulce","rojos-con-huevo","molletes-con-tocino-1792010418029-535","tpv052","sku-5060590"];
+  const featuredCategory = "Los más vendidos";
   const eligible = item => item && (isFiillerCoffee(item) || item.allowExtras === true || (item.allowExtras !== false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(item.cat || "")));
   try{
     const saved=JSON.parse(sessionStorage.getItem("filler_extras_cart_v1")||"{}");
@@ -144,7 +146,7 @@
     if (!menu) return;
     // Mantener la posición de cada carrusel al actualizar el carrito.
     const priorScroll = new Map(Array.from(menu.querySelectorAll(".filler-family-track")).map(el => [el.dataset.family, el.scrollLeft]));
-    const categoryProducts = state.category === "Todos" ? state.menu : state.menu.filter(i => i.cat === state.category);
+    const categoryProducts = state.category === "Todos" ? state.menu : state.category === featuredCategory ? state.menu.filter(i => featuredIds.includes(i.id)) : state.menu.filter(i => i.cat === state.category);
     const products = searchQuery ? categoryProducts.filter(i => normalize(i.name + " " + i.cat).includes(searchQuery)) : categoryProducts;
     // Agrupar presentaciones en una tarjeta; cada tamaño conserva su propio SKU, precio y stock.
     const families = [...new Set(products.map(item => item.cat || "Otros"))];
@@ -162,6 +164,12 @@
       grouped.get(groupName).sizeVariants.push({...item, sizeOz:Number(match[2])});
     }
     displayProducts.forEach(p => p.sizeVariants?.sort((a,b)=>a.sizeOz-b.sizeOz));
+    const featured = displayProducts.filter(p => (p.sizeVariants ? p.sizeVariants.some(v=>featuredIds.includes(v.id)) : featuredIds.includes(p.id)));
+    const sections = state.category === "Todos"
+      ? [{name:featuredCategory,items:featured}, ...families.map(name => ({name,items:displayProducts.filter(p => (p.cat||"Otros")===name && !featured.includes(p))}))].filter(section=>section.items.length)
+      : state.category === featuredCategory
+        ? [{name:featuredCategory,items:featured}]
+        : families.map(name=>({name,items:displayProducts.filter(p=>(p.cat||"Otros")===name)}));
 
     function productCard(item) {
       const variants = item.sizeVariants || null;
@@ -179,8 +187,9 @@
     if (!products.length) {
       menu.innerHTML = '<div class="empty">No encontramos productos para esta búsqueda. Prueba otra familia o palabra.</div>';
     } else {
-      menu.innerHTML = families.map((family, idx) => {
-        const items = displayProducts.filter(item => (item.cat || "Otros") === family);
+      menu.innerHTML = sections.map((section, idx) => {
+        const family = section.name;
+        const items = section.items;
         return '<section class="filler-family"><div class="filler-family-header"><div><h3>' + esc(family) + '</h3><small>' + items.length + (items.length === 1 ? " producto" : " productos") + '</small></div><div class="filler-family-controls"><button type="button" class="filler-family-arrow" data-slide="' + idx + '" data-dir="-1" aria-label="Ver productos anteriores de ' + esc(family) + '">‹</button><button type="button" class="filler-family-arrow" data-slide="' + idx + '" data-dir="1" aria-label="Ver más productos de ' + esc(family) + '">›</button></div></div><div class="filler-family-track" id="filler-family-' + idx + '" data-family="' + esc(family) + '" role="region" aria-label="Productos de ' + esc(family) + '" tabindex="0">' + items.map(productCard).join("") + '</div></section>';
       }).join("");
     }
