@@ -23,7 +23,7 @@
       window.FillerCloudExtras=extras;
       if(!products.length) {block("El menú de la nube aún no está configurado. Estamos preparando los pedidos entre dispositivos.");return;}
       const local=new Map(state.menu.map(i=>[i.id,i]));
-      if(state.category!=="Todos"&&!products.some(p=>p.cat===state.category))state.category="Todos";
+      if(state.category!=="Todos"&&state.category!=="Los más vendidos"&&!products.some(p=>p.cat===state.category))state.category="Todos";
       state.menu=products.map(i=>({...i,imageKey:local.get(i.id)?.imageKey||"",image:i.image||local.get(i.id)?.image||""}));
       // Revisión de carrito cuando el stock cambia remotamente.
       for(const key of Object.keys(state.cart)){
