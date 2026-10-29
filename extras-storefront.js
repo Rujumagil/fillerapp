@@ -42,7 +42,7 @@
     .fx-choice{display:flex;align-items:center;gap:12px;background:#f1f6f1;border:1px solid #d8e6db;border-radius:14px;padding:12px;font-size:15px;color:#243e32}
     .fx-choice input{width:20px;height:20px;flex:0 0 20px;accent-color:#006241}.fx-choice span{flex:1}.fx-choice b{color:#006241}
     .fx-total{font-size:20px;font-weight:900;display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #e4ded4}
-    .fx-actions{display:flex;flex-wrap:wrap;gap:8px}.fx-actions button{flex:1}
+    .fx-actions{display:flex;flex-wrap:wrap;gap:8px}.fx-actions button{flex:1}.fx-question{margin:20px 0;font-weight:800;font-size:18px;color:#174b34}.fx-choice-step[hidden],.fx-question-step[hidden]{display:none!important}
     .cart-extras{display:block;font-size:12px;color:#285c42;line-height:1.5;margin:4px 0 2px}
     @media(max-width:560px){.fx-dialog{padding:18px}.fx-actions button{min-width:125px}}
   `;
@@ -51,7 +51,7 @@
   modal.id = "filler-extras-modal";
   modal.className = "fx-modal";
   modal.hidden = true;
-  modal.innerHTML = '<div class="fx-dialog" role="dialog" aria-modal="true" aria-labelledby="fx-title"><div class="fx-heading"><div><h2 id="fx-title">Personaliza tu platillo</h2><p id="fx-name"></p></div><button class="fx-close" type="button" id="fx-close" aria-label="Cerrar">✕</button></div><div id="fx-options" class="fx-choices"></div><div class="fx-total"><span>Total por platillo</span><span id="fx-total">$0</span></div><div class="fx-actions"><button type="button" class="secondary" id="fx-plain">Sin extras</button><button type="button" id="fx-confirm">Agregar al pedido</button></div></div>';
+  modal.innerHTML = '<div class="fx-dialog" role="dialog" aria-modal="true" aria-labelledby="fx-title"><div class="fx-heading"><div><h2 id="fx-title">Personaliza tu platillo</h2><p id="fx-name"></p></div><button class="fx-close" type="button" id="fx-close" aria-label="Cerrar">✕</button></div><div id="fx-question-step" class="fx-question-step"><p class="fx-question">¿Quieres agregar algún extra a tu platillo?</p><div class="fx-actions"><button type="button" class="secondary" id="fx-plain">No, gracias</button><button type="button" id="fx-yes">Sí, agregar extras</button></div></div><div id="fx-choice-step" class="fx-choice-step" hidden><p>Selecciona tus extras (opcionales):</p><div id="fx-options" class="fx-choices"></div><div class="fx-total"><span>Total por platillo</span><span id="fx-total">$0</span></div><div class="fx-actions"><button type="button" class="secondary" id="fx-back">Volver</button><button type="button" id="fx-confirm">Agregar al pedido</button></div></div></div>';
   document.body.appendChild(modal);
   let currentId = null;
   let previousFocus = null;
@@ -78,6 +78,8 @@
     document.getElementById("fx-options").innerHTML = activeExtras().map(e =>
       '<label class="fx-choice"><input type="checkbox" data-extra="' + esc(e.id) + '"><span>' + esc(e.name) + '</span><b>+' + money(e.price) + '</b></label>'
     ).join("");
+    document.getElementById("fx-question-step").hidden = false;
+    document.getElementById("fx-choice-step").hidden = true;
     updateModalTotal();
     modal.hidden = false;
     document.getElementById("fx-close").focus();
@@ -93,6 +95,16 @@
     return true;
   }
   document.getElementById("fx-plain").addEventListener("click", () => { if (addConfigured(currentId)) closeModal(); });
+  document.getElementById("fx-yes").addEventListener("click", () => {
+    document.getElementById("fx-question-step").hidden = true;
+    document.getElementById("fx-choice-step").hidden = false;
+    document.getElementById("fx-options").querySelector("input")?.focus();
+  });
+  document.getElementById("fx-back").addEventListener("click", () => {
+    document.getElementById("fx-choice-step").hidden = true;
+    document.getElementById("fx-question-step").hidden = false;
+    document.getElementById("fx-yes").focus();
+  });
   document.getElementById("fx-confirm").addEventListener("click", () => { if (addConfigured(currentId, readSelected())) closeModal(); });
   addToCart = function(id) {
     const item = itemById(id);
@@ -132,8 +144,8 @@
       const options = eligible(item) && activeExtras().length;
       const stockLabel = available <= 0 ? "Agotado" : "Disponible";
       const stockClass = available <= 0 ? "sold-out" : available <= 5 ? "low" : "";
-      const addLabel = available <= 0 ? "Agotado" : options ? "Extras +" : "Agregar";
-      return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3><div class="item-bottom"><strong class="price">' + money(Number(item.price)) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options ? "Elegir extras de " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(item.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
+      const addLabel = available <= 0 ? "Agotado" : options ? "Elegir" : "Agregar";
+      return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3><div class="item-bottom"><strong class="price">' + money(Number(item.price)) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options ? "Seleccionar " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(item.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
     }
 
     if (!products.length) {
