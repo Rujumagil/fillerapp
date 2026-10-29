@@ -28,7 +28,10 @@
         .map(e => ({ id: String(e.id), name: String(e.name), price: Number(e.price) }));
     } catch { return []; }
   };
-  const eligible = item => item && (item.allowExtras === true || (item.allowExtras !== false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(item.cat || "")));
+  const milkIds = new Set(["fiiller-leche-entera","tpv117","tpv119","tpv118"]);
+  const isFiillerCoffee = item => item && /^fiiller-cafe-(8|12|16)$/.test(String(item.id));
+  const extrasFor = item => activeExtras().filter(e => isFiillerCoffee(item) ? milkIds.has(e.id) : !milkIds.has(e.id));
+  const eligible = item => item && (isFiillerCoffee(item) || item.allowExtras === true || (item.allowExtras !== false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(item.cat || "")));
   try{
     const saved=JSON.parse(sessionStorage.getItem("filler_extras_cart_v1")||"{}");
     state.extraSelections=saved&&typeof saved==="object"&&!Array.isArray(saved)?saved:{};
@@ -61,7 +64,7 @@
   document.addEventListener("keydown", event => { if (!modal.hidden && event.key === "Escape") closeModal(); });
   function readSelected() {
     const enabled = new Set([...modal.querySelectorAll('input[data-extra]:checked')].map(el => el.dataset.extra));
-    return activeExtras().filter(e => enabled.has(e.id));
+    return extrasFor(itemById(currentId)).filter(e => enabled.has(e.id));
   }
   function updateModalTotal() {
     const item = itemById(currentId);
@@ -75,9 +78,16 @@
     currentId = id;
     previousFocus = document.activeElement;
     document.getElementById("fx-name").textContent = item.name;
-    document.getElementById("fx-options").innerHTML = activeExtras().map(e =>
+    document.querySelector("#fx-question-step .fx-question").textContent = isFiillerCoffee(item) ? "¿Quieres agregar leche extra a tu Café Fiiller?" : "¿Quieres agregar algún extra a tu platillo?";
+    document.getElementById("fx-options").innerHTML = extrasFor(item).map(e =>
       '<label class="fx-choice"><input type="checkbox" data-extra="' + esc(e.id) + '"><span>' + esc(e.name) + '</span><b>+' + money(e.price) + '</b></label>'
     ).join("");
+    if (isFiillerCoffee(item)) {
+      document.getElementById("fx-options").querySelectorAll('input[data-extra]').forEach(input => {
+        input.type = "radio";
+        input.name = "fiiller-milk-choice";
+      });
+    }
     document.getElementById("fx-question-step").hidden = false;
     document.getElementById("fx-choice-step").hidden = true;
     updateModalTotal();
@@ -109,7 +119,7 @@
   addToCart = function(id) {
     const item = itemById(id);
     if (!item || reserved(id) >= Number(item.stock)) { toast("No hay más existencias."); return; }
-    if (eligible(item) && activeExtras().length) openModal(id);
+    if (eligible(item) && extrasFor(item).length) openModal(id);
     else addConfigured(id);
   };
   changeQty = function(key, delta) {
@@ -141,7 +151,7 @@
     const displayProducts = [];
     const grouped = new Map();
     for (const item of products) {
-      const match = item.cat === "Bebidas calientes" && item.name.match(/^(.* Nestlé) (8|16|20) oz$/i);
+      const match = item.cat === "Bebidas calientes" && item.name.match(/^(.* Nestlé|Café Fiiller) (8|12|16|20) oz$/i);
       if (!match) { displayProducts.push(item); continue; }
       const groupName = match[1];
       if (!grouped.has(groupName)) {
@@ -158,7 +168,7 @@
       const selected = variants ? (variants.find(v => Number(v.stock) - reserved(v.id) > 0) || variants[0]) : item;
       const available = Number(selected.stock) - reserved(selected.id);
       const photo = item.image ? 'style="background-image:url(&quot;' + esc(item.image) + '&quot;);background-size:contain;background-position:center center;background-repeat:no-repeat;background-color:#fff"' : "";
-      const options = !variants && eligible(item) && activeExtras().length;
+      const options = eligible(selected) && extrasFor(selected).length;
       const stockLabel = available <= 0 ? "Agotado" : "Disponible";
       const stockClass = available <= 0 ? "sold-out" : available <= 5 ? "low" : "";
       const addLabel = available <= 0 ? "Agotado" : options ? "Elegir" : "Agregar";
@@ -184,9 +194,10 @@
       const card = select.closest(".item");
       const button = card.querySelector("[data-add]");
       const stock = Number(chosen.dataset.stock);
+      const withExtras = eligible(itemById(select.value)) && extrasFor(itemById(select.value)).length;
       button.dataset.add = select.value;
       button.disabled = stock <= 0;
-      button.querySelector("span:last-child").textContent = stock <= 0 ? "Agotado" : "Agregar";
+      button.querySelector("span:last-child").textContent = stock <= 0 ? "Agotado" : (withExtras ? "Elegir" : "Agregar");
       card.querySelector(".price").textContent = money(Number(chosen.dataset.price));
       const badge = card.querySelector(".item-stock-badge");
       badge.textContent = stock <= 0 ? "Agotado" : "Disponible";
