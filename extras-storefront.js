@@ -43,7 +43,7 @@
     .fx-choice input{width:20px;height:20px;flex:0 0 20px;accent-color:#006241}.fx-choice span{flex:1}.fx-choice b{color:#006241}
     .fx-total{font-size:20px;font-weight:900;display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #e4ded4}
     .fx-actions{display:flex;flex-wrap:wrap;gap:8px}.fx-actions button{flex:1}.fx-question{margin:20px 0;font-weight:800;font-size:18px;color:#174b34}.fx-choice-step[hidden],.fx-question-step[hidden]{display:none!important}
-    .cart-extras{display:block;font-size:12px;color:#285c42;line-height:1.5;margin:4px 0 2px}
+    .fx-size-picker{display:grid;gap:5px;margin:9px 0}.fx-size-picker label{font-size:12px;font-weight:800;color:#365849}.fx-size-picker select{width:100%;border:1px solid #cbdcd0;border-radius:11px;background:#fff;padding:9px;color:#174b34;font-weight:700}.cart-extras{display:block;font-size:12px;color:#285c42;line-height:1.5;margin:4px 0 2px}
     @media(max-width:560px){.fx-dialog{padding:18px}.fx-actions button{min-width:125px}}
   `;
   document.head.appendChild(style);
@@ -136,23 +136,41 @@
     const priorScroll = new Map(Array.from(menu.querySelectorAll(".filler-family-track")).map(el => [el.dataset.family, el.scrollLeft]));
     const categoryProducts = state.category === "Todos" ? state.menu : state.menu.filter(i => i.cat === state.category);
     const products = searchQuery ? categoryProducts.filter(i => normalize(i.name + " " + i.cat).includes(searchQuery)) : categoryProducts;
+    // Agrupar presentaciones en una tarjeta; cada tamaño conserva su propio SKU, precio y stock.
     const families = [...new Set(products.map(item => item.cat || "Otros"))];
+    const displayProducts = [];
+    const grouped = new Map();
+    for (const item of products) {
+      const match = item.cat === "Bebidas calientes" && item.name.match(/^(.* Nestlé) (8|16|20) oz$/i);
+      if (!match) { displayProducts.push(item); continue; }
+      const groupName = match[1];
+      if (!grouped.has(groupName)) {
+        const representative = {...item, name:groupName, sizeVariants:[]};
+        grouped.set(groupName, representative);
+        displayProducts.push(representative);
+      }
+      grouped.get(groupName).sizeVariants.push({...item, sizeOz:Number(match[2])});
+    }
+    displayProducts.forEach(p => p.sizeVariants?.sort((a,b)=>a.sizeOz-b.sizeOz));
 
     function productCard(item) {
-      const available = Number(item.stock) - reserved(item.id);
+      const variants = item.sizeVariants || null;
+      const selected = variants ? (variants.find(v => Number(v.stock) - reserved(v.id) > 0) || variants[0]) : item;
+      const available = Number(selected.stock) - reserved(selected.id);
       const photo = item.image ? 'style="background-image:url(&quot;' + esc(item.image) + '&quot;);background-size:contain;background-position:center center;background-repeat:no-repeat;background-color:#fff"' : "";
-      const options = eligible(item) && activeExtras().length;
+      const options = !variants && eligible(item) && activeExtras().length;
       const stockLabel = available <= 0 ? "Agotado" : "Disponible";
       const stockClass = available <= 0 ? "sold-out" : available <= 5 ? "low" : "";
       const addLabel = available <= 0 ? "Agotado" : options ? "Elegir" : "Agregar";
-      return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3><div class="item-bottom"><strong class="price">' + money(Number(item.price)) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options ? "Seleccionar " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(item.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
+      const sizeSelector = variants ? '<div class="fx-size-picker"><label for="size-' + esc(selected.id) + '">Elige tu tamaño</label><select id="size-' + esc(selected.id) + '" data-coffee-size aria-label="Tamaño de ' + esc(item.name) + '">' + variants.map(v => '<option value="' + esc(v.id) + '" data-price="' + Number(v.price) + '" data-stock="' + Math.max(0,Number(v.stock)-reserved(v.id)) + '"' + (v.id===selected.id?' selected':'') + (Number(v.stock)-reserved(v.id)<=0?' disabled':'') + '>' + v.sizeOz + ' oz · ' + money(Number(v.price)) + (Number(v.stock)-reserved(v.id)<=0?' · Agotado':'') + '</option>').join('') + '</select></div>' : '';
+      return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3>' + sizeSelector + '<div class="item-bottom"><strong class="price">' + money(Number(selected.price)) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options ? "Seleccionar " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(selected.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
     }
 
     if (!products.length) {
       menu.innerHTML = '<div class="empty">No encontramos productos para esta búsqueda. Prueba otra familia o palabra.</div>';
     } else {
       menu.innerHTML = families.map((family, idx) => {
-        const items = products.filter(item => (item.cat || "Otros") === family);
+        const items = displayProducts.filter(item => (item.cat || "Otros") === family);
         return '<section class="filler-family"><div class="filler-family-header"><div><h3>' + esc(family) + '</h3><small>' + items.length + (items.length === 1 ? " producto" : " productos") + '</small></div><div class="filler-family-controls"><button type="button" class="filler-family-arrow" data-slide="' + idx + '" data-dir="-1" aria-label="Ver productos anteriores de ' + esc(family) + '">‹</button><button type="button" class="filler-family-arrow" data-slide="' + idx + '" data-dir="1" aria-label="Ver más productos de ' + esc(family) + '">›</button></div></div><div class="filler-family-track" id="filler-family-' + idx + '" data-family="' + esc(family) + '" role="region" aria-label="Productos de ' + esc(family) + '" tabindex="0">' + items.map(productCard).join("") + '</div></section>';
       }).join("");
     }
@@ -160,6 +178,20 @@
     menu.querySelectorAll(".filler-family-track").forEach(el => {
       if (priorScroll.has(el.dataset.family)) el.scrollLeft = priorScroll.get(el.dataset.family);
     });
+    menu.querySelectorAll("[data-coffee-size]").forEach(select => select.addEventListener("change", () => {
+      const chosen = select.selectedOptions[0];
+      if (!chosen) return;
+      const card = select.closest(".item");
+      const button = card.querySelector("[data-add]");
+      const stock = Number(chosen.dataset.stock);
+      button.dataset.add = select.value;
+      button.disabled = stock <= 0;
+      button.querySelector("span:last-child").textContent = stock <= 0 ? "Agotado" : "Agregar";
+      card.querySelector(".price").textContent = money(Number(chosen.dataset.price));
+      const badge = card.querySelector(".item-stock-badge");
+      badge.textContent = stock <= 0 ? "Agotado" : "Disponible";
+      badge.className = "item-stock-badge " + (stock<=0?"sold-out":stock<=5?"low":"");
+    }));
     menu.querySelectorAll("[data-add]").forEach(b => b.addEventListener("click", () => addToCart(b.dataset.add)));
     menu.querySelectorAll("[data-slide]").forEach(b => b.addEventListener("click", () => {
       const track = document.getElementById("filler-family-" + b.dataset.slide);
