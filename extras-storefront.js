@@ -31,7 +31,17 @@
   const milkIds = new Set(["fiiller-leche-entera","tpv117","tpv119","tpv118"]);
   const isFiillerCoffee = item => item && /^fiiller-cafe-(8|12|16)$/.test(String(item.id));
   const extrasFor = item => activeExtras().filter(e => isFiillerCoffee(item) ? milkIds.has(e.id) : !milkIds.has(e.id));
-  const featuredIds = ["pan-dulce","rojos-con-huevo","molletes-con-tocino-1792010418029-535","tpv052","sku-5060590"];
+  // Ventas netas por artículo del reporte del 1 al 14 de octubre de 2026.
+  const featuredSales = [
+    {id:"sandwich-pollo",units:78},{id:"verdes-con-pollo",units:47},
+    {id:"tpv065",units:46},{id:"tpv021",units:45},
+    {id:"rojos-con-pollo",units:42},{id:"tpv013",units:40},
+    {id:"jugo-verde-1792010789028-489",units:33},
+    {id:"jugo-naranja",units:28},
+    {id:"croque-madame-1792010869308-203",units:27}
+  ];
+  const featuredIds = featuredSales.map(s=>s.id);
+  const featuredRank = new Map(featuredSales.map((s,i)=>[s.id,{units:s.units,rank:i+1}]));
   const featuredCategory = "Los más vendidos";
   const eligible = item => item && (isFiillerCoffee(item) || item.allowExtras === true || (item.allowExtras !== false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(item.cat || "")));
   try{
@@ -48,7 +58,7 @@
     .fx-choice input{width:20px;height:20px;flex:0 0 20px;accent-color:#006241}.fx-choice span{flex:1}.fx-choice b{color:#006241}
     .fx-total{font-size:20px;font-weight:900;display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #e4ded4}
     .fx-actions{display:flex;flex-wrap:wrap;gap:8px}.fx-actions button{flex:1}.fx-question{margin:20px 0;font-weight:800;font-size:18px;color:#174b34}.fx-choice-step[hidden],.fx-question-step[hidden]{display:none!important}
-    .fx-size-picker{display:grid;gap:5px;margin:9px 0}.fx-size-picker label{font-size:12px;font-weight:800;color:#365849}.fx-size-picker select{width:100%;border:1px solid #cbdcd0;border-radius:11px;background:#fff;padding:9px;color:#174b34;font-weight:700}.cart-extras{display:block;font-size:12px;color:#285c42;line-height:1.5;margin:4px 0 2px}
+    .fx-size-picker{display:grid;gap:5px;margin:9px 0}.fx-size-picker label{font-size:12px;font-weight:800;color:#365849}.fx-size-picker select{width:100%;border:1px solid #cbdcd0;border-radius:11px;background:#fff;padding:9px;color:#174b34;font-weight:700}.fx-sales-count{display:block;font-size:11px;font-weight:750;color:#4f7561}.cart-extras{display:block;font-size:12px;color:#285c42;line-height:1.5;margin:4px 0 2px}
     @media(max-width:560px){.fx-dialog{padding:18px}.fx-actions button{min-width:125px}}
   `;
   document.head.appendChild(style);
@@ -164,7 +174,10 @@
       grouped.get(groupName).sizeVariants.push({...item, sizeOz:Number(match[2])});
     }
     displayProducts.forEach(p => p.sizeVariants?.sort((a,b)=>a.sizeOz-b.sizeOz));
-    const featured = displayProducts.filter(p => (p.sizeVariants ? p.sizeVariants.some(v=>featuredIds.includes(v.id)) : featuredIds.includes(p.id)));
+    const featured = displayProducts.filter(p => (p.sizeVariants ? p.sizeVariants.some(v=>featuredIds.includes(v.id)) : featuredIds.includes(p.id))).sort((a,b)=>{
+      const rank = p => Math.min(...(p.sizeVariants ? p.sizeVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) : [featuredRank.get(p.id)?.rank ?? 999]));
+      return rank(a)-rank(b);
+    });
     const sections = state.category === "Todos"
       ? [{name:featuredCategory,items:featured}, ...families.map(name => ({name,items:displayProducts.filter(p => (p.cat||"Otros")===name && !featured.includes(p))}))].filter(section=>section.items.length)
       : state.category === featuredCategory
@@ -180,8 +193,11 @@
       const stockLabel = available <= 0 ? "Agotado" : "Disponible";
       const stockClass = available <= 0 ? "sold-out" : available <= 5 ? "low" : "";
       const addLabel = available <= 0 ? "Agotado" : options ? "Elegir" : "Agregar";
+      const sales = variants ? variants.map(v=>featuredRank.get(v.id)).find(Boolean) : featuredRank.get(item.id);
+      const salesLabel = sales && (state.category === featuredCategory || state.category === "Todos")
+        ? '<small class="fx-sales-count">' + sales.units + ' unidades vendidas</small>' : '';
       const sizeSelector = variants ? '<div class="fx-size-picker"><label for="size-' + esc(selected.id) + '">Elige tu tamaño</label><select id="size-' + esc(selected.id) + '" data-coffee-size aria-label="Tamaño de ' + esc(item.name) + '">' + variants.map(v => '<option value="' + esc(v.id) + '" data-price="' + Number(v.price) + '" data-stock="' + Math.max(0,Number(v.stock)-reserved(v.id)) + '"' + (v.id===selected.id?' selected':'') + (Number(v.stock)-reserved(v.id)<=0?' disabled':'') + '>' + v.sizeOz + ' oz · ' + money(Number(v.price)) + (Number(v.stock)-reserved(v.id)<=0?' · Agotado':'') + '</option>').join('') + '</select></div>' : '';
-      return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3>' + sizeSelector + '<div class="item-bottom"><strong class="price">' + money(Number(selected.price)) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options ? "Seleccionar " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(selected.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
+      return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3>' + salesLabel + sizeSelector + '<div class="item-bottom"><strong class="price">' + money(Number(selected.price)) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options ? "Seleccionar " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(selected.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
     }
 
     if (!products.length) {
@@ -190,7 +206,8 @@
       menu.innerHTML = sections.map((section, idx) => {
         const family = section.name;
         const items = section.items;
-        return '<section class="filler-family"><div class="filler-family-header"><div><h3>' + esc(family) + '</h3><small>' + items.length + (items.length === 1 ? " producto" : " productos") + '</small></div><div class="filler-family-controls"><button type="button" class="filler-family-arrow" data-slide="' + idx + '" data-dir="-1" aria-label="Ver productos anteriores de ' + esc(family) + '">‹</button><button type="button" class="filler-family-arrow" data-slide="' + idx + '" data-dir="1" aria-label="Ver más productos de ' + esc(family) + '">›</button></div></div><div class="filler-family-track" id="filler-family-' + idx + '" data-family="' + esc(family) + '" role="region" aria-label="Productos de ' + esc(family) + '" tabindex="0">' + items.map(productCard).join("") + '</div></section>';
+        const heading = family === featuredCategory ? "Los más vendidos · ventas del 1 al 14 oct" : family;
+        return '<section class="filler-family"><div class="filler-family-header"><div><h3>' + esc(heading) + '</h3><small>' + items.length + (items.length === 1 ? " producto" : " productos") + '</small></div><div class="filler-family-controls"><button type="button" class="filler-family-arrow" data-slide="' + idx + '" data-dir="-1" aria-label="Ver productos anteriores de ' + esc(family) + '">‹</button><button type="button" class="filler-family-arrow" data-slide="' + idx + '" data-dir="1" aria-label="Ver más productos de ' + esc(family) + '">›</button></div></div><div class="filler-family-track" id="filler-family-' + idx + '" data-family="' + esc(family) + '" role="region" aria-label="Productos de ' + esc(family) + '" tabindex="0">' + items.map(productCard).join("") + '</div></section>';
       }).join("");
     }
     FillerPhotos.applyImages(menu);
