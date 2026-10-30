@@ -2,6 +2,8 @@ name: Fiiller browser checkout visual QA
 on:
   push:
     branches: [feature/promo-product-links-20261029]
+  pull_request:
+    paths: ['tests/promo-browser.cjs', '.github/workflows/fiiller-promo-browser-qa.yml', 'extras-storefront.js', 'storefront-features.js']
   workflow_dispatch:
 jobs:
   browser-qa:
