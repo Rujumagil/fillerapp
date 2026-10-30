@@ -1,3 +1,12 @@
+## Decisión operativa confirmada — fase manual (29 oct 2026)
+- El recetario se integrará gradualmente, sin obligación de completarlo para operar la cafetería.
+- **No habilitar descuentos automáticos de insumos por receta ni modificar `filler_place_order` con ese propósito.**
+- Las existencias de `filler_inventory_items` se administrarán **manualmente** mediante conteos, entradas, salidas y conciliaciones realizadas por personal autorizado.
+- Los pedidos digitales conservan el comportamiento actual de decremento de `filler_products.stock` (unidades de producto del menú), que es un control **diferente** al almacén de ingredientes. Se debe comunicar esta distinción a operaciones.
+- Mantener registro auditable de movimientos y conservar mínimos/máximos; no modificar cantidades históricas ni reinicializar inventario por incorporar recetas.
+- Las recetas nuevas permanecen inactivas hasta revisión; la automatización solo podrá habilitarse tras aprobar el recetario, verificar unidades y probar en staging.
+- El borrador SQL de este PR es exclusivamente una referencia para trabajo posterior y **no debe migrarse durante la fase manual**.
+
 # Fiiller Café — Auditoría de pedidos, recetas e inventario (29 oct 2026)
 
 ## Hallazgo confirmado en la base real
