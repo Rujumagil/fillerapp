@@ -27,6 +27,23 @@ function preview(){
  if(url&&imageAllowed(url))img.src=url;else img.removeAttribute("src");
 }
 form.addEventListener("input",preview);form.addEventListener("change",preview);
+$("upload-photo").addEventListener("click",async()=>{
+ const file=$("image-file").files?.[0],btn=$("upload-photo");
+ if(!file){message("Selecciona primero una fotografía.",true);return;}
+ const mime={"image/jpeg":"jpg","image/png":"png","image/webp":"webp"};
+ if(!mime[file.type]){message("Solo se permiten fotos JPG, PNG o WebP.",true);return;}
+ if(file.size>3*1024*1024){message("La fotografía no debe superar 3 MB.",true);return;}
+ btn.disabled=true;
+ try{
+  if(await FillerCloud.staffRole()!=="admin")throw Error("Necesitas acceso de administrador.");
+  const token=session()?.access_token;if(!token)throw Error("Inicia sesión otra vez.");
+  const name="marketing/"+crypto.randomUUID()+"."+mime[file.type];
+  const res=await fetch(BASE+"/storage/v1/object/filler-product-images/"+name,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+token,"Content-Type":file.type,"x-upsert":"false"},body:file});
+  if(!res.ok){const err=await res.json().catch(()=>({}));throw Error(err.message||"No fue posible subir la fotografía.");}
+  form.elements.image_url.value=BASE+"/storage/v1/object/public/filler-product-images/"+name;
+  $("image-file").value="";preview();message("Foto cargada. Guarda el anuncio para vincularla.");
+ }catch(e){message(e.message,true)}finally{btn.disabled=false}
+});
 $("reset").addEventListener("click",clear);$("reload").addEventListener("click",()=>load().catch(e=>message(e.message,true)));
 async function load(){
  records=await api(TABLE+"?select=id,kind,title,description,image_url,eyebrow,starts_on,ends_on,sort_order,is_published,created_at&order=sort_order.asc,created_at.desc&limit=100");
