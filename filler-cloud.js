@@ -86,7 +86,7 @@
       const staff = await request("filler_staff?select=user_id,role&user_id=eq."+encodeURIComponent(data.user.id),{staff:true});
       if (!staff?.length) throw new Error("Este usuario todavía no está autorizado para operar Fiiller Café.");
       // El perfil Auth y el rol permitido deben coincidir con el nombre de usuario elegido.
-      const expectedRole=account==="admin"?"admin":"cocina";
+      const expectedRole=account==="cocina"?"cocina":"admin";
       if(staff[0].role!==expectedRole) throw new Error("Los permisos de este usuario necesitan revisión.");
       return staff[0];
     } catch(error) {saveSession(null);throw error;}
