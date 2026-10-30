@@ -489,7 +489,7 @@ $("movement-form").addEventListener("submit",async e=>{
  if(!sameQuantity(previous,latest))throw Error("Existencia modificada a "+nfmt(latest)+" "+item.unit+". Actualiza y repite el movimiento.");
  const next=previous+(type==="entrada"?qty:-qty);
  if(next<0)throw Error("La salida supera la existencia registrada.");
- if(!window.confirm("Confirmar "+type.toUpperCase()+" de almacén\\n"+item.name+"\\nCantidad: "+nfmt(qty)+" "+item.unit+"\\nExistencia actual: "+nfmt(previous)+" "+item.unit+"\\nNueva existencia estimada: "+nfmt(next)+" "+item.unit+"\\nMotivo: "+(note||"Sin nota")+"\\n\\n¿Guardar?"))return;
+ if(!window.confirm("Confirmar "+type.toUpperCase()+" de almacén\n"+item.name+"\nCantidad: "+nfmt(qty)+" "+item.unit+"\nExistencia actual: "+nfmt(previous)+" "+item.unit+"\nNueva existencia estimada: "+nfmt(next)+" "+item.unit+"\nMotivo: "+(note||"Sin nota")+"\n\n¿Guardar?"))return;
  await call("rpc/filler_inventory_move",{method:"POST",body:{p_item:item.id,p_type:type,p_quantity:qty,p_note:note||null}});
  f.elements.qty.value="";f.elements.note.value="";await load();message("✓ "+(type==="entrada"?"Entrada":"Salida")+" registrada para "+item.name+".");
  }catch(err){message(err.message,true);}finally{b.disabled=false;}
