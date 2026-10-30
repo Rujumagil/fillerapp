@@ -28,7 +28,7 @@ try{for(const viewport of [{width:1440,height:900,label:"desktop"},{width:390,he
  const wizard=page.locator(".fx-chilaquiles-dialog");await wizard.waitFor();
  assert.match(await wizard.locator(".fx-chilaquiles-prompt").textContent(),/Verdes/);
  await wizard.getByRole("button",{name:/Con pollo/}).click();
- await wizard.getByRole("button",{name:"Elegir extras"}).click();
+ await wizard.getByRole("button",{name:"Continuar a extras"}).click();
  const modal=page.locator("#filler-extras-modal");await modal.waitFor({state:"visible"});
  await page.locator("#fx-yes").click();
  await modal.locator('input[data-extra="tpvs071"]').check();
