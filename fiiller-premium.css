@@ -84,4 +84,21 @@ main{max-width:1450px}
 
 /* Formato de cartel completo en Próximos a llegar: evita recortes de tipografía dentro de la foto. */
 #proximos .fiiller-feature-card.has-photo{width:100%;max-width:760px}
-@media(max-width:700px){#proximos .fiiller-discovery-grid{display:grid;grid-template-columns:minmax(0,1fr);overflow:visible}#proximos .fiiller-feature-card.has-photo{max-width:100%;min-width:0;flex:auto}#proximos .fiiller-feature-photo{width:100%;height:auto;aspect-ratio:16/9;object-fit:contain}}
+@media(max-width:700px){
+  /* Carrusel táctil de novedades: mostrar una tarjeta y asomar la siguiente. */
+  #proximos .fiiller-discovery-grid{
+    display:flex;grid-template-columns:none;gap:14px;overflow-x:auto;overflow-y:hidden;
+    scroll-snap-type:x mandatory;scroll-padding-inline:2px;overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;
+    padding:2px 2px 18px;scrollbar-width:thin;
+  }
+  #proximos .fiiller-feature-card,
+  #proximos .fiiller-feature-card:last-child,
+  #proximos .fiiller-feature-card.has-photo{
+    flex:0 0 min(85vw,380px);width:min(85vw,380px);max-width:none;min-width:0;
+    scroll-snap-align:start;scroll-snap-stop:always;grid-column:auto;
+  }
+  #proximos .fiiller-feature-photo{width:100%;height:auto;aspect-ratio:16/9;object-fit:contain}
+  #proximos .fiiller-feature-card.has-photo .fiiller-feature-text{padding:14px 16px 0}
+  #proximos .fiiller-feature-card.has-photo h3{font-size:20px}
+}
