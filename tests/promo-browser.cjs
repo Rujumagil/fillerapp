@@ -62,6 +62,10 @@ async function main(){
    await page.waitForFunction(() => document.querySelector("#cart-lines")?.textContent?.includes("$46"));
    const ordinary=page.locator(".fiiller-feature-card").filter({hasText:"Prueba de sándwich"});
    await ordinary.getByRole("button",{name:/Elegir producto/}).click();
+   const sandwichPicker=page.locator(".fx-chilaquiles-dialog");
+   await sandwichPicker.waitFor({state:"visible"});
+   await sandwichPicker.getByRole("button",{name:/De pollo/}).click();
+   await sandwichPicker.getByRole("button",{name:"Continuar a extras"}).click();
    await extrasModal.waitFor({state:"visible"});
    await page.locator("#fx-plain").click();
    await page.waitForFunction(() => document.querySelector("#cart-lines")?.textContent?.includes("Sándwich de pollo"));
