@@ -72,3 +72,12 @@ main{max-width:1450px}
 .fiiller-promo-size-actions button{flex:1;border-radius:12px;min-height:47px}
 .fiiller-promo-size-actions .secondary{background:#e9f3ee;color:#084b36}
 @media(max-width:480px){.fiiller-promo-size-dialog{padding:20px}}
+
+/* Estado sin promociones publicadas: evita presentar tarjetas de demostración como ofertas. */
+.fiiller-promos-empty{grid-column:1/-1;background:linear-gradient(110deg,#e4f0e7,#fff1dd);border:1px solid #dfebdf;border-radius:22px;padding:26px 30px;min-height:165px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.fiiller-promos-empty h3{font-size:clamp(21px,2.6vw,28px);letter-spacing:-.03em;color:#12462f;margin:0 0 8px}
+.fiiller-promos-empty p{font-size:14px;line-height:1.55;color:#526b5a;margin:0 0 14px}
+.fiiller-promos-empty a{background:#f7751f;color:white;font-size:13px;font-weight:850;border-radius:11px;padding:11px 16px;text-decoration:none}
+.fiiller-promos-empty a:hover{background:#d95a0d}
+.fiiller-promos-empty a:focus-visible{outline:3px solid #12472f;outline-offset:3px}
+@media(max-width:700px){.fiiller-promos-empty{min-height:155px;padding:22px}}
