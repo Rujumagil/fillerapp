@@ -35,7 +35,7 @@ function toggleProductField(){
  if(!active)form.elements.product_id.value="";
 }
 form.elements.kind.addEventListener("change",toggleProductField);
-function clear(){form.reset();toggleProductField();form.elements.id.value="";form.elements.sort_order.value="100";$("editor-heading").textContent="Nuevo anuncio";preview();}
+function clear(){HTMLFormElement.prototype.reset.call(form);toggleProductField();form.elements.id.value="";form.elements.sort_order.value="100";$("editor-heading").textContent="Nuevo anuncio";preview();}
 function preview(){
  const d=new FormData(form),url=String(d.get("image_url")||"").trim();
  $("preview-title").textContent=String(d.get("title")||"").trim()||"Tu nuevo anuncio";
