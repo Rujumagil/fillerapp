@@ -102,3 +102,24 @@ main{max-width:1450px}
   #proximos .fiiller-feature-card.has-photo .fiiller-feature-text{padding:14px 16px 0}
   #proximos .fiiller-feature-card.has-photo h3{font-size:20px}
 }
+
+/* Tarjetas del carrusel: precio y CTA ocupan filas propias incluso en tarjetas estrechas. */
+.menu-grid .item-details{min-width:0}
+.menu-grid .item h3{overflow-wrap:anywhere;hyphens:auto}
+.menu-grid .item-bottom{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:9px;
+  align-content:end;align-items:stretch;min-width:0;width:100%;margin-top:auto;
+}
+.menu-grid .item-bottom .price{display:block;min-width:0;max-width:100%;white-space:normal;overflow-wrap:normal;font-size:clamp(17px,1.7vw,21px)}
+.menu-grid .item .item-add{
+  display:inline-flex;width:100%;max-width:100%;min-width:0;min-height:40px;height:auto;
+  padding:10px 8px;align-items:center;justify-content:center;gap:7px;white-space:normal;
+  line-height:1.2;text-align:center;
+}
+.menu-grid .item .item-add>span:not(.item-add-plus){display:inline;overflow-wrap:anywhere}
+@media(max-width:700px){
+  .menu-grid .item-bottom{gap:7px}
+  .menu-grid .item-bottom .price{font-size:16px}
+  .menu-grid .item .item-add{min-height:38px;min-width:0;width:100%;height:auto;padding:9px 6px;font-size:12px}
+  .menu-grid .item .item-add .item-add-plus{font-size:19px}
+}
