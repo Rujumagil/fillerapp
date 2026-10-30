@@ -55,8 +55,8 @@
   async function login(username,password) {
     const raw=String(username||"").trim().toLowerCase();
     const account=USER_ACCOUNTS[raw]?raw:Object.keys(USER_ACCOUNTS).find(k=>USER_ACCOUNTS[k]===raw);
-    const email=account?USER_ACCOUNTS[account]:null;
-    if(!email)throw new Error('Usuario no reconocido. Escribe "admin" o "cocina".');
+    const email=raw==="proyectocompas.info@gmail.com"?raw:(account?USER_ACCOUNTS[account]:null);
+    if(!email)throw new Error('Usuario no reconocido. Usa "admin", "cocina" o tu correo administrador de Fiiller.');
     if(typeof password!=="string" || !password)throw new Error("Escribe tu contraseña de Fiiller Café.");
     let res;
     try {
