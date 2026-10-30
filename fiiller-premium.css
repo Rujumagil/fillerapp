@@ -1,0 +1,53 @@
+/* Fiiller Café · storefront premium v1 · visual-only enhancements */
+:root{--fiiller-ink:#163a2b;--fiiller-orange:#fa741d;--fiiller-cream:#fbf8f2}
+html{scroll-padding-top:92px}
+body{background:var(--fiiller-cream)}
+.nav{max-width:1450px}
+main{max-width:1450px}
+.nav .brand h1{letter-spacing:-.035em}
+.hero{box-shadow:0 22px 55px rgba(13,50,33,.13)}
+.hero-copy{background:linear-gradient(125deg,#073b2a 0%,#00533a 100%)}
+.hero h2{font-weight:950;letter-spacing:-.055em}
+.hero-actions button{transition:transform .2s ease,box-shadow .2s ease}
+.hero-actions button:hover{transform:translateY(-2px);box-shadow:0 12px 26px #0a321d50}
+.fiiller-hero-benefits{display:flex;gap:18px;flex-wrap:wrap;color:#eff9f2;font-size:12px;font-weight:650}
+.fiiller-hero-benefits span{display:inline-flex;align-items:center;gap:7px}
+.fiiller-hero-benefits span::before{content:"✦";color:#ffb15e}
+.fiiller-discovery{margin:0 0 28px;display:grid;gap:16px}
+.fiiller-discovery-head{display:flex;align-items:end;justify-content:space-between;gap:12px}
+.fiiller-discovery-head h2{font-size:clamp(24px,2.4vw,33px);line-height:1.1;letter-spacing:-.04em;color:#073b2a;margin:0 0 6px}
+.fiiller-discovery-head p{margin:0;color:#6b786e;font-size:14px}
+.fiiller-discovery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.fiiller-feature-card{min-height:185px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative;border-radius:23px;padding:22px;border:1px solid #eee4d8;background:linear-gradient(120deg,#fce9d6,#fff6e6);box-shadow:0 10px 28px #5542220d}
+.fiiller-feature-card:nth-child(2){background:linear-gradient(120deg,#dcece0,#edf7e8)}
+.fiiller-feature-card:nth-child(3){background:linear-gradient(120deg,#fdebd8,#fbd8b5)}
+.fiiller-feature-card::after{content:attr(data-symbol);position:absolute;right:10px;bottom:-17px;font-size:105px;opacity:.28;transform:rotate(-14deg);pointer-events:none}
+.fiiller-feature-card>*{z-index:1;position:relative}
+.fiiller-feature-tag{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:900;color:#a34d13}
+.fiiller-feature-card h3{font-size:clamp(19px,2vw,27px);max-width:270px;line-height:1.1;letter-spacing:-.035em;margin:7px 0;color:#123d2a}
+.fiiller-feature-card p{max-width:270px;font-size:13px;line-height:1.45;color:#425849;margin:8px 0}
+.fiiller-feature-card a{display:inline-flex;width:fit-content;align-items:center;gap:7px;padding:10px 14px;background:#fff;color:#07543a;border-radius:11px;border:1px solid #dfe5d9;font-weight:850;text-decoration:none;font-size:13px}
+.fiiller-feature-card a:hover,.fiiller-feature-card a:focus-visible{background:#07543a;color:#fff}
+.fiiller-coming{border-radius:22px;padding:20px 24px;display:flex;gap:20px;justify-content:space-between;align-items:center;background:linear-gradient(110deg,#103e2e,#1c6044);color:white;overflow:hidden}
+.fiiller-coming div{max-width:680px}
+.fiiller-coming h3{font-size:clamp(20px,2vw,27px);margin:6px 0;line-height:1.15;letter-spacing:-.03em;color:white}
+.fiiller-coming p{margin:0;color:#d3e8da;font-size:13px;line-height:1.55}
+.fiiller-coming .fiiller-feature-tag{color:#f8c78d}
+.fiiller-coming a{flex-shrink:0;background:#fff;color:#06452f;font-size:13px;font-weight:850;border-radius:12px;padding:12px 15px;text-decoration:none}
+.fiiller-coming a:hover{background:#ffdfbb}
+.fiiller-guide{font-size:12px;color:#63796c;margin:4px 0 0}
+#pedido .cart{border:1px solid #e7e5db;box-shadow:0 16px 40px #253b2412}
+#pedido .cart .total{background:#edf6ee;padding:13px 15px;border-radius:14px;color:#064b34}
+#pedido .cart #customer-account{border:1px solid #e0ecde}
+#pedido .cart input,#pedido .cart select,#pedido .cart textarea{border-radius:13px}
+#pedido .cart input:focus-visible,#pedido .cart select:focus-visible,#pedido .cart textarea:focus-visible{outline:2px solid #fa741d;outline-offset:2px}
+#menu .filler-menu-search{border:1px solid #e5e6db;box-shadow:0 10px 30px #152d1710}
+#menu .filler-menu-search:focus-within{border-color:#fa741d;box-shadow:0 0 0 3px #fa741d20}
+.menu-grid .item{box-shadow:0 10px 25px #11291b0d;transition:transform .2s ease,box-shadow .2s ease}
+.menu-grid .item:hover{transform:translateY(-3px);box-shadow:0 17px 33px #11291b1a}
+.menu-grid .item h3{letter-spacing:-.025em}
+.menu-grid .item button:not(:disabled){background:#f7751f}
+.menu-grid .item button:not(:disabled):hover{background:#de6315}
+@media(max-width:1000px){.fiiller-discovery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.fiiller-feature-card:last-child{grid-column:1/-1}}
+@media(max-width:700px){.fiiller-hero-benefits{gap:7px 13px;font-size:10px}.fiiller-discovery{margin-bottom:17px}.fiiller-discovery-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 0 10px;gap:12px}.fiiller-feature-card,.fiiller-feature-card:last-child{flex:0 0 min(81vw,285px);min-height:170px;scroll-snap-align:start;padding:17px}.fiiller-coming{padding:17px;align-items:start;flex-direction:column;gap:14px}.fiiller-coming a{align-self:flex-start}.fiiller-discovery-head h2{font-size:24px}.fiiller-discovery-head p{font-size:12px}.hero h2{font-size:clamp(29px,7vw,36px)}}
+@media(prefers-reduced-motion:reduce){.menu-grid .item,.hero-actions button{transition:none}.menu-grid .item:hover,.hero-actions button:hover{transform:none}}
