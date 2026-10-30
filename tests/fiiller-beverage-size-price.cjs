@@ -4,7 +4,7 @@ const catalog=[
 {id:"fiiller-cafe-8",name:"Café Fiiller 8 oz",category:"Bebidas calientes",price:29,stock:100,active:true,image_url:""},
 {id:"fiiller-cafe-12",name:"Café Fiiller 12 oz",category:"Bebidas calientes",price:31,stock:100,active:true,image_url:""},
 {id:"fiiller-cafe-16",name:"Café Fiiller 16 oz",category:"Bebidas calientes",price:38,stock:100,active:true,image_url:""},
-{id:"tpv018",name:"Torta de jamón",category:"Sándwiches y más",price:45,stock:100,active:true,image_url:""}];
+{id:"tpv021",name:"Cuernito de jamón y queso",category:"Sándwiches y más",price:55,stock:100,active:true,image_url:""}];
 const server=http.createServer((req,res)=>{const file=path.resolve(root,"."+decodeURIComponent(req.url.split("?")[0]));if(!file.startsWith(root+path.sep)){res.writeHead(403);return res.end();}fs.readFile(file,(error,bytes)=>{if(error){res.writeHead(404);return res.end();}res.writeHead(200,{"content-type":types[path.extname(file)]||"application/octet-stream"});res.end(bytes);});});
 async function run(){await new Promise(resolve=>server.listen(8112,"127.0.0.1",resolve));const browser=await chromium.launch();fs.mkdirSync("artifacts",{recursive:true});
 try{for(const viewport of [{width:1440,height:900,label:"desktop"},{width:390,height:844,label:"mobile"}]){
@@ -24,9 +24,9 @@ try{for(const viewport of [{width:1440,height:900,label:"desktop"},{width:390,he
  await selector.selectOption("fiiller-cafe-16");
  assert.equal(await coffee.locator("[data-add]").getAttribute("data-add"),"fiiller-cafe-16");
  assert.equal(await coffee.locator(".item-bottom .price").count(),0);
- const torta=page.locator(".menu-grid .item").filter({has:page.locator("h3",{hasText:"Torta de jamón"})}).first();
- await torta.waitFor();
- assert.equal(await torta.locator(".price").textContent(),"$45");
+ const cuernito=page.locator(".menu-grid .item").filter({has:page.locator("h3",{hasText:"Cuernito de jamón y queso"})}).first();
+ await cuernito.waitFor();
+ assert.equal(await cuernito.locator(".price").textContent(),"$55");
  assert.equal(errors.length,0,errors.join(" | "));
  await coffee.scrollIntoViewIfNeeded();
  await page.screenshot({path:"artifacts/beverage-size-only-"+viewport.label+".png",fullPage:true});
