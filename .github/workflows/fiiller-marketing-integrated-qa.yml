@@ -22,8 +22,8 @@ jobs:
           node --check extras-storefront.js
           node --check storefront-features.js
           node --check storefront-features-admin.js
-      - name: Marketing and purchase UI
-        run: node tests/promo-browser.cjs
+      - name: Public homepage without search or promotions
+        run: node tests/fiiller-clean-home-browser.cjs
       - name: Administrative UI
         run: node tests/marketing-admin-browser.cjs
       - name: Chilaquiles regression
