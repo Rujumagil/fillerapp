@@ -60,3 +60,9 @@ main{max-width:1450px}
 .fiiller-feature-card.has-photo::after{display:none}
 .fiiller-feature-card.has-photo h3{font-size:21px}
 .fiiller-feature-card:focus-within{outline:2px solid #fa741d;outline-offset:2px}
+
+/* CTA promociones conectadas a SKU oficial */
+.fiiller-feature-buy{align-self:flex-start;position:relative;z-index:2;margin-top:10px;border:0;background:#f7751f;color:#fff;border-radius:11px;padding:11px 16px;font:inherit;font-size:13px;font-weight:850;cursor:pointer;box-shadow:0 5px 14px #ad530e20}
+.fiiller-feature-buy:hover{background:#d95a0d}
+.fiiller-feature-buy:focus-visible{outline:3px solid #12472f;outline-offset:3px}
+.fiiller-feature-card.has-photo .fiiller-feature-buy{margin:14px 17px 17px}
