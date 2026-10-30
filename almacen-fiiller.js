@@ -483,15 +483,15 @@ $("movement-form").addEventListener("submit",async e=>{
  try{
  const d=new FormData(f),item=inventory.find(i=>i.id===d.get("item"));
  const type=String(d.get("type")||""),qty=Number(d.get("qty")),note=String(d.get("note")||"").trim();
- if(!item||!["entrada","salida"].includes(type))throw Error("Selecciona un insumo y tipo de movimiento válido.");
+ if(!item||!["entrada","salida","ajuste"].includes(type))throw Error("Selecciona un insumo y tipo de movimiento válido.");
  if(!Number.isFinite(qty)||qty<=0||qty>1000000)throw Error("Introduce una cantidad mayor a cero.");
  const previous=Number(item.quantity),latest=await currentInventoryQuantity(item.id);
  if(!sameQuantity(previous,latest))throw Error("Existencia modificada a "+nfmt(latest)+" "+item.unit+". Actualiza y repite el movimiento.");
- const next=previous+(type==="entrada"?qty:-qty);
+ const next=previous+(type==="salida"?-qty:qty);
  if(next<0)throw Error("La salida supera la existencia registrada.");
  if(!window.confirm("Confirmar "+type.toUpperCase()+" de almacén\n"+item.name+"\nCantidad: "+nfmt(qty)+" "+item.unit+"\nExistencia actual: "+nfmt(previous)+" "+item.unit+"\nNueva existencia estimada: "+nfmt(next)+" "+item.unit+"\nMotivo: "+(note||"Sin nota")+"\n\n¿Guardar?"))return;
  await call("rpc/filler_inventory_move",{method:"POST",body:{p_item:item.id,p_type:type,p_quantity:qty,p_note:note||null}});
- f.elements.qty.value="";f.elements.note.value="";await load();message("✓ "+(type==="entrada"?"Entrada":"Salida")+" registrada para "+item.name+".");
+ f.elements.qty.value="";f.elements.note.value="";await load();message("✓ "+(type==="entrada"?"Entrada":type==="salida"?"Salida":"Ajuste positivo")+" registrada para "+item.name+".");
  }catch(err){message(err.message,true);}finally{b.disabled=false;}
 });
 show().catch(err=>message(err.message,true));
