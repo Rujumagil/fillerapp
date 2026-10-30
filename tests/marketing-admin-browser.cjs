@@ -33,7 +33,10 @@ async function run(){
    await page.locator('[name="eyebrow"]').fill("Novedad");
    await page.locator('[name="product_id"]').selectOption("fiiller-cafe-8");
    await page.locator("#save").click();
-   await page.getByText("Anuncio guardado.",{exact:false}).waitFor();
+   await page.waitForTimeout(500);
+   const status=await page.locator("#message").textContent();
+   console.log("SAVE QA STATUS:",status,"RECORDS:",records.length,"JS ERRORS:",errors);
+   assert.match(status,/Anuncio guardado/,"Saving failed: "+status);
    assert.equal(records.length,1);
    assert.equal(records[0].product_id,"fiiller-cafe-8");
    assert.equal(records[0].is_published,false);
