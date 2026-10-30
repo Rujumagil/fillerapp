@@ -1,0 +1,25 @@
+name: Fiiller menu cards accessible CTA
+on:
+  push:
+    branches: [fix/fiiller-menu-card-footer-20261030]
+  pull_request:
+    paths: ['fiiller-premium.css','index.html','tests/fiiller-menu-card-footer.cjs']
+jobs:
+  card-layout:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - run: node tests/fiiller-menu-card-footer.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fiiller-card-footer-screenshots
+          path: artifacts/fiiller-card-footer-*.png
+          if-no-files-found: ignore
