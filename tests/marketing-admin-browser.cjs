@@ -22,7 +22,7 @@ async function run(){
      if(method==="GET")data=records;
      else if(method==="POST"){const row={...json(),id:offerId,created_at:"2026-10-29T00:00:00Z"};records=[row];data=[row];writes++;}
      else if(method==="PATCH"){records=records.map(r=>({...r,...json()}));data=records;writes++;}
-    }else if(url.pathname.includes("/storage/v1/object/")){uploads++;data={Key:"filler-product-images/marketing/test.webp"};}
+    }else if(url.pathname.includes("/storage/v1/object/")){if(method==="POST")uploads++;data={Key:"filler-product-images/marketing/test.webp"};}
     await route.fulfill({status,contentType:"application/json",headers:{"access-control-allow-origin":"*"},body:JSON.stringify(data)});
    });
    await page.goto("http://127.0.0.1:8092/promociones-admin.html");
