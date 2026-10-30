@@ -19,13 +19,14 @@ try{for(const viewport of [{width:1440,height:900,label:"desktop"},{width:390,he
   return route.fulfill({status:200,contentType:"application/json",headers:{"access-control-allow-origin":"*"},body:JSON.stringify(body)});
  });
  await page.goto("http://127.0.0.1:8094/index.html",{waitUntil:"domcontentloaded"});
- const card=page.locator(".item").filter({hasText:"Chilaquiles"}).first();
+ const red=page.locator(".item").filter({hasText:"Chilaquiles Rojos"}).first();
+ const card=page.locator(".item").filter({hasText:"Chilaquiles Verdes"}).first();
  await card.waitFor({timeout:15000});
- assert.equal(await page.locator(".item").filter({hasText:"Chilaquiles"}).count(),1,"Must group all chilaquiles in one card");
+ assert.equal(await page.locator(".item").filter({hasText:"Chilaquiles"}).count(),2,"Must show separate red and green cards");
+ assert.equal(await red.count(),1,"Missing red card");
  await card.locator("[data-add]").click();
  const wizard=page.locator(".fx-chilaquiles-dialog");await wizard.waitFor();
- await wizard.getByRole("button",{name:/Verdes/}).click();
- await wizard.getByRole("button",{name:"Continuar"}).click();
+ assert.match(await wizard.locator(".fx-chilaquiles-prompt").textContent(),/Verdes/);
  await wizard.getByRole("button",{name:/Con pollo/}).click();
  await wizard.getByRole("button",{name:"Elegir extras"}).click();
  const modal=page.locator("#filler-extras-modal");await modal.waitFor({state:"visible"});
@@ -36,7 +37,7 @@ try{for(const viewport of [{width:1440,height:900,label:"desktop"},{width:390,he
  await page.waitForFunction(()=>document.querySelector("#cart-lines")?.textContent?.includes("$83"));
  await page.screenshot({path:"artifacts/chilaquiles-"+viewport.label+".png",fullPage:true});
  assert.equal(errors.length,0,"Runtime JS errors: "+errors.join(" / "));
- console.log("PASS "+viewport.label+" salsa verdes -> pollo 65 -> aguacate 18 -> carrito 83");
+ console.log("PASS "+viewport.label+" two cards -> verdes -> pollo 65 -> aguacate 18 -> carrito 83");
  await ctx.close();
 }}finally{await browser.close();server.close();}}
 main().catch(e=>{console.error(e.stack||e);process.exitCode=1;server.close();});
