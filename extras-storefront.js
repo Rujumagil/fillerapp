@@ -43,7 +43,7 @@
   const featuredIds = featuredSales.map(s=>s.id);
   const featuredRank = new Map(featuredSales.map((s,i)=>[s.id,{units:s.units,rank:i+1}]));
   const featuredCategory = "Los más vendidos";
-  const eligible = item => item && (isFiillerCoffee(item) || item.allowExtras === true || (item.allowExtras !== false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(item.cat || "")));
+  const eligible = item => item && (isFiillerCoffee(item) || item.allowExtras === true || (item.allowExtras !== false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(normalize(item.cat || ""))));
   try{
     const saved=JSON.parse(sessionStorage.getItem("filler_extras_cart_v1")||"{}");
     state.extraSelections=saved&&typeof saved==="object"&&!Array.isArray(saved)?saved:{};
