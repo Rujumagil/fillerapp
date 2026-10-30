@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Promociones y novedades | Fiiller Admin</title>
+<link rel="icon" href="assets/filler-icon-192.png">
+<style>
+:root{--green:#064b35;--orange:#f7751f;--cream:#fcf9f4;--line:#e4e8df;--ink:#20382d}
+[hidden]{display:none!important}\n*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,system-ui,sans-serif}
+main{max-width:1160px;margin:auto;padding:24px 18px 70px}
+a{color:var(--green);font-weight:800}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+header img{width:95px;height:auto}h1{font-size:clamp(28px,4vw,42px);letter-spacing:-.045em;margin:0}
+h2{margin:0 0 14px;font-size:22px;letter-spacing:-.03em}
+small,p{color:#66776b}p{line-height:1.5}
+.card{background:white;border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:0 12px 32px #142c1710}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(310px,.85fr);gap:18px}
+label{display:grid;gap:7px;font-size:13px;font-weight:800}
+input,textarea,select{width:100%;font:inherit;border:1px solid #dce4db;border-radius:12px;padding:12px;background:#fff;color:var(--ink)}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--orange);outline-offset:1px}
+textarea{min-height:100px;resize:vertical}button{font:inherit;font-weight:800;cursor:pointer;border:0;background:var(--green);color:white;border-radius:12px;padding:12px 18px}button:disabled{opacity:.5;cursor:not-allowed}.secondary{background:#eaf2ed;color:var(--green)}.danger{background:#fff0e9;color:#aa3e17}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}.stack{display:grid;gap:14px}.actions{display:flex;gap:10px;flex-wrap:wrap}
+#message{padding:13px;border-radius:12px;background:#eaf3ea;min-height:44px;margin-bottom:16px}
+#message.error{background:#ffebe7;color:#a42e24}
+.preview{border-radius:18px;overflow:hidden;background:linear-gradient(110deg,#dbeee1,#fff0dc);border:1px solid var(--line)}
+.preview img{width:100%;height:170px;object-fit:cover;background:#eef4ef;display:none}.preview img.visible{display:block}
+.preview .body{padding:19px}.preview strong{display:block;font-size:22px}.preview .tag{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#ae530c}
+.item{border:1px solid var(--line);border-radius:15px;padding:13px;margin-top:11px;display:grid;gap:9px}
+.item-title{font-weight:900}.item-meta{font-size:12px;color:#65776b}.pill{display:inline-block;border-radius:20px;background:#eef2ef;padding:6px 10px;font-size:11px;font-weight:800}
+.row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:space-between}
+.check{display:flex;align-items:center;gap:9px}.check input{width:auto;accent-color:var(--green)}
+@media(max-width:850px){.layout{grid-template-columns:1fr}}@media(max-width:500px){.grid2{grid-template-columns:1fr}.card{padding:17px}}
+</style></head><body>
+<main>
+<header><div><img src="assets/filler-logo-oficial.webp" alt="Fiiller Café"><h1>Promociones y novedades</h1><p>Publica anuncios en el menú sin editar código.</p></div><div><a href="admin.html">← Administración</a> · <a href="index.html">Ver tienda</a></div></header>
+<div id="message" role="status" aria-live="polite">Verificando acceso de administración…</div>
+<section class="card" id="login-card" hidden><h2>Acceso de administrador</h2><form id="login-form" class="stack"><label>Usuario<input name="username" value="admin" autocomplete="username" required></label><label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label><button type="submit">Ingresar</button></form></section>
+<div id="workspace" class="layout" hidden>
+<section class="card"><h2 id="editor-heading">Nuevo anuncio</h2><form id="feature-form" class="stack">
+<input type="hidden" name="id">
+<div class="grid2"><label>Sección<select name="kind"><option value="promotion">Promociones</option><option value="upcoming">Próximos a llegar</option></select></label><label>Orden<input name="sort_order" type="number" min="0" max="10000" value="100" required></label></div>
+<label>Título<input name="title" required minlength="3" maxlength="90" placeholder="Ej. Combo desayuno"></label>
+<label>Etiqueta breve<input name="eyebrow" maxlength="65" placeholder="Ej. Próximamente"></label>
+<label id="feature-product-field">Producto del menú (opcional)
+<select name="product_id" id="feature-product"><option value="">Sin producto vinculado · anuncio informativo</option></select>
+<small>Para promociones: vincula un producto real. El cliente verá su precio oficial, tamaños y extras. Este módulo no aplica descuentos.</small></label>
+<label>Descripción<textarea name="description" maxlength="300" placeholder="Qué incluye o qué llegará."></textarea></label>
+<label>Imagen (URL https o ruta assets/)<input name="image_url" maxlength="700" placeholder="assets/imagen.webp o https://..."><small>Usa una foto aprobada. También puedes subirla directamente aquí.</small></label><div class="actions"><label style="flex:1">Subir fotografía JPG, PNG o WebP<input id="image-file" type="file" accept="image/jpeg,image/png,image/webp"></label><button type="button" id="upload-photo" class="secondary" style="align-self:end">Subir foto</button></div>
+<div class="grid2"><label>Desde (opcional)<input name="starts_on" type="date"></label><label>Hasta (opcional)<input name="ends_on" type="date"></label></div>
+<label class="check"><input type="checkbox" name="is_published"> Publicar en la tienda</label>
+<small>La publicación requiere activar esta casilla. Los productos y descuentos no se crean desde aquí.</small>
+<div class="actions"><button type="submit" id="save">Guardar anuncio</button><button type="button" id="reset" class="secondary">Nuevo / Limpiar</button></div>
+</form></section>
+<section class="stack"><div class="card"><h2>Vista previa</h2><div class="preview"><img id="preview-img" alt="Imagen del anuncio"><div class="body"><span id="preview-tag" class="tag">Próximamente</span><strong id="preview-title">Tu nuevo anuncio</strong><p id="preview-description">Así se mostrará el contenido.</p></div></div></div>
+<div class="card"><div class="row"><h2>Anuncios guardados</h2><button type="button" id="reload" class="secondary">Actualizar</button></div><div id="feature-list">Cargando…</div></div></section></div></main>
+<script src="filler-cloud.js"></script><script src="storefront-features-admin.js"></script>
+</body></html>
