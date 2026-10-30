@@ -43,7 +43,7 @@
   const featuredIds = featuredSales.map(s=>s.id);
   const featuredRank = new Map(featuredSales.map((s,i)=>[s.id,{units:s.units,rank:i+1}]));
   const featuredCategory = "Los más vendidos";
-  const eligible = item => item && (isFiillerCoffee(item) || item.allowExtras === true || (item.allowExtras !== false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(item.cat || "")));
+  const eligible = item => item && (isFiillerCoffee(item) || item.allowExtras === true || (item.allowExtras !== false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(normalize(item.cat || ""))));
   try{
     const saved=JSON.parse(sessionStorage.getItem("filler_extras_cart_v1")||"{}");
     state.extraSelections=saved&&typeof saved==="object"&&!Array.isArray(saved)?saved:{};
@@ -208,10 +208,85 @@
     });
     renderStep();options.querySelector("button:not(:disabled)")?.focus();
   }
+  // Solo las variedades clásicas activas: Club Oroweat y especiales quedan independientes.
+  const classicFamilies=Object.freeze({
+    torta:new Set(["tpv018","tpv017","tpv020"]),
+    sandwich:new Set(["tpv013","sandwich-pollo","sandwich-atun","tpv016"])
+  });
+  const classicKind=item=>{
+    if(!item)return null;
+    const id=String(item.id);
+    return classicFamilies.torta.has(id)?"torta":classicFamilies.sandwich.has(id)?"sandwich":null;
+  };
+  const classicVariants=kind=>state.menu.filter(v=>classicKind(v)===kind);
+  const classicLabel=item=>{
+    const name=normalize(item.name);
+    if(name.includes("milanesa"))return "De milanesa";
+    if(name.includes("salchicha"))return "De salchicha";
+    if(name.includes("pollo"))return "De pollo";
+    if(name.includes("atun"))return "De atún";
+    return "De jamón";
+  };
+  function openClassicPicker(kind){
+    const variants=classicVariants(kind),inStock=variants.filter(v=>Number(v.stock)>reserved(v.id));
+    if(!inStock.length){toast("No hay existencias de esta familia.");return;}
+    const origin=document.activeElement;
+    const overlay=document.createElement("div");overlay.className="fx-modal fx-chilaquiles";
+    const panel=document.createElement("div");panel.className="fx-dialog fx-chilaquiles-dialog";
+    panel.setAttribute("role","dialog");panel.setAttribute("aria-modal","true");panel.setAttribute("aria-labelledby","fx-classic-title");
+    const heading=document.createElement("h2");heading.id="fx-classic-title";
+    heading.textContent=kind==="torta"?"Elige tu torta":"Elige tu sándwich";
+    const progress=document.createElement("p");progress.className="fx-chilaquiles-progress";
+    progress.textContent="Paso 1 de 2 · Elige tu preparación";
+    const prompt=document.createElement("h3");prompt.className="fx-chilaquiles-prompt";
+    prompt.textContent="¿Con qué lo quieres?";
+    const choices=document.createElement("div");choices.className="fx-chilaquiles-options";
+    const actions=document.createElement("div");actions.className="fx-actions";
+    const cancel=document.createElement("button");cancel.type="button";cancel.className="secondary";cancel.textContent="Cancelar";
+    const next=document.createElement("button");next.type="button";next.textContent="Continuar a extras";next.disabled=true;
+    let chosen=null;
+    const close=()=>{overlay.remove();if(origin?.isConnected)origin.focus();};
+    for(const item of variants){
+      const disabled=Number(item.stock)<=reserved(item.id);
+      const button=document.createElement("button");
+      button.type="button";button.className="fx-chilaquiles-option";button.disabled=disabled;button.setAttribute("aria-pressed","false");
+      const name=document.createElement("strong");name.textContent=classicLabel(item);
+      const detail=document.createElement("small");detail.textContent=disabled?"Agotado":money(Number(item.price));
+      button.append(name,detail);
+      button.addEventListener("click",()=>{
+        chosen=item.id;
+        for(const other of choices.querySelectorAll("button")){other.classList.remove("selected");other.setAttribute("aria-pressed","false");}
+        button.classList.add("selected");button.setAttribute("aria-pressed","true");next.disabled=false;
+      });
+      choices.append(button);
+    }
+    next.addEventListener("click",()=>{
+      const item=state.menu.find(v=>v.id===chosen);
+      if(!item||Number(item.stock)<=reserved(item.id)){toast("Esta opción ya no está disponible.");return;}
+      close();
+      // Paso 2: el mismo módulo de extras que utiliza el resto del menú.
+      if(eligible(item)&&extrasFor(item).length)openModal(item.id);
+      else addConfigured(item.id);
+    });
+    cancel.addEventListener("click",close);
+    overlay.addEventListener("click",event=>{if(event.target===overlay)close();});
+    overlay.addEventListener("keydown",event=>{
+      if(event.key==="Escape"){event.preventDefault();close();}
+      if(event.key==="Tab"){
+        const controls=[...panel.querySelectorAll("button:not(:disabled)")];
+        const index=controls.indexOf(document.activeElement);
+        if(event.shiftKey&&index===0){event.preventDefault();controls[controls.length-1]?.focus();}
+        else if(!event.shiftKey&&index===controls.length-1){event.preventDefault();controls[0]?.focus();}
+      }
+    });
+    actions.append(cancel,next);panel.append(heading,progress,prompt,choices,actions);overlay.append(panel);document.body.append(overlay);
+    choices.querySelector("button:not(:disabled)")?.focus();
+  }
   addToCart = function(id) {
     const item = itemById(id);
     if (!item || reserved(id) >= Number(item.stock)) { toast("No hay más existencias."); return; }
     if (isChilaquiles(item)) {openChilaquilWizard(id);return;}
+    if (classicKind(item)) {openClassicPicker(classicKind(item));return;}
     if (eligible(item) && extrasFor(item).length) openModal(id);
     else addConfigured(id);
   };
@@ -255,6 +330,16 @@
         }
         continue;
       }
+      const kind=classicKind(item);
+      if(kind){
+        const key="classic-"+kind;
+        if(!grouped.has(key)){
+          const all=classicVariants(kind),first=all.find(v=>Number(v.stock)>reserved(v.id))||all[0];
+          const representative={...first,id:"fiiller-"+key,name:kind==="torta"?"Tortas":"Sándwiches",classicGroup:kind,classicVariants:all};
+          grouped.set(key,representative);displayProducts.push(representative);
+        }
+        continue;
+      }
       if (!match) { displayProducts.push(item); continue; }
       const groupName = match[1];
       if (!grouped.has(groupName)) {
@@ -265,8 +350,8 @@
       grouped.get(groupName).sizeVariants.push({...item, sizeOz:Number(match[2])});
     }
     displayProducts.forEach(p => p.sizeVariants?.sort((a,b)=>a.sizeOz-b.sizeOz));
-    const featured = displayProducts.filter(p => (p.chilaquilesGroup ? p.chilaquilesVariants.some(v=>featuredIds.includes(v.id)) : p.sizeVariants ? p.sizeVariants.some(v=>featuredIds.includes(v.id)) : featuredIds.includes(p.id))).sort((a,b)=>{
-      const rank = p => Math.min(...(p.chilaquilesGroup ? p.chilaquilesVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) : p.sizeVariants ? p.sizeVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) : [featuredRank.get(p.id)?.rank ?? 999]));
+    const featured = displayProducts.filter(p => (p.classicGroup ? p.classicVariants.some(v=>featuredIds.includes(v.id)) : p.chilaquilesGroup ? p.chilaquilesVariants.some(v=>featuredIds.includes(v.id)) : p.sizeVariants ? p.sizeVariants.some(v=>featuredIds.includes(v.id)) : featuredIds.includes(p.id))).sort((a,b)=>{
+      const rank = p => Math.min(...(p.classicGroup ? p.classicVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) : p.chilaquilesGroup ? p.chilaquilesVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) : p.sizeVariants ? p.sizeVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) : [featuredRank.get(p.id)?.rank ?? 999]));
       return rank(a)-rank(b);
     });
     const sections = state.category === "Todos"
@@ -277,19 +362,20 @@
 
     function productCard(item) {
       const chilaquilesGroup=Boolean(item.chilaquilesGroup);
+      const classicGroup=Boolean(item.classicGroup),groupVariants=classicGroup?item.classicVariants:chilaquilesGroup?item.chilaquilesVariants:null;
       const variants = item.sizeVariants || null;
       const selected = variants ? (variants.find(v => Number(v.stock) - reserved(v.id) > 0) || variants[0]) : item;
-      const available = chilaquilesGroup ? item.chilaquilesVariants.reduce((sum,v)=>sum+Math.max(0,Number(v.stock)-reserved(v.id)),0) : Number(selected.stock) - reserved(selected.id);
+      const available = groupVariants ? groupVariants.reduce((sum,v)=>sum+Math.max(0,Number(v.stock)-reserved(v.id)),0) : Number(selected.stock) - reserved(selected.id);
       const photo = item.image ? 'style="background-image:url(&quot;' + esc(item.image) + '&quot;);background-size:contain;background-position:center center;background-repeat:no-repeat;background-color:#fff"' : "";
       const options = eligible(selected) && extrasFor(selected).length;
       const stockLabel = available <= 0 ? "Agotado" : "Disponible";
       const stockClass = available <= 0 ? "sold-out" : available <= 5 ? "low" : "";
-      const addLabel = available <= 0 ? "Agotado" : chilaquilesGroup ? "Personalizar" : options ? "Elegir" : "Agregar";
-      const sales = chilaquilesGroup ? item.chilaquilesVariants.map(v=>featuredRank.get(v.id)).find(Boolean) : variants ? variants.map(v=>featuredRank.get(v.id)).find(Boolean) : featuredRank.get(item.id);
+      const addLabel = available <= 0 ? "Agotado" : groupVariants ? "Elegir" : options ? "Elegir" : "Agregar";
+      const sales = groupVariants ? groupVariants.map(v=>featuredRank.get(v.id)).find(Boolean) : variants ? variants.map(v=>featuredRank.get(v.id)).find(Boolean) : featuredRank.get(item.id);
       const salesLabel = sales && (state.category === featuredCategory || state.category === "Todos")
         ? '<small class="fx-sales-count">' + sales.units + ' unidades vendidas</small>' : '';
       const sizeSelector = variants ? '<div class="fx-size-picker"><label for="size-' + esc(selected.id) + '">Elige tu tamaño</label><select id="size-' + esc(selected.id) + '" data-coffee-size aria-label="Tamaño de ' + esc(item.name) + '">' + variants.map(v => '<option value="' + esc(v.id) + '" data-price="' + Number(v.price) + '" data-stock="' + Math.max(0,Number(v.stock)-reserved(v.id)) + '"' + (v.id===selected.id?' selected':'') + (Number(v.stock)-reserved(v.id)<=0?' disabled':'') + '>' + v.sizeOz + ' oz · ' + money(Number(v.price)) + (Number(v.stock)-reserved(v.id)<=0?' · Agotado':'') + '</option>').join('') + '</select></div>' : '';
-      return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3>' + salesLabel + sizeSelector + '<div class="item-bottom"><strong class="price">' + (chilaquilesGroup ? "Desde "+money(Math.min(...item.chilaquilesVariants.filter(v=>Number(v.stock)>reserved(v.id)).map(v=>Number(v.price)))) : money(Number(selected.price))) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options ? "Seleccionar " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(chilaquilesGroup ? (item.chilaquilesVariants.find(v=>Number(v.stock)>reserved(v.id))?.id||selected.id) : selected.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
+      return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3>' + salesLabel + sizeSelector + '<div class="item-bottom"><strong class="price">' + (groupVariants ? "Desde "+money(Math.min(...groupVariants.filter(v=>Number(v.stock)>reserved(v.id)).map(v=>Number(v.price)))) : money(Number(selected.price))) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options ? "Seleccionar " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(groupVariants ? (groupVariants.find(v=>Number(v.stock)>reserved(v.id))?.id||selected.id) : selected.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
     }
 
     if (!products.length) {
