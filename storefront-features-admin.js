@@ -17,7 +17,25 @@ async function api(path,{method="GET",body}={}){
  return data;
 }
 function imageAllowed(url){return !url||/^https:\/\/[^\s]+$/.test(url)||/^assets\/[A-Za-z0-9_./-]+$/.test(url)}
-function clear(){form.reset();form.elements.id.value="";form.elements.sort_order.value="100";$("editor-heading").textContent="Nuevo anuncio";preview();}
+let catalogProducts=[];
+async function loadCatalog(){
+ const products=await FillerCloud.catalog();
+ catalogProducts=(products||[]).filter(x=>Number(x.stock)>0).sort((a,b)=>String(a.cat).localeCompare(String(b.cat),"es")||String(a.name).localeCompare(String(b.name),"es"));
+ const select=form.elements.product_id,prior=select.value;
+ select.replaceChildren(new Option("Sin producto vinculado · anuncio informativo",""));
+ for(const p of catalogProducts){
+  select.add(new Option(p.cat+" · "+p.name+" · $"+Number(p.price).toFixed(2)+" · "+p.stock+" disp.",p.id));
+ }
+ if(catalogProducts.some(p=>p.id===prior))select.value=prior;
+}
+function toggleProductField(){
+ const active=form.elements.kind.value==="promotion";
+ $("feature-product-field").hidden=!active;
+ form.elements.product_id.disabled=!active;
+ if(!active)form.elements.product_id.value="";
+}
+form.elements.kind.addEventListener("change",toggleProductField);
+function clear(){form.reset();toggleProductField();form.elements.id.value="";form.elements.sort_order.value="100";$("editor-heading").textContent="Nuevo anuncio";preview();}
 function preview(){
  const d=new FormData(form),url=String(d.get("image_url")||"").trim();
  $("preview-title").textContent=String(d.get("title")||"").trim()||"Tu nuevo anuncio";
@@ -46,7 +64,7 @@ $("upload-photo").addEventListener("click",async()=>{
 });
 $("reset").addEventListener("click",clear);$("reload").addEventListener("click",()=>load().catch(e=>message(e.message,true)));
 async function load(){
- records=await api(TABLE+"?select=id,kind,title,description,image_url,eyebrow,starts_on,ends_on,sort_order,is_published,created_at&order=sort_order.asc,created_at.desc&limit=100");
+ records=await api(TABLE+"?select=id,kind,title,description,image_url,eyebrow,starts_on,ends_on,sort_order,is_published,product_id,created_at&order=sort_order.asc,created_at.desc&limit=100");
  const list=$("feature-list");list.replaceChildren();
  if(!records.length){list.textContent="Aún no hay anuncios. Crea el primero.";return;}
  for(const r of records){
@@ -63,6 +81,9 @@ async function load(){
 }
 function editRecord(r){
  for(const key of ["id","kind","title","description","eyebrow","image_url","starts_on","ends_on","sort_order"])form.elements[key].value=r[key]??"";
+ toggleProductField();
+ if(r.product_id && !catalogProducts.some(p=>p.id===r.product_id))form.elements.product_id.add(new Option("Producto no disponible: "+r.product_id,r.product_id));
+ form.elements.product_id.value=r.product_id||"";
  form.elements.is_published.checked=Boolean(r.is_published);
  $("editor-heading").textContent="Editar anuncio";preview();form.scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -80,6 +101,9 @@ form.addEventListener("submit",async e=>{
   if(!imageAllowed(url))throw Error("La foto debe usar https:// o una ruta de assets/.");
   if(start&&end&&end<start)throw Error("La fecha final debe ser posterior a la inicial.");
   const data={kind:d.get("kind"),title:String(d.get("title")||"").trim(),eyebrow:String(d.get("eyebrow")||"").trim(),description:String(d.get("description")||"").trim(),image_url:url||null,starts_on:start,ends_on:end,sort_order:Number(d.get("sort_order")),is_published:form.elements.is_published.checked,updated_at:new Date().toISOString()};
+  const productId=d.get("kind")==="promotion" ? String(d.get("product_id")||"") : "";
+  if(productId&&!catalogProducts.some(p=>p.id===productId))throw Error("Selecciona un producto activo y con existencia.");
+  data.product_id=productId||null;
   const id=d.get("id"),user=session()?.user?.id;
   if(id){await api(TABLE+"?id=eq."+encodeURIComponent(id),{method:"PATCH",body:data});}
   else{await api(TABLE,{method:"POST",body:{...data,created_by:user}});}
@@ -95,7 +119,7 @@ async function init(){
  const role=await FillerCloud.staffRole(),admin=role==="admin";
  $("login-card").hidden=admin;$("workspace").hidden=!admin;
  if(!admin){message(role?"Tu cuenta no tiene permiso de administración.":"Inicia sesión para administrar anuncios.",!!role);return}
- await load();message("Panel conectado. Puedes crear borradores y publicar anuncios.");
+ await loadCatalog();await load();toggleProductField();message("Panel conectado. Puedes crear borradores y publicar anuncios.");
 }
 init().catch(err=>message(err.message,true));preview();
 })();
