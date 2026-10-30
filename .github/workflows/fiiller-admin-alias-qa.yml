@@ -1,0 +1,16 @@
+name: Fiiller staff login regression
+on:
+  push:
+    branches: [feature/fiiller-admin-project-compas-email-20261030]
+  pull_request:
+    paths: ['filler-cloud.js','tests/fiiller-admin-alias.test.cjs']
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check filler-cloud.js
+      - run: node --test tests/fiiller-admin-alias.test.cjs
