@@ -274,7 +274,7 @@
       toast("Estamos actualizando el menú. Intenta de nuevo en unos segundos.");return;
     }
     const product=state.menu.find(x=>x.id===productId);
-    if(!product || !fiillerMenuPermitido(product)){
+    if(!product){
       toast("Este producto ya no está disponible en el menú.");return;
     }
     if(Number(product.stock)<=reserved(productId)){
