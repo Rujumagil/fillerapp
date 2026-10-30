@@ -1,0 +1,39 @@
+name: Fiiller integrated marketing regression
+on:
+  push:
+    branches: [integration/fiiller-marketing-current-main-20261030]
+  pull_request:
+    paths: ['storefront-features*.js', 'promociones-admin.html', 'extras-storefront.js', 'index.html', 'admin.html', 'tests/**']
+jobs:
+  marketing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium and test runner
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Syntax checks
+        run: |
+          node --check extras-storefront.js
+          node --check storefront-features.js
+          node --check storefront-features-admin.js
+      - name: Marketing and purchase UI
+        run: node tests/promo-browser.cjs
+      - name: Administrative UI
+        run: node tests/marketing-admin-browser.cjs
+      - name: Chilaquiles regression
+        run: node tests/chilaquiles-browser.cjs
+      - name: Tortas and sandwiches regression
+        run: node tests/tortas-sandwiches-browser.cjs
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fiiller-marketing-integrated-qa
+          path: artifacts/
+          if-no-files-found: ignore

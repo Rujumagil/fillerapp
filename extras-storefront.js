@@ -444,6 +444,83 @@
     document.querySelectorAll("[data-qty]").forEach(b => b.addEventListener("click", () => changeQty(b.dataset.qty, Number(b.dataset.delta))));
     document.getElementById("cart-total").textContent = money(total);
   };
+  // Las promociones utilizan exclusivamente los SKUs y precios del catálogo real.
+  // Para cafés, ofrecer variantes del mismo producto antes del modal de extras.
+  function promotionVariants(product){
+    if(!product || product.cat!=="Bebidas calientes")return [];
+    const match=String(product.name||"").match(/^(.* Nestlé|Café Fiiller) (8|12|16|20) oz$/i);
+    if(!match)return [];
+    const base=match[1].toLocaleLowerCase("es-MX");
+    return state.menu.filter(item=>{
+      const parts=String(item.name||"").match(/^(.* Nestlé|Café Fiiller) (8|12|16|20) oz$/i);
+      return item.cat===product.cat && parts && parts[1].toLocaleLowerCase("es-MX")===base;
+    }).sort((a,b)=>{
+      const aa=Number(a.name.match(/(8|12|16|20) oz$/i)?.[1]||0);
+      const bb=Number(b.name.match(/(8|12|16|20) oz$/i)?.[1]||0);
+      return aa-bb;
+    });
+  }
+  function choosePromoSize(product,variants){
+    const overlay=document.createElement("div");
+    overlay.className="fiiller-promo-size-overlay";
+    const dialog=document.createElement("div");
+    dialog.className="fiiller-promo-size-dialog";
+    dialog.setAttribute("role","dialog");
+    dialog.setAttribute("aria-modal","true");
+    dialog.setAttribute("aria-label","Elige el tamaño de tu café");
+    const heading=document.createElement("h2");
+    heading.textContent="Elige tu tamaño";
+    const subtitle=document.createElement("p");
+    subtitle.textContent=product.name.replace(/ (8|12|16|20) oz$/i,"")+" · Precio oficial Fiiller";
+    const select=document.createElement("select");
+    select.setAttribute("aria-label","Tamaño y precio");
+    for(const item of variants){
+      const size=item.name.match(/(8|12|16|20) oz$/i)?.[1]||"";
+      const option=new Option(size+" oz · "+money(Number(item.price))+(Number(item.stock)<=reserved(item.id)?" · Agotado":""),item.id);
+      option.disabled=Number(item.stock)<=reserved(item.id);
+      select.add(option);
+    }
+    const preferred=variants.find(x=>x.id===product.id && Number(x.stock)>reserved(x.id));
+    const firstAvailable=preferred||variants.find(x=>Number(x.stock)>reserved(x.id));
+    if(!firstAvailable){toast("Este café está agotado por ahora.");return;}
+    select.value=firstAvailable.id;
+    const actions=document.createElement("div");actions.className="fiiller-promo-size-actions";
+    const cancel=document.createElement("button");cancel.type="button";cancel.className="secondary";cancel.textContent="Cancelar";
+    const confirm=document.createElement("button");confirm.type="button";confirm.textContent="Continuar →";
+    const previous=document.activeElement;
+    const close=()=>{overlay.remove();if(previous?.isConnected)previous.focus();};
+    cancel.addEventListener("click",close);
+    confirm.addEventListener("click",()=>{
+      const selected=state.menu.find(x=>x.id===select.value);
+      if(!selected || Number(selected.stock)<=reserved(selected.id)){
+        toast("Este tamaño ya no está disponible.");return;
+      }
+      close();addToCart(selected.id);
+    });
+    overlay.addEventListener("click",e=>{if(e.target===overlay)close();});
+    overlay.addEventListener("keydown",e=>{
+      if(e.key==="Escape"){e.preventDefault();close();}
+      if(e.key==="Tab"){
+        const targets=[select,cancel,confirm],index=targets.indexOf(document.activeElement);
+        if(e.shiftKey && index===0){e.preventDefault();confirm.focus();}
+        else if(!e.shiftKey && index===2){e.preventDefault();select.focus();}
+      }
+    });
+    actions.append(cancel,confirm);dialog.append(heading,subtitle,select,actions);overlay.append(dialog);
+    document.body.append(overlay);select.focus();
+  }
+  document.addEventListener("fiiller:promo-product", event => {
+    const productId=event.detail?.productId;
+    if(typeof productId!=="string" || productId.length>120 || !window.FillerOnlineActive){
+      toast("Estamos actualizando el menú. Intenta de nuevo en unos segundos.");return;
+    }
+    const product=state.menu.find(x=>x.id===productId);
+    if(!product){toast("Este producto ya no está disponible en el menú.");return;}
+    const variants=promotionVariants(product);
+    if(variants.length>1){choosePromoSize(product,variants);return;}
+    if(Number(product.stock)<=reserved(productId)){toast("Este producto está agotado por ahora.");return;}
+    addToCart(productId);
+  });
   // Nunca confirmar pedidos solo en localStorage: la cocina no los recibiría.
   sendOrder = function() { toast("La recepción de cocina no está conectada. Revisa tu conexión."); };
   const oldSend = document.getElementById("send-order");
