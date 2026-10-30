@@ -283,7 +283,8 @@
         : families.map(name=>({name,items:displayProducts.filter(p=>(p.cat||"Otros")===name)}));
 
     function productCard(item) {
-      const chilaquilesGroup=Boolean(item.chilaquilesGroup);\n      const variants = item.sizeVariants || null;
+      const chilaquilesGroup=Boolean(item.chilaquilesGroup);
+      const variants = item.sizeVariants || null;
       const selected = variants ? (variants.find(v => Number(v.stock) - reserved(v.id) > 0) || variants[0]) : item;
       const available = chilaquilesGroup ? item.chilaquilesVariants.reduce((sum,v)=>sum+Math.max(0,Number(v.stock)-reserved(v.id)),0) : Number(selected.stock) - reserved(selected.id);
       const photo = item.image ? 'style="background-image:url(&quot;' + esc(item.image) + '&quot;);background-size:contain;background-position:center center;background-repeat:no-repeat;background-color:#fff"' : "";
