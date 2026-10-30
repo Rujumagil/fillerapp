@@ -161,7 +161,9 @@
     const next=document.createElement("button");next.type="button";next.textContent="Continuar";
     actions.append(back,close,next);panel.append(title,progress,prompt,options,actions);overlay.append(panel);
     document.body.append(overlay);chilaquilWizard=overlay;
-    let step=1,color=variants.find(x=>x.id===preferredId)?chilaquilColor(variants.find(x=>x.id===preferredId)):"",style="";
+    const initial=variants.find(x=>x.id===preferredId);
+    const color=initial?chilaquilColor(initial):"rojos";
+    let style="";
     const hasStock=v=>Number(v.stock)>reserved(v.id);
     const available=colorKey=>variants.filter(v=>chilaquilColor(v)===colorKey);
     function selectButton(text,value,detail,disabled,checked,action){
@@ -174,35 +176,25 @@
     }
     function renderStep(){
       options.replaceChildren();
-      progress.textContent=step===1?"Paso 1 de 3 · Elige tu salsa":"Paso 2 de 3 · Elige tu presentación";
-      prompt.textContent=step===1?"¿Los prefieres rojos o verdes?":"¿Cómo quieres tus chilaquiles?";
-      back.hidden=step===1;
-      next.textContent=step===1?"Continuar":"Elegir extras";
-      if(step===1){
-        for(const key of ["rojos","verdes"]){
-          const list=available(key),count=list.filter(hasStock).length;
-          options.append(selectButton(key==="rojos"?"🍅 Rojos":"🌿 Verdes",key,count?"Elige tu presentación":"Agotados por ahora",!count,color===key,()=>{color=key;style="";renderStep();}));
-        }
-        next.disabled=!color||!available(color).some(hasStock);
-      }else{
-        for(const variantKey of ["sencillos","huevo","pollo"]){
-          const item=available(color).find(x=>chilaquilStyle(x)===variantKey);
-          const label=variantKey==="sencillos"?"Sencillos":variantKey==="huevo"?"Con huevo":"Con pollo";
-          options.append(selectButton(label,variantKey,item?(hasStock(item)?money(Number(item.price)):"Agotados"):"No disponibles",!item||!hasStock(item),style===variantKey,()=>{style=variantKey;renderStep();}));
-        }
-        next.disabled=!style;
+      progress.textContent="Paso 1 de 2 · Elige tu presentación";
+      prompt.textContent="Chilaquiles "+(color==="rojos"?"Rojos":"Verdes")+" · ¿Cómo los quieres?";
+      back.hidden=true;
+      next.textContent="Continuar a extras";
+      for(const variantKey of ["sencillos","huevo","pollo"]){
+        const item=available(color).find(x=>chilaquilStyle(x)===variantKey);
+        const label=variantKey==="sencillos"?"Sencillos":variantKey==="huevo"?"Con huevo":"Con pollo";
+        options.append(selectButton(label,variantKey,item?(hasStock(item)?money(Number(item.price)):"Agotados"):"No disponibles",!item||!hasStock(item),style===variantKey,()=>{style=variantKey;renderStep();}));
       }
+      next.disabled=!style;
     }
     next.addEventListener("click",()=>{
-      if(step===1){if(!color)return;step=2;renderStep();return;}
       const selected=available(color).find(v=>chilaquilStyle(v)===style);
       if(!selected||!hasStock(selected)){toast("Esa presentación está agotada.");renderStep();return;}
-      // Paso 3: conserva el selector de extras, precios y carrito ya existentes.
       closeChilaquilWizard();
       if(eligible(selected)&&extrasFor(selected).length)openModal(selected.id);
       else addConfigured(selected.id);
     });
-    back.addEventListener("click",()=>{step=1;renderStep();});
+    back.addEventListener("click",closeChilaquilWizard);
     close.addEventListener("click",closeChilaquilWizard);
     overlay.addEventListener("click",event=>{if(event.target===overlay)closeChilaquilWizard();});
     overlay.addEventListener("keydown",event=>{
@@ -254,11 +246,12 @@
     for (const item of products) {
       const match = item.cat === "Bebidas calientes" && item.name.match(/^(.* Nestlé|Café Fiiller) (8|12|16|20) oz$/i);
       if (isChilaquiles(item)) {
-        if(!grouped.has("chilaquiles")) {
-          const all=state.menu.filter(isChilaquiles);
+        const color=chilaquilColor(item),key="chilaquiles-"+color;
+        if(!grouped.has(key)) {
+          const all=state.menu.filter(v=>isChilaquiles(v)&&chilaquilColor(v)===color);
           const first=all.find(v=>Number(v.stock)>reserved(v.id))||all[0];
-          const representative={...first,id:"fiiller-chilaquiles-group",name:"Chilaquiles",chilaquilesGroup:true,chilaquilesVariants:all};
-          grouped.set("chilaquiles",representative);displayProducts.push(representative);
+          const representative={...first,id:"fiiller-"+key,name:"Chilaquiles "+(color==="rojos"?"Rojos":"Verdes"),chilaquilesGroup:true,chilaquilesVariants:all};
+          grouped.set(key,representative);displayProducts.push(representative);
         }
         continue;
       }
