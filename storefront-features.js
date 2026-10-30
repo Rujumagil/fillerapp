@@ -14,11 +14,21 @@ function card(r){
  const body=make("div","fiiller-feature-text"),label=make("span","fiiller-feature-tag",r.eyebrow||(r.kind==="promotion"?"Promoción":"Novedad"));
  const title=make("h3","",r.title),desc=make("p","",r.description||"Descubre más en Fiiller Café.");
  body.append(label,title,desc);article.append(body);
- const link=make("a","",r.kind==="promotion"?"Explorar menú →":"Ver menú →");link.href="#menu-list";article.append(link);
+ if(r.kind==="promotion" && typeof r.product_id==="string" && r.product_id){
+  const choose=make("button","fiiller-feature-buy","Elegir producto →");
+  choose.type="button";
+  choose.addEventListener("click",()=>{
+    document.dispatchEvent(new CustomEvent("fiiller:promo-product",{detail:{productId:r.product_id}}));
+  });
+  article.append(choose);
+ }else{
+  const link=make("a","",r.kind==="promotion"?"Explorar menú →":"Ver menú →");
+  link.href="#menu-list";article.append(link);
+ }
  return article;
 }
 async function load(){
- const res=await fetch(base+"/rest/v1/filler_storefront_features?select=kind,title,description,eyebrow,image_url,sort_order&order=sort_order.asc&limit=18",{
+ const res=await fetch(base+"/rest/v1/filler_storefront_features?select=kind,title,description,eyebrow,image_url,sort_order,product_id&order=sort_order.asc&limit=18",{
  headers:{apikey:key,Accept:"application/json"},cache:"no-store"});
  if(!res.ok)return;
  const rows=await res.json();if(!Array.isArray(rows))return;
