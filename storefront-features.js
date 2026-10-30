@@ -34,7 +34,22 @@ async function load(){
  const rows=await res.json();if(!Array.isArray(rows))return;
  const promo=rows.filter(x=>x.kind==="promotion"),upcoming=rows.filter(x=>x.kind==="upcoming");
  const promoGrid=document.querySelector("#promociones .fiiller-discovery-grid");
- if(promoGrid&&promo.length){promoGrid.replaceChildren(...promo.map(card));document.querySelector("#promociones .fiiller-discovery-head p").textContent="Ofertas y combinaciones preparadas para ti.";}
+ if(promoGrid){
+   const intro=document.querySelector("#promociones .fiiller-discovery-head p");
+   if(promo.length){
+     promoGrid.replaceChildren(...promo.map(card));
+     if(intro)intro.textContent="Descubre las ofertas disponibles en Fiiller Café.";
+   }else{
+     // Las tarjetas de diseño son ejemplos, no ofertas. Eliminarlas al recibir respuesta válida.
+     const empty=make("div","fiiller-promos-empty");
+     const heading=make("h3","","Pronto tendremos nuevas Fiiller Promos");
+     const description=make("p","","Mientras preparamos las siguientes promociones, puedes pedir tus favoritos del menú.");
+     const link=make("a","","Explorar menú →");link.href="#menu-list";
+     empty.append(heading,description,link);
+     promoGrid.replaceChildren(empty);
+     if(intro)intro.textContent="Estamos preparando nuevas sorpresas para ti.";
+   }
+ }
  const upcomingWrap=document.querySelector("#proximos");
  if(upcomingWrap&&upcoming.length){
    const old=upcomingWrap.querySelector(".fiiller-coming");
