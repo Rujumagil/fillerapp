@@ -17,6 +17,12 @@ async function call(path,{body,method="GET"}={}){
  if(!res.ok)throw Error(result?.message||"Error consultando almacén.");
  return result;
 }
+async function currentInventoryQuantity(id){
+ const rows=await call("filler_inventory_items?select=id,quantity&id=eq."+encodeURIComponent(id)+"&limit=1");
+ if(!Array.isArray(rows)||rows.length!==1)throw Error("Insumo no disponible. Actualiza el almacén.");
+ return Number(rows[0].quantity);
+}
+function sameQuantity(a,b){return Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<0.000001;}
 function today(){
  const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
  const p=k=>parts.find(a=>a.type===k)?.value||"";
@@ -245,7 +251,9 @@ $("count-form").addEventListener("submit",async e=>{
  if(!item)throw Error("Selecciona un insumo válido.");
  const physical=Number(d.get("physical"));
  if(!Number.isFinite(physical)||physical<0)throw Error("Escribe la existencia física encontrada.");
- const current=Number(item.quantity),difference=physical-current;
+ const current=Number(item.quantity),latest=await currentInventoryQuantity(item.id);
+ if(!sameQuantity(current,latest))throw Error("La existencia cambió de "+nfmt(current)+" a "+nfmt(latest)+" "+item.unit+". Actualiza antes de contar.");
+ const difference=physical-current;
  const answer=window.confirm("Confirmar conteo de "+item.name+"\nSistema: "+nfmt(current)+" "+item.unit+"\nFísico: "+nfmt(physical)+" "+item.unit+"\nDiferencia: "+nfmt(difference)+" "+item.unit+"\n\n¿Guardar el conteo y ajustar la existencia?");
  if(!answer)return;
  await call("rpc/filler_inventory_count",{method:"POST",body:{p_item:item.id,p_physical:physical,p_reason:String(d.get("reason")||"").trim()||"Conteo físico de cocina"}});
@@ -372,6 +380,8 @@ $("barcode-count-form").addEventListener("submit",async ev=>{
  if(!item){barcodeMessage("Escanea primero un producto.",true);return;}
  const number=Number(f.elements.physical.value);
  if(!String(f.elements.physical.value).trim()||!Number.isFinite(number)||number<0||number>1000000){barcodeMessage("Introduce una cantidad física válida.",true);return;}
+ const latest=await currentInventoryQuantity(item.id);
+ if(!sameQuantity(Number(item.quantity),latest)){barcodeMessage("La existencia cambió a "+nfmt(latest)+" "+item.unit+". Actualiza antes de contar.",true);await load();return;}
  const difference=number-Number(item.quantity);
  if(!window.confirm("Confirmar conteo de "+item.name+"\nSistema: "+nfmt(item.quantity)+" "+item.unit+"\nFísico: "+nfmt(number)+" "+item.unit+"\nDiferencia: "+nfmt(difference)+" "+item.unit+"\n\n¿Actualizar el almacén?"))return;
  b.disabled=true;
@@ -471,9 +481,17 @@ $("create-form").addEventListener("submit",async e=>{
 $("movement-form").addEventListener("submit",async e=>{
  e.preventDefault();const f=e.currentTarget,b=f.querySelector("button");b.disabled=true;
  try{
- const d=new FormData(f);
- await call("rpc/filler_inventory_move",{method:"POST",body:{p_item:d.get("item"),p_type:d.get("type"),p_quantity:Number(d.get("qty")),p_note:String(d.get("note")||"").trim()||null}});
- f.elements.qty.value="";f.elements.note.value="";await load();message("✓ Movimiento de almacén guardado.");
+ const d=new FormData(f),item=inventory.find(i=>i.id===d.get("item"));
+ const type=String(d.get("type")||""),qty=Number(d.get("qty")),note=String(d.get("note")||"").trim();
+ if(!item||!["entrada","salida","ajuste"].includes(type))throw Error("Selecciona un insumo y tipo de movimiento válido.");
+ if(!Number.isFinite(qty)||qty<=0||qty>1000000)throw Error("Introduce una cantidad mayor a cero.");
+ const previous=Number(item.quantity),latest=await currentInventoryQuantity(item.id);
+ if(!sameQuantity(previous,latest))throw Error("Existencia modificada a "+nfmt(latest)+" "+item.unit+". Actualiza y repite el movimiento.");
+ const next=previous+(type==="salida"?-qty:qty);
+ if(next<0)throw Error("La salida supera la existencia registrada.");
+ if(!window.confirm("Confirmar "+type.toUpperCase()+" de almacén\n"+item.name+"\nCantidad: "+nfmt(qty)+" "+item.unit+"\nExistencia actual: "+nfmt(previous)+" "+item.unit+"\nNueva existencia estimada: "+nfmt(next)+" "+item.unit+"\nMotivo: "+(note||"Sin nota")+"\n\n¿Guardar?"))return;
+ await call("rpc/filler_inventory_move",{method:"POST",body:{p_item:item.id,p_type:type,p_quantity:qty,p_note:note||null}});
+ f.elements.qty.value="";f.elements.note.value="";await load();message("✓ "+(type==="entrada"?"Entrada":type==="salida"?"Salida":"Ajuste positivo")+" registrada para "+item.name+".");
  }catch(err){message(err.message,true);}finally{b.disabled=false;}
 });
 show().catch(err=>message(err.message,true));
