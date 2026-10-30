@@ -66,3 +66,15 @@ main{max-width:1450px}
 .fiiller-feature-buy:hover{background:#d95a0d}
 .fiiller-feature-buy:focus-visible{outline:3px solid #12472f;outline-offset:3px}
 .fiiller-feature-card.has-photo .fiiller-feature-buy{margin:14px 17px 17px}
+
+/* Selector oficial de tamaños al entrar desde una promoción */
+.fiiller-promo-size-overlay{position:fixed;inset:0;z-index:150;display:grid;place-items:center;background:rgba(8,29,21,.69);padding:18px}
+.fiiller-promo-size-dialog{width:min(100%,430px);background:#fffdf7;border-radius:23px;padding:24px;box-shadow:0 26px 75px #001c175e}
+.fiiller-promo-size-dialog h2{margin:0;color:#073c2b;font-size:27px;letter-spacing:-.035em}
+.fiiller-promo-size-dialog p{color:#5a7062;font-size:14px;line-height:1.5;margin:9px 0 20px}
+.fiiller-promo-size-dialog select{width:100%;border:1px solid #c8d9ce;border-radius:12px;background:white;padding:13px;color:#123d2a;font:inherit;font-size:16px;font-weight:750}
+.fiiller-promo-size-dialog select:focus-visible{outline:3px solid #f7751f;outline-offset:2px}
+.fiiller-promo-size-actions{display:flex;gap:12px;margin-top:20px}
+.fiiller-promo-size-actions button{flex:1;border-radius:12px;min-height:47px}
+.fiiller-promo-size-actions .secondary{background:#e9f3ee;color:#084b36}
+@media(max-width:480px){.fiiller-promo-size-dialog{padding:20px}}
