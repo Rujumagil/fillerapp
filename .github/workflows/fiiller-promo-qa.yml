@@ -1,0 +1,28 @@
+name: Fiiller promotion flow QA
+on:
+  push:
+    branches:
+      - feature/promo-product-links-20261029
+  pull_request:
+    paths:
+      - 'storefront-features.js'
+      - 'storefront-features-admin.js'
+      - 'extras-storefront.js'
+      - 'tests/promo-flow.test.cjs'
+jobs:
+  promo-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax validation
+        run: |
+          node --check storefront-features.js
+          node --check storefront-features-admin.js
+          node --check extras-storefront.js
+          node --check storefront-cloud.js
+      - name: Promotion flow regression tests
+        run: node --test tests/promo-flow.test.cjs
