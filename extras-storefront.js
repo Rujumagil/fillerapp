@@ -219,7 +219,8 @@
   addToCart = function(id) {
     const item = itemById(id);
     if (!item || reserved(id) >= Number(item.stock)) { toast("No hay más existencias."); return; }
-    if (isChilaquiles(item)) {openChilaquilWizard(id);return;}\n    if (eligible(item) && extrasFor(item).length) openModal(id);
+    if (isChilaquiles(item)) {openChilaquilWizard(id);return;}
+    if (eligible(item) && extrasFor(item).length) openModal(id);
     else addConfigured(id);
   };
   changeQty = function(key, delta) {
