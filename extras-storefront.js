@@ -266,6 +266,22 @@
     document.querySelectorAll("[data-qty]").forEach(b => b.addEventListener("click", () => changeQty(b.dataset.qty, Number(b.dataset.delta))));
     document.getElementById("cart-total").textContent = money(total);
   };
+  // Las promociones apuntan al SKU real y reutilizan el configurador de extras.
+  // No aceptamos precios del anuncio ni creamos líneas de pedido artificiales.
+  document.addEventListener("fiiller:promo-product", event => {
+    const productId=event.detail?.productId;
+    if(typeof productId!=="string" || productId.length>120 || !window.FillerOnlineActive){
+      toast("Estamos actualizando el menú. Intenta de nuevo en unos segundos.");return;
+    }
+    const product=state.menu.find(x=>x.id===productId);
+    if(!product || !fiillerMenuPermitido(product)){
+      toast("Este producto ya no está disponible en el menú.");return;
+    }
+    if(Number(product.stock)<=reserved(productId)){
+      toast("Este producto está agotado por ahora.");return;
+    }
+    addToCart(productId);
+  });
   // Nunca confirmar pedidos solo en localStorage: la cocina no los recibiría.
   sendOrder = function() { toast("La recepción de cocina no está conectada. Revisa tu conexión."); };
   const oldSend = document.getElementById("send-order");
