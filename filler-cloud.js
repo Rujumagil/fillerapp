@@ -108,10 +108,26 @@
     }));
   }
   async function updateOrder(id,status) {
-    if (!["Preparando","Listo","Entregado"].includes(status)) throw new Error("Estado no válido.");
-    return request("filler_orders?id=eq."+encodeURIComponent(id),{
-      method:"PATCH", staff:true, body:{ status,status_updated_at:new Date().toISOString() },prefer:"return=minimal"
+    const transitions = Object.freeze({
+      "Nuevo": "Preparando",
+      "Preparando": "Listo",
+      "Listo": "Entregado"
     });
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(id||""))) {
+      throw new Error("Identificador de pedido no válido.");
+    }
+    if (!["Preparando","Listo","Entregado"].includes(status)) throw new Error("Estado no válido.");
+    // Compare-and-set: la actualización solo procede desde el estado esperado.
+    // Una respuesta vacía indica que otro dispositivo ya cambió el pedido.
+    const previous = Object.keys(transitions).find(key => transitions[key] === status);
+    const rows = await request(
+      "filler_orders?id=eq."+encodeURIComponent(id)+"&status=eq."+encodeURIComponent(previous)+"&select=id,status",
+      {method:"PATCH",staff:true,body:{status,status_updated_at:new Date().toISOString()},prefer:"return=representation"}
+    );
+    if (!Array.isArray(rows) || rows.length !== 1) {
+      throw new Error("El pedido ya cambió de estado o no tienes permiso. Actualiza la pantalla antes de continuar.");
+    }
+    return rows[0];
   }
   async function orderMessages(orderId) {
     if (!/^[0-9a-f-]{36}$/i.test(String(orderId||""))) throw new Error("Pedido no válido.");
