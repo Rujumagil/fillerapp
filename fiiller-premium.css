@@ -54,7 +54,7 @@ main{max-width:1450px}
 
 /* Fiiller marketing: uploaded images and purchasable linked SKUs */
 .fiiller-feature-card.has-photo{padding:0;display:flex;flex-direction:column;justify-content:flex-start;background:#fff}
-.fiiller-feature-photo{display:block;width:100%;height:155px;object-fit:cover;aspect-ratio:16/8}
+.fiiller-feature-photo{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain;object-position:center;background:#f8f4ec}
 .fiiller-feature-card.has-photo .fiiller-feature-text{padding:15px 17px 0}
 .fiiller-feature-card.has-photo a,.fiiller-feature-card.has-photo .fiiller-feature-buy{margin:14px 17px 17px}
 .fiiller-feature-card.has-photo::after{display:none}
@@ -81,3 +81,7 @@ main{max-width:1450px}
 .fiiller-promos-empty a:hover{background:#d95a0d}
 .fiiller-promos-empty a:focus-visible{outline:3px solid #12472f;outline-offset:3px}
 @media(max-width:700px){.fiiller-promos-empty{min-height:155px;padding:22px}}
+
+/* Formato de cartel completo en Próximos a llegar: evita recortes de tipografía dentro de la foto. */
+#proximos .fiiller-feature-card.has-photo{width:100%;max-width:760px}
+@media(max-width:700px){#proximos .fiiller-discovery-grid{display:grid;grid-template-columns:minmax(0,1fr);overflow:visible}#proximos .fiiller-feature-card.has-photo{max-width:100%;min-width:0;flex:auto}#proximos .fiiller-feature-photo{width:100%;height:auto;aspect-ratio:16/9;object-fit:contain}}
