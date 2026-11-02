@@ -86,6 +86,9 @@ async function request(path,opts={}){
   return r.status===204?null:await r.json().catch(()=>null);
 }
 const guestPanel=document.getElementById("guest-verification");
+const guestName=document.getElementById("guest-name");
+const guestCodeArea=document.getElementById("guest-code-area");
+let issuedIdentity=null;
 const guestEmail=document.getElementById("guest-email");
 const guestCode=document.getElementById("guest-code");
 const guestSendCode=document.getElementById("guest-send-code");
@@ -115,15 +118,46 @@ async function guestRequest(payload){
  if(!response.ok){const err=Error(data.message||"No se pudo enviar la encuesta.");err.status=response.status;throw err;}
  return data;
 }
-guestSendCode.addEventListener("click",async()=>{
+function readGuestIdentity(){
+ const name=guestName.value.trim().replace(/\\s+/g," ");
  const email=guestEmail.value.trim().toLowerCase();
- if(!guestEmail.checkValidity()||!email){
-   guestMessage.textContent="Ingresa un correo electrónico válido.";guestEmail.focus();return;
+ if(name.length<2||name.length>60){
+   guestName.focus();
+   throw Error("Escribe solo tu nombre (de 2 a 60 caracteres), sin necesidad de apellidos.");
  }
+ if(!email||!guestEmail.checkValidity()){
+   guestEmail.focus();
+   throw Error("Ingresa un correo electrónico válido.");
+ }
+ return {name,email};
+}
+function saveSignupData(identity){
+ try{
+   sessionStorage.setItem("filler_survey_signup_email",identity.email);
+   sessionStorage.setItem("filler_survey_signup_name",identity.name);
+ }catch{}
+}
+function resetVerificationIfEdited(){
+ if(!issuedIdentity)return;
+ if(guestName.value.trim().replace(/\\s+/g," ")===issuedIdentity.name &&
+    guestEmail.value.trim().toLowerCase()===issuedIdentity.email)return;
+ issuedIdentity=null;
+ guestCode.value="";
+ guestCodeArea.hidden=true;
+ guestMessage.textContent="Cambiaste tus datos. Solicita un nuevo código para confirmar el correo.";
+}
+guestName.addEventListener("input",resetVerificationIfEdited);
+guestEmail.addEventListener("input",resetVerificationIfEdited);
+guestSendCode.addEventListener("click",async()=>{
+ let identity;
+ try { identity=readGuestIdentity(); }
+ catch(error){ guestMessage.textContent=error.message;return; }
  guestSendCode.disabled=true;
  guestMessage.textContent="Enviando código de verificación…";
  try{
-   const result=await guestRequest({action:"send_code",email});
+   const result=await guestRequest({action:"send_code",...identity});
+   issuedIdentity=identity;
+   guestCodeArea.hidden=false;
    guestMessage.textContent=result.message||"Revisa tu correo, incluida la carpeta de spam.";
    guestCode.focus();
  }catch(error){guestMessage.textContent=error.message;}
@@ -167,20 +201,22 @@ form.addEventListener("submit",async event=>{
       await request("filler_feedback",{method:"POST",body:payload});
       completed(false);
     }else{
-      const email=guestEmail.value.trim().toLowerCase();
-      if(!guestEmail.checkValidity()||!email)throw Error("Ingresa tu correo y solicita tu código de verificación.");
-      if(!/^[0-9]{6}$/.test(guestCode.value.trim()))throw Error("Introduce el código de seis dígitos que enviamos a tu correo.");
-      await guestRequest({action:"submit",email,code:guestCode.value.trim(),
+      const identity=readGuestIdentity();
+      if(!issuedIdentity||issuedIdentity.email!==identity.email||issuedIdentity.name!==identity.name)
+        throw Error("Solicita y confirma el código de verificación de tu correo.");
+      if(!/^[0-9]{6}$/.test(guestCode.value.trim()))
+        throw Error("Introduce el código de seis dígitos que enviamos a tu correo.");
+      await guestRequest({action:"submit",email:identity.email,code:guestCode.value.trim(),
         ratings:values,comment:payload.comment,suggested_dish:payload.suggested_dish,
         suggested_product_2:payload.suggested_product_2});
-      try{sessionStorage.setItem("filler_survey_signup_email",email);}catch{}
+      saveSignupData(identity);
       completed(true);
     }
   }catch(err){
     if(err.code==="23505"){
       completed(false,true);
     }else if(err.status===409){
-      try{sessionStorage.setItem("filler_survey_signup_email",guestEmail.value.trim().toLowerCase());}catch{}
+      try{saveSignupData(readGuestIdentity());}catch{}
       completed(true,true);
     }else{
       output.textContent=err.message||"No pudimos guardar tu encuesta.";
@@ -199,13 +235,13 @@ form.addEventListener("submit",async event=>{
     }else{
       guestPanel.hidden=false;
       document.getElementById("login-gate").hidden=false;
-      output.textContent="Completa las preguntas y confirma tu correo para guardar tu respuesta. No necesitas una cuenta.";
+      output.textContent="Escribe un nombre y tu correo. Confírmalo para guardar tu encuesta sin registrarte.";
       button.disabled=false;
     }
   }catch(error){
     guestPanel.hidden=false;
     button.disabled=false;
-    output.textContent="No pudimos comprobar tu sesión. Puedes responder como visitante verificando tu correo.";
+    output.textContent="Puedes responder como visitante: ingresa un nombre y correo electrónico para confirmar tu opinión.";
   }
 })();
 // Si la encuesta quedó abierta hasta el siguiente mes, recuperar su disponibilidad
