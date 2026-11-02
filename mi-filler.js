@@ -38,6 +38,19 @@ $("new-password").hidden=which!=="new-password";
 $("tab-register").className=which==="register"?"":"secondary";
 $("tab-login").className=which==="login"?"":"secondary";
 }
+// La encuesta invita a crear cuenta, sin duplicar registros ni pedir el correo de nuevo.
+try {
+  const params=new URLSearchParams(window.location.search);
+  if(params.get("modo")==="ingresar")tab("login");
+  if(params.get("modo")==="registro"){
+    tab("register");
+    const surveyEmail=sessionStorage.getItem("filler_survey_signup_email");
+    if(surveyEmail && $("register")?.elements?.email){
+      $("register").elements.email.value=surveyEmail;
+      sessionStorage.removeItem("filler_survey_signup_email");
+    }
+  }
+}catch{}
 $("tab-register").addEventListener("click",()=>tab("register"));
 $("tab-login").addEventListener("click",()=>tab("login"));
 $("forgot-link").addEventListener("click",()=>{
