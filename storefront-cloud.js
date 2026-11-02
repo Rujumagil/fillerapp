@@ -59,10 +59,25 @@
       fields.hidden=false;
     };
     let session;
-    try{session=JSON.parse(sessionStorage.getItem("filler_customer_session_v1")||"null");}catch{}
+    try{session=JSON.parse(localStorage.getItem("filler_customer_session_v1")||
+      sessionStorage.getItem("filler_customer_session_v1")||"null");}catch{}
     if(!session?.access_token||!session?.user?.id){guest();return;}
     try{
-      // Verificar sesión con Auth antes de mostrar datos. Nunca confiar únicamente en sessionStorage.
+      // Restaurar y renovar sesión guardada antes de comprobarla con Supabase Auth.
+      if(session.expires_at&&session.expires_at<=Math.floor(Date.now()/1000)+90){
+        if(!session.refresh_token){guest();return;}
+        const refresh=await fetch("https://qwxydjotwhniahaovrff.supabase.co/auth/v1/token?grant_type=refresh_token",{
+          method:"POST",headers:{apikey:"sb_publishable_17NekbDHp_ssL_Pf-CnqPg_v0acxqn3","Content-Type":"application/json"},
+          body:JSON.stringify({refresh_token:session.refresh_token}),cache:"no-store"
+        });
+        if(!refresh.ok){guest();return;}
+        const updated=await refresh.json();
+        session={...session,...updated,user:updated.user||session.user};
+        const serialized=JSON.stringify(session);
+        localStorage.setItem("filler_customer_session_v1",serialized);
+        sessionStorage.setItem("filler_customer_session_v1",serialized);
+      }
+      // Los datos de cuenta se muestran solo después de verificar el token con Auth.
       const headers={apikey:"sb_publishable_17NekbDHp_ssL_Pf-CnqPg_v0acxqn3",Authorization:"Bearer "+session.access_token};
       const who=await fetch("https://qwxydjotwhniahaovrff.supabase.co/auth/v1/user",{headers,cache:"no-store"});
       if(!who.ok){guest();return;}
