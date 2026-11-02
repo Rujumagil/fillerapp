@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v67";
+const CACHE_NAME = "filler-app-v68";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -87,9 +87,11 @@ self.addEventListener("fetch", event => {
 self.addEventListener("notificationclick", event => {
   event.notification.close();
   const raw=event.notification.data?.url || "./pedidos.html";
+  const isPromotion=event.notification.data?.type==="promotion" &&
+    typeof raw==="string" && /^\.\/index\.html#(?:promociones|menu|menu-list)$/.test(raw);
   const isPrivateTracking=typeof raw==="string" &&
     /^\.\/pedido\.html#token=[0-9a-f-]{36}$/i.test(raw);
-  const target=isPrivateTracking?raw:(raw==="./pedido.html"?"./pedido.html":(raw==="./monitor.html"?"./monitor.html":"./pedidos.html"));
+  const target=isPromotion?raw:(isPrivateTracking?raw:(raw==="./pedido.html"?"./pedido.html":(raw==="./monitor.html"?"./monitor.html":"./pedidos.html")));
   const absolute=new URL(target,self.registration.scope).href;
   event.waitUntil((async()=>{
     const all=await clients.matchAll({type:"window",includeUncontrolled:true});
@@ -99,7 +101,15 @@ self.addEventListener("notificationclick", event => {
       return isPrivateTracking?seen.href===target.href:
         (seen.origin===target.origin && seen.pathname===target.pathname);
     });
-    if(existing){await existing.focus();existing.postMessage({kind:"filler-order-notification-click"});return;}
+    if(existing){
+      if(isPromotion&&typeof existing.navigate==="function"){
+        const changed=await existing.navigate(absolute).catch(()=>null);
+        if(changed){await changed.focus();return;}
+      }
+      await existing.focus();
+      if(!isPromotion)existing.postMessage({kind:"filler-order-notification-click"});
+      return;
+    }
     await clients.openWindow(absolute);
   })());
 });
@@ -111,15 +121,22 @@ self.addEventListener("push",event=>{
   let payload={};
   try{payload=event.data.json();}catch{payload={body:event.data.text()};}
   const customer=payload?.type==="customer";
+  const promo=payload?.type==="promotion";
   const code=typeof payload.code==="string"?payload.code.slice(0,40):"Fiiller Café";
   const tracking=typeof payload.tracking_url==="string" && /^\.\/pedido\.html#token=[0-9a-f-]{36}$/i.test(payload.tracking_url)?payload.tracking_url:null;
-  const title=customer?"☕ Aviso de tu pedido Fiiller":"🔔 Nuevo pedido Fiiller Café";
-  const body=customer?String(payload.body||"Tu pedido tiene una actualización.").slice(0,160):code;
-  event.waitUntil(self.registration.showNotification(title,{
+  const title=promo?String(payload.title||"🥐 Fiiller Promos").slice(0,110):
+    customer?"☕ Aviso de tu pedido Fiiller":"🔔 Nuevo pedido Fiiller Café";
+  const body=promo?String(payload.body||"¡Descubre nuestras promociones!").slice(0,200):
+    customer?String(payload.body||"Tu pedido tiene una actualización.").slice(0,160):code;
+  const photo=typeof payload.image==="string" && /^https:\/\/qwxydjotwhniahaovrff\.supabase\.co\/storage\/v1\/object\/public\/filler-product-images\//.test(payload.image)?
+    payload.image:undefined;
+  const options={
     body,
     icon:"./assets/filler-icon-192.png",
     badge:"./assets/filler-icon-192.png",
-    tag:(customer?"filler-cliente-":"filler-cocina-")+code,
-    data:{url:customer?(tracking||"./pedido.html"):"./pedidos.html"}
-  }));
+    tag:promo?"filler-promo-"+String(payload.campaign_id||"").slice(0,40):(customer?"filler-cliente-":"filler-cocina-")+code,
+    data:{type:promo?"promotion":customer?"customer":"kitchen",url:promo?"./index.html#promociones":customer?(tracking||"./pedido.html"):"./pedidos.html"}
+  };
+  if(promo&&photo)options.image=photo;
+  event.waitUntil(self.registration.showNotification(title,options));
 });
