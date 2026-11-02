@@ -169,7 +169,7 @@ form.addEventListener("submit",async event=>{
     }else{
       const email=guestEmail.value.trim().toLowerCase();
       if(!guestEmail.checkValidity()||!email)throw Error("Ingresa tu correo y solicita tu código de verificación.");
-      if(!/^\\d{6}$/.test(guestCode.value.trim()))throw Error("Introduce el código de seis dígitos que enviamos a tu correo.");
+      if(!/^[0-9]{6}$/.test(guestCode.value.trim()))throw Error("Introduce el código de seis dígitos que enviamos a tu correo.");
       await guestRequest({action:"submit",email,code:guestCode.value.trim(),
         ratings:values,comment:payload.comment,suggested_dish:payload.suggested_dish,
         suggested_product_2:payload.suggested_product_2});
