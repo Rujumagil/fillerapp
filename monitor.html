@@ -4,11 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#006241">
-  <link rel="manifest" href="manifest.json?v=39">
+  <link rel="manifest" href="manifest-pedidos.json?v=1">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/filler-icon-192.png">
   <link rel="apple-touch-icon" href="assets/filler-icon-192.png">
   <link rel="stylesheet" href="ticket-print.css">
-  <title>Fiiller Monitor</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Fiiller Pedidos">
+  <title>Fiiller Monitor | Cocina</title>
   <style>
     body{margin:0;background:#073c2c;color:white;font-family:system-ui}main{padding:32px}.top{display:flex;justify-content:space-between;align-items:center}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:18px}.card.late-card{background:#b64235;border-color:#ffb7ad}.card.ready-card{background:#dff4e8;color:#063b2c}.card.prep-card{background:#e9f2ff;color:#123c6b}.card.new-card{background:#fff4d8;color:#5d3c00}.badge{display:inline-block;border-radius:999px;padding:7px 11px;font-weight:900;margin-bottom:10px;background:rgba(255,255,255,.22)}.time{font-size:18px;font-weight:900}.detail{opacity:.85}@media(max-width:900px){.grid{grid-template-columns:1fr}}
 
@@ -17,10 +19,17 @@
     .monitor-print-actions button:hover{background:#d6ffe7}
     .card{min-width:0;overflow-wrap:anywhere}
     .card h2{font-size:25px;margin:8px 0}
+    .top{gap:14px;flex-wrap:wrap}.top-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .install-monitor{background:#fff;color:#075437;border:1px solid #bbe4ce;border-radius:12px;padding:11px 16px;font:inherit;font-weight:800;cursor:pointer;min-height:44px}
+    .install-monitor[hidden]{display:none!important}.install-help{font-size:12px;color:#bfe9d1;margin:0 0 15px;line-height:1.5}
+    @media(max-width:600px){main{padding:17px}.top{align-items:flex-start}.top h1{font-size:25px}}
   </style>
 </head>
 <body>
-  <main><div class="top"><h1>Pedidos Fiiller</h1><div id="clock"></div></div><div class="grid" id="orders"></div></main>
+  <main><div class="top"><h1>Pedidos Fiiller</h1>
+<div class="top-controls"><div id="clock"></div><button type="button" class="install-monitor" data-install-app onclick="fillerInstallApp()">Instalar Fiiller Pedidos</button></div></div>
+<p id="monitor-install-help" class="install-help" data-install-status role="status" aria-live="polite">Instala la app de cocina para abrir tus pedidos directamente.</p>
+<div class="grid" id="orders"></div></main>
   <script src="pwa.js"></script>
   <script src="filler-sounds.js?v=39"></script>
   <script src="order-notifications.js?v=39"></script>
