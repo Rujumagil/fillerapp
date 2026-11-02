@@ -30,10 +30,17 @@ function hideHelp(){guide.hidden=true;}
 function permissionBlocked(){
  return !("Notification" in window)||Notification.permission==="denied";
 }
-function session(){try{return JSON.parse(sessionStorage.getItem("filler_customer_session_v1")||"null");}catch{return null;}}
+function session(){
+ try{return JSON.parse(localStorage.getItem("filler_customer_session_v1")||
+   sessionStorage.getItem("filler_customer_session_v1")||"null");}catch{return null;}
+}
 async function customerToken(){
- const s=session();if(!s?.access_token||!s?.user?.id)throw Error("Inicia sesión en Mi Fiiller para recibir promociones.");
- if(s.expires_at&&s.expires_at<Date.now()/1000+60)throw Error("Tu sesión venció. Ingresa de nuevo.");
+ const s=window.FillerCustomerAuth?.getSession?
+   await window.FillerCustomerAuth.getSession():session();
+ if(!s?.access_token||!s?.user?.id)
+   throw Error("Inicia sesión en Mi Fiiller para recibir promociones.");
+ if(s.expires_at&&s.expires_at<Date.now()/1000+60)
+   throw Error("No pudimos renovar tu sesión. Comprueba tu conexión y vuelve a intentar.");
  return s;
 }
 async function marketingAllowed(s){
