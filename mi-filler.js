@@ -186,6 +186,7 @@ function showMember(){
   editProfile(false);
   updateLastOrder();
   loadMyOrderHistory();
+  window.FillerPushClient?.refresh?.();
 }
 $("edit-profile").addEventListener("click",()=>{
   editProfile($("profile-edit").hidden);
