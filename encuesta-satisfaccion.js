@@ -101,10 +101,15 @@ function completed(guest=false,duplicate=false){
  const p=showPeriod();
  form.hidden=true;
  thankYou.hidden=false;
- thankYouTitle.textContent=duplicate?"Ya registramos una respuesta este mes":"¡Gracias por compartir tu opinión!";
+ const firstName=guest&&issuedIdentity?.name?issuedIdentity.name:"";
+ thankYouTitle.textContent=duplicate
+   ?"Ya registramos una respuesta este mes"
+   :(firstName?"¡Gracias, "+firstName+"!":"¡Gracias por compartir tu opinión!");
  thankYouCopy.textContent=duplicate
    ?"Ya contamos con una encuesta de este mes. Podrás participar nuevamente el "+p.nextLabel+"."
-   :"Tus respuestas quedaron registradas. Nos ayudan a mejorar Fiiller Café. ¡Te esperamos en tu próximo pedido!";
+   :(guest
+     ?"Tus respuestas quedaron registradas. Si deseas crear tu cuenta para pedir más rápido, ya podemos completar tu nombre y correo. Registrarte es opcional."
+     :"Tus respuestas quedaron registradas. Nos ayudan a mejorar Fiiller Café. ¡Te esperamos en tu próximo pedido!");
  document.getElementById("survey-register-cta").hidden=!guest;
  document.getElementById("survey-login-cta").hidden=!guest;
  thankYou.scrollIntoView({behavior:"smooth",block:"center"});
