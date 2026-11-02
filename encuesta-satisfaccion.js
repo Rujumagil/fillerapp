@@ -119,7 +119,7 @@ async function guestRequest(payload){
  return data;
 }
 function readGuestIdentity(){
- const name=guestName.value.trim().replace(/\\s+/g," ");
+ const name=guestName.value.trim().replace(/\s+/g," ");
  const email=guestEmail.value.trim().toLowerCase();
  if(name.length<2||name.length>60){
    guestName.focus();
@@ -139,7 +139,7 @@ function saveSignupData(identity){
 }
 function resetVerificationIfEdited(){
  if(!issuedIdentity)return;
- if(guestName.value.trim().replace(/\\s+/g," ")===issuedIdentity.name &&
+ if(guestName.value.trim().replace(/\s+/g," ")===issuedIdentity.name &&
     guestEmail.value.trim().toLowerCase()===issuedIdentity.email)return;
  issuedIdentity=null;
  guestCode.value="";
