@@ -1,0 +1,25 @@
+{
+  "id": "./fiiller-pedidos",
+  "name": "Fiiller Pedidos | Cocina y entrega",
+  "short_name": "Fiiller Pedidos",
+  "description": "Recibe y administra pedidos, consulta el monitor y controla la preparación en Fiiller Café.",
+  "start_url": "./pedidos.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f1e7",
+  "theme_color": "#006241",
+  "icons": [
+    {
+      "src": "assets/filler-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/filler-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
