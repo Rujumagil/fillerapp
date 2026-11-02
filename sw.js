@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v68";
+const CACHE_NAME = "filler-app-v69";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -43,6 +43,9 @@ const APP_SHELL = [
   "./storefront-cloud.js",
   "./manifest.json",
   "./pwa.js",
+  "./filler-marketing-push-client.js",
+  "./filler-promo-push-admin.js",
+  "./promociones-admin.html",
   "./assets/filler-logo-oficial.webp",
   "./assets/filler-icon-192.png",
   "./assets/filler-icon-512.png",
