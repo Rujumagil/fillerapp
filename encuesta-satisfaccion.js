@@ -67,14 +67,14 @@ function showPeriod(){
 showPeriod();
 async function access(){
   let session;
-  try{session=JSON.parse(sessionStorage.getItem("filler_customer_session_v1")||"null");}catch{return null;}
+  try{session=JSON.parse(localStorage.getItem("filler_customer_session_v1")||sessionStorage.getItem("filler_customer_session_v1")||"null");}catch{return null;}
   if(!session?.access_token)return null;
   if(session.expires_at && session.expires_at<=Date.now()/1000+60){
     if(!session.refresh_token)return null;
     const r=await fetch(BASE+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{"apikey":KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:session.refresh_token})});
     if(!r.ok)return null;
     session=await r.json();
-    sessionStorage.setItem("filler_customer_session_v1",JSON.stringify(session));
+    localStorage.setItem("filler_customer_session_v1",JSON.stringify(session));sessionStorage.setItem("filler_customer_session_v1",JSON.stringify(session));
   }
   return session.access_token;
 }
