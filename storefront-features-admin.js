@@ -120,6 +120,7 @@ async function init(){
  $("login-card").hidden=admin;$("workspace").hidden=!admin;
  if(!admin){message(role?"Tu cuenta no tiene permiso de administración.":"Inicia sesión para administrar anuncios.",!!role);return}
  await loadCatalog();await load();toggleProductField();message("Panel conectado. Puedes crear borradores y publicar anuncios.");
+ document.dispatchEvent(new CustomEvent("fiiller:admin-ready"));
 }
 init().catch(err=>message(err.message,true));preview();
 })();
