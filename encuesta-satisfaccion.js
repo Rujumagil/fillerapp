@@ -1,4 +1,4 @@
-/* Encuesta visual Fiiller Café: estrellas y sugerencias con sesión autenticada. */
+/* Encuesta Fiiller: clientes autenticados y visitantes con correo verificado. */
 (()=>{
 "use strict";
 const BASE="https://qwxydjotwhniahaovrff.supabase.co";
@@ -85,18 +85,56 @@ async function request(path,opts={}){
   if(!r.ok){const data=await r.json().catch(()=>({}));const err=Error(data.message||"No se pudo guardar la encuesta.");err.code=data.code;throw err;}
   return r.status===204?null:await r.json().catch(()=>null);
 }
-function completed(){
-  const p=showPeriod();
-  form.querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=true);
-  output.textContent="✓ Ya recibimos tu encuesta de "+p.label+". Gracias por participar. Podrás responder de nuevo el "+p.nextLabel+".";
-  output.scrollIntoView({behavior:"smooth",block:"center"});
+const guestPanel=document.getElementById("guest-verification");
+const guestEmail=document.getElementById("guest-email");
+const guestCode=document.getElementById("guest-code");
+const guestSendCode=document.getElementById("guest-send-code");
+const guestMessage=document.getElementById("guest-code-message");
+const thankYou=document.getElementById("survey-thank-you");
+const thankYouTitle=document.getElementById("survey-thank-you-title");
+const thankYouCopy=document.getElementById("survey-thank-you-copy");
+
+function completed(guest=false,duplicate=false){
+ const p=showPeriod();
+ form.hidden=true;
+ thankYou.hidden=false;
+ thankYouTitle.textContent=duplicate?"Ya registramos una respuesta este mes":"¡Gracias por compartir tu opinión!";
+ thankYouCopy.textContent=duplicate
+   ?"Ya contamos con una encuesta de este mes. Podrás participar nuevamente el "+p.nextLabel+"."
+   :"Tus respuestas quedaron registradas. Nos ayudan a mejorar Fiiller Café. ¡Te esperamos en tu próximo pedido!";
+ document.getElementById("survey-register-cta").hidden=!guest;
+ document.getElementById("survey-login-cta").hidden=!guest;
+ thankYou.scrollIntoView({behavior:"smooth",block:"center"});
 }
+async function guestRequest(payload){
+ const response=await fetch(BASE+"/functions/v1/filler-guest-survey",{
+   method:"POST",headers:{"apikey":KEY,"Content-Type":"application/json"},
+   body:JSON.stringify(payload),cache:"no-store"
+ });
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok){const err=Error(data.message||"No se pudo enviar la encuesta.");err.status=response.status;throw err;}
+ return data;
+}
+guestSendCode.addEventListener("click",async()=>{
+ const email=guestEmail.value.trim().toLowerCase();
+ if(!guestEmail.checkValidity()||!email){
+   guestMessage.textContent="Ingresa un correo electrónico válido.";guestEmail.focus();return;
+ }
+ guestSendCode.disabled=true;
+ guestMessage.textContent="Enviando código de verificación…";
+ try{
+   const result=await guestRequest({action:"send_code",email});
+   guestMessage.textContent=result.message||"Revisa tu correo, incluida la carpeta de spam.";
+   guestCode.focus();
+ }catch(error){guestMessage.textContent=error.message;}
+ finally{guestSendCode.disabled=false;}
+});
 async function check(){
   try{
     const p=showPeriod();
     const rows=await request("filler_feedback?select=id&survey_date=gte."+p.start+
       "&survey_date=lt."+p.end+"&limit=1");
-    if(rows?.length)completed();
+    if(rows?.length)completed(false,true);
     else{output.textContent="Puedes responder la encuesta de "+p.label+". Una respuesta por mes.";button.disabled=false;}
   }catch(error){output.textContent="No fue posible validar si ya respondiste: "+error.message;button.disabled=true;}
 }
@@ -105,9 +143,12 @@ form.addEventListener("submit",async event=>{
   if(button.disabled)return;
   const fields=new FormData(form);
   const values=Array.from({length:10},(_,i)=>Number(fields.get("q"+(i+1))));
-  if(values.some(n=>!Number.isInteger(n)||n<1||n>5)){output.textContent="Responde las 10 preguntas con una calificación de 1 a 5.";return;}
+  if(values.some(n=>!Number.isInteger(n)||n<1||n>5)){
+    output.textContent="Responde las 10 preguntas con una calificación de 1 a 5.";
+    return;
+  }
   const question_ratings=Object.fromEntries(values.map((n,i)=>["q"+(i+1),n]));
-  const average=(a)=>Math.round(a.reduce((x,y)=>x+y,0)/a.length);
+  const average=a=>Math.round(a.reduce((x,y)=>x+y,0)/a.length);
   const payload={
     rating:average(values),
     food_rating:average(values.slice(3,6)),
@@ -118,28 +159,54 @@ form.addEventListener("submit",async event=>{
     suggested_dish:String(fields.get("suggested_dish")||"").trim().slice(0,120)||null,
     suggested_product_2:String(fields.get("suggested_product_2")||"").trim().slice(0,120)||null
   };
-  button.disabled=true;output.textContent="Enviando tu opinión…";
-  try{await request("filler_feedback",{method:"POST",body:payload});completed();}
-  catch(err){
-    if(err.code==="23505"){
-      completed();
+  button.disabled=true;
+  output.textContent="Enviando tu opinión…";
+  try {
+    const token=await access();
+    if(token){
+      await request("filler_feedback",{method:"POST",body:payload});
+      completed(false);
     }else{
+      const email=guestEmail.value.trim().toLowerCase();
+      if(!guestEmail.checkValidity()||!email)throw Error("Ingresa tu correo y solicita tu código de verificación.");
+      if(!/^\\d{6}$/.test(guestCode.value.trim()))throw Error("Introduce el código de seis dígitos que enviamos a tu correo.");
+      await guestRequest({action:"submit",email,code:guestCode.value.trim(),
+        ratings:values,comment:payload.comment,suggested_dish:payload.suggested_dish,
+        suggested_product_2:payload.suggested_product_2});
+      try{sessionStorage.setItem("filler_survey_signup_email",email);}catch{}
+      completed(true);
+    }
+  }catch(err){
+    if(err.code==="23505"){
+      completed(false,true);
+    }else if(err.status===409){
+      try{sessionStorage.setItem("filler_survey_signup_email",guestEmail.value.trim().toLowerCase());}catch{}
+      completed(true,true);
+    }else{
+      output.textContent=err.message||"No pudimos guardar tu encuesta.";
       button.disabled=false;
-      output.textContent=err.message;
+      output.scrollIntoView({behavior:"smooth",block:"center"});
     }
   }
 });
 (async()=>{
-  try{
+  try {
     const token=await access();
-    if(!token){
+    if(token){
+      guestPanel.hidden=true;
+      document.getElementById("login-gate").hidden=true;
+      await check();
+    }else{
+      guestPanel.hidden=false;
       document.getElementById("login-gate").hidden=false;
-      output.textContent="Inicia sesión en Mi Fiiller para registrar tu evaluación.";
-      button.disabled=true;
-      return;
+      output.textContent="Completa las preguntas y confirma tu correo para guardar tu respuesta. No necesitas una cuenta.";
+      button.disabled=false;
     }
-    await check();
-  }catch(error){output.textContent="No pudimos verificar tu sesión: "+error.message;button.disabled=true;}
+  }catch(error){
+    guestPanel.hidden=false;
+    button.disabled=false;
+    output.textContent="No pudimos comprobar tu sesión. Puedes responder como visitante verificando tu correo.";
+  }
 })();
 // Si la encuesta quedó abierta hasta el siguiente mes, recuperar su disponibilidad
 // al regresar a la pestaña sin exigir al cliente que recuerde recargarla.
