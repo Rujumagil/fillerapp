@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v64";
+const CACHE_NAME = "filler-app-v65";
 const APP_SHELL = [
   "./",
   "./index.html",
