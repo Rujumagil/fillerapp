@@ -7,6 +7,8 @@
   <link rel="manifest" href="manifest.json?v=39">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/filler-icon-192.png">
   <link rel="apple-touch-icon" href="assets/filler-icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Fiiller Café">
   <title>Fiiller Café - Menu y pedidos</title>
   <style>
     :root{--green:#006241;--deep:#12362d;--mint:#e8f2ed;--cream:#f7f1e7;--gold:#c99542;--ink:#1e2f29;--muted:#69766f;--line:#e4ded4;--danger:#b64235;--shadow:0 16px 40px rgba(51,36,18,.12)}
@@ -348,7 +350,11 @@
           <h2>Tu antojo empieza <span style="color:#ffa351">aquí</span></h2>
           <p>Café, sándwiches, panadería y más. Fresco, rápido y delicioso.</p>
         </div>
-        <div class="hero-actions"><button type="button" onclick="document.querySelector('#menu').scrollIntoView({behavior:'smooth'})">Ver menú completo <span aria-hidden="true">→</span></button></div><div class="fiiller-hero-benefits"><span>Preparado al momento</span><span>Recoge sin filas</span><span>Tu café favorito</span></div>
+        <div class="hero-actions">
+  <button type="button" onclick="document.querySelector('#menu').scrollIntoView({behavior:'smooth'})">Ver menú completo <span aria-hidden="true">→</span></button>
+  <button type="button" data-install-app onclick="fillerInstallApp()" style="background:#fff;color:#075b3a;border:1px solid #d3ecdf">📲 Instalar Fiiller Café</button>
+</div>
+<p data-install-status role="status" aria-live="polite" style="font-size:12px;line-height:1.5;color:#e9f9ec;margin:8px 0 0;max-width:590px">Agrega Fiiller a tu pantalla de inicio para pedir más rápido.</p><div class="fiiller-hero-benefits"><span>Preparado al momento</span><span>Recoge sin filas</span><span>Tu café favorito</span></div>
       </div>
       <div class="hero-visual" aria-label="Vitrina de alimentos de Fiiller Café">
         <img src="assets/filler-vitrina-hero-hd.webp" alt="Vitrina de Fiiller Café con los alimentos frescos preparados para elegir" fetchpriority="high" decoding="async">
