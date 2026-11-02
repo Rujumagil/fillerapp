@@ -50,25 +50,32 @@ async function registration(){
 }
 async function refresh(){
  try{
-  if(!session()?.user?.id){enable.hidden=true;disable.hidden=true;return;}
+  const auth=await customerToken();
+  if(!auth.user?.id){enable.hidden=true;disable.hidden=true;return;}
+  const allowed=await marketingAllowed(auth);
   const r=await registration();
-  const s=await r.pushManager.getSubscription();
-  enable.hidden=Boolean(s);disable.hidden=!s;
-  if(s)say("✓ Este dispositivo tiene notificaciones habilitadas.");
-  else say("Activa promociones para recibir avisos en este dispositivo. Es opcional.");
+  const sub=await r.pushManager.getSubscription();
+  enable.hidden=Boolean(sub);disable.hidden=!sub;
+  enable.disabled=!allowed;
+  if(sub&&!allowed)say("Las promociones están desactivadas en tu perfil. Puedes desactivar los avisos de este dispositivo desde aquí.");
+  else if(sub)say("✓ Este dispositivo tiene notificaciones habilitadas.");
+  else if(!allowed)say("Para activar los avisos, primero marca «Quiero recibir promociones» y guarda tus preferencias.");
+  else say("Toca «Activar promociones push» si deseas recibir avisos en este dispositivo.");
  }catch(e){enable.hidden=false;disable.hidden=true;say(e.message,true);}
 }
 enable.addEventListener("click",async()=>{
- if(pending)return;
+ if(pending||enable.disabled)return;
  pending=true;enable.disabled=true;
- // Solicitar permiso inmediatamente desde el toque del cliente, antes de otras llamadas asíncronas.
- const permissionRequest=Notification.permission==="default"?Notification.requestPermission():Promise.resolve(Notification.permission);
+ // El permiso debe pedirse durante el toque; el consentimiento se revisó antes de habilitar este botón.
+ const permissionRequest=("Notification" in window)
+   ? (Notification.permission==="default"?Notification.requestPermission():Promise.resolve(Notification.permission))
+   : Promise.resolve("unsupported");
  try{
   const s=await customerToken();
   if(!(await marketingAllowed(s)))throw Error("Primero acepta y guarda la opción «Quiero recibir promociones» en Mis datos.");
   const permission=await permissionRequest;
   if(permission!=="granted")throw Error("Permiso de notificaciones no concedido. Puedes habilitarlo en los ajustes del navegador.");
-  const r=await registration();const ready=await navigator.serviceWorker.ready;
+  await registration();const ready=await navigator.serviceWorker.ready;
   const result=await fetch(BASE+"/functions/v1/filler-marketing-push",{
    method:"POST",headers:{"Content-Type":"application/json",apikey:KEY},body:JSON.stringify({action:"config"})});
   const config=await result.json().catch(()=>({}));
