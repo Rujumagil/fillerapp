@@ -8,8 +8,8 @@ const $=id=>document.getElementById(id);
 let session=null,profile=null,recoveryAccess=null;
 const message=(text,bad=false)=>{const el=$("message");el.hidden=false;el.textContent=text;el.className="notice"+(bad?" error":"");};
 const headers=()=>({"apikey":KEY,"Content-Type":"application/json"});
-function save(value){session=value;if(value)sessionStorage.setItem(STORE,JSON.stringify(value));else sessionStorage.removeItem(STORE);}
-try{session=JSON.parse(sessionStorage.getItem(STORE)||"null");}catch{}
+function save(value){session=value;try{if(value){const data=JSON.stringify(value);localStorage.setItem(STORE,data);sessionStorage.setItem(STORE,data);}else{localStorage.removeItem(STORE);sessionStorage.removeItem(STORE);}}catch(error){console.warn("Fiiller session storage unavailable",error);}}
+try{session=JSON.parse(localStorage.getItem(STORE)||sessionStorage.getItem(STORE)||"null");if(session?.access_token)save(session);}catch{}
 async function auth(path,body){
 const res=await fetch(BASE+"/auth/v1/"+path,{method:"POST",headers:headers(),body:JSON.stringify(body)});
 const json=await res.json().catch(()=>({}));
