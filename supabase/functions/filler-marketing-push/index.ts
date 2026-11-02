@@ -20,14 +20,31 @@ Deno.serve(async req=>{
    return config?.length?answer(origin,200,{publicKey:config[0].vapid_public_key}):answer(origin,503,{message:"Push no configurado."});
   }
   if(body.action!=="send")return answer(origin,400,{message:"Acción desconocida."});
-  const access=(req.headers.get("authorization")||"").replace(/^Bearer\s+/i,"");
-  if(!access)return answer(origin,401,{message:"Inicia sesión como administrador."});
-  const auth=await fetch(BASE+"/auth/v1/user",{headers:{apikey:KEY,Authorization:"Bearer "+access},cache:"no-store"});
-  if(!auth.ok)return answer(origin,401,{message:"Sesión inválida."});
-  const user=await auth.json();
-  if(!/^[0-9a-f-]{36}$/i.test(String(user?.id||"")))return answer(origin,401,{message:"Cuenta inválida."});
-  const staff=await table("filler_staff?user_id=eq."+user.id+"&role=eq.admin&select=role");
-  if(!staff?.length)return answer(origin,403,{message:"Acceso solo para administradores."});
+  // Llamadas internas de administración desde pg_net usan una credencial aleatoria
+  // que permanece en una tabla protegida; el cliente público nunca la recibe.
+  const internalToken=req.headers.get("x-fiiller-internal-dispatch")||"";
+  let internalAuthorized=false;
+  if(/^[0-9a-f]{64}$/.test(internalToken)){
+    const config=(await table("filler_push_config?config_key=eq.primary&select=internal_dispatch_token"))?.[0];
+    const saved=String(config?.internal_dispatch_token||"");
+    if(saved.length===64){
+      const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(saved),"HMAC",false,["sign"]);
+      const digest=await crypto.subtle.sign("HMAC",key,new TextEncoder().encode("Fiiller push dispatcher"));
+      const suppliedKey=await crypto.subtle.importKey("raw",new TextEncoder().encode(internalToken),"HMAC",false,["sign"]);
+      const digestSupplied=await crypto.subtle.sign("HMAC",suppliedKey,new TextEncoder().encode("Fiiller push dispatcher"));
+      internalAuthorized=new Uint8Array(digest).every((byte,i)=>byte===new Uint8Array(digestSupplied)[i]);
+    }
+  }
+  if(!internalAuthorized){
+    const access=(req.headers.get("authorization")||"").replace(/^Bearer\s+/i,"");
+    if(!access)return answer(origin,401,{message:"Inicia sesión como administrador."});
+    const auth=await fetch(BASE+"/auth/v1/user",{headers:{apikey:KEY,Authorization:"Bearer "+access},cache:"no-store"});
+    if(!auth.ok)return answer(origin,401,{message:"Sesión inválida."});
+    const user=await auth.json();
+    if(!/^[0-9a-f-]{36}$/i.test(String(user?.id||"")))return answer(origin,401,{message:"Cuenta inválida."});
+    const staff=await table("filler_staff?user_id=eq."+user.id+"&role=eq.admin&select=role");
+    if(!staff?.length)return answer(origin,403,{message:"Acceso solo para administradores."});
+  }
   const id=String(body.campaign_id||"");if(!/^[0-9a-f-]{36}$/i.test(id))return answer(origin,400,{message:"Campaña inválida."});
   const rows=await table("filler_promo_campaigns?id=eq."+id+"&select=id,status,title,body,image_url,target_url,feature_id");
   const c=rows?.[0];if(!c)return answer(origin,404,{message:"No existe la campaña."});
