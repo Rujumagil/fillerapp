@@ -40,7 +40,7 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <div class="card auth-card">
 <div class="actions"><button id="tab-register" type="button">Crear cuenta</button><button id="tab-login" class="secondary" type="button">Iniciar sesión</button></div>
 <form id="register" class="stack">
-<label>Nombre completo<input name="name" minlength="2" maxlength="90" autocomplete="name" required></label>
+<label>Tu nombre (sin apellidos obligatorios)<input name="name" minlength="2" maxlength="90" autocomplete="given-name" placeholder="Ej. Ana" required></label>
 <label>Correo electrónico<input name="email" type="email" autocomplete="email" required></label>
 <label>Contraseña (mínimo 8 caracteres)<input name="password" type="password" minlength="8" autocomplete="new-password" required></label>
 <label class="check"><input name="promotions" type="checkbox"> Quiero recibir promociones de Fiiller Café. Es opcional y puedo cambiarlo después.</label>
@@ -143,7 +143,7 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <p class="foot-note">Fiiller Café · Tus datos y preferencias permanecen en tu cuenta.</p>
 </main>
 <script src="./pwa.js"></script>
-<script src="./mi-filler.js?v=49"></script>
+<script src="./mi-filler.js?v=50"></script>
 
 </body>
 </html>
