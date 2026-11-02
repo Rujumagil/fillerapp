@@ -45,9 +45,14 @@ try {
   if(params.get("modo")==="registro"){
     tab("register");
     const surveyEmail=sessionStorage.getItem("filler_survey_signup_email");
+    const surveyName=sessionStorage.getItem("filler_survey_signup_name");
     if(surveyEmail && $("register")?.elements?.email){
       $("register").elements.email.value=surveyEmail;
       sessionStorage.removeItem("filler_survey_signup_email");
+    }
+    if(surveyName && $("register")?.elements?.name){
+      $("register").elements.name.value=surveyName.slice(0,60);
+      sessionStorage.removeItem("filler_survey_signup_name");
     }
   }
 }catch{}
