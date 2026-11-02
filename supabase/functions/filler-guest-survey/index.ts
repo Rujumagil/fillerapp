@@ -51,8 +51,12 @@ Deno.serve(async req => {
   const email = normalize(body.email);
   if (!validEmail(email)) return respond(origin, 400, "Escribe un correo electrónico válido.");
   const action = String(body.action || "");
+  const respondentName = String(body.name || "").trim().replace(/\s+/g, " ");
   try {
     if (action === "send_code") {
+      if (respondentName.length < 2 || respondentName.length > 60) {
+        return respond(origin, 400, "Escribe un nombre de entre 2 y 60 caracteres, sin necesidad de apellidos.");
+      }
       const hash = await digest(email);
       const bucket = Math.floor(Date.now() / 180000); // Una solicitud por correo cada 3 minutos.
       const rate = await admin.from("filler_auth_email_rate_limits")
@@ -63,7 +67,7 @@ Deno.serve(async req => {
       const code_digest = await codeDigest(email, code);
       const expires_at = new Date(Date.now() + 10 * 60 * 1000).toISOString();
       const stored = await admin.from("filler_feedback_email_challenges")
-        .upsert({ email, code_digest, expires_at, attempts: 0, created_at: new Date().toISOString(), verified_at: null }, { onConflict: "email" });
+        .upsert({ email, respondent_name: respondentName, code_digest, expires_at, attempts: 0, created_at: new Date().toISOString(), verified_at: null }, { onConflict: "email" });
       if (stored.error) {
         console.error("Fiiller survey challenge storage", stored.error.code);
         return respond(origin, 503, "No pudimos preparar la verificación.");
@@ -72,6 +76,7 @@ Deno.serve(async req => {
         '<div style="max-width:520px;margin:auto;background:#fff;border-radius:16px;overflow:hidden">' +
         '<div style="background:#006241;text-align:center;padding:20px"><img src="https://fiillercafe.app/assets/filler-logo-oficial.webp" alt="Fiiller Café" width="140"></div>' +
         '<div style="padding:28px"><h1>Gracias por compartir tu opinión</h1>' +
+        '<p>Hola, ' + safe(respondentName) + '.</p>' +
         '<p>Confirma tu correo para enviar tu encuesta de satisfacción. Este código vence en 10 minutos:</p>' +
         '<p style="letter-spacing:8px;font-weight:bold;font-size:31px;text-align:center">' + safe(code) + '</p>' +
         '<p>Si no solicitaste este código, simplemente ignora el mensaje. No se ha creado ninguna cuenta.</p></div></div></body></html>';
@@ -102,6 +107,8 @@ Deno.serve(async req => {
         return respond(origin, 400, "El código venció. Solicita uno nuevo.");
       if (challenge.data.attempts >= 5)
         return respond(origin, 429, "Se agotaron los intentos. Solicita otro código.");
+      if (!challenge.data.respondent_name || String(challenge.data.respondent_name).trim().length < 2)
+        return respond(origin, 400, "Vuelve a solicitar el código ingresando tu nombre.");
       const expected = await codeDigest(email, code);
       if (expected !== challenge.data.code_digest) {
         await admin.from("filler_feedback_email_challenges").update({ attempts: challenge.data.attempts + 1 }).eq("email", email);
@@ -115,6 +122,7 @@ Deno.serve(async req => {
         user_id: null,
         guest_email: email,
         guest_verified_at: new Date().toISOString(),
+        respondent_name: String(challenge.data.respondent_name).trim(),
         survey_date,
         rating: average(ratings),
         food_rating: average(ratings.slice(3, 6)),
