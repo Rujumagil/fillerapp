@@ -28,9 +28,9 @@ Deno.serve(async req=>{
     const config=(await table("filler_push_config?config_key=eq.primary&select=internal_dispatch_token"))?.[0];
     const saved=String(config?.internal_dispatch_token||"");
     if(saved.length===64){
-      const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(saved),"HMAC",false,["sign"]);
+      const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(saved),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
       const digest=await crypto.subtle.sign("HMAC",key,new TextEncoder().encode("Fiiller push dispatcher"));
-      const suppliedKey=await crypto.subtle.importKey("raw",new TextEncoder().encode(internalToken),"HMAC",false,["sign"]);
+      const suppliedKey=await crypto.subtle.importKey("raw",new TextEncoder().encode(internalToken),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
       const digestSupplied=await crypto.subtle.sign("HMAC",suppliedKey,new TextEncoder().encode("Fiiller push dispatcher"));
       internalAuthorized=new Uint8Array(digest).every((byte,i)=>byte===new Uint8Array(digestSupplied)[i]);
     }
