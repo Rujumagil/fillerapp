@@ -117,8 +117,8 @@ self.addEventListener("notificationclick", event => {
   })());
 });
 
-// Preparado para Web Push real; no se enviarán mensajes cuando la página
-// esté cerrada hasta configurar servidor, suscripciones y claves VAPID.
+// Web Push de promociones y estados de pedidos: solo muestra avisos recibidos.
+// El envío a clientes exige consentimiento y un dispositivo suscrito al servicio.
 self.addEventListener("push",event=>{
   if(!event.data)return;
   let payload={};
