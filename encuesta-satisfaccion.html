@@ -57,6 +57,12 @@ button[type=submit]:disabled{opacity:.55;cursor:not-allowed}
 .message{font-weight:700;color:var(--green);font-size:14px;min-height:18px;margin:0;line-height:1.45}
 .guest-panel{background:#f6fbf7;border:1px solid #cfe5d6;border-radius:17px;padding:20px;margin:20px 0}
 .guest-panel h2{font-size:18px;color:#0b4d34;margin:0 0 7px}
+.guest-identity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.guest-identity-grid input{width:100%;min-width:0;border:1px solid #b4d3bc;background:white;border-radius:11px;padding:14px;font:inherit;color:#143d2b}
+.guest-identity-grid input:focus-visible{outline:3px solid #d6eddb}
+.guest-panel strong{color:#075d3d}
+@media(max-width:580px){.guest-identity-grid{grid-template-columns:1fr}.guest-panel{padding:18px 15px}}
+
 .guest-panel p{font-size:13px;line-height:1.55;color:#466856}
 .guest-panel label{font-size:13px;font-weight:800;display:block;margin:14px 0 6px}
 .guest-row{display:flex;gap:10px;flex-wrap:wrap}
@@ -86,6 +92,22 @@ footer{text-align:center;color:#829088;font-size:12px;padding-bottom:22px}
 </div>
 <div class="login-gate" id="login-gate" hidden>¿Ya tienes cuenta? Puedes <a href="./mi-filler.html?modo=ingresar">iniciar sesión</a> para responder sin verificar tu correo otra vez. Si no tienes, participa como visitante.</div>
 <form id="filler-feedback-form">
+<section id="guest-verification" class="guest-panel" hidden aria-labelledby="guest-heading">
+<span class="section-kicker">TUS DATOS · SIN REGISTRO</span>
+<h2 id="guest-heading">Para responder solo necesitamos tu nombre y correo</h2>
+<p>Escribe únicamente tu nombre, sin apellidos. <strong>No necesitas crear una cuenta.</strong> Si después quieres hacer pedidos con tu cuenta Fiiller, te ofreceremos registrarte al terminar.</p>
+<div class="guest-identity-grid">
+<div><label for="guest-name">Tu nombre</label><input id="guest-name" name="guest_name" type="text" autocomplete="given-name" minlength="2" maxlength="60" placeholder="Ej. Ana"></div>
+<div><label for="guest-email">Correo electrónico</label><input id="guest-email" name="guest_email" type="email" autocomplete="email" maxlength="254" placeholder="tucorreo@ejemplo.com"></div>
+</div>
+<div class="guest-row" style="margin-top:14px"><button type="button" id="guest-send-code">Enviar código de verificación</button></div>
+<div id="guest-code-area" hidden>
+<label for="guest-code">Código enviado a tu correo</label>
+<div class="guest-row"><input id="guest-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 dígitos"></div>
+</div>
+<p class="guest-hint" id="guest-code-message" role="status" aria-live="polite"></p>
+<p class="guest-hint" style="margin-bottom:0">Solo verificamos tu correo para limitar la encuesta a una respuesta por mes. No te registramos ni te enviamos publicidad. Consulta el <a href="./aviso-privacidad.html" target="_blank" rel="noopener">aviso de privacidad</a>.</p>
+</section>
 <div class="progress-panel"><div class="progress-head"><span>Tu avance en la encuesta</span><strong id="survey-progress-label">0 de 10 preguntas</strong></div><div class="progress-track"><div class="progress-fill" id="survey-progress"></div></div><p class="legend">Toca de 1 a 5 estrellas en cada pregunta: 1 = Muy malo · 5 = Excelente. Cada cliente puede participar una vez por mes.</p></div>
 <section class="survey-section" aria-labelledby="category-01"><header class="section-heading"><span class="category-icon">☺</span><div><span class="section-kicker">BLOQUE 01 DE 04</span><h2 id="category-01">Atención</h2></div><span class="section-count">3 preguntas</span></header><div class="question-list"><div class="question-card" data-question="1">
   <div class="q-top"><span class="q-number">01</span><p id="question-title-1">¿El personal te atendió de manera amable y respetuosa?</p></div>
@@ -152,15 +174,7 @@ footer{text-align:center;color:#829088;font-size:12px;padding-bottom:22px}
   </div>
 </div></div></section>
 <section class="survey-section" aria-labelledby="suggestions-heading"><header class="section-heading"><span class="category-icon">✧</span><div><span class="section-kicker">TU VOZ CUENTA</span><h2 id="suggestions-heading">¿Qué te gustaría probar?</h2></div></header><div class="suggestion-fields"><div class="suggestion-card"><label for="suggested-dish">Primera sugerencia</label><input id="suggested-dish" name="suggested_dish" maxlength="120" placeholder="Ej. Chapata vegetariana"></div><div class="suggestion-card"><label for="suggested-product-2">Segunda sugerencia</label><input id="suggested-product-2" name="suggested_product_2" maxlength="120" placeholder="Ej. Café frío con vainilla"></div></div><div class="suggestion-card comment-box"><label for="survey-comment">¿Quieres contarnos algo más? <span style="font-weight:400;color:#73857a">(opcional)</span></label><textarea id="survey-comment" name="comment" maxlength="500" rows="3" placeholder="Comparte aquí tus comentarios o ideas"></textarea></div></section>
-<section id="guest-verification" class="guest-panel" hidden aria-labelledby="guest-heading">
-<h2 id="guest-heading">Confirma tu correo para enviar tu opinión</h2>
-<p>Tu encuesta no necesita una cuenta. Te enviaremos un código de seis dígitos para validar el correo y evitar respuestas repetidas durante el mismo mes. Esto no te registra ni te suscribe a promociones. Consulta nuestro <a href="./aviso-privacidad.html" target="_blank" rel="noopener">aviso de privacidad</a>.</p>
-<label for="guest-email">Correo electrónico</label>
-<div class="guest-row"><input id="guest-email" type="email" autocomplete="email" maxlength="254" placeholder="tucorreo@ejemplo.com"><button type="button" id="guest-send-code">Enviar código</button></div>
-<label for="guest-code">Código recibido por correo</label>
-<div class="guest-row"><input id="guest-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 dígitos"></div>
-<p class="guest-hint" id="guest-code-message" role="status" aria-live="polite"></p>
-</section>
+
 <div class="submit-card"><p id="filler-feedback-message" class="message" role="status" aria-live="polite"></p><button type="submit" id="send-filler-feedback">Enviar mi opinión</button><span style="color:#76877c;font-size:12px;text-align:center">La encuesta es opcional. Solo se permite una respuesta por mes, y se renueva el día 1.</span></div>
 </form>
 <section class="thank-you" id="survey-thank-you" hidden aria-live="polite">
@@ -175,5 +189,5 @@ footer{text-align:center;color:#829088;font-size:12px;padding-bottom:22px}
 <p style="margin-top:18px;font-size:12px">Crear una cuenta es opcional. Podrás hacer pedidos sin registrarte.</p>
 </section>
 </main><footer>© Fiiller Café · Crecemos con tus ideas.</footer>
-<script src="./encuesta-satisfaccion.js?v=53"></script>
+<script src="./encuesta-satisfaccion.js?v=54"></script>
 </body></html>
