@@ -16,15 +16,33 @@ const json=await res.json().catch(()=>({}));
 if(!res.ok){const error=Error(json.msg||json.error_description||json.message||"No se pudo completar la solicitud.");error.status=res.status;throw error;}
 return json;
 }
+let refreshPromise=null;
 async function token(){
-if(!session?.access_token)return null;
-if(session.expires_at && session.expires_at<Date.now()/1000+60){
- if(!session.refresh_token){save(null);return null;}
- try{save(await auth("token?grant_type=refresh_token",{refresh_token:session.refresh_token}));}
- catch{save(null);return null;}
+ if(!session?.access_token)return null;
+ const now=Math.floor(Date.now()/1000);
+ if(session.expires_at && session.expires_at<=now+90){
+  if(!session.refresh_token)return null;
+  if(!refreshPromise){
+   refreshPromise=(async()=>{
+    try{
+     const updated=await auth("token?grant_type=refresh_token",{refresh_token:session.refresh_token});
+     if(!updated?.access_token||!updated?.refresh_token)throw Error("Respuesta de sesión incompleta.");
+     save({...session,...updated,user:updated.user||session.user,
+       expires_at:updated.expires_at||Math.floor(Date.now()/1000)+Number(updated.expires_in||3600)});
+     return session.access_token;
+    }catch(error){
+     if([400,401,403].includes(Number(error.status)))save(null);
+     return null;
+    }finally{refreshPromise=null;}
+   })();
+  }
+  return refreshPromise;
+ }
+ return session.access_token;
 }
-return session?.access_token||null;
-}
+window.FillerCustomerAuth=Object.freeze({
+ getSession:async()=>{const access=await token();return access?{...session,access_token:access}:null;}
+});
 async function request(path,{method="GET",body}={}){
 const access=await token();if(!access)throw Error("Tu sesión terminó. Inicia sesión de nuevo.");
 const res=await fetch(BASE+"/rest/v1/"+path,{method,headers:{...headers(),Authorization:"Bearer "+access, ...(method!=="GET"?{Prefer:"return=representation"}:{})},body:body===undefined?undefined:JSON.stringify(body),cache:"no-store"});
