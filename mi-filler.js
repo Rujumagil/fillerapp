@@ -13,7 +13,7 @@ try{session=JSON.parse(localStorage.getItem(STORE)||sessionStorage.getItem(STORE
 async function auth(path,body){
 const res=await fetch(BASE+"/auth/v1/"+path,{method:"POST",headers:headers(),body:JSON.stringify(body)});
 const json=await res.json().catch(()=>({}));
-if(!res.ok)throw Error(json.msg||json.error_description||json.message||"No se pudo completar la solicitud.");
+if(!res.ok){const error=Error(json.msg||json.error_description||json.message||"No se pudo completar la solicitud.");error.status=res.status;throw error;}
 return json;
 }
 async function token(){
