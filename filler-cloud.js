@@ -143,7 +143,7 @@
     // usuario validado por Supabase; el invitado conserva el flujo habitual.
     let customerAccess=null;
     try{
-      const customer=JSON.parse(sessionStorage.getItem("filler_customer_session_v1")||"null");
+      const customer=JSON.parse(localStorage.getItem("filler_customer_session_v1")||sessionStorage.getItem("filler_customer_session_v1")||"null");
       if(customer?.user?.id && customer?.access_token){
         if(customer.expires_at && customer.expires_at <= Math.floor(Date.now()/1000)+60 && customer.refresh_token){
           const refreshRes=await fetch(BASE+"/auth/v1/token?grant_type=refresh_token",{
@@ -152,7 +152,7 @@
           });
           if(refreshRes.ok){
             const updated=await refreshRes.json();
-            sessionStorage.setItem("filler_customer_session_v1",JSON.stringify(updated));
+            localStorage.setItem("filler_customer_session_v1",JSON.stringify(updated));sessionStorage.setItem("filler_customer_session_v1",JSON.stringify(updated));
             customerAccess=updated.access_token;
           }
         }else if(!customer.expires_at || customer.expires_at > Math.floor(Date.now()/1000)+60){
