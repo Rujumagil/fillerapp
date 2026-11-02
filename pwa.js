@@ -99,8 +99,11 @@ async function fillerRequestNotifications() {
     alert("Este navegador no permite notificaciones.");
     return false;
   }
-  if (Notification.permission === "granted") return true;
+  if (Notification.permission === "denied") { window.FillerPushClient?.showHelp?.("Las notificaciones están bloqueadas. Revisa las instrucciones de Android."); return false; }
+  if (Notification.permission === "granted") { window.FillerPushClient?.refresh?.(); return true; }
   const permission = await Notification.requestPermission();
+  if (permission !== "granted") window.FillerPushClient?.showHelp?.("No se concedió el permiso. Revisa las instrucciones para activarlo.");
+  else window.FillerPushClient?.refresh?.();
   return permission === "granted";
 }
 
