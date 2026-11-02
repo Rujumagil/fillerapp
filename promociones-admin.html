@@ -50,6 +50,11 @@ textarea{min-height:100px;resize:vertical}button{font:inherit;font-weight:800;cu
 <div class="actions"><button type="submit" id="save">Guardar anuncio</button><button type="button" id="reset" class="secondary">Nuevo / Limpiar</button></div>
 </form></section>
 <section class="stack"><div class="card"><h2>Vista previa</h2><div class="preview"><img id="preview-img" alt="Imagen del anuncio"><div class="body"><span id="preview-tag" class="tag">Próximamente</span><strong id="preview-title">Tu nuevo anuncio</strong><p id="preview-description">Así se mostrará el contenido.</p></div></div></div>
-<div class="card"><div class="row"><h2>Anuncios guardados</h2><button type="button" id="reload" class="secondary">Actualizar</button></div><div id="feature-list">Cargando…</div></div></section></div></main>
-<script src="filler-cloud.js"></script><script src="storefront-features-admin.js"></script>
+<div class="card"><div class="row"><h2>Anuncios guardados</h2><button type="button" id="reload" class="secondary">Actualizar</button></div><div id="feature-list">Cargando…</div></div></section></div>
+<section class="card" id="push-workspace" hidden style="margin-top:20px">
+  <div class="row"><div><h2>🔔 Notificaciones push de promociones</h2><p>Prueba el aviso en tu dispositivo y envíalo solo a los clientes que aceptaron promociones y activaron las notificaciones.</p></div><button type="button" id="reload-push" class="secondary">Actualizar campañas</button></div>
+  <div id="push-campaign-list" aria-live="polite"><p>Cargando campañas…</p></div>
+  <p id="push-campaign-status" role="status" aria-live="polite" style="margin-top:16px;color:#38694a">No se enviará nada sin confirmar el envío.</p>
+</section></main>
+<script src="filler-cloud.js"></script><script src="storefront-features-admin.js?v=4"></script><script src="filler-promo-push-admin.js?v=1"></script>
 </body></html>
