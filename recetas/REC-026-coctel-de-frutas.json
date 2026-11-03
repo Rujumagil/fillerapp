@@ -1,0 +1,53 @@
+{
+  "id": "REC-026",
+  "product_name": "Cóctel de frutas",
+  "category": "Frutas y snacks",
+  "catalog_code": "TPV092",
+  "yield": {
+    "quantity": 1,
+    "unit": "vaso",
+    "fruit_ready_to_serve_g": 220
+  },
+  "sale_price_mxn": 48,
+  "ingredients": [
+    {
+      "name": "Papaya",
+      "quantity": 60,
+      "unit": "g",
+      "measurement_state": "limpia y lista para servir"
+    },
+    {
+      "name": "Melón",
+      "quantity": 60,
+      "unit": "g",
+      "measurement_state": "limpio y listo para servir"
+    },
+    {
+      "name": "Sandía",
+      "quantity": 60,
+      "unit": "g",
+      "measurement_state": "limpia y lista para servir"
+    },
+    {
+      "name": "Piña",
+      "quantity": 40,
+      "unit": "g",
+      "measurement_state": "limpia y lista para servir"
+    }
+  ],
+  "excluded_ingredients": [
+    "Plátano",
+    "Manzana"
+  ],
+  "complements": [],
+  "presentation": "Vaso",
+  "preparation": {
+    "method": "Fruta fresca limpia y cortada en cubos"
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "whole_fruit_to_clean_fruit_yield_status": "pending",
+  "packaging_cost_status": "pending"
+}
