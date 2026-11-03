@@ -1,0 +1,49 @@
+{
+  "id": "REC-033",
+  "product_name": "Smoothie de yogur con manzana",
+  "category": "Smoothies",
+  "catalog_code": "TPV029",
+  "yield": {
+    "quantity": 1,
+    "unit": "smoothie"
+  },
+  "sale_price_mxn": 55,
+  "ingredients": [
+    {
+      "name": "Manzana (pulpa)",
+      "quantity": 120,
+      "unit": "g",
+      "measurement_state": "lista para usar"
+    },
+    {
+      "name": "Yogur natural",
+      "quantity": 150,
+      "unit": "g"
+    },
+    {
+      "name": "Leche entera",
+      "quantity": 100,
+      "unit": "ml"
+    },
+    {
+      "name": "Hielo",
+      "quantity": 80,
+      "unit": "g"
+    }
+  ],
+  "excluded_ingredients": [
+    "Miel",
+    "Canela"
+  ],
+  "preparation": {
+    "method": "Licuar manzana, yogur natural, leche entera y hielo hasta lograr consistencia cremosa uniforme. Servir sin miel ni canela."
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "apple_variety_status": "pending",
+  "apple_peel_handling_status": "pending",
+  "cup_size_status": "pending",
+  "ingredient_sku_mapping_status": "pending"
+}
