@@ -1,0 +1,46 @@
+{
+  "id": "REC-039",
+  "product_name": "Frappé de cajeta",
+  "category": "Frappés",
+  "yield": {
+    "quantity": 1,
+    "unit": "frappé"
+  },
+  "sale_price_mxn": 58,
+  "ingredients": [
+    {
+      "name": "Leche entera",
+      "quantity": 200,
+      "unit": "ml"
+    },
+    {
+      "name": "Cajeta",
+      "quantity": 40,
+      "unit": "g",
+      "note": "Cantidad total, incluida cualquier decoración"
+    },
+    {
+      "name": "Hielo",
+      "quantity": 150,
+      "unit": "g"
+    },
+    {
+      "name": "Crema batida",
+      "quantity": 20,
+      "unit": "g"
+    }
+  ],
+  "excluded_ingredients": [
+    "Azúcar adicional"
+  ],
+  "preparation": {
+    "method": "Licuar la leche entera, cajeta y hielo hasta obtener consistencia de frappé; servir y decorar con crema batida. No exceder los 40 g totales de cajeta si se usa también para decorar."
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "ingredient_sku_mapping_status": "pending",
+  "cup_size_status": "pending",
+  "physical_yield_status": "pending"
+}
