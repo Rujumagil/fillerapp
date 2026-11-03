@@ -24,8 +24,8 @@ async function notifyTest(c){
  if(await request!=="granted")throw Error("Debes permitir las notificaciones para probar la campaña.");
  const reg=await navigator.serviceWorker.register("./sw.js");
  const ready=await navigator.serviceWorker.ready;
- await ready.showNotification(c.title,{body:c.body,icon:"./assets/filler-icon-192.png",
-   badge:"./assets/filler-icon-192.png",image:c.image_url||undefined,
+ await ready.showNotification(c.title,{body:c.body,icon:c.image_url||undefined,
+   image:c.image_url||undefined,
    tag:"filler-promo-local-test",data:{type:"promotion",url:"./index.html#promociones"}});
 }
 async function deliver(c){
