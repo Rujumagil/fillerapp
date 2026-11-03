@@ -1,0 +1,41 @@
+{
+  "id": "REC-030",
+  "product_name": "Licuado de plátano",
+  "category": "Licuados",
+  "catalog_code": "TPV116",
+  "yield": {
+    "quantity": 1,
+    "unit": "licuado"
+  },
+  "sale_price_mxn": 45,
+  "ingredients": [
+    {
+      "name": "Plátano (pulpa)",
+      "quantity": 100,
+      "unit": "g",
+      "measurement_state": "sin cáscara"
+    },
+    {
+      "name": "Leche entera",
+      "quantity": 250,
+      "unit": "ml"
+    },
+    {
+      "name": "Hielo",
+      "quantity": 80,
+      "unit": "g"
+    }
+  ],
+  "excluded_ingredients": [
+    "Azúcar"
+  ],
+  "preparation": {
+    "method": "Licuar plátano, leche entera y hielo hasta obtener consistencia uniforme; servir inmediatamente, sin añadir azúcar."
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "banana_peel_yield_status": "pending",
+  "cup_size_status": "pending"
+}
