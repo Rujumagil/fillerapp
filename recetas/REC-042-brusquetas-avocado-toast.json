@@ -1,0 +1,58 @@
+{
+  "id": "REC-042",
+  "product_name": "Brusquetas (Avocado Toast)",
+  "category": "Sándwiches y más",
+  "catalog_code": "TPVS018",
+  "yield": {
+    "quantity": 1,
+    "unit": "orden",
+    "pieces_per_order": 2
+  },
+  "sale_price_mxn": 65,
+  "ingredients": [
+    {
+      "name": "Pan artesanal",
+      "quantity": 2,
+      "unit": "rebanadas"
+    },
+    {
+      "name": "Aguacate (pulpa)",
+      "quantity": 80,
+      "unit": "g",
+      "measurement_state": "pulpa lista para usar"
+    },
+    {
+      "name": "Jitomate",
+      "quantity": 30,
+      "unit": "g"
+    },
+    {
+      "name": "Aceite de oliva",
+      "quantity": 5,
+      "unit": "ml"
+    },
+    {
+      "name": "Sal",
+      "quantity": 2,
+      "unit": "g"
+    },
+    {
+      "name": "Pimienta",
+      "quantity": 1,
+      "unit": "g"
+    }
+  ],
+  "excluded_ingredients": [
+    "Huevo"
+  ],
+  "preparation": {
+    "method": "Tostar las dos rebanadas de pan artesanal, distribuir el aguacate, agregar el jitomate y terminar con aceite de oliva, sal y pimienta."
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "ingredient_sku_mapping_status": "pending",
+  "avocado_pulp_yield_status": "pending",
+  "bread_type_status": "pending"
+}
