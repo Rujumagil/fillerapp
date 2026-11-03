@@ -1,0 +1,43 @@
+{
+  "id": "REC-029",
+  "product_name": "Parfait de yogur con fruta y granola",
+  "category": "Frutas y snacks",
+  "yield": {
+    "quantity": 1,
+    "unit": "porción",
+    "total_weight_g": 245
+  },
+  "sale_price_mxn": 52,
+  "ingredients": [
+    {
+      "name": "Yogur natural",
+      "quantity": 120,
+      "unit": "g"
+    },
+    {
+      "name": "Granola",
+      "quantity": 30,
+      "unit": "g",
+      "warehouse_code": "01070033"
+    },
+    {
+      "name": "Fresa",
+      "quantity": 40,
+      "unit": "g"
+    },
+    {
+      "name": "Plátano",
+      "quantity": 40,
+      "unit": "g"
+    },
+    {
+      "name": "Miel",
+      "quantity": 15,
+      "unit": "g"
+    }
+  ],
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs"
+}
