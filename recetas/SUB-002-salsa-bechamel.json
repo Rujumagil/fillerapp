@@ -1,0 +1,62 @@
+{
+  "id": "SUB-002",
+  "product_name": "Salsa bechamel preparada",
+  "type": "subrecipe",
+  "category": "Preparaciones base",
+  "yield": {
+    "estimated_quantity": 550,
+    "unit": "g",
+    "physical_yield_status": "pending_verification"
+  },
+  "ingredients": [
+    {
+      "name": "Leche entera",
+      "quantity": 500,
+      "unit": "ml"
+    },
+    {
+      "name": "Mantequilla",
+      "quantity": 40,
+      "unit": "g"
+    },
+    {
+      "name": "Harina de trigo",
+      "quantity": 40,
+      "unit": "g"
+    },
+    {
+      "name": "Sal",
+      "quantity": 3,
+      "unit": "g"
+    },
+    {
+      "name": "Pimienta",
+      "quantity": 1,
+      "unit": "g"
+    }
+  ],
+  "excluded_ingredients": [
+    "Nuez moscada"
+  ],
+  "preparation": {
+    "method": "Derretir la mantequilla, incorporar harina y cocinar brevemente. Agregar la leche poco a poco mientras se mezcla hasta espesar. Sazonar con sal y pimienta."
+  },
+  "notes": "",
+  "status": "confirmed",
+  "linked_recipes": [
+    {
+      "recipe_id": "REC-045",
+      "product_name": "Croque Madame",
+      "prepared_subrecipe_consumption": {
+        "quantity": 40,
+        "unit": "g"
+      }
+    }
+  ],
+  "estimated_full_40g_portions_per_batch": 13,
+  "estimated_remainder_g": 30,
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "ingredient_sku_mapping_status": "pending",
+  "inventory_accounting_note": "Consumir ingredientes al preparar lote de bechamel, y descontar 40 g de bechamel preparada en REC-045; no descontar materias primas dos veces. Los 10 g de mantequilla directa en REC-045 son independientes."
+}
