@@ -1,0 +1,57 @@
+{
+  "id": "REC-048",
+  "product_name": "Sándwich saludable de pollo",
+  "category": "Sándwiches y más",
+  "catalog_code": "TPVS026",
+  "yield": {
+    "quantity": 1,
+    "unit": "sándwich"
+  },
+  "sale_price_mxn": 95,
+  "ingredients": [
+    {
+      "name": "Pan de 12 granos",
+      "quantity": 2,
+      "unit": "rebanadas"
+    },
+    {
+      "name": "Pechuga de pollo a la plancha",
+      "quantity": 100,
+      "unit": "g",
+      "measurement_state": "peso cocido"
+    },
+    {
+      "name": "Queso panela",
+      "quantity": 40,
+      "unit": "g"
+    },
+    {
+      "name": "Lechuga",
+      "quantity": 15,
+      "unit": "g"
+    },
+    {
+      "name": "Jitomate",
+      "quantity": 20,
+      "unit": "g"
+    },
+    {
+      "name": "Mayonesa",
+      "quantity": 10,
+      "unit": "g"
+    }
+  ],
+  "excluded_ingredients": [
+    "Aguacate"
+  ],
+  "preparation": {
+    "method": "Cocinar la pechuga de pollo a la plancha, pesar 100 g después de la cocción y colocarla entre dos rebanadas de pan de 12 granos con queso panela, lechuga, jitomate y mayonesa."
+  },
+  "notes": "",
+  "status": "confirmed",
+  "distinct_from": "REC-011",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "ingredient_sku_mapping_status": "pending",
+  "chicken_raw_to_cooked_yield_status": "pending"
+}
