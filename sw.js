@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v71";
+const CACHE_NAME = "filler-app-v72";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -46,6 +46,8 @@ const APP_SHELL = [
   "./filler-marketing-push-client.js",
   "./filler-promo-push-admin.js",
   "./promociones-admin.html",
+  "./promo-chilaquiles-rojos.html",
+  "./promo-deeplink.js",
   "./assets/filler-logo-oficial.webp",
   "./assets/filler-icon-192.png",
   "./assets/filler-icon-512.png",
@@ -91,7 +93,7 @@ self.addEventListener("notificationclick", event => {
   event.notification.close();
   const raw=event.notification.data?.url || "./pedidos.html";
   const isPromotion=event.notification.data?.type==="promotion" &&
-    typeof raw==="string" && /^\.\/index\.html#(?:promociones|menu|menu-list)$/.test(raw);
+    typeof raw==="string" && /^\.\/(?:index\.html#(?:promociones|menu|menu-list)|promo-chilaquiles-rojos\.html)$/.test(raw);
   const isPrivateTracking=typeof raw==="string" &&
     /^\.\/pedido\.html#token=[0-9a-f-]{36}$/i.test(raw);
   const target=isPromotion?raw:(isPrivateTracking?raw:(raw==="./pedido.html"?"./pedido.html":(raw==="./monitor.html"?"./monitor.html":"./pedidos.html")));
@@ -131,14 +133,16 @@ self.addEventListener("push",event=>{
     customer?"☕ Aviso de tu pedido Fiiller":"🔔 Nuevo pedido Fiiller Café";
   const body=promo?String(payload.body||"¡Descubre nuestras promociones!").slice(0,200):
     customer?String(payload.body||"Tu pedido tiene una actualización.").slice(0,160):code;
+  const marketingTarget=promo && payload.url==="./promo-chilaquiles-rojos.html"
+    ?"./promo-chilaquiles-rojos.html":"./index.html#promociones";
   const photo=typeof payload.image==="string" && /^https:\/\/qwxydjotwhniahaovrff\.supabase\.co\/storage\/v1\/object\/public\/filler-product-images\//.test(payload.image)?
     payload.image:undefined;
   const options={
     body,
-    icon:"./assets/filler-icon-192.png",
-    badge:"./assets/filler-icon-192.png",
+    icon:promo?(photo||"./assets/filler-icon-192.png"):"./assets/filler-icon-192.png",
+    ...(promo?{}:{badge:"./assets/filler-icon-192.png"}),
     tag:promo?"filler-promo-"+String(payload.campaign_id||"").slice(0,40):(customer?"filler-cliente-":"filler-cocina-")+code,
-    data:{type:promo?"promotion":customer?"customer":"kitchen",url:promo?"./index.html#promociones":customer?(tracking||"./pedido.html"):"./pedidos.html"}
+    data:{type:promo?"promotion":customer?"customer":"kitchen",url:promo?marketingTarget:customer?(tracking||"./pedido.html"):"./pedidos.html"}
   };
   if(promo&&photo)options.image=photo;
   event.waitUntil(self.registration.showNotification(title,options));
