@@ -1,0 +1,44 @@
+{
+  "id": "REC-018",
+  "product_name": "Huevos con tocino",
+  "category": "Desayunos",
+  "catalog_code": "TPV106",
+  "yield": {
+    "quantity": 1,
+    "unit": "platillo"
+  },
+  "sale_price_mxn": 57,
+  "ingredients": [
+    {
+      "name": "Huevo",
+      "quantity": 2,
+      "unit": "piezas"
+    },
+    {
+      "name": "Tocino",
+      "quantity": 40,
+      "unit": "g",
+      "measurement_state": "cocido"
+    },
+    {
+      "name": "Aceite",
+      "quantity": 5,
+      "unit": "ml"
+    },
+    {
+      "name": "Pan integral",
+      "quantity": 1,
+      "unit": "rebanada",
+      "role": "guarnición"
+    }
+  ],
+  "preparation": {
+    "method": "Huevos revueltos con tocino",
+    "bacon_weight_measurement": "Después de cocinar"
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "bacon_raw_to_cooked_yield_status": "pending"
+}
