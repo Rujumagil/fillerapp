@@ -1,0 +1,35 @@
+{
+  "id": "REC-040",
+  "product_name": "Jugo de naranja natural",
+  "category": "Jugos naturales",
+  "yield": {
+    "quantity": 1,
+    "unit": "vaso",
+    "declared_juice_volume_ml": 300,
+    "physical_yield_status": "pending_verification"
+  },
+  "sale_price_mxn": 40,
+  "ingredients": [
+    {
+      "name": "Naranja natural",
+      "quantity": 15,
+      "unit": "pieza",
+      "note": "Cantidad confirmada por vaso; rendimiento físico por naranja pendiente de comprobar"
+    }
+  ],
+  "excluded_ingredients": [
+    "Azúcar adicional",
+    "Agua adicional",
+    "Hielo"
+  ],
+  "preparation": {
+    "method": "Lavar, cortar y exprimir 15 naranjas. Servir 300 ml de jugo natural, sin agua, azúcar ni hielo."
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "ingredient_sku_mapping_status": "pending",
+  "physical_yield_status": "pending_verification",
+  "declared_yield_per_orange_ml": 20
+}
