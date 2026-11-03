@@ -1,0 +1,258 @@
+{
+  "id": "POL-NESTLE-SIN-RECETA",
+  "title": "Productos Nestlé sin receta técnica",
+  "status": "confirmed",
+  "source_catalog": "catalogo-tpv-20261026.json",
+  "policy": {
+    "record_sales": true,
+    "recipe_required": false,
+    "ingredient_costing": false,
+    "auto_deduct_ingredient_inventory": false,
+    "affects_recipe_counter": false,
+    "track_sales_by_product_and_size": true
+  },
+  "items": [
+    {
+      "catalog_code": "TPV052",
+      "product_name": "Café americano Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV053",
+      "product_name": "Café con leche Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV054",
+      "product_name": "Cappuccino Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV055",
+      "product_name": "Latte Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV057",
+      "product_name": "Cappuccino vainilla Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV058",
+      "product_name": "Latte vainilla Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV059",
+      "product_name": "Chocolate Abuelita Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "sale_price_mxn": 55,
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV060",
+      "product_name": "Moka canela Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV061",
+      "product_name": "Mokaccino Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV062",
+      "product_name": "Chocovainilla Nestlé 8 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV063",
+      "product_name": "Café americano Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV064",
+      "product_name": "Café con leche Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV065",
+      "product_name": "Cappuccino Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV066",
+      "product_name": "Latte Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV068",
+      "product_name": "Cappuccino vainilla Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV069",
+      "product_name": "Latte vainilla Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV070",
+      "product_name": "Chocolate Abuelita Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV071",
+      "product_name": "Moka canela Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV072",
+      "product_name": "Mokaccino Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV073",
+      "product_name": "Chocovainilla Nestlé 16 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV074",
+      "product_name": "Café americano Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV075",
+      "product_name": "Café con leche Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV076",
+      "product_name": "Cappuccino Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV077",
+      "product_name": "Latte Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV079",
+      "product_name": "Cappuccino vainilla Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV080",
+      "product_name": "Latte vainilla Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV081",
+      "product_name": "Chocolate Abuelita Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV082",
+      "product_name": "Moka canela Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV083",
+      "product_name": "Mokaccino Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    },
+    {
+      "catalog_code": "TPV084",
+      "product_name": "Chocovainilla Nestlé 20 oz",
+      "category": "Bebidas calientes",
+      "recipe_required": false,
+      "ingredient_costing": false,
+      "auto_deduct_ingredient_inventory": false
+    }
+  ],
+  "note": "Esta política cubre las bebidas Nestlé existentes en el catálogo TPV. No supone que el código de la app ya consuma este archivo; queda pendiente conectar la regla al flujo de inventario/ventas donde sea aplicable. No se crea REC-042."
+}
