@@ -1,0 +1,54 @@
+{
+  "id": "REC-035",
+  "product_name": "Frappé de Oreo",
+  "category": "Frappés",
+  "catalog_code": "TPV032",
+  "yield": {
+    "quantity": 1,
+    "unit": "frappé"
+  },
+  "sale_price_mxn": 58,
+  "ingredients": [
+    {
+      "name": "Leche entera",
+      "quantity": 200,
+      "unit": "ml"
+    },
+    {
+      "name": "Galletas Oreo",
+      "quantity": 40,
+      "unit": "g"
+    },
+    {
+      "name": "Hielo",
+      "quantity": 150,
+      "unit": "g"
+    },
+    {
+      "name": "Jarabe de chocolate",
+      "quantity": 15,
+      "unit": "ml"
+    },
+    {
+      "name": "Crema batida",
+      "quantity": 30,
+      "unit": "g"
+    },
+    {
+      "name": "Azúcar",
+      "quantity": 5,
+      "unit": "g"
+    }
+  ],
+  "preparation": {
+    "method": "Licuar la leche entera con galletas Oreo, hielo y azúcar hasta obtener consistencia de frappé. Servir y decorar con jarabe de chocolate y crema batida.",
+    "chocolate_syrup_usage_detail_status": "pending_confirmation"
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "ingredient_sku_mapping_status": "pending",
+  "cup_size_status": "pending",
+  "physical_yield_status": "pending"
+}
