@@ -42,7 +42,8 @@
     }
   ],
   "used_by": [
-    "REC-012"
+    "REC-012",
+    "REC-047"
   ],
   "portions": {
     "quantity_per_sandwich": 80,
