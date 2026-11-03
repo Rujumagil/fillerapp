@@ -1,0 +1,54 @@
+{
+  "id": "REC-011",
+  "product_name": "Sándwich de pechuga de pollo a la plancha",
+  "category": "Sándwiches",
+  "yield": {
+    "quantity": 1,
+    "unit": "sándwich"
+  },
+  "sale_price_mxn": 48,
+  "ingredients": [
+    {
+      "name": "Pan integral",
+      "quantity": 2,
+      "unit": "rebanadas"
+    },
+    {
+      "name": "Pechuga de pollo",
+      "quantity": 100,
+      "unit": "g",
+      "measurement_state": "cocido"
+    },
+    {
+      "name": "Queso",
+      "quantity": 30,
+      "unit": "g"
+    },
+    {
+      "name": "Lechuga",
+      "quantity": 10,
+      "unit": "g"
+    },
+    {
+      "name": "Jitomate",
+      "quantity": 10,
+      "unit": "g"
+    },
+    {
+      "name": "Mayonesa",
+      "quantity": 15,
+      "unit": "g"
+    }
+  ],
+  "preparation": {
+    "chicken_style": "Filete a la plancha",
+    "chicken_weight_measurement": "Después de cocinar"
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "chicken_raw_to_cooked_yield_status": "pending",
+  "cooking_oil_quantity_status": "pending_if_used",
+  "cheese_inventory_sku_status": "pending"
+}
