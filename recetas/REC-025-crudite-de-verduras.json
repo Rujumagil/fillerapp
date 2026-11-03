@@ -1,0 +1,50 @@
+{
+  "id": "REC-025",
+  "product_name": "Crudité de verduras",
+  "category": "Frutas y snacks",
+  "catalog_code": "TPV091",
+  "yield": {
+    "quantity": 1,
+    "unit": "porción"
+  },
+  "sale_price_mxn": 35,
+  "ingredients": [
+    {
+      "name": "Zanahoria",
+      "quantity": 60,
+      "unit": "g",
+      "measurement_state": "lista para servir"
+    },
+    {
+      "name": "Pepino",
+      "quantity": 60,
+      "unit": "g",
+      "measurement_state": "listo para servir"
+    },
+    {
+      "name": "Jícama",
+      "quantity": 60,
+      "unit": "g",
+      "measurement_state": "lista para servir"
+    },
+    {
+      "name": "Jugo de limón",
+      "quantity": 15,
+      "unit": "ml"
+    },
+    {
+      "name": "Chile en polvo",
+      "quantity": 2,
+      "unit": "g"
+    }
+  ],
+  "preparation": {
+    "method": "Verduras frescas cortadas en bastones, acompañadas de jugo de limón y chile en polvo"
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "vegetable_cleaning_yield_status": "pending",
+  "lemon_whole_fruit_to_juice_yield_status": "pending"
+}
