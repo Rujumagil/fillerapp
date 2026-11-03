@@ -1,0 +1,46 @@
+{
+  "id": "REC-019",
+  "product_name": "Huevos con espinaca y queso panela",
+  "category": "Desayunos",
+  "catalog_code": "TPV107",
+  "yield": {
+    "quantity": 1,
+    "unit": "platillo"
+  },
+  "sale_price_mxn": 60,
+  "ingredients": [
+    {
+      "name": "Huevo",
+      "quantity": 2,
+      "unit": "piezas"
+    },
+    {
+      "name": "Espinaca",
+      "quantity": 30,
+      "unit": "g"
+    },
+    {
+      "name": "Queso panela",
+      "quantity": 30,
+      "unit": "g"
+    },
+    {
+      "name": "Aceite",
+      "quantity": 5,
+      "unit": "ml"
+    },
+    {
+      "name": "Pan integral",
+      "quantity": 1,
+      "unit": "rebanada",
+      "role": "guarnición"
+    }
+  ],
+  "preparation": {
+    "method": "Huevos revueltos con espinaca y queso panela"
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs"
+}
