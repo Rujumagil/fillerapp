@@ -1,0 +1,47 @@
+{
+  "id": "REC-004",
+  "product_name": "Chilaquiles verdes sencillos",
+  "category": "Desayunos",
+  "yield": {
+    "quantity": 1,
+    "unit": "platillo"
+  },
+  "sale_price_mxn": 55,
+  "ingredients": [
+    {
+      "name": "Totopos",
+      "quantity": 130,
+      "unit": "g"
+    },
+    {
+      "name": "Salsa verde",
+      "quantity": 60,
+      "unit": "ml"
+    },
+    {
+      "name": "Crema",
+      "quantity": 10,
+      "unit": "g"
+    },
+    {
+      "name": "Queso",
+      "quantity": 15,
+      "unit": "g"
+    },
+    {
+      "name": "Cebolla",
+      "quantity": 5,
+      "unit": "g"
+    },
+    {
+      "name": "Cilantro",
+      "quantity": 5,
+      "unit": "g"
+    }
+  ],
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "sauce_subrecipe_status": "pending"
+}
