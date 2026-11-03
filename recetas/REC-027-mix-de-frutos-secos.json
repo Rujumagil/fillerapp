@@ -1,0 +1,51 @@
+{
+  "id": "REC-027",
+  "product_name": "Mix de frutos secos",
+  "category": "Frutas y snacks",
+  "catalog_code": "TPV114",
+  "yield": {
+    "quantity": 1,
+    "unit": "vaso",
+    "mix_weight_g": 70
+  },
+  "sale_price_mxn": 75,
+  "ingredients": [
+    {
+      "name": "Nuez de la India",
+      "quantity": 20,
+      "unit": "g"
+    },
+    {
+      "name": "Cacahuates",
+      "quantity": 20,
+      "unit": "g"
+    },
+    {
+      "name": "Pasas",
+      "quantity": 10,
+      "unit": "g"
+    },
+    {
+      "name": "Nuez común",
+      "quantity": 10,
+      "unit": "g"
+    },
+    {
+      "name": "Arándanos secos",
+      "quantity": 10,
+      "unit": "g"
+    }
+  ],
+  "excluded_ingredients": [
+    "Almendras"
+  ],
+  "presentation": "Vaso",
+  "preparation": {
+    "method": "Mezclar los cinco ingredientes y servir en vaso"
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "ingredient_sku_mapping_status": "pending"
+}
