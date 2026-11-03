@@ -1,0 +1,52 @@
+{
+  "id": "REC-023",
+  "product_name": "Ensalada de atún",
+  "category": "Ensaladas",
+  "catalog_code": "TPV047",
+  "yield": {
+    "quantity": 1,
+    "unit": "ensalada"
+  },
+  "sale_price_mxn": 95,
+  "ingredients": [
+    {
+      "name": "Ensalada de atún preparada",
+      "quantity": 100,
+      "unit": "g",
+      "subrecipe_id": "SUB-001",
+      "subrecipe_path": "recetas/SUB-001-ensalada-de-atun.json"
+    },
+    {
+      "name": "Lechuga",
+      "quantity": 80,
+      "unit": "g"
+    },
+    {
+      "name": "Jitomate",
+      "quantity": 30,
+      "unit": "g"
+    },
+    {
+      "name": "Pepino",
+      "quantity": 30,
+      "unit": "g"
+    },
+    {
+      "name": "Zanahoria",
+      "quantity": 20,
+      "unit": "g"
+    },
+    {
+      "name": "Aderezo",
+      "quantity": 30,
+      "unit": "ml",
+      "type": "pending_identification"
+    }
+  ],
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "dressing_type_status": "pending_identification",
+  "inventory_handling": "SUB-001 consume ingredientes al preparar el lote. REC-023 consume 100 g de ensalada preparada y sus ingredientes adicionales sin descontar nuevamente los ingredientes internos de SUB-001."
+}
