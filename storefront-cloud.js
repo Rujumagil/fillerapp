@@ -193,48 +193,99 @@
       return trackingTokenPattern.test(item?.token||"")?item:null;
     }catch{return null;}
   }
+  // La campanita incluye novedades públicas sin revelar datos de otros clientes.
+  let promoCache=[],promoCacheTime=0;
+  async function fetchPromoAlerts(){
+    if(Date.now()-promoCacheTime<60000)return promoCache;
+    const base="https://qwxydjotwhniahaovrff.supabase.co";
+    const endpoint=base+"/rest/v1/filler_storefront_features?select=id,title,description,image_url,product_id,created_at&kind=eq.promotion&is_published=eq.true&order=created_at.desc&limit=3";
+    try{
+      const response=await fetch(endpoint,{headers:{apikey:"sb_publishable_17NekbDHp_ssL_Pf-CnqPg_v0acxqn3",Accept:"application/json"},cache:"no-store"});
+      if(!response.ok)throw Error("No hay novedades disponibles.");
+      const rows=await response.json();
+      promoCache=Array.isArray(rows)?rows:[];
+      promoCacheTime=Date.now();
+    }catch{
+      // No ocultar los avisos de pedidos cuando falla una consulta promocional.
+    }
+    return promoCache;
+  }
+  const safeGet=key=>{try{return localStorage.getItem(key)}catch{return null}};
+  const safeSet=(key,value)=>{try{localStorage.setItem(key,value)}catch{}};
   async function refreshAlerts(){
     const item=lastTracking();
     alertContent.replaceChildren();
-    if(!item){
-      const text=document.createElement("p");
-      text.textContent="Todavía no tienes avisos. Cuando hagas un pedido, podrás consultar aquí su preparación.";
-      alertContent.appendChild(text);
-      alertDot.hidden=true;
-      return;
+    let orderUnread=false,promoUnread=false,hasOrder=false;
+    if(item){
+      try{
+        const order=await FillerCloud.orderStatus(item.token);
+        hasOrder=true;
+        const section=document.createElement("div");
+        section.style.cssText="padding:12px 0;border-bottom:1px solid #e8e2d9";
+        const headline=document.createElement("strong");
+        headline.textContent=(order.status==="Listo"?"🎉 ¡Tu pedido está listo!":order.status==="Preparando"?"🍳 Estamos preparando tu pedido":order.status==="Entregado"?"✓ Pedido entregado":order.status==="Cancelado"?"Pedido cancelado":"☕ Recibimos tu pedido");
+        const detail=document.createElement("p");
+        detail.textContent="Pedido "+String(order.code||item.code||"")+" · "+(order.status==="Listo"?"Ya puedes pasar a recogerlo.":"Estado actual: "+String(order.status||"En proceso"));
+        const link=document.createElement("a");
+        link.href="./pedido.html#token="+encodeURIComponent(item.token);
+        link.textContent="Ver seguimiento del pedido";
+        const notes=Array.isArray(order.messages)?order.messages:[];
+        const latest=notes.length?notes[notes.length-1]:null;
+        section.append(headline,detail);
+        if(latest?.message){
+          const note=document.createElement("p");
+          note.style.cssText="white-space:pre-wrap;background:#eaf5ec;color:#174b34;padding:11px;border-radius:11px;font-weight:750;overflow-wrap:anywhere";
+          note.textContent="✉ Cocina: "+String(latest.message);
+          section.appendChild(note);
+        }
+        section.appendChild(link);alertContent.appendChild(section);
+        const seenKey="filler_seen_status_"+item.token;
+        const revision=String(order.status||"")+":"+String(order.status_updated_at||"")+":"+String(latest?.id||"");
+        if(!alertPanel.hidden)safeSet(seenKey,revision);
+        orderUnread=safeGet(seenKey)!==revision;
+      }catch{
+        const message=document.createElement("p");
+        message.textContent="No pudimos actualizar el estado de tu pedido. Intenta nuevamente.";
+        const link=document.createElement("a");
+        link.href="./pedido.html#token="+encodeURIComponent(item.token);
+        link.textContent="Abrir seguimiento";
+        alertContent.append(message,link);
+        hasOrder=true;
+      }
     }
-    try{
-      const order=await FillerCloud.orderStatus(item.token);
-      const headline=document.createElement("strong");
-      headline.textContent=(order.status==="Listo"?"🎉 ¡Tu pedido está listo!":order.status==="Preparando"?"🍳 Estamos preparando tu pedido":order.status==="Entregado"?"✓ Pedido entregado":order.status==="Cancelado"?"Pedido cancelado":"☕ Recibimos tu pedido");
-      const detail=document.createElement("p");
-      detail.textContent="Pedido "+String(order.code||item.code||"")+" · "+(order.status==="Listo"?"Ya puedes pasar a recogerlo.":"Estado actual: "+String(order.status||"En proceso"));
+    const promos=await fetchPromoAlerts();
+    for(const promo of promos){
+      if(typeof promo.id!=="string"||typeof promo.title!=="string")continue;
+      const card=document.createElement("article");
+      card.style.cssText="display:grid;gap:6px;padding:14px 0;border-bottom:1px solid #e8e2d9";
+      const tag=document.createElement("small");
+      tag.textContent="🔔 Fiiller Promos";tag.style.cssText="color:#a84617;font-weight:900;letter-spacing:.03em";
+      const title=document.createElement("strong");title.textContent=promo.title;
+      card.append(tag,title);
+      if(typeof promo.image_url==="string" && /^https:\/\/qwxydjotwhniahaovrff\.supabase\.co\/storage\/v1\/object\/public\/filler-product-images\//.test(promo.image_url)){
+        const photo=document.createElement("img");
+        photo.src=promo.image_url;photo.alt="Fotografía del producto";
+        photo.loading="lazy";photo.style.cssText="width:100%;max-height:165px;object-fit:cover;border-radius:12px";
+        card.appendChild(photo);
+      }
+      const copy=document.createElement("p");
+      copy.textContent=String(promo.description||"").slice(0,180);
+      copy.style.margin="0";card.appendChild(copy);
       const link=document.createElement("a");
-      link.href="./pedido.html#token="+encodeURIComponent(item.token);
-      link.textContent="Ver seguimiento del pedido";
-      const notes=Array.isArray(order.messages)?order.messages:[];
-      const latest=notes.length?notes[notes.length-1]:null;
-      if(latest?.message){
-        const note=document.createElement("p");
-        note.style.cssText="white-space:pre-wrap;background:#eaf5ec;color:#174b34;padding:11px;border-radius:11px;font-weight:750;overflow-wrap:anywhere";
-        note.textContent="✉ Cocina: "+String(latest.message);
-        alertContent.append(headline,detail,note,link);
-      }else{alertContent.append(headline,detail,link);}
-      const seenKey="filler_seen_status_"+item.token;
-      const revision=String(order.status||"")+":"+String(order.status_updated_at||"")+":"+String(latest?.id||"");
-      const opened=alertPanel.hidden===false;
-      if(opened){try{localStorage.setItem(seenKey,revision);}catch{}}
-      alertDot.hidden=opened||localStorage.getItem(seenKey)===revision;
-    }catch{
+      link.href=promo.product_id==="chilaquiles-rojos-sencillos"?"./promo-chilaquiles-rojos.html":"./index.html#promociones";
+      link.textContent="Ver anuncio y pedir →";
+      card.appendChild(link);
+      alertContent.appendChild(card);
+      const key="filler_seen_promo_"+promo.id;
+      if(!alertPanel.hidden)safeSet(key,"1");
+      if(safeGet(key)!=="1")promoUnread=true;
+    }
+    if(!hasOrder&&!promos.length){
       const message=document.createElement("p");
-      message.textContent="No pudimos actualizar los avisos en este momento. Intenta nuevamente.";
+      message.textContent="Todavía no tienes avisos. Las novedades y tus pedidos aparecerán aquí.";
       alertContent.appendChild(message);
-      const link=document.createElement("a");
-      link.href="./pedido.html#token="+encodeURIComponent(item.token);
-      link.textContent="Abrir seguimiento";
-      alertContent.appendChild(link);
-      alertDot.hidden=true;
     }
+    alertDot.hidden=!alertPanel.hidden?!(orderUnread||promoUnread):true;
   }
   function closeAlerts(){alertPanel.hidden=true;bell.setAttribute("aria-expanded","false");}
   bell.addEventListener("click",()=>{
