@@ -1,0 +1,52 @@
+{
+  "id": "REC-046",
+  "product_name": "Sándwich saludable de jamón y queso panela en pan de 12 granos",
+  "category": "Sándwiches y más",
+  "catalog_code": "TPVS024",
+  "yield": {
+    "quantity": 1,
+    "unit": "sándwich"
+  },
+  "sale_price_mxn": 105,
+  "ingredients": [
+    {
+      "name": "Pan de 12 granos",
+      "quantity": 2,
+      "unit": "rebanadas"
+    },
+    {
+      "name": "Jamón",
+      "quantity": 60,
+      "unit": "g"
+    },
+    {
+      "name": "Queso panela",
+      "quantity": 40,
+      "unit": "g"
+    },
+    {
+      "name": "Lechuga",
+      "quantity": 15,
+      "unit": "g"
+    },
+    {
+      "name": "Jitomate",
+      "quantity": 20,
+      "unit": "g"
+    },
+    {
+      "name": "Mayonesa",
+      "quantity": 10,
+      "unit": "g"
+    }
+  ],
+  "excluded_ingredients": [
+    "Aguacate"
+  ],
+  "notes": "",
+  "status": "confirmed",
+  "distinct_from": "REC-010",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "ingredient_sku_mapping_status": "pending"
+}
