@@ -1,0 +1,52 @@
+{
+  "id": "REC-020",
+  "product_name": "Huevos a la mexicana",
+  "category": "Desayunos",
+  "catalog_code": "TPVS016",
+  "yield": {
+    "quantity": 1,
+    "unit": "platillo"
+  },
+  "sale_price_mxn": 55,
+  "ingredients": [
+    {
+      "name": "Huevo",
+      "quantity": 2,
+      "unit": "piezas"
+    },
+    {
+      "name": "Jitomate",
+      "quantity": 30,
+      "unit": "g"
+    },
+    {
+      "name": "Cebolla",
+      "quantity": 20,
+      "unit": "g"
+    },
+    {
+      "name": "Chile verde",
+      "quantity": 10,
+      "unit": "g",
+      "variety": "pending"
+    },
+    {
+      "name": "Aceite",
+      "quantity": 5,
+      "unit": "ml"
+    },
+    {
+      "name": "Pan integral",
+      "quantity": 1,
+      "unit": "rebanada",
+      "role": "guarnición"
+    }
+  ],
+  "preparation": {
+    "method": "Huevos revueltos a la mexicana"
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs"
+}
