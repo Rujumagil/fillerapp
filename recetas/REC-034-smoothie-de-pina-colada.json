@@ -1,0 +1,50 @@
+{
+  "id": "REC-034",
+  "product_name": "Smoothie de piña colada",
+  "category": "Smoothies",
+  "catalog_code": "TPV031",
+  "yield": {
+    "quantity": 1,
+    "unit": "smoothie"
+  },
+  "sale_price_mxn": 55,
+  "ingredients": [
+    {
+      "name": "Piña (pulpa limpia)",
+      "quantity": 150,
+      "unit": "g",
+      "measurement_state": "sin cáscara ni corazón, lista para servir"
+    },
+    {
+      "name": "Leche de coco",
+      "quantity": 150,
+      "unit": "ml"
+    },
+    {
+      "name": "Yogur natural",
+      "quantity": 50,
+      "unit": "g"
+    },
+    {
+      "name": "Hielo",
+      "quantity": 80,
+      "unit": "g"
+    },
+    {
+      "name": "Azúcar",
+      "quantity": 5,
+      "unit": "g"
+    }
+  ],
+  "preparation": {
+    "method": "Licuar la pulpa de piña con la leche de coco, el yogur natural, el hielo y el azúcar hasta obtener consistencia cremosa. Servir inmediatamente."
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "pineapple_whole_to_clean_fruit_yield_status": "pending",
+  "coconut_milk_package_status": "pending",
+  "ingredient_sku_mapping_status": "pending",
+  "cup_size_status": "pending"
+}
