@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#7d1f0c">
+<meta name="description" content="¿Ya probaste nuestros chilaquiles rojos? Conoce las versiones sencillas, con huevo y con pollo. Pide para recoger en Fiiller Café.">
+<title>¿Ya probaste nuestros chilaquiles rojos? | Fiiller Café</title>
+<link rel="manifest" href="./manifest.json?v=39">
+<link rel="icon" href="./assets/filler-icon-192.png">
+<style>
+:root{color-scheme:light;--coffee:#2c160e;--red:#ac2110;--gold:#ffd34c;--cream:#fff5e3;--green:#20553b;--ink:#2b241e}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}body{margin:0;background:#f5eee3;color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:inherit}
+.shell{max-width:1120px;margin:0 auto;padding:22px 20px 70px}
+.top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:21px}
+.back{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:800;color:var(--green);font-size:14px;background:white;padding:11px 16px;border-radius:30px}
+.note{font-size:12px;font-weight:750;color:#695b50;text-align:right}
+.hero{position:relative;overflow:hidden;isolation:isolate;min-height:490px;border-radius:35px;background:linear-gradient(120deg,#2c170e 0%,#5d2e18 52%,#9c4b24 100%);box-shadow:0 25px 70px #3d1f1038;display:grid;grid-template-columns:1.05fr .95fr}
+.hero:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 95% 8%,#f7c7754d 0,transparent 30%),radial-gradient(circle at 3% 95%,#ef66214f 0,transparent 30%);z-index:-1}
+.hero-copy{padding:56px 16px 44px 50px;color:white;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
+.eyebrow{align-self:flex-start;background:#b41e0f;border-radius:12px;padding:8px 15px;transform:rotate(-2deg);font-weight:900;letter-spacing:.025em;font-size:15px}
+.hero h1{font-size:clamp(45px,6vw,79px);font-weight:950;line-height:.98;margin:25px 0 19px;letter-spacing:-.068em;text-wrap:balance;text-shadow:0 4px 12px #210f0955}
+.hero h1 span{color:#ffcf45;display:block}
+.hero p{font-size:clamp(17px,2.1vw,23px);margin:0 0 28px;max-width:470px;line-height:1.4;color:#fff6e7}
+.action{display:inline-flex;align-items:center;justify-content:center;gap:12px;background:#ffd44f;color:#311e0b;text-decoration:none;padding:15px 23px;border-radius:16px;font-weight:900;font-size:17px;box-shadow:0 6px 0 #d49516;min-height:55px;align-self:flex-start;transition:transform .2s}
+.action:hover{transform:translateY(-2px)}
+.hero-media{position:relative;min-width:0;display:flex;align-items:center;justify-content:center}
+.hero-media img{width:100%;height:100%;object-fit:cover;object-position:50% 50%;position:absolute;inset:0}
+.hero-media:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#6a3216e1 0%,transparent 22%),linear-gradient(0deg,#491d0966 0%,transparent 35%)}
+.hero-media .stamp{position:absolute;z-index:2;bottom:24px;right:24px;background:#fff5db;color:#71240d;border:2px dashed #db9758;transform:rotate(5deg);padding:10px 17px;border-radius:13px;font-weight:900;font-size:15px;box-shadow:0 9px 20px #160d0740}
+.intro{text-align:center;padding:55px 15px 24px}
+.intro .small{display:inline-block;text-transform:uppercase;letter-spacing:.13em;font-weight:900;color:#b35217;font-size:12px}
+.intro h2{font-size:clamp(27px,4vw,42px);color:#173b2b;letter-spacing:-.035em;line-height:1.12;margin:8px 0}
+.intro p{color:#5b635b;margin:11px auto 0;max-width:630px}
+.variants{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:18px}
+.variant{background:#fff;overflow:hidden;border-radius:22px;border:1px solid #e9dbca;box-shadow:0 12px 32px #43230c12;display:flex;flex-direction:column}
+.variant img{width:100%;aspect-ratio:1.22/1;object-fit:cover;display:block;background:#f0eadf}
+.variant .content{padding:20px 20px 22px;display:grid;gap:9px;flex:1;align-content:start}
+.variant h3{font-size:23px;color:#17412f;letter-spacing:-.035em;margin:0;line-height:1.15}
+.variant p{margin:0;color:#5d675f;font-size:14px;min-height:43px}
+.variant .price{font-size:19px;color:#a53b10;font-weight:900;min-height:26px}
+.variant .choose{display:block;text-decoration:none;text-align:center;border:0;border-radius:13px;background:#20583c;color:white;padding:13px;font-size:15px;font-weight:800;margin-top:auto}
+.variant .choose:hover{background:#143a27}
+.variant .choose[aria-disabled="true"]{background:#8b9790;pointer-events:none}
+.foot{text-align:center;margin:34px 0 0;color:#5d655e;font-size:13px}
+.foot a{color:#20583c;font-weight:800}
+@media(max-width:780px){
+.shell{padding:12px 12px 50px}.top{margin:10px 0 18px}.hero{grid-template-columns:1fr;min-height:0}.hero-copy{padding:32px 27px 23px}.hero h1{font-size:clamp(44px,10vw,72px);margin:20px 0}.hero-media{height:335px}.hero-media:after{background:linear-gradient(0deg,#30180d4b,transparent 65%)}.variants{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:540px){
+.hero{border-radius:24px}.hero-media{height:300px}.hero h1{font-size:49px}.hero-copy p{font-size:18px}.variants{grid-template-columns:1fr;gap:15px}.intro{padding:39px 10px 20px}.variant img{aspect-ratio:1.55/1}.note{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.action{transition:none}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="top"><a class="back" href="./index.html">← Volver al menú</a><span class="note">Especial del menú · Sin descuentos adicionales</span></div>
+  <section class="hero" aria-label="Promoción de chilaquiles rojos">
+    <div class="hero-copy">
+      <span class="eyebrow">¡Se antojan hoy!</span>
+      <h1>¿Ya probaste nuestros <span>chilaquiles rojos?</span></h1>
+      <p>Crujientes, con salsa roja y todo el sabor de casa. Elige tu versión favorita.</p>
+      <a class="action" href="#opciones">Pedir ahora <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="hero-media">
+      <img src="https://qwxydjotwhniahaovrff.supabase.co/storage/v1/object/public/filler-product-images/productos/chilaquiles-rojos-sencillos-1793377040745-veci2a.jpg" alt="Chilaquiles rojos preparados para servir" fetchpriority="high">
+      <span class="stamp">¡Recién preparados!</span>
+    </div>
+  </section>
+  <section id="opciones" aria-labelledby="option-title">
+    <div class="intro">
+      <span class="small">Elige a tu gusto</span>
+      <h2 id="option-title">¿Cómo prefieres tus chilaquiles?</h2>
+      <p>Selecciona una de las opciones disponibles en el menú. Los precios y existencias se consultan directamente en Fiiller.</p>
+    </div>
+    <div class="variants">
+      <article class="variant" data-product="chilaquiles-rojos-sencillos">
+        <img src="https://qwxydjotwhniahaovrff.supabase.co/storage/v1/object/public/filler-product-images/productos/chilaquiles-rojos-sencillos-1793377040745-veci2a.jpg" alt="Chilaquiles rojos sencillos" loading="lazy">
+        <div class="content"><h3>Rojos sencillos</h3><p>La versión clásica con salsa roja.</p><div class="price" data-price>Consultando precio…</div><a class="choose" href="./index.html?promo=chilaquiles-rojos-sencillos#pedido">Elegir esta opción →</a></div>
+      </article>
+      <article class="variant" data-product="rojos-con-huevo">
+        <img src="https://qwxydjotwhniahaovrff.supabase.co/storage/v1/object/public/filler-product-images/productos/rojos-con-huevo-1793376890604-l1bt6p.jpg" alt="Chilaquiles rojos con huevo" loading="lazy">
+        <div class="content"><h3>Con huevo</h3><p>Con huevo para un desayuno más completo.</p><div class="price" data-price>Consultando precio…</div><a class="choose" href="./index.html?promo=rojos-con-huevo#pedido">Elegir esta opción →</a></div>
+      </article>
+      <article class="variant" data-product="rojos-con-pollo">
+        <img src="https://qwxydjotwhniahaovrff.supabase.co/storage/v1/object/public/filler-product-images/productos/rojos-con-pollo-1793376056385-297y1n.jpg" alt="Chilaquiles rojos con pollo" loading="lazy">
+        <div class="content"><h3>Con pollo</h3><p>Con pechuga de pollo para disfrutar aún más.</p><div class="price" data-price>Consultando precio…</div><a class="choose" href="./index.html?promo=rojos-con-pollo#pedido">Elegir esta opción →</a></div>
+      </article>
+    </div>
+  </section>
+  <p class="foot">Precios según el menú vigente. <a href="./index.html">Conoce todo nuestro menú</a>.</p>
+</main>
+<script>
+(async()=>{
+  try{
+    const base="https://qwxydjotwhniahaovrff.supabase.co";
+    const ids=["chilaquiles-rojos-sencillos","rojos-con-huevo","rojos-con-pollo"];
+    const endpoint=base+"/rest/v1/filler_products?select=id,price,stock,active&id=in.("+ids.join(",")+")";
+    const resp=await fetch(endpoint,{headers:{apikey:"sb_publishable_17NekbDHp_ssL_Pf-CnqPg_v0acxqn3"},cache:"no-store"});
+    if(!resp.ok)throw Error("Sin catálogo");
+    const rows=await resp.json();
+    const found=new Map(rows.map(x=>[x.id,x]));
+    const pesos=new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0});
+    for(const item of document.querySelectorAll("[data-product]")){
+      const r=found.get(item.dataset.product),price=item.querySelector("[data-price]"),button=item.querySelector(".choose");
+      if(!r||!r.active||Number(r.stock)<=0){price.textContent="No disponible";button.textContent="Agotado por ahora";button.setAttribute("aria-disabled","true");continue;}
+      price.textContent=pesos.format(Number(r.price));
+    }
+  }catch{
+    for(const price of document.querySelectorAll("[data-price]"))price.textContent="Consulta el precio al pedir";
+  }
+})();
+</script>
+</body></html>
