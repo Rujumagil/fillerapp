@@ -5,6 +5,25 @@
   const escape=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const money=n=>"$"+Number(n||0).toLocaleString("es-MX",{minimumFractionDigits:0,maximumFractionDigits:2});
   const min=n=>Math.max(0,Math.floor(n/60000));
+  // Solo se muestra en pedidos listos; el operador confirma el envío dentro de WhatsApp.
+  function whatsappNumber(value){
+    const digits=String(value||"").replace(/\D/g,"");
+    if(/^\d{10}$/.test(digits))return "52"+digits;
+    if(/^52\d{10}$/.test(digits))return digits;
+    if(/^521\d{10}$/.test(digits))return "52"+digits.slice(3);
+    if(/^1\d{10}$/.test(digits))return digits;
+    return null;
+  }
+  function whatsappReadyLink(o){
+    if(o.status!=="Listo")return "";
+    const number=whatsappNumber(o.phone);
+    if(!number)return '<span class="note" role="note">WhatsApp no disponible: revisa el teléfono del pedido.</span>';
+    const firstName=String(o.customer||"").trim().split(/\s+/)[0];
+    const greeting="Hola"+(firstName?", "+firstName:"")+" 👋☕";
+    const text=greeting+"\nTu pedido "+String(o.id||"")+" de Fiiller Café ya está listo para recoger. ¡Te esperamos!";
+    const url="https://wa.me/"+number+"?text="+encodeURIComponent(text);
+    return '<a class="whatsapp-ready" href="'+escape(url)+'" target="_blank" rel="noopener noreferrer" aria-label="Abrir WhatsApp con aviso de pedido listo para '+escape(o.customer)+'">🟢 WhatsApp · Avisar listo</a>';
+  }
   let role=null, orders=[], running=false, timer=null;
   const shell=document.createElement("section");
   shell.className="card";
@@ -79,6 +98,7 @@
             '<button type="button" data-print="'+escape(o.uuid)+'" data-kind="cocina">🖨 Imprimir comanda</button>'+
             '<button type="button" class="secondary" data-print="'+escape(o.uuid)+'" data-kind="cliente">Ticket cliente</button>'+
             '<button type="button" class="secondary" data-message="'+escape(o.uuid)+'">✉ Mensaje al cliente</button>'+
+            whatsappReadyLink(o)+
             '</div>'+
             (o.status==="Listo"?
               '<div class="order-ready-note" role="status">✓ Estado «Listo» publicado en el seguimiento web del cliente.</div>':"")+
