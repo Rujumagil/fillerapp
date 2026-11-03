@@ -1,0 +1,52 @@
+{
+  "id": "REC-047",
+  "product_name": "Sándwich saludable de atún en pan de 12 granos",
+  "category": "Sándwiches y más",
+  "catalog_code": "TPVS025",
+  "yield": {
+    "quantity": 1,
+    "unit": "sándwich"
+  },
+  "sale_price_mxn": 89,
+  "ingredients": [
+    {
+      "name": "Pan de 12 granos",
+      "quantity": 2,
+      "unit": "rebanadas"
+    },
+    {
+      "name": "Ensalada de atún preparada",
+      "quantity": 80,
+      "unit": "g",
+      "subrecipe_id": "SUB-001",
+      "subrecipe_path": "recetas/SUB-001-ensalada-de-atun.json"
+    },
+    {
+      "name": "Lechuga",
+      "quantity": 15,
+      "unit": "g"
+    },
+    {
+      "name": "Jitomate",
+      "quantity": 20,
+      "unit": "g",
+      "role": "adicional al preparado"
+    },
+    {
+      "name": "Mayonesa",
+      "quantity": 10,
+      "unit": "g",
+      "role": "adicional al preparado"
+    }
+  ],
+  "excluded_ingredients": [
+    "Queso panela",
+    "Aguacate"
+  ],
+  "notes": "",
+  "status": "confirmed",
+  "distinct_from": "REC-012",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "inventory_handling": "Al preparar SUB-001 se descuentan los ingredientes de la ensalada; al vender REC-047 se descuentan 80 g de ensalada preparada y los ingredientes adicionales del sándwich, evitando doble descuento."
+}
