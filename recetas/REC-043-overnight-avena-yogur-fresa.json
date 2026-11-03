@@ -1,0 +1,50 @@
+{
+  "id": "REC-043",
+  "product_name": "Overnight de avena con yogur natural y fresa",
+  "category": "Frutas y bowls",
+  "catalog_code": "TPVS021",
+  "yield": {
+    "quantity": 1,
+    "unit": "porción",
+    "nominal_ingredient_weight_g": 210,
+    "final_weight_status": "pending_verification"
+  },
+  "sale_price_mxn": 52,
+  "ingredients": [
+    {
+      "name": "Avena",
+      "quantity": 40,
+      "unit": "g"
+    },
+    {
+      "name": "Yogur natural",
+      "quantity": 120,
+      "unit": "g"
+    },
+    {
+      "name": "Fresa",
+      "quantity": 40,
+      "unit": "g"
+    },
+    {
+      "name": "Miel",
+      "quantity": 10,
+      "unit": "g"
+    }
+  ],
+  "excluded_ingredients": [
+    "Chía",
+    "Leche entera",
+    "Plátano",
+    "Granola"
+  ],
+  "preparation": {
+    "method": "Preparación el mismo día, sin reposo nocturno confirmado",
+    "hydration_time_status": "pending_verification"
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "ingredient_sku_mapping_status": "pending"
+}
