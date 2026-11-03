@@ -1,0 +1,72 @@
+{
+  "id": "REC-044",
+  "product_name": "Club sándwich",
+  "category": "Sándwiches y más",
+  "catalog_code": "TPVS027",
+  "yield": {
+    "quantity": 1,
+    "unit": "orden",
+    "side": "Papas tipo chips",
+    "side_weight_g": 54
+  },
+  "sale_price_mxn": 115,
+  "ingredients": [
+    {
+      "name": "Pan de caja",
+      "quantity": 3,
+      "unit": "rebanadas"
+    },
+    {
+      "name": "Pechuga de pollo cocida",
+      "quantity": 80,
+      "unit": "g",
+      "measurement_state": "cocida"
+    },
+    {
+      "name": "Jamón",
+      "quantity": 40,
+      "unit": "g"
+    },
+    {
+      "name": "Tocino cocido",
+      "quantity": 30,
+      "unit": "g",
+      "measurement_state": "cocido"
+    },
+    {
+      "name": "Queso",
+      "quantity": 30,
+      "unit": "g"
+    },
+    {
+      "name": "Lechuga",
+      "quantity": 20,
+      "unit": "g"
+    },
+    {
+      "name": "Jitomate",
+      "quantity": 30,
+      "unit": "g"
+    },
+    {
+      "name": "Mayonesa",
+      "quantity": 20,
+      "unit": "g"
+    },
+    {
+      "name": "Papas tipo chips",
+      "quantity": 54,
+      "unit": "g",
+      "role": "guarnición"
+    }
+  ],
+  "preparation": {
+    "method": "Tostar tres rebanadas de pan. Distribuir el pollo, jamón, tocino, queso, lechuga, jitomate y mayonesa entre las capas. Cortar el sándwich y servir con 54 g de papas tipo chips."
+  },
+  "notes": "",
+  "status": "confirmed",
+  "ingredient_sku_mapping_status": "pending",
+  "cheese_type_status": "pending",
+  "cost_status": "pending_warehouse_unit_costs",
+  "inventory_deduction_status": "pending_integration"
+}
