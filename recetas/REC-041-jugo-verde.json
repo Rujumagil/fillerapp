@@ -1,0 +1,54 @@
+{
+  "id": "REC-041",
+  "product_name": "Jugo verde",
+  "category": "Jugos naturales",
+  "yield": {
+    "quantity": 1,
+    "unit": "vaso",
+    "declared_volume_ml": 300,
+    "physical_yield_status": "pending_verification"
+  },
+  "sale_price_mxn": 45,
+  "ingredients": [
+    {
+      "name": "Apio",
+      "quantity": 40,
+      "unit": "g"
+    },
+    {
+      "name": "Nopal limpio",
+      "quantity": 60,
+      "unit": "g"
+    },
+    {
+      "name": "Espinaca",
+      "quantity": 30,
+      "unit": "g"
+    },
+    {
+      "name": "Piña limpia",
+      "quantity": 80,
+      "unit": "g"
+    },
+    {
+      "name": "Agua",
+      "quantity": 200,
+      "unit": "ml"
+    }
+  ],
+  "excluded_ingredients": [
+    "Jugo de limón",
+    "Azúcar",
+    "Hielo"
+  ],
+  "preparation": {
+    "method": "Lavar y desinfectar los vegetales; licuar apio, nopal limpio, espinaca y piña limpia con agua. Servir sin limón, azúcar ni hielo.",
+    "straining_status": "not_specified"
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "ingredient_sku_mapping_status": "pending",
+  "physical_yield_status": "pending_verification"
+}
