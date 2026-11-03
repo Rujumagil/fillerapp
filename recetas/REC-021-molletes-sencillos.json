@@ -1,0 +1,42 @@
+{
+  "id": "REC-021",
+  "product_name": "Molletes sencillos",
+  "category": "Desayunos",
+  "catalog_code": "TPVS065",
+  "yield": {
+    "quantity": 1,
+    "unit": "orden",
+    "halves": 2
+  },
+  "sale_price_mxn": 55,
+  "ingredients": [
+    {
+      "name": "Bolillo",
+      "quantity": 1,
+      "unit": "pieza",
+      "preparation": "Dividido en dos mitades"
+    },
+    {
+      "name": "Frijoles refritos",
+      "quantity": 80,
+      "unit": "g"
+    },
+    {
+      "name": "Queso manchego",
+      "quantity": 50,
+      "unit": "g"
+    }
+  ],
+  "excluded_ingredients": [
+    "Tocino"
+  ],
+  "preparation": {
+    "method": "Gratinados"
+  },
+  "garnishes": [],
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "beans_subrecipe_status": "pending_if_prepared_in_kitchen"
+}
