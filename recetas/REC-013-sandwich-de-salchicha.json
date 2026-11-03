@@ -1,0 +1,52 @@
+{
+  "id": "REC-013",
+  "product_name": "Sándwich de salchicha",
+  "category": "Sándwiches",
+  "catalog_code": "TPV016",
+  "yield": {
+    "quantity": 1,
+    "unit": "sándwich"
+  },
+  "sale_price_mxn": 45,
+  "ingredients": [
+    {
+      "name": "Pan integral",
+      "quantity": 2,
+      "unit": "rebanadas"
+    },
+    {
+      "name": "Salchicha",
+      "quantity": 80,
+      "unit": "g"
+    },
+    {
+      "name": "Queso",
+      "quantity": 30,
+      "unit": "g"
+    },
+    {
+      "name": "Lechuga",
+      "quantity": 10,
+      "unit": "g"
+    },
+    {
+      "name": "Jitomate",
+      "quantity": 10,
+      "unit": "g"
+    },
+    {
+      "name": "Mayonesa",
+      "quantity": 15,
+      "unit": "g"
+    }
+  ],
+  "preparation": {
+    "sausage_style": "A la plancha en tiras"
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "cheese_inventory_sku_status": "pending",
+  "cooking_oil_quantity_status": "pending_if_used"
+}
