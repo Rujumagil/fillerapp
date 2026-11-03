@@ -1,0 +1,41 @@
+{
+  "id": "REC-031",
+  "product_name": "Licuado de chocolate Chocomilk",
+  "category": "Licuados",
+  "yield": {
+    "quantity": 1,
+    "unit": "licuado"
+  },
+  "sale_price_mxn": 45,
+  "ingredients": [
+    {
+      "name": "Leche entera",
+      "quantity": 250,
+      "unit": "ml"
+    },
+    {
+      "name": "Chocolate en polvo Chocomilk",
+      "quantity": 30,
+      "unit": "g"
+    },
+    {
+      "name": "Hielo",
+      "quantity": 80,
+      "unit": "g"
+    },
+    {
+      "name": "Azúcar adicional",
+      "quantity": 10,
+      "unit": "g"
+    }
+  ],
+  "preparation": {
+    "method": "Licuar leche entera, chocolate en polvo Chocomilk, hielo y azúcar adicional hasta obtener mezcla uniforme; servir inmediatamente."
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "ingredient_sku_mapping_status": "pending",
+  "cup_size_status": "pending"
+}
