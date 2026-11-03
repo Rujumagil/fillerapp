@@ -14,7 +14,12 @@ function card(r){
  const body=make("div","fiiller-feature-text"),label=make("span","fiiller-feature-tag",r.eyebrow||(r.kind==="promotion"?"Promoción":"Novedad"));
  const title=make("h3","",r.title),desc=make("p","",r.description||"Descubre más en Fiiller Café.");
  body.append(label,title,desc);article.append(body);
- if(r.kind==="promotion" && typeof r.product_id==="string" && r.product_id){
+ if(r.kind==="promotion" && r.product_id==="chilaquiles-rojos-sencillos"){
+  // La campaña muestra tres versiones reales: sencillos, con huevo y con pollo.
+  const link=make("a","fiiller-feature-buy","Ver especial y elegir →");
+  link.href="./promo-chilaquiles-rojos.html";
+  article.append(link);
+ }else if(r.kind==="promotion" && typeof r.product_id==="string" && r.product_id){
   const choose=make("button","fiiller-feature-buy","Elegir producto →");
   choose.type="button";
   choose.addEventListener("click",()=>{
