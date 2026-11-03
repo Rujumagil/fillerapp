@@ -1,0 +1,37 @@
+{
+  "id": "REC-014",
+  "product_name": "Sincronizada de jamón y queso manchego",
+  "category": "Sándwiches y más",
+  "catalog_code": "TPV010",
+  "yield": {
+    "quantity": 1,
+    "unit": "sincronizada"
+  },
+  "sale_price_mxn": 50,
+  "ingredients": [
+    {
+      "name": "Tortillas de harina",
+      "quantity": 3,
+      "unit": "piezas"
+    },
+    {
+      "name": "Jamón",
+      "quantity": 80,
+      "unit": "g"
+    },
+    {
+      "name": "Queso manchego",
+      "quantity": 50,
+      "unit": "g"
+    }
+  ],
+  "preparation": {
+    "method": "A la plancha"
+  },
+  "complements": [],
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "cooking_oil_or_butter_status": "not_confirmed"
+}
