@@ -1,0 +1,50 @@
+{
+  "id": "REC-012",
+  "product_name": "Sándwich de atún",
+  "category": "Sándwiches",
+  "catalog_code": "TPV014",
+  "yield": {
+    "quantity": 1,
+    "unit": "sándwich"
+  },
+  "sale_price_mxn": 55,
+  "ingredients": [
+    {
+      "name": "Pan integral",
+      "quantity": 2,
+      "unit": "rebanadas"
+    },
+    {
+      "name": "Ensalada de atún preparada",
+      "quantity": 80,
+      "unit": "g",
+      "subrecipe_id": "SUB-001",
+      "subrecipe_path": "recetas/SUB-001-ensalada-de-atun.json"
+    },
+    {
+      "name": "Lechuga",
+      "quantity": 10,
+      "unit": "g"
+    },
+    {
+      "name": "Jitomate",
+      "quantity": 10,
+      "unit": "g",
+      "role": "adicional al preparado"
+    },
+    {
+      "name": "Mayonesa",
+      "quantity": 15,
+      "unit": "g",
+      "role": "adicional al preparado"
+    }
+  ],
+  "preparation": {
+    "tuna": "Ensalada de atún preparada"
+  },
+  "notes": "",
+  "status": "confirmed",
+  "inventory_deduction_status": "pending_integration",
+  "cost_status": "pending_warehouse_unit_costs",
+  "inventory_handling": "Al preparar SUB-001 se descuentan sus ingredientes; al vender REC-012 se descuentan 80 g de ensalada preparada y el resto de los ingredientes del sándwich. Evitar doble descuento."
+}
