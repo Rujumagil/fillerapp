@@ -39,7 +39,11 @@
       "quantity": 1,
       "unit": "pieza",
       "inventory_code": "01170024",
-      "sku_selection_status": "confirmed_product_pending_pieces_per_kg_conversion_and_cost"
+      "sku_selection_status": "confirmed_product_and_conversion_pending_verified_unit_cost",
+      "pieces_per_kg": 17,
+      "inventory_units_per_order": 0.058823529411764705,
+      "inventory_unit": "kg",
+      "conversion_basis": "17 huevos por kg informado por usuario"
     },
     {
       "name": "Sal de mesa yodada fluorada Sol",
@@ -59,12 +63,12 @@
   "preparation": {
     "method": "Preparar el pan Oroweat con jamón Virginia de pavo FUD y queso manchego, gratinar y terminar con huevo; sazonar con sal y pimienta. Método específico de tostado y cocción pendiente de confirmar con cocina."
   },
-  "notes": "REC-045 utiliza 2 de 14 rebanadas de pan Oroweat por paquete de 680 g (1/7 paquete por orden). Cinco equivalencias verificadas; pendiente únicamente piezas de huevo por kg. Costos de compra sin comprobar. Sin salsa ni mantequilla; no descontar existencias automáticamente.",
+  "notes": "Seis SKU y seis equivalencias confirmadas. Huevo blanco granjero: 17 piezas por kg, una pieza por orden = 1/17 kg (aprox. 58.82 g). Pan Oroweat: 14 rebanadas por paquete, 2 por orden. Costos de compra pendientes; no descontar existencias automáticamente. Sin salsa ni mantequilla.",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
   "cost_status": "awaiting_verified_inventory_costs",
   "subrecipe_links": [],
-  "ingredient_sku_mapping_status": "six_skus_confirmed_five_conversions_verified_one_pending",
+  "ingredient_sku_mapping_status": "six_skus_confirmed_six_conversions_verified_costs_pending",
   "physical_yield_status": "not_applicable_without_subrecipe",
   "ingredients_confirmed": true,
   "sauce_used": false,
@@ -74,10 +78,8 @@
     "ingredients_without_sku_candidate": 0,
     "verified_unit_costs": 0,
     "gross_margin_status": "not_calculable",
-    "review_note": "Confirmado por usuario: pan Oroweat 680 g contiene 14 rebanadas, 2 por orden = 1/7 paquete. Huevo pendiente de piezas/kg. Costos de los seis ingredientes pendientes; margen no calculable.",
-    "verified_conversions": 5,
-    "pending_conversions": [
-      "Huevo: piezas por kg"
-    ]
+    "review_note": "Huevo blanco granjero SKU 01170024: usuario indica 17 piezas/kg, consumo 1/17 kg por orden. Todas las equivalencias listas; costo unitario comprobado aún no disponible para los seis insumos. No calcular margen hasta registrar los costos.",
+    "verified_conversions": 6,
+    "pending_conversions": []
   }
 }
