@@ -47,9 +47,9 @@ function renderSalesTrend(dates,salesByDate,firstDay){
 }
 
 
-// Referencia importada del reporte TPV octubre 2026: sólo importes positivos de la columna Importe.
-// Cantidad Presentación no es una venta monetaria; líneas negativas son movimientos internos excluidos.
-const OCTOBER_TPV_POSITIVE={"2026-10-01":8474,"2026-10-02":1037,"2026-10-05":5534,"2026-10-06":5776,"2026-10-07":9386,"2026-10-08":5620,"2026-10-09":1594,"2026-10-12":4055,"2026-10-13":8537,"2026-10-14":11449,"2026-10-15":5144,"2026-10-16":1008,"2026-10-19":5694,"2026-10-20":9855,"2026-10-21":10006,"2026-10-22":3483,"2026-10-23":877,"2026-10-26":8546,"2026-10-27":6447,"2026-10-28":4598,"2026-10-29":3552,"2026-10-30":611};
+// Referencia importada del TPV octubre 2026: venta NETA de columna Importe, con movimientos positivos y negativos.
+// Cantidad Presentación no es una venta monetaria; líneas negativas compensan operaciones, según documentos.
+const OCTOBER_TPV_POSITIVE={"2026-10-01":7233,"2026-10-02":845,"2026-10-05":5372,"2026-10-06":5449,"2026-10-07":8635,"2026-10-08":5079,"2026-10-09":1570,"2026-10-12":3840,"2026-10-13":8056,"2026-10-14":10714,"2026-10-15":4722,"2026-10-16":936,"2026-10-19":5192,"2026-10-20":8584,"2026-10-21":9312,"2026-10-22":3093,"2026-10-23":781,"2026-10-26":3101,"2026-10-27":5786,"2026-10-28":4482,"2026-10-29":3429,"2026-10-30":611};
 async function showOctoberReconciliation(token){
  const q=await fetch(BASE+"/rest/v1/ocs_filler_sales_days?select=sale_date,amount&sale_date=gte.2026-10-01&sale_date=lte.2026-10-31&order=sale_date.asc",{headers:{"apikey":KEY,"Authorization":"Bearer "+token},cache:"no-store"});
  if(!q.ok)throw Error("No fue posible consultar los cortes de octubre para la conciliación.");
@@ -72,8 +72,8 @@ async function showOctoberReconciliation(token){
  $("oct-compared-days").textContent=matched+" de "+days.length;
  $("oct-matched-difference").textContent=money(matchedReference-matchedStored);
  $("oct-sales-rows").innerHTML=lines.join("");
- $("oct-reconciliation-note").textContent="La diferencia corresponde únicamente a los "+matched+" días con corte en ambas fuentes. "+(missing.length?"Sin corte para "+missing.length+" día(s): "+missing.join(", ")+". ":"")+(unexpected.length?"Fechas adicionales en la app: "+unexpected.join(", ")+". ":"")+"Movimientos internos negativos excluidos: $14,461 (262 líneas); no se modifica el histórico de Supabase.";
- $("oct-reconciliation-status").textContent=missing.length||different.length||unexpected.length?"Requiere conciliación: "+different.length+" día(s) con diferencias; "+missing.length+" sin corte.":"Todos los días disponibles coinciden con el reporte TPV positivo.";
+ $("oct-reconciliation-note").textContent="La diferencia corresponde únicamente a los "+matched+" días con corte en ambas fuentes. "+(missing.length?"Sin corte para "+missing.length+" día(s): "+missing.join(", ")+". ":"")+(unexpected.length?"Fechas adicionales en la app: "+unexpected.join(", ")+". ":"")+"Movimientos negativos aplicados: −$14,461. La versión anterior de Supabase se preserva en fiiller_sales_reconciliation_audit.";
+ $("oct-reconciliation-status").textContent=missing.length||different.length||unexpected.length?"Requiere conciliación: "+different.length+" día(s) con diferencias; "+missing.length+" sin corte.":"Todos los días disponibles coinciden con el reporte TPV neto.";
 }
 
 async function show(){
