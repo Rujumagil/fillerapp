@@ -21,14 +21,14 @@
       "quantity": 60,
       "unit": "g",
       "inventory_code": "08020104",
-      "sku_selection_status": "confirmed_product_pending_verified_unit_cost"
+      "sku_selection_status": "confirmed_product_and_conversion_pending_verified_unit_cost"
     },
     {
       "name": "Queso manchego La Villita AAA a granel",
       "quantity": 50,
       "unit": "g",
       "inventory_code": "06040093",
-      "sku_selection_status": "confirmed_product_pending_verified_unit_cost"
+      "sku_selection_status": "confirmed_product_and_conversion_pending_verified_unit_cost"
     },
     {
       "name": "Huevo blanco granjero",
@@ -42,25 +42,25 @@
       "quantity": 1,
       "unit": "g",
       "inventory_code": "01090217",
-      "sku_selection_status": "confirmed_product_pending_verified_unit_cost_and_pack_conversion"
+      "sku_selection_status": "confirmed_product_and_conversion_pending_verified_unit_cost"
     },
     {
       "name": "Pimienta negra molida a granel",
       "quantity": 1,
       "unit": "g",
       "inventory_code": "TMP-ABA-002",
-      "sku_selection_status": "confirmed_product_pending_verified_unit_cost"
+      "sku_selection_status": "confirmed_product_and_conversion_pending_verified_unit_cost"
     }
   ],
   "preparation": {
     "method": "Preparar el pan Oroweat con jamón Virginia de pavo FUD y queso manchego, gratinar y terminar con huevo; sazonar con sal y pimienta. Método específico de tostado y cocción pendiente de confirmar con cocina."
   },
-  "notes": "Los seis ingredientes y sus SKU están identificados según confirmaciones de cocina: Oroweat 01230281, jamón FUD 08020104, manchego La Villita 06040093, huevo 01170024, sal Sol 01090217 y pimienta negra molida a granel TMP-ABA-002. Sin mantequilla ni salsa. Costos reales y equivalencias de presentación pendientes; sin descuentos automáticos.",
+  "notes": "Seis SKU confirmados, cuatro equivalencias de unidad verificadas. Pendientes las rebanadas por paquete Oroweat, piezas de huevo/kg y costos reales documentados de los seis insumos. Sin salsa ni mantequilla; no descontar inventario automáticamente.",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
   "cost_status": "awaiting_verified_inventory_costs",
   "subrecipe_links": [],
-  "ingredient_sku_mapping_status": "six_products_confirmed_pending_conversion_and_cost_verification",
+  "ingredient_sku_mapping_status": "six_skus_confirmed_four_conversions_verified_two_pending",
   "physical_yield_status": "not_applicable_without_subrecipe",
   "ingredients_confirmed": true,
   "sauce_used": false,
@@ -70,6 +70,11 @@
     "ingredients_without_sku_candidate": 0,
     "verified_unit_costs": 0,
     "gross_margin_status": "not_calculable",
-    "review_note": "Los seis SKU de productos están identificados y confirmados. Aún falta validar equivalencias de presentación y costos de compra, principalmente rebanadas de pan por paquete y piezas de huevo por kg. Pimienta negra molida registrada en g. Sin cálculo de margen ni consumo automático hasta verificar."
+    "review_note": "Google Sheet Control de Almacén: catálogo y entradas revisados, precios unitarios vacíos para 6 SKU. Equivalencia verificada para jamón 1000 g/kg, manchego 1000 g/kg, sal 1000 g/envase de 1 kg, pimienta 1 g/g. Oroweat y huevo pendientes.",
+    "verified_conversions": 4,
+    "pending_conversions": [
+      "Oroweat: rebanadas por paquete",
+      "Huevo: piezas por kg"
+    ]
   }
-}
+}\n
