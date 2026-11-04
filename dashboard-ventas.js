@@ -410,7 +410,7 @@ let flyChatContext=null;
 function flyChatAdd(message,author){
  const node=document.createElement("div");
  node.className="fly-bubble "+(author==="user"?"fly-user":"fly-bot");
- node.textContent=String(message).slice(0,2400);
+ node.textContent=String(message).slice(0,8000);
  $("fly-chat").appendChild(node);
  while($("fly-chat").children.length>14)$("fly-chat").removeChild($("fly-chat").firstChild);
  $("fly-chat").scrollTop=$("fly-chat").scrollHeight;
@@ -610,6 +610,10 @@ async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,i
 }
 
 async function show(){
+ flyOpsReportText="";
+ flyChatContext=null;
+ $("fly-generate-report").disabled=true;
+ $("fly-copy-report").disabled=true;
  const role=await FillerCloud.staffRole();
  if(role!=="admin"){$("login-card").hidden=false;$("dashboard").hidden=true;status(role?"Este tablero requiere acceso de administrador.":"Inicia sesión con tu cuenta de administrador.");return;}
  const session=JSON.parse(sessionStorage.getItem("filler_staff_session_v1")||"null");
@@ -722,9 +726,18 @@ $("fly-nav-link").addEventListener("click",event=>{
  switchDashboardView("fly");
  $("fly-ops-panel").scrollIntoView({behavior:"smooth",block:"start"});
 });
-$("fly-generate-report").addEventListener("click",()=>{
- const prompt="Genera un reporte ejecutivo del periodo con los principales hallazgos, riesgos, datos pendientes y tres acciones priorizadas con criterios de verificación.";
- flyChatAsk(prompt);
+$("fly-generate-report").addEventListener("click",async()=>{
+ if(!flyOpsReportText)return;
+ const period=flyChatContext?.period||"periodo seleccionado";
+ const report="REPORTE OPERATIVO VERIFICABLE · "+period+"\n\n"+flyOpsReportText+
+  "\n\nLECTURA: cifras TPV y tickets solo de fechas confirmadas, inventario actual independiente, sin inferir ventas en fechas pendientes. Sujeto a revisión humana.";
+ flyLastAnswer=report;
+ flyChatAdd(report,"bot");
+ $("fly-copy-answer").disabled=false;
+ $("fly-ai-status").textContent="Reporte con datos verificables generado dentro de Fiiller. Puedes copiarlo aquí.";
+ if($("fly-ai-enabled").checked){
+   await flyChatAsk("Analiza el reporte operativo: separa hallazgos confirmados de datos faltantes, explica riesgos y propone hasta tres acciones verificables, sin inventar cifras.");
+ }
 });
 $("fly-copy-answer").addEventListener("click",async()=>{
  if(!flyLastAnswer)return;
