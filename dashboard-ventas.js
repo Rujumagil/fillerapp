@@ -647,10 +647,10 @@ $("report-month").value=new Intl.DateTimeFormat("sv-SE",{timeZone:"America/Mexic
 $("report-month").addEventListener("change",()=>{$("report-month").dataset.userSelected="yes";show().catch(e=>status(e.message,true));});
 $("refresh").addEventListener("click",()=>show().catch(e=>status(e.message,true)));
 const viewGroups={
- resumen:new Set([1,5,6]),
- fly:new Set([2,3,4]),
- ventas:new Set([7,8,9,11,12]),
- operacion:new Set([10,13,14,15])
+ resumen:new Set([3,7,8]),
+ fly:new Set([4,5,6]),
+ ventas:new Set([9,10,11,13,14]),
+ operacion:new Set([12,15,16,17])
 };
 const viewDescriptions={
  resumen:"Resumen ejecutivo · indicadores, metas y alertas de negocio",
@@ -664,7 +664,7 @@ function switchDashboardView(view){
  activeView=view;
  const children=Array.from($("dashboard").children);
  children.forEach((node,index)=>{
-  if(index===0||index===children.length-1)return;
+  if(index<=2||index===children.length-1)return;
   node.classList.toggle("dashboard-view-hidden",!viewGroups[view].has(index));
  });
  document.querySelectorAll("[data-dashboard-view]").forEach(button=>{
