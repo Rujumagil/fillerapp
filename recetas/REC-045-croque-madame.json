@@ -45,29 +45,31 @@
       "sku_selection_status": "confirmed_product_pending_verified_unit_cost_and_pack_conversion"
     },
     {
-      "name": "Pimienta",
+      "name": "Pimienta negra molida a granel",
       "quantity": 1,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "TMP-ABA-002",
+      "sku_selection_status": "confirmed_product_pending_verified_unit_cost"
     }
   ],
   "preparation": {
     "method": "Preparar el pan Oroweat con jamón Virginia de pavo FUD y queso manchego, gratinar y terminar con huevo; sazonar con sal y pimienta. Método específico de tostado y cocción pendiente de confirmar con cocina."
   },
-  "notes": "REC-045 sin mantequilla ni salsa. SKU confirmados: Oroweat 01230281, FUD 08020104, manchego La Villita 06040093, huevo 01170024 y sal Sol 01090217. Pimienta por confirmar. Costos reales y equivalencias pendientes; sin descuentos automáticos.",
+  "notes": "Los seis ingredientes y sus SKU están identificados según confirmaciones de cocina: Oroweat 01230281, jamón FUD 08020104, manchego La Villita 06040093, huevo 01170024, sal Sol 01090217 y pimienta negra molida a granel TMP-ABA-002. Sin mantequilla ni salsa. Costos reales y equivalencias de presentación pendientes; sin descuentos automáticos.",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
   "cost_status": "awaiting_verified_inventory_costs",
   "subrecipe_links": [],
-  "ingredient_sku_mapping_status": "five_products_confirmed_pending_cost_and_conversions_one_candidate_zero_unassigned",
+  "ingredient_sku_mapping_status": "six_products_confirmed_pending_conversion_and_cost_verification",
   "physical_yield_status": "not_applicable_without_subrecipe",
   "ingredients_confirmed": true,
   "sauce_used": false,
   "costing_review": {
     "sale_price_mxn": 85,
-    "sku_candidates_pending_confirmation": 1,
+    "sku_candidates_pending_confirmation": 0,
     "ingredients_without_sku_candidate": 0,
     "verified_unit_costs": 0,
     "gross_margin_status": "not_calculable",
-    "review_note": "Sal Sol (1 g por orden) confirmada; envase de 1 kg registrado en almacén por pieza. Equivalencia y costo pendientes; huevo requiere piezas/kg y pan rebanadas/paquete. No calcular margen."
+    "review_note": "Los seis SKU de productos están identificados y confirmados. Aún falta validar equivalencias de presentación y costos de compra, principalmente rebanadas de pan por paquete y piezas de huevo por kg. Pimienta negra molida registrada en g. Sin cálculo de margen ni consumo automático hasta verificar."
   }
 }
