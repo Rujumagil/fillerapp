@@ -459,7 +459,7 @@ async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,i
  const average=tickets?pairs.reduce((n,d)=>n+Number(salesByDate.get(d)),0)/tickets:null;
  const results=[];
  const add=(title,state,detail,note)=>results.push({title,state,detail,note});
- add("Cortes y tickets",missing||missingTickets?"warn":dates.length?"good":"unknown",missing+" cortes y "+missingTickets+" tickets por registrar","Los registros ausentes no representan ventas cero.");
+ add("Cortes y tickets",missing||missingTickets?"warn":dates.length?"good":"unknown",missing+" días sin corte · "+missingTickets+" días sin tickets","Los registros ausentes no representan ventas cero.");
  if(average===null||!target||!Number(target.avg_ticket_target))add("Ticket promedio","unknown","Sin comparación","Faltan datos comparables o meta.");
  else {
   const ratio=average/Number(target.avg_ticket_target);
@@ -469,7 +469,14 @@ async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,i
  else {
   const sum=cuts.reduce((n,d)=>n+Number(salesByDate.get(d)),0);
   const pct=100*sum/Number(target.sales_target);
-  add("Meta de ventas",missing?"unknown":"warn",pct.toFixed(1)+"% del objetivo",missing?"Periodo incompleto: no calificar el ritmo.":"Revisar avance contra calendario; no es pronóstico.");
+  const year=Number(firstDay.slice(0,4)),month=Number(firstDay.slice(5,7));
+  const lastDay=new Date(Date.UTC(year,month,0)).getUTCDate();
+  let planned=0;
+  for(let i=1;i<=lastDay;i++){const weekday=new Date(Date.UTC(year,month-1,i)).getUTCDay();if(weekday!==0&&weekday!==6)planned++;}
+  const calendarPct=planned?dates.length/planned*100:0;
+  const ratio=calendarPct?pct/calendarPct:0;
+  const grade=missing?"unknown":ratio>=.95?"good":ratio>=.8?"warn":"bad";
+  add("Meta de ventas",grade,pct.toFixed(1)+"% del objetivo",missing?"Faltan cortes; ritmo sin calificar.":ratio>=.95?"Avance acorde al calendario hábil.":"Avance inferior a los días hábiles transcurridos.");
  }
  const low=Number(inventory?.low);
  add("Abastecimiento",!Number.isFinite(low)?"unknown":low>0?(low>=20?"bad":"warn"):"good",Number.isFinite(low)?fmt(low)+" insumos en mínimo o por debajo":"Sin dato de inventario","Revisar reposición con el almacén de Fiiller.");
