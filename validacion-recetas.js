@@ -10,7 +10,7 @@ function render(){
  const verified=lines.filter(x=>x.mapping_status==="verified").length,candidate=lines.filter(x=>x.mapping_status==="candidate").length;
  $("stats").innerHTML='<span>'+recipes.length+' recetas</span><span>'+verified+' SKU confirmados</span><span>'+candidate+' SKU sugeridos</span><span>'+(lines.length-verified)+' componentes pendientes</span>';
  const sub=recipes.find(x=>x.recipe_id==="SUB-002");
- if(sub){$("yield-qty").value=sub.yield_quantity;$("yield-confirm").value=sub.yield_verified?"yes":"no";msg("yield-status",sub.yield_verified?"Rendimiento físicamente confirmado.":"Rendimiento estimado; comprobación pendiente.");}
+ if(!sub){$("yield-form").closest("section").hidden=true;}else{$("yield-form").closest("section").hidden=false;$("yield-qty").value=sub.yield_quantity;$("yield-confirm").value=sub.yield_verified?"yes":"no";msg("yield-status",sub.yield_verified?"Rendimiento físicamente confirmado.":"Rendimiento estimado; comprobación pendiente.");}
  $("recipe-lines").innerHTML=recipes.map(r=>'<div><h3>'+esc(r.recipe_id+" · "+r.recipe_name)+'</h3>'+lines.filter(x=>x.recipe_id===r.recipe_id).map(l=>{
   if(l.subrecipe_id)return '<div class="line"><h3>'+esc(l.ingredient_name)+' <span>'+esc(l.required_quantity+" "+l.required_unit)+" · "+esc(l.subrecipe_id)+'</span></h3><p class="muted">Subreceta vinculada. No se descuenta su materia prima por segunda vez.</p></div>';
   return '<form class="line" data-recipe="'+esc(l.recipe_id)+'" data-line="'+l.line_number+'"><h3>'+esc(l.ingredient_name)+' <span>'+esc(l.required_quantity+" "+l.required_unit)+' por receta</span></h3><div class="line-grid"><label>SKU de inventario<select name="sku" required>'+skuOptions(l.candidate_inventory_code||"")+'</select></label><label>Equivalencia: '+esc(l.required_unit)+' / 1 unidad de almacén<input name="factor" type="number" min="0.000001" step="any" value="'+esc(l.quantity_per_inventory_unit??"")+'" required placeholder="Ej. 1000"></label><label>Estado<select name="state"><option value="candidate" '+(l.mapping_status==="verified"?"":"selected")+'>Propuesta sin validar</option><option value="verified" '+(l.mapping_status==="verified"?"selected":"")+'>Confirmado tras comprobar</option></select></label><button>Guardar</button></div><p class="flag '+(l.mapping_status==="verified"?"ok":"")+'">'+(l.mapping_status==="verified"?"Confirmado":l.mapping_status==="candidate"?"SKU sugerido, no aprobado":"Sin asignación")+'</p></form>';
@@ -21,7 +21,7 @@ async function load(){
  if(await FillerCloud.staffRole()!=="admin"){$("login").hidden=false;$("private").hidden=true;return}
  $("login").hidden=true;$("private").hidden=false;
  [recipes,lines,items]=await Promise.all([
- api("fiiller_recipe_costing?select=recipe_id,recipe_name,recipe_type,yield_quantity,yield_unit,yield_verified&order=recipe_id.asc"),
+ api("fiiller_recipe_costing?select=recipe_id,recipe_name,recipe_type,yield_quantity,yield_unit,yield_verified&status=eq.confirmed&order=recipe_id.asc"),
  api("fiiller_recipe_costing_lines?select=recipe_id,line_number,ingredient_name,required_quantity,required_unit,subrecipe_id,candidate_inventory_code,mapping_status,conversion_status,quantity_per_inventory_unit&order=recipe_id.asc,line_number.asc"),
  api("filler_inventory_items?select=code,name,unit,unit_cost,unit_cost_source&order=name.asc&limit=1000")
  ]);
