@@ -246,6 +246,73 @@ async function renderKitchenRetail(token,firstDay){
  $("kr-note").textContent=items.length?"Cifras netas por artículo del TPV Arrow. Cocina incluye bebidas preparadas y extras. No se agregan pedidos de la app ni se interpreta este desglose como utilidad.":"Aún no hay detalle de productos del TPV para este mes; S/D no equivale a $0 de ventas.";
 }
 
+
+async function renderExecutiveSummary(token,firstDay,dates,salesByDate,ticketByDate,monthNow){
+ const headers={apikey:KEY,Authorization:"Bearer "+token},selected=firstDay.slice(0,7),current=monthNow.slice(0,7);
+ const prev=new Date(firstDay+"T12:00:00Z");prev.setUTCMonth(prev.getUTCMonth()-1);
+ const prevStart=prev.toISOString().slice(0,10);
+ const [targetsResponse,prevResponse,productsResponse,classesResponse]=await Promise.all([
+  fetch(BASE+"/rest/v1/fiiller_monthly_targets?select=effective_month,sales_target,tickets_target,avg_ticket_target&effective_month=lte."+firstDay+"&order=effective_month.desc&limit=1",{headers,cache:"no-store"}),
+  fetch(BASE+"/rest/v1/ocs_filler_sales_days?select=sale_date,amount&sale_date=gte."+prevStart+"&sale_date=lt."+firstDay,{headers,cache:"no-store"}),
+  fetch(BASE+"/rest/v1/fiiller_tpv_product_monthly?select=product_code,product_name,net_units,net_amount&sale_month=eq."+firstDay+"&limit=1000",{headers,cache:"no-store"}),
+  fetch(BASE+"/rest/v1/fiiller_tpv_product_classification?select=product_code,product_type&limit=1000",{headers,cache:"no-store"})
+ ]);
+ if([targetsResponse,prevResponse,productsResponse,classesResponse].some(r=>!r.ok))throw Error("No se pudieron preparar los indicadores ejecutivos.");
+ const [targetRows,prevRows,products,classes]=await Promise.all([targetsResponse.json(),prevResponse.json(),productsResponse.json(),classesResponse.json()]);
+ const goal=targetRows[0]||null;
+ const known=dates.filter(d=>salesByDate.has(d)),unknown=dates.filter(d=>!salesByDate.has(d));
+ const ticketDates=dates.filter(d=>ticketByDate.has(d)),missingTickets=dates.filter(d=>!ticketByDate.has(d));
+ const sales=known.reduce((a,d)=>a+salesByDate.get(d),0);
+ const comparable=dates.filter(d=>ticketByDate.get(d)>0&&salesByDate.has(d));
+ const ticketTotal=comparable.reduce((a,d)=>a+ticketByDate.get(d),0);
+ const ticketAverage=ticketTotal?comparable.reduce((a,d)=>a+salesByDate.get(d),0)/ticketTotal:null;
+ const result=[],action=[],risks=[];
+ const add=(arr,subject,content)=>arr.push({subject,content});
+ if(!known.length){
+   add(result,"Sin cortes","No hay ventas TPV confirmadas para el periodo seleccionado; no equivale a cero ventas.");
+   add(action,"Registrar cierres","Importar los cortes del TPV para activar comparaciones y recomendaciones basadas en ventas.");
+ } else {
+   add(result,"Ventas netas",money(sales)+" registradas en "+known.length+" días con corte del periodo.");
+   if(goal){
+    const pct=100*sales/Number(goal.sales_target);
+    add(result,"Meta mensual",pct.toFixed(1)+"% del objetivo de "+money(goal.sales_target)+", con "+money(Math.max(0,Number(goal.sales_target)-sales))+" por alcanzar.");
+   }
+ }
+ if(unknown.length) add(risks,"Cortes pendientes",unknown.length+" día(s) hábiles sin corte. Evitar interpretar el total parcial como cierre del periodo.");
+ if(missingTickets.length) add(risks,"Tickets incompletos",missingTickets.length+" día(s) hábiles sin tickets registrados; el promedio sólo contempla días comparables.");
+ if(ticketAverage!==null && goal){
+  const difference=ticketAverage-Number(goal.avg_ticket_target);
+  add(result,"Ticket promedio comparable",money(ticketAverage)+" en "+comparable.length+" día(s) con venta y tickets capturados.");
+  if(difference<0)add(action,"Mejorar venta por ticket","Brecha de "+money(-difference)+" frente a la meta. Probar recomendaciones de complementos y medir su efecto.");
+  else add(result,"Objetivo por ticket","El ticket promedio comparable alcanza o supera la meta por "+money(difference)+".");
+ }
+ const prior=prevRows.reduce((a,r)=>a+Number(r.amount),0);
+ if(known.length && prior>0){
+   const priorComparable=selected===current?prevRows.filter(r=>Number(r.sale_date.slice(-2))<=Number(monthNow.slice(-2))).reduce((a,r)=>a+Number(r.amount),0):prior;
+   if(priorComparable>0)add(result,"Referencia anterior",money(priorComparable)+" en el "+(selected===current?"mismo tramo calendario del":"total registrado del")+" mes anterior. No constituye una comparación completa si faltan cortes.");
+ }
+ const map=new Map(classes.map(c=>[c.product_code,c.product_type]));
+ const typed={cocina:0,retail:0,pendiente:0};
+ for(const p of products)typed[map.get(p.product_code)||"pendiente"]+=Number(p.net_amount);
+ if(products.length){
+  const winner=products.filter(p=>Number(p.net_units)>0).sort((a,b)=>Number(b.net_amount)-Number(a.net_amount))[0];
+  if(winner)add(result,"Producto líder",winner.product_name+" aporta "+money(winner.net_amount)+" ("+Number(winner.net_units)+" unidades netas).");
+  if(typed.cocina+typed.retail+typed.pendiente>0){
+   add(result,"Participación por área","Cocina "+(typed.cocina/(typed.cocina+typed.retail+typed.pendiente)*100).toFixed(1)+"%; retail "+(typed.retail/(typed.cocina+typed.retail+typed.pendiente)*100).toFixed(1)+"% de ingresos netos.");
+   if(typed.retail>0)add(action,"Impulsar complementos","Probar venta cruzada con artículos retail junto a los productos preparados más solicitados; aún no contamos con márgenes para confirmar rentabilidad.");
+   if(typed.pendiente>0)add(risks,"Clasificación incompleta",money(typed.pendiente)+" de artículos no asignados a cocina ni retail.");
+  }
+ }else if(known.length){
+  add(risks,"Sin detalle por producto","Hay cortes de ventas, pero falta el archivo de artículos del periodo. No se deduce el mix de producto.");
+ }
+ if(selected>current)add(risks,"Periodo futuro","No se emite diagnóstico de ventas futuras.");
+ if(!risks.length)add(risks,"Sin alertas de integridad","No se detectaron faltantes en las fuentes revisadas para este periodo; esto no sustituye el cierre de caja.");
+ const draw=(id,items)=>{$(id).innerHTML=items.map(it=>'<div class="executive-line"><strong>'+escape(it.subject)+'</strong><p>'+escape(it.content)+'</p></div>').join("");};
+ draw("executive-results",result);draw("executive-actions",action.length?action:[{subject:"Seguimiento",content:"Mantener los cortes y tickets diarios actualizados antes de definir acciones comerciales adicionales."}]);draw("executive-risks",risks);
+ $("executive-period").textContent=new Date(firstDay+"T12:00:00Z").toLocaleDateString("es-MX",{month:"long",year:"numeric",timeZone:"UTC"});
+ $("executive-source").textContent="Lectura automática basada en TPV, tickets capturados, metas y productos del mes elegido. No es una predicción de IA ni un cierre bancario.";
+}
+
 async function show(){
  const role=await FillerCloud.staffRole();
  if(role!=="admin"){$("login-card").hidden=false;$("dashboard").hidden=true;status(role?"Este tablero requiere acceso de administrador.":"Inicia sesión con tu cuenta de administrador.");return;}
@@ -285,6 +352,7 @@ async function show(){
  await showOctoberReconciliation(session.access_token);
  await renderTpvProductRanking(session.access_token,firstDay);
  await renderKitchenRetail(session.access_token,firstDay);
+ await renderExecutiveSummary(session.access_token,firstDay,dates,salesByDate,ticketByDate,monthNow);
  const sales=data.sales||{},orders=data.orders||{},inventory=data.inventory||{},feedback=data.feedback||{};
  $("login-card").hidden=true;$("dashboard").hidden=false;
  $("sales-amount").textContent=monthSales.length?money(monthAmount):"Sin cortes";
