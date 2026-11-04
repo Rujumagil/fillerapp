@@ -405,6 +405,7 @@ async function renderRecipeCosting(token){
 }
 
 
+let flyOpsReportText="";
 async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,inventory){
  const headers={apikey:KEY,Authorization:"Bearer "+token};
  const res=await fetch(BASE+"/rest/v1/fiiller_monthly_targets?select=avg_ticket_target,sales_target&effective_month=lte."+firstDay+"&order=effective_month.desc&limit=1",{headers,cache:"no-store"});
@@ -440,6 +441,51 @@ async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,i
  add("Abastecimiento",!Number.isFinite(low)?"unknown":low>0?(low>=20?"bad":"warn"):"good",Number.isFinite(low)?fmt(low)+" insumos en mínimo o por debajo":"Sin dato de inventario","Revisar reposición con el almacén de Fiiller.");
  $("fly-grid").innerHTML=results.map(r=>'<div class="fly-box '+r.state+'"><h3>'+escape(r.title)+'</h3><p>'+escape(r.detail)+'</p><small>'+escape(r.note)+'</small></div>').join("");
  $("fly-period").textContent=new Date(firstDay+"T12:00:00Z").toLocaleDateString("es-MX",{month:"long",year:"numeric",timeZone:"UTC"});
+ const actionItems=[];
+ const task=(priority,owner,title,evidence,action,done)=>actionItems.push({priority,owner,title,evidence,action,done});
+ if(missing>0||missingTickets>0)task("Alta","Fly Quality","Completar registros de ventas y tickets",
+  missing+" días hábiles sin corte y "+missingTickets+" sin captura de tickets en el periodo.",
+  "Revisar los reportes TPV Arrow y cargar solamente los datos confirmados.",
+  "Los cortes y tickets de todas las fechas operativas evaluadas están conciliados, sin inventar ceros.");
+ if(Number.isFinite(low)&&low>0)task(low>=20?"Alta":"Media","Fly Delivery","Priorizar reposición de inventario",
+  fmt(low)+" insumos en mínimo o por debajo según el inventario actual.",
+  "Revisar el listado de insumos críticos, caducidades y disponibilidad real con CEDIS OCS.",
+  "La revisión humana registra necesidades de compra y confirma las existencias.");
+ if(average!==null&&target&&Number(target.avg_ticket_target)>0&&average<Number(target.avg_ticket_target))task("Media","Fly Delivery","Elevar el ticket promedio",
+  money(average)+" contra meta "+money(target.avg_ticket_target)+" en "+pairs.length+" días comparables.",
+  "Evaluar venta cruzada con complementos y comparar resultados tras nuevos cortes.",
+  "El ticket promedio se vuelve a medir con tickets y ventas confirmados del mismo día.");
+ if(!target||!Number(target.sales_target))task("Media","Fly Quality","Comprobar metas configuradas",
+  "No se encontró una meta de ventas aplicable.",
+  "Verificar vigencia y configuración administrativa de metas.",
+  "Se confirma una meta activa y documentada para el mes seleccionado.");
+ if(!actionItems.length)task("Seguimiento","Fly Quality","Mantener monitoreo preventivo",
+  "No se generaron prioridades por las reglas evaluadas.",
+  "Revisar integridad de datos e inventario en la próxima actualización.",
+  "Los indicadores conservan fuentes completas y verificables.");
+ const top=actionItems.slice(0,3);
+ $("fly-action-list").innerHTML='<div class="fly-action-list">'+top.map((t,i)=>'<article class="fly-task"><span class="fly-owner">'+escape(t.owner)+' · '+escape(t.priority)+'</span><h4>'+(i+1)+'. '+escape(t.title)+'</h4><p><strong>Evidencia:</strong> '+escape(t.evidence)+'</p><p><strong>Acción:</strong> '+escape(t.action)+'</p><small><strong>Cierre:</strong> '+escape(t.done)+'</small></article>').join("")+'</div>';
+ const period=firstDay.slice(0,7);
+ const lines=[
+  "FIILLER CAFÉ · REPORTE PARA COMPÁS FLY OPS",
+  "Periodo de ventas: "+period,
+  "Fuente: cortes TPV Arrow y tickets manuales; inventario actual separado.",
+  "Tipo: diagnóstico basado en reglas, pendiente de revisión humana.",
+  "",
+  "SEMÁFORO"
+ ];
+ results.forEach(r=>lines.push("- "+r.title+" ["+r.state+"]: "+r.detail+". "+r.note));
+ lines.push("","PRIORIDADES");
+ top.forEach((t,i)=>lines.push(
+  (i+1)+". "+t.title+" | Responsable sugerido: "+t.owner+" | Prioridad: "+t.priority,
+  "Evidencia: "+t.evidence,
+  "Acción: "+t.action,
+  "Criterio de cierre: "+t.done
+ ));
+ lines.push("","CONTROL: No se han ejecutado acciones, creado issues, contactado CEDIS ni invocado agentes. Ventas TPV y pedidos de app no se suman. Costos de compra internos no se incluyen.");
+ flyOpsReportText=lines.join("\n");
+ $("fly-copy-report").disabled=false;
+
 }
 
 async function show(){
@@ -510,6 +556,16 @@ async function show(){
 $("report-month").value=new Intl.DateTimeFormat("sv-SE",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit"}).format(new Date()).slice(0,7);
 $("report-month").addEventListener("change",()=>{$("report-month").dataset.userSelected="yes";show().catch(e=>status(e.message,true));});
 $("refresh").addEventListener("click",()=>show().catch(e=>status(e.message,true)));
+$("fly-copy-report").addEventListener("click",async()=>{
+ if(!flyOpsReportText)return;
+ try{
+  await navigator.clipboard.writeText(flyOpsReportText);
+  $("fly-copy-state").textContent="Reporte copiado. Puedes pegarlo en Compás Fly Ops para la revisión de Quality y Delivery.";
+ }catch(error){
+  $("fly-copy-state").textContent="No se pudo acceder al portapapeles en este navegador. Revisa los permisos del sitio.";
+ }
+});
+
 $("login-form").addEventListener("submit",async e=>{
  e.preventDefault();const f=e.currentTarget,b=f.querySelector("button");b.disabled=true;
  try{if(f.elements.username.value.trim().toLowerCase()!=="admin")throw Error("Ingresa con el usuario admin.");await FillerCloud.login("admin",f.elements.password.value);await show();}
