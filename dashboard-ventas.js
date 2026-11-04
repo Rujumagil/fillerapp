@@ -210,6 +210,42 @@ async function renderTrendComparisons(token,firstDay,monthEnd,dates,salesByDate,
  $("ticket-trend").innerHTML='<svg viewBox="0 0 '+w+' '+height+'" style="min-width:'+w+'px;width:100%;height:auto" role="img" aria-label="Ticket promedio por fecha con corte y tickets registrados"><line x1="'+left+'" y1="'+(height-bottom)+'" x2="'+(w-10)+'" y2="'+(height-bottom)+'" stroke="#c9d9ce"/><text x="5" y="'+(top+8)+'" font-size="12" fill="#5c7465">'+escape(money(maxAvg))+'</text><path d="'+path+'" fill="none" stroke="#087650" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'</svg>';
 }
 
+
+async function renderKitchenRetail(token,firstDay){
+ const headers={apikey:KEY,Authorization:"Bearer "+token};
+ const [salesRes,classRes]=await Promise.all([
+  fetch(BASE+"/rest/v1/fiiller_tpv_product_monthly?select=product_code,product_name,net_units,net_amount&sale_month=eq."+firstDay+"&limit=1000",{headers,cache:"no-store"}),
+  fetch(BASE+"/rest/v1/fiiller_tpv_product_classification?select=product_code,product_type,classification_rule&limit=1000",{headers,cache:"no-store"})
+ ]);
+ if(!salesRes.ok||!classRes.ok)throw Error("No se pudo consultar la clasificación de productos TPV.");
+ const items=await salesRes.json(),mapping=new Map((await classRes.json()).map(c=>[c.product_code,c]));
+ const groups={cocina:{amount:0,qty:0,count:0,items:[]},retail:{amount:0,qty:0,count:0,items:[]},pendiente:{amount:0,qty:0,count:0,items:[]}};
+ items.forEach(p=>{
+  const type=mapping.get(p.product_code)?.product_type||"pendiente";
+  const g=groups[type]||groups.pendiente;
+  g.amount+=Number(p.net_amount);g.qty+=Number(p.net_units);g.count++;g.items.push(p);
+ });
+ const total=Object.values(groups).reduce((a,g)=>a+g.amount,0);
+ const pct=value=>total>0?(value/total*100).toFixed(1)+"%":"—";
+ $("kr-period").textContent=new Date(firstDay+"T12:00:00Z").toLocaleDateString("es-MX",{month:"long",year:"numeric",timeZone:"UTC"});
+ for(const type of ["cocina","retail","pendiente"]){
+  const g=groups[type];
+  $("kr-"+type+"-amount").textContent=items.length?money(g.amount):"S/D";
+  $("kr-"+type+"-qty").textContent=items.length?fmt(g.qty)+" unidades · "+g.count+" códigos":"Sin detalle";
+  $("kr-"+type+"-pct").textContent=pct(g.amount);
+ }
+ $("kr-combined-bar").innerHTML=total>0?["cocina","retail","pendiente"].map(type=>'<div class="kr-segment kr-'+type+'" style="width:'+(groups[type].amount/total*100)+'%" title="'+escape(type+": "+money(groups[type].amount))+'"></div>').join(""):"";
+ function ranking(type){
+  const records=groups[type].items.filter(p=>Number(p.net_amount)>0).sort((a,b)=>Number(b.net_amount)-Number(a.net_amount)).slice(0,5);
+  const max=Math.max(1,...records.map(r=>Number(r.net_amount)));
+  $("kr-"+type+"-leaders").innerHTML=records.map((p,i)=>'<div class="kr-leader"><span class="kr-rank">'+(i+1)+'</span><div class="kr-name">'+escape(p.product_name)+'<small>'+fmt(p.net_units)+' uds. · '+escape(p.product_code)+'</small><div class="kr-mini-track"><div class="kr-mini-fill" style="width:'+(Number(p.net_amount)/max*100).toFixed(1)+'%"></div></div></div><strong>'+money(p.net_amount)+'</strong></div>').join("")||'<p class="small">Sin productos de esta categoría en el mes elegido.</p>';
+ }
+ ranking("cocina");ranking("retail");
+ const pending=groups.pendiente.items;
+ $("kr-review").textContent=pending.length?"Por revisar: "+pending.map(p=>p.product_name+" ("+p.product_code+")").join("; ")+". No se asignan a cocina o retail hasta validarlos.":"Todos los productos de este periodo están clasificados.";
+ $("kr-note").textContent=items.length?"Cifras netas por artículo del TPV Arrow. Cocina incluye bebidas preparadas y extras. No se agregan pedidos de la app ni se interpreta este desglose como utilidad.":"Aún no hay detalle de productos del TPV para este mes; S/D no equivale a $0 de ventas.";
+}
+
 async function show(){
  const role=await FillerCloud.staffRole();
  if(role!=="admin"){$("login-card").hidden=false;$("dashboard").hidden=true;status(role?"Este tablero requiere acceso de administrador.":"Inicia sesión con tu cuenta de administrador.");return;}
@@ -248,6 +284,7 @@ async function show(){
  $("monthly-sales-note").textContent="Tickets manuales capturados: "+dates.filter(d=>ticketByDate.has(d)).length+" días. Cortes importados: "+dates.filter(d=>salesByDate.has(d)).length+" días. Los días pendientes no se consideran ventas de $0.";
  await showOctoberReconciliation(session.access_token);
  await renderTpvProductRanking(session.access_token,firstDay);
+ await renderKitchenRetail(session.access_token,firstDay);
  const sales=data.sales||{},orders=data.orders||{},inventory=data.inventory||{},feedback=data.feedback||{};
  $("login-card").hidden=true;$("dashboard").hidden=false;
  $("sales-amount").textContent=monthSales.length?money(monthAmount):"Sin cortes";
