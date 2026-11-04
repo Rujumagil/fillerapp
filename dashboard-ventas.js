@@ -313,6 +313,39 @@ async function renderExecutiveSummary(token,firstDay,dates,salesByDate,ticketByD
  $("executive-source").textContent="Lectura automática basada en TPV, tickets capturados, metas y productos del mes elegido. No es una predicción de IA ni un cierre bancario.";
 }
 
+
+async function renderCostAndInventory(token,firstDay){
+ const headers={apikey:KEY,Authorization:"Bearer "+token};
+ const [salesRes,costRes,invRes]=await Promise.all([
+  fetch(BASE+"/rest/v1/fiiller_tpv_product_monthly?select=product_code,product_name,net_units,net_amount&sale_month=eq."+firstDay+"&limit=1000",{headers,cache:"no-store"}),
+  fetch(BASE+"/rest/v1/fiiller_tpv_product_costs?select=product_code,cost_per_unit,cost_source,verified_at&limit=1000",{headers,cache:"no-store"}),
+  fetch(BASE+"/rest/v1/filler_inventory_items?select=code,name,quantity,min_quantity,unit,unit_cost,expiration_date&limit=1000",{headers,cache:"no-store"})
+ ]);
+ if(!salesRes.ok||!costRes.ok||!invRes.ok)throw Error("No fue posible consultar costos o existencias con permisos de administrador.");
+ const products=await salesRes.json(),costs=await costRes.json(),inventory=await invRes.json();
+ const byCost=new Map(costs.filter(c=>c.cost_per_unit!==null&&c.cost_source&&c.verified_at).map(c=>[c.product_code,Number(c.cost_per_unit)]));
+ const sold=products.filter(p=>Number(p.net_units)>0);
+ const priced=sold.filter(p=>byCost.has(p.product_code));
+ const verifiedRevenue=priced.reduce((sum,p)=>sum+Number(p.net_amount),0);
+ const verifiedCosts=priced.reduce((sum,p)=>sum+Number(p.net_units)*byCost.get(p.product_code),0);
+ const totalRevenue=products.reduce((sum,p)=>sum+Number(p.net_amount),0);
+ $("cost-covered").textContent=priced.length+" de "+sold.length+" códigos con venta neta";
+ $("cost-coverage-pct").textContent=sold.length?(100*priced.length/sold.length).toFixed(1)+"%":"—";
+ $("cost-verified-revenue").textContent=priced.length?money(verifiedRevenue):"Pendiente";
+ $("cost-verified-margin").textContent=priced.length?money(verifiedRevenue-verifiedCosts):"No calculable";
+ $("cost-margin-note").textContent=priced.length?"Margen bruto parcial únicamente de "+priced.length+" productos con costo comprobado. No representa la utilidad total ni incluye gastos operativos.":"Todavía no hay costos unitarios de productos TPV verificados; no se atribuye utilidad a los "+money(totalRevenue)+" de venta neta del periodo.";
+ const withUnitCost=inventory.filter(x=>Number(x.unit_cost)>0).length;
+ const lows=inventory.filter(x=>x.min_quantity!==null&&Number(x.quantity)<=Number(x.min_quantity));
+ const expired=inventory.filter(x=>x.expiration_date&&x.expiration_date<new Intl.DateTimeFormat("sv-SE",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date()));
+ $("inv-cost-coverage").textContent=withUnitCost+" de "+inventory.length+" insumos con costo positivo";
+ $("inv-low-count").textContent=String(lows.length);
+ $("inv-expired-count").textContent=String(expired.length);
+ const greatest=lows.sort((a,b)=>(Number(b.min_quantity)-Number(b.quantity))-(Number(a.min_quantity)-Number(a.quantity))).slice(0,8);
+ $("inv-low-list").innerHTML=greatest.map(x=>'<div class="cost-alert"><strong>'+escape(x.name)+'</strong><span>'+escape(x.code||"Sin código")+' · '+fmt(x.quantity)+' '+escape(x.unit||"")+" disponibles / mínimo "+fmt(x.min_quantity)+'</span></div>').join("")||'<p class="small">No se detectaron insumos en mínimo o por debajo de él.</p>';
+ $("cost-pending-products").innerHTML=sold.filter(p=>!byCost.has(p.product_code)).sort((a,b)=>Number(b.net_amount)-Number(a.net_amount)).slice(0,7).map(p=>'<div class="cost-alert"><strong>'+escape(p.product_name)+'</strong><span>'+escape(p.product_code)+" · "+money(p.net_amount)+" vendido · falta costo unitario verificado</span></div>").join("")||'<p class="small">Todos los productos vendidos de este mes tienen costo verificado.</p>';
+ $("inventory-scope-note").textContent="Inventario físico actual, no histórico de "+firstDay.slice(0,7)+". No se descuenta automáticamente por ventas TPV sin recetas y equivalencias comprobadas.";
+}
+
 async function show(){
  const role=await FillerCloud.staffRole();
  if(role!=="admin"){$("login-card").hidden=false;$("dashboard").hidden=true;status(role?"Este tablero requiere acceso de administrador.":"Inicia sesión con tu cuenta de administrador.");return;}
@@ -353,6 +386,7 @@ async function show(){
  await renderTpvProductRanking(session.access_token,firstDay);
  await renderKitchenRetail(session.access_token,firstDay);
  await renderExecutiveSummary(session.access_token,firstDay,dates,salesByDate,ticketByDate,monthNow);
+ await renderCostAndInventory(session.access_token,firstDay);
  const sales=data.sales||{},orders=data.orders||{},inventory=data.inventory||{},feedback=data.feedback||{};
  $("login-card").hidden=true;$("dashboard").hidden=false;
  $("sales-amount").textContent=monthSales.length?money(monthAmount):"Sin cortes";
