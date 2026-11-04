@@ -161,6 +161,55 @@ async function renderGoals(token,firstDay,monthEnd,dates,salesByDate,ticketByDat
  put("goal-summary",goalNarrative+(missingTickets.length?" Faltan tickets en "+missingTickets.length+" día(s).":""));
 }
 
+
+async function renderTrendComparisons(token,firstDay,monthEnd,dates,salesByDate,ticketByDate){
+ const headers={apikey:KEY,Authorization:"Bearer "+token};
+ const displayMonth=d=>new Date(d+"T12:00:00Z").toLocaleDateString("es-MX",{month:"short",year:"numeric",timeZone:"UTC"});
+ const allDays=dates;
+ // Weeks are Monday-Sunday, but sum only actual TPV cuts; never impute missing cuts as zero.
+ const weeks=new Map();
+ for(const day of allDays){
+  const dt=new Date(day+"T12:00:00Z");
+  const mon=new Date(dt.getTime()-((dt.getUTCDay()+6)%7)*86400000).toISOString().slice(0,10);
+  if(!weeks.has(mon))weeks.set(mon,{start:mon,sum:0,observed:0,expected:0});
+  const w=weeks.get(mon);w.expected++;
+  if(salesByDate.has(day)){w.observed++;w.sum+=Number(salesByDate.get(day));}
+ }
+ const weekly=[...weeks.values()];
+ const maxWeekly=Math.max(1,...weekly.map(w=>w.sum));
+ $("weekly-sales").innerHTML=weekly.map((w,i)=>'<div class="weekly-line"><div><strong>Semana '+(i+1)+'</strong><span class="small">'+escape(w.start)+' · '+w.observed+'/'+w.expected+' días</span></div><div class="trend-track"><div class="trend-fill" style="width:'+(100*w.sum/maxWeekly).toFixed(1)+'%"></div></div><strong>'+ (w.observed?money(w.sum):'Sin cortes') +'</strong></div>').join("")||'<p class="small">No hay días de operación para graficar.</p>';
+ $("weekly-explain").textContent=weekly.some(w=>w.observed<w.expected)?"Las semanas con cortes faltantes son parciales; las barras no representan un cierre semanal completo.":"Las semanas muestran sus cortes diarios registrados.";
+
+ const current=new Date(firstDay+"T12:00:00Z");
+ current.setUTCMonth(current.getUTCMonth()-5);
+ const windowStart=current.toISOString().slice(0,10);
+ const res=await fetch(BASE+"/rest/v1/ocs_filler_sales_days?select=sale_date,amount&sale_date=gte."+windowStart+"&sale_date=lt."+monthEnd+"&order=sale_date.asc",{headers,cache:"no-store"});
+ if(!res.ok)throw Error("No se pudo consultar el histórico mensual de ventas.");
+ const history=await res.json();
+ const byMonth=new Map();
+ for(let d=new Date(windowStart+"T12:00:00Z");d<new Date(monthEnd+"T12:00:00Z");d.setUTCMonth(d.getUTCMonth()+1)){
+  byMonth.set(d.toISOString().slice(0,7),{amount:0,days:0});
+ }
+ for(const r of history){const m=r.sale_date.slice(0,7);if(byMonth.has(m)){const z=byMonth.get(m);z.amount+=Number(r.amount);z.days++;}}
+ const months=[...byMonth.entries()];
+ const maxMonthly=Math.max(1,...months.map(([,v])=>v.amount));
+ $("month-comparison-bars").innerHTML=months.map(([m,v])=>{
+  const label=displayMonth(m+"-01");
+  return '<div class="month-column"><div class="month-bar-wrap"><div class="month-bar" style="height:'+(v.days?Math.max(4,100*v.amount/maxMonthly):0).toFixed(1)+'%" title="'+escape(label+': '+money(v.amount))+'"></div></div><strong>'+ (v.days?money(v.amount):"S/D") +'</strong><span>'+escape(label)+'</span><small>'+v.days+' cortes</small></div>';
+ }).join("");
+ $("month-comparison-note").textContent="Comparativo por mes calendario, sin sumar órdenes digitales. S/D significa sin cortes registrados; el mes en curso puede estar incompleto.";
+
+ const points=allDays.filter(d=>salesByDate.has(d)&&ticketByDate.has(d)&&Number(ticketByDate.get(d))>0).map(d=>({d,avg:salesByDate.get(d)/ticketByDate.get(d)}));
+ $("ticket-trend-count").textContent=points.length+" días comparables";
+ if(!points.length){$("ticket-trend").innerHTML='<p class="small">Faltan cortes de venta y tickets positivos del mismo día. No se dibujan valores artificiales.</p>';return;}
+ const maxAvg=Math.max(100,...points.map(p=>p.avg))*1.15,w=Math.max(560,points.length*58+70),height=230,left=52,bottom=35,top=20,usable=height-bottom-top;
+ const cx=i=>left+(w-left-22)*(points.length===1?.5:i/(points.length-1));
+ const cy=v=>top+usable*(1-v/maxAvg);
+ const path=points.map((p,i)=>(i?"L":"M")+cx(i).toFixed(1)+","+cy(p.avg).toFixed(1)).join(" ");
+ const dots=points.map((p,i)=>'<circle cx="'+cx(i)+'" cy="'+cy(p.avg)+'" r="5" fill="#087650"><title>'+escape(p.d+": "+money(p.avg)+" por ticket")+'</title></circle><text x="'+cx(i)+'" y="'+(height-11)+'" text-anchor="middle" font-size="11" fill="#5c7465">'+Number(p.d.slice(-2))+'</text>').join("");
+ $("ticket-trend").innerHTML='<svg viewBox="0 0 '+w+' '+height+'" style="min-width:'+w+'px;width:100%;height:auto" role="img" aria-label="Ticket promedio por fecha con corte y tickets registrados"><line x1="'+left+'" y1="'+(height-bottom)+'" x2="'+(w-10)+'" y2="'+(height-bottom)+'" stroke="#c9d9ce"/><text x="5" y="'+(top+8)+'" font-size="12" fill="#5c7465">'+escape(money(maxAvg))+'</text><path d="'+path+'" fill="none" stroke="#087650" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'</svg>';
+}
+
 async function show(){
  const role=await FillerCloud.staffRole();
  if(role!=="admin"){$("login-card").hidden=false;$("dashboard").hidden=true;status(role?"Este tablero requiere acceso de administrador.":"Inicia sesión con tu cuenta de administrador.");return;}
@@ -184,6 +233,7 @@ async function show(){
  const dates=Array.from({length:dayOfMonth},(_,i)=>firstDay.slice(0,8)+String(i+1).padStart(2,"0")).filter(day=>{const weekday=new Date(day+"T12:00:00Z").getUTCDay();return weekday!==0&&weekday!==6;});
  renderSalesTrend(dates,salesByDate,firstDay);
  await renderGoals(session.access_token,firstDay,monthEnd,dates,salesByDate,ticketByDate,monthNow);
+ await renderTrendComparisons(session.access_token,firstDay,monthEnd,dates,salesByDate,ticketByDate);
  const monthTickets=dates.reduce((sum,d)=>sum+(ticketByDate.get(d)||0),0);
  const monthAmount=dates.reduce((sum,d)=>sum+(salesByDate.get(d)||0),0);
  const monthBoth=dates.filter(d=>salesByDate.has(d)&&ticketByDate.has(d)&&ticketByDate.get(d)>0);
