@@ -350,7 +350,7 @@ async function renderCostAndInventory(token,firstDay){
 async function renderRecipeCosting(token){
  const headers={apikey:KEY,Authorization:"Bearer "+token};
  const [rr,lr,ir]=await Promise.all([
-  fetch(BASE+"/rest/v1/fiiller_recipe_costing?select=recipe_id,recipe_name,recipe_type,tpv_code,yield_quantity,yield_unit,yield_verified&status=eq.confirmed&order=recipe_id.asc",{headers,cache:"no-store"}),
+  fetch(BASE+"/rest/v1/fiiller_recipe_costing?select=recipe_id,recipe_name,recipe_type,tpv_code,yield_quantity,yield_unit,yield_verified,operational_overhead_pct&status=eq.confirmed&order=recipe_id.asc",{headers,cache:"no-store"}),
   fetch(BASE+"/rest/v1/fiiller_recipe_costing_lines?select=recipe_id,line_number,ingredient_name,required_quantity,required_unit,subrecipe_id,candidate_inventory_code,mapping_status,conversion_status,quantity_per_inventory_unit&order=recipe_id.asc,line_number.asc",{headers,cache:"no-store"}),
   fetch(BASE+"/rest/v1/filler_inventory_items?select=code,name,unit_cost,unit_cost_source,unit_cost_verified_at&limit=1000",{headers,cache:"no-store"})
  ]);
@@ -384,7 +384,8 @@ async function renderRecipeCosting(token){
  $("recipe-rows").innerHTML=recipes.map(r=>{
   const detail=lines.filter(l=>l.recipe_id===r.recipe_id),verified=detail.filter(l=>l.mapping_status==="verified").length,proposed=detail.filter(l=>l.mapping_status==="candidate").length;
   const cost=compute(r.recipe_id);
-  const label=cost===null?"Costo pendiente": "Costo por "+escape(r.yield_unit)+": "+money(cost/Number(r.yield_quantity));
+  const perUnit=cost===null?null:cost/Number(r.yield_quantity), overhead=r.recipe_type==="sale"?Number(r.operational_overhead_pct||0)/100:0;
+  const label=perUnit===null?"Costo de ingredientes pendiente · Recargo operativo "+(overhead*100).toFixed(0)+"% configurado (sin calcular)": "Ingredientes: "+money(perUnit)+" · Operación CEDIS OCS ("+(overhead*100).toFixed(0)+"%): "+money(perUnit*overhead)+" · Costo completo por "+escape(r.yield_unit)+": "+money(perUnit*(1+overhead));
   const yieldStatus=r.recipe_type==="subrecipe"&&!r.yield_verified?" · Rendimiento físico pendiente":"";
   return '<div class="cost-alert"><strong>'+escape(r.recipe_id+" · "+r.recipe_name)+'</strong><span>'+detail.length+' componentes · '+verified+' SKU confirmados · '+proposed+' propuestas'+yieldStatus+'</span><span>'+label+'</span></div>';
  }).join("")||'<p class="small">No hay recetas registradas para este costeo.</p>';
@@ -392,7 +393,7 @@ async function renderRecipeCosting(token){
   const item=byStock.get(l.candidate_inventory_code);
   return '<div class="cost-alert"><strong>'+escape(l.recipe_id+" · "+l.ingredient_name)+'</strong><span>'+fmtAmount(l.required_quantity)+" "+escape(l.required_unit)+(item?" · SKU sugerido "+escape(item.code)+" ("+escape(item.name)+")":" · Falta identificar SKU")+(l.subrecipe_id?" · Subreceta "+escape(l.subrecipe_id):"")+'</span></div>';
  }).join("")||'<p class="small">Todos los ingredientes vinculados.</p>';
- $("recipe-caution").textContent="Los códigos propuestos NO se descuentan del almacén. El costo queda pendiente hasta validar el SKU, la equivalencia de unidades, el costo de compra y, cuando aplique, el rendimiento real del lote. La bechamel se consume una sola vez como subreceta.";
+ $("recipe-caution").textContent="El 25% de operación de CEDIS OCS es un recargo interno sobre el costo de ingredientes, NO un margen de utilidad. Se aplica una sola vez al producto final; subrecetas no lo duplican. Los códigos propuestos NO se descuentan del almacén. El costo queda pendiente hasta validar el SKU, la equivalencia de unidades, el costo de compra y, cuando aplique, el rendimiento real del lote. La bechamel se consume una sola vez como subreceta.";
 }
 
 async function show(){
