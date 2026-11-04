@@ -95,9 +95,21 @@
 <p class="small" id="inventory-scope-note"></p>
 <p class="small">Los movimientos del TPV no se descuentan de inventario hasta vincular códigos, recetas, rendimiento y unidades. No se estiman compras ni márgenes con costos faltantes.</p>
 </section>
+<section class="card" style="margin-top:18px" aria-label="Vinculación de recetas y almacén">
+<div class="head-line"><div><h2>Recetas ↔ Almacén · Costeo por porción</h2><p class="small">Vinculación controlada con unidades, subrecetas y fuentes de costos verificadas. Sin afectar existencias.</p></div><a href="https://github.com/Rujumagil/fillerapp/tree/main/recetas" target="_blank" rel="noopener">Ver recetas en GitHub</a></div>
+<div class="cost-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+<div class="cost-panel"><div class="label">Cobertura de recetas costeadas</div><div class="metric" id="recipe-coverage">—</div></div>
+<div class="cost-panel"><div class="label">Ingredientes con SKU confirmado</div><div class="metric" id="recipe-links-count">—</div></div>
+</div>
+<div class="tpv-ranking-grid" style="margin-top:18px">
+ <div class="trend-panel"><h2 style="font-size:17px">Recetas vinculadas</h2><div id="recipe-rows"></div></div>
+ <div class="trend-panel"><h2 style="font-size:17px">Pendientes de validación</h2><div id="recipe-proposals" style="max-height:520px;overflow:auto"></div></div>
+</div>
+<p class="small" id="recipe-caution" style="margin-top:14px"></p>
+</section>
 <div class="columns">
 
 <div class="card"><h2>Productos más pedidos en la app</h2><p class="small">Cantidad de productos solicitados, sin contar pedidos cancelados.</p><div id="top-products"></div></div>
 <div class="card"><h2>Estado del almacén nuevo</h2><div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div><div class="metric" id="inventory-items">—</div><div class="label">Insumos registrados</div></div><div><div class="metric" id="inventory-low">—</div><div class="label">Bajo mínimo</div></div><div><div class="metric" id="inventory-expiry">—</div><div class="label">Por caducar en 7 días</div></div><div><div class="metric" id="inventory-value">—</div><div class="label">Valor estimado</div></div></div><p class="small">Nuevo almacén en transición, separado de las existencias actuales de OCS.</p></div>
 <div class="card"><h2>Experiencia del cliente</h2><div class="metric" id="rating">—</div><div class="small">Calificación media de las encuestas del período</div><div class="metric" id="responses" style="margin-top:21px">—</div><div class="small">Encuestas respondidas en 30 días</div><p class="small" style="margin-top:17px"><a href="./encuestas.html">Abrir análisis por pregunta y sugerencias →</a></p></div>
-</div><p id="updated" class="small" style="margin-top:20px"></p></div></main><script src="./filler-cloud.js?v=54"></script><script src="./dashboard-ventas.js?v=69"></script></body></html>
+</div><p id="updated" class="small" style="margin-top:20px"></p></div></main><script src="./filler-cloud.js?v=54"></script><script src="./dashboard-ventas.js?v=70"></script></body></html>
