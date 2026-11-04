@@ -20,13 +20,15 @@ function render(){
  const converted=active.filter(l=>l.mapping_status==="verified"&&l.conversion_status==="verified"&&Number(l.quantity_per_inventory_unit)>0).length;
  const priced=active.filter(l=>{const item=items.find(i=>i.code===l.candidate_inventory_code);return item&&Number(item.unit_cost)>0&&item.unit_cost_source}).length;
  $("rec045-cost-summary").innerHTML='<span>'+linked+'/'+active.length+' SKU identificados</span><span>'+converted+'/'+active.length+' equivalencias verificadas</span><span>'+priced+'/'+active.length+' costos con fuente registrada</span>';
+ const sale=recipes.find(r=>r.recipe_id==="REC-045");
+ if(sale) $("ocs-overhead").textContent=Number(sale.operational_overhead_pct||0).toLocaleString("es-MX",{maximumFractionDigits:2})+"% sobre costo de ingredientes, agregado una sola vez a la receta de venta.";
  $("cost-sku").innerHTML=skuOptions();
 }
 async function load(){
  if(await FillerCloud.staffRole()!=="admin"){$("login").hidden=false;$("private").hidden=true;return}
  $("login").hidden=true;$("private").hidden=false;
  [recipes,lines,items]=await Promise.all([
- api("fiiller_recipe_costing?select=recipe_id,recipe_name,recipe_type,yield_quantity,yield_unit,yield_verified&status=eq.confirmed&order=recipe_id.asc"),
+ api("fiiller_recipe_costing?select=recipe_id,recipe_name,recipe_type,yield_quantity,yield_unit,yield_verified,operational_overhead_pct&status=eq.confirmed&order=recipe_id.asc"),
  api("fiiller_recipe_costing_lines?select=recipe_id,line_number,ingredient_name,required_quantity,required_unit,subrecipe_id,candidate_inventory_code,mapping_status,conversion_status,quantity_per_inventory_unit&order=recipe_id.asc,line_number.asc"),
  api("filler_inventory_items?select=code,name,unit,unit_cost,unit_cost_source&order=name.asc&limit=1000")
  ]);
