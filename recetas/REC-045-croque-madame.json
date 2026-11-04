@@ -24,9 +24,11 @@
       "sku_selection_status": "confirmed_product_pending_verified_unit_cost"
     },
     {
-      "name": "Queso manchego",
+      "name": "Queso manchego La Villita AAA a granel",
       "quantity": 50,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "06040093",
+      "sku_selection_status": "confirmed_product_pending_verified_unit_cost"
     },
     {
       "name": "Huevo",
@@ -47,21 +49,21 @@
   "preparation": {
     "method": "Preparar el pan Oroweat con jamón Virginia de pavo FUD y queso manchego, gratinar y terminar con huevo; sazonar con sal y pimienta. Método específico de tostado y cocción pendiente de confirmar con cocina."
   },
-  "notes": "No utiliza mantequilla ni ninguna salsa. Pan Oroweat (01230281) y jamón Virginia FUD (08020104) confirmados; SKU y costos restantes pendientes. Sin descuentos automáticos de inventario.",
+  "notes": "Sin mantequilla ni salsa. Confirmados: Oroweat 01230281, jamón FUD 08020104, queso manchego La Villita 06040093. Falta confirmar presentaciones/equivalencias aplicables y costos reales antes del costeo o descuentos automáticos.",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
   "cost_status": "awaiting_verified_inventory_costs",
   "subrecipe_links": [],
-  "ingredient_sku_mapping_status": "two_products_confirmed_pending_cost_and_conversion_four_candidates_zero_unassigned",
+  "ingredient_sku_mapping_status": "three_products_confirmed_pending_cost_and_conversions_three_candidates_zero_unassigned",
   "physical_yield_status": "not_applicable_without_subrecipe",
   "ingredients_confirmed": true,
   "sauce_used": false,
   "costing_review": {
     "sale_price_mxn": 85,
-    "sku_candidates_pending_confirmation": 4,
+    "sku_candidates_pending_confirmation": 3,
     "ingredients_without_sku_candidate": 0,
     "verified_unit_costs": 0,
     "gross_margin_status": "not_calculable",
-    "review_note": "Se elimina mantequilla. Se mantienen 6 ingredientes; falta validar presentaciones, equivalencias de pan/huevo y costos. No calcular margen todavía."
+    "review_note": "Queso La Villita confirmado: 50 g por orden; almacén en kg. Costos reales aún pendientes. Pan requiere rebanadas por paquete y huevo equivalencia piezas/kg."
   }
 }
