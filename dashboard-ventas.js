@@ -405,6 +405,42 @@ async function renderRecipeCosting(token){
 }
 
 
+
+let flyChatContext=null;
+function flyChatAdd(message,author){
+ const node=document.createElement("div");
+ node.className="fly-bubble "+(author==="user"?"fly-user":"fly-bot");
+ node.textContent=String(message).slice(0,2400);
+ $("fly-chat").appendChild(node);
+ while($("fly-chat").children.length>14)$("fly-chat").removeChild($("fly-chat").firstChild);
+ $("fly-chat").scrollTop=$("fly-chat").scrollHeight;
+}
+function flyChatAnswer(question){
+ const d=flyChatContext;
+ if(!d)return "El reporte todavía está cargando. Comprueba que iniciaste sesión como administrador y actualiza los indicadores.";
+ const q=String(question).toLocaleLowerCase("es-MX").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+ const period=d.period;
+ if(/recet|cost|margen|cedis|utilidad|ingrediente/.test(q))
+  return "Recetas: REC-045 tiene 6 ingredientes y sus equivalencias verificadas. El costo por porción sigue pendiente porque no hay precios de compra comprobados. El cargo operativo de CEDIS OCS es 25% sobre el costo de ingredientes, no utilidad. No mostraré precios internos ni estimaré márgenes. Revisa «Validar recetas y costos» en el menú.";
+ if(/invent|almacen|stock|reponer|compra|insumo|caduc/.test(q))
+  return "Inventario actual: "+(Number.isFinite(d.low)?fmt(d.low)+" insumos en su mínimo o por debajo":"sin lectura disponible")+". Esta cifra no es histórica del mes "+period+". Acción recomendada: comprobar existencias, caducidades y prioridades antes de solicitar reposición a CEDIS.";
+ if(/ticket|promedio|venta por|complemento/.test(q))
+  return d.avg===null?"Ticket promedio "+period+": no calculable porque faltan ventas y tickets comparables del mismo día.":
+   "Ticket promedio "+period+": "+money(d.avg)+" en "+d.comparable+" días comparables"+(d.avgGoal!==null?", frente a la meta de "+money(d.avgGoal)+(d.avg<d.avgGoal?" (brecha "+money(d.avgGoal-d.avg)+").":" (objetivo alcanzado)."):" (sin meta configurada).")+". No mezcla pedidos digitales con TPV.";
+ if(/corte|falt|pendient|registro|calidad|quality|anomali/.test(q))
+  return "Calidad de datos "+period+": "+d.missingCuts+" días hábiles sin corte confirmado y "+d.missingTickets+" días sin tickets capturados. Ninguno se considera venta $0. Fly Quality debe comprobar el origen antes de validar un cierre.";
+ if(/meta|venta|ingreso|factur|avance|objetivo|recaud/.test(q))
+  return "Ventas oficiales TPV Arrow "+period+": "+(d.cutDays?money(d.sales)+" de "+d.cutDays+" días con corte":"sin cortes confirmados")+(d.salesGoal!==null?"; meta "+money(d.salesGoal)+", avance "+(100*d.sales/d.salesGoal).toFixed(1)+"%.":"; meta no configurada.")+" Hay "+d.missingCuts+" día(s) hábiles sin corte. Los pedidos de la app se mantienen separados para evitar duplicaciones.";
+ if(/prior|recomend|accion|hacer|fly|resumen|reporte|operac/.test(q))
+  return "Prioridades para "+period+": "+d.priorities.join("; ")+". Para revisión supervisada usa «Copiar reporte para Compás Fly» y regístralo en Compás Eco. Esta conversación no envía datos a los agentes ni ejecuta acciones.";
+ return "Puedo consultar ventas, metas, tickets, cortes pendientes, inventario, recetas y prioridades del mes "+period+". Prueba una de las preguntas rápidas. Para análisis libre con IA, primero se necesita un endpoint autorizado de Compás Evolution.";
+}
+function flyChatAsk(question){
+ if(!$("dashboard")||$("dashboard").hidden)return;
+ flyChatAdd(question,"user");
+ flyChatAdd(flyChatAnswer(question),"bot");
+}
+
 let flyOpsReportText="";
 async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,inventory){
  const headers={apikey:KEY,Authorization:"Bearer "+token};
@@ -464,6 +500,17 @@ async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,i
   "Revisar integridad de datos e inventario en la próxima actualización.",
   "Los indicadores conservan fuentes completas y verificables.");
  const top=actionItems.slice(0,3);
+ flyChatContext={
+  period:firstDay.slice(0,7),
+  sales:cuts.reduce((n,d)=>n+Number(salesByDate.get(d)),0),
+  cutDays:cuts.length,missingCuts:missing,missingTickets,
+  avg:average,comparable:pairs.length,
+  salesGoal:target&&Number(target.sales_target)>0?Number(target.sales_target):null,
+  avgGoal:target&&Number(target.avg_ticket_target)>0?Number(target.avg_ticket_target):null,
+  low:Number.isFinite(low)?low:null,
+  priorities:top.map(t=>t.title)
+ };
+
  $("fly-action-list").innerHTML='<div class="fly-action-list">'+top.map((t,i)=>'<article class="fly-task"><span class="fly-owner">'+escape(t.owner)+' · '+escape(t.priority)+'</span><h4>'+(i+1)+'. '+escape(t.title)+'</h4><p><strong>Evidencia:</strong> '+escape(t.evidence)+'</p><p><strong>Acción:</strong> '+escape(t.action)+'</p><small><strong>Cierre:</strong> '+escape(t.done)+'</small></article>').join("")+'</div>';
  const period=firstDay.slice(0,7);
  const lines=[
@@ -556,6 +603,16 @@ async function show(){
 $("report-month").value=new Intl.DateTimeFormat("sv-SE",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit"}).format(new Date()).slice(0,7);
 $("report-month").addEventListener("change",()=>{$("report-month").dataset.userSelected="yes";show().catch(e=>status(e.message,true));});
 $("refresh").addEventListener("click",()=>show().catch(e=>status(e.message,true)));
+document.querySelectorAll("[data-fly-question]").forEach(button=>{
+ button.addEventListener("click",()=>flyChatAsk(button.dataset.flyQuestion));
+});
+$("fly-chat-form").addEventListener("submit",event=>{
+ event.preventDefault();
+ const input=$("fly-chat-input"),question=input.value.trim();
+ if(!question)return;
+ input.value="";
+ flyChatAsk(question);
+});
 $("fly-copy-report").addEventListener("click",async()=>{
  if(!flyOpsReportText)return;
  try{
