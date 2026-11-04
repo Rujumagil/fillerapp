@@ -647,14 +647,14 @@ $("report-month").value=new Intl.DateTimeFormat("sv-SE",{timeZone:"America/Mexic
 $("report-month").addEventListener("change",()=>{$("report-month").dataset.userSelected="yes";show().catch(e=>status(e.message,true));});
 $("refresh").addEventListener("click",()=>show().catch(e=>status(e.message,true)));
 const viewGroups={
- resumen:new Set([3,7,8]),
- fly:new Set([4,5,6]),
- ventas:new Set([9,10,11,13,14]),
- operacion:new Set([12,15,16,17])
+ resumen:new Set([3,5,6]),
+ fly:new Set([4]),
+ ventas:new Set([7,8,9,11,12]),
+ operacion:new Set([10,13,14,15])
 };
 const viewDescriptions={
  resumen:"Resumen ejecutivo · indicadores, metas y alertas de negocio",
- fly:"Compás Fly · consulta, análisis IA supervisado y semáforo operativo",
+ fly:"Compás Fly · semáforo y prioridades. Abre la burbuja para hablar con el agente.",
  ventas:"Ventas y tendencias · evolución y registro diario del TPV",
  operacion:"Operación · cocina y retail, inventario, recetas y satisfacción"
 };
@@ -664,7 +664,7 @@ function switchDashboardView(view){
  activeView=view;
  const children=Array.from($("dashboard").children);
  children.forEach((node,index)=>{
-  if(index<=2||index===children.length-1)return;
+  if(index<=2||node.id==="updated"||node.id==="fly-floating-root")return;
   node.classList.toggle("dashboard-view-hidden",!viewGroups[view].has(index));
  });
  document.querySelectorAll("[data-dashboard-view]").forEach(button=>{
@@ -673,15 +673,25 @@ function switchDashboardView(view){
  $("dashboard-view-caption").textContent=viewDescriptions[view];
 }
 document.querySelectorAll("[data-dashboard-view]").forEach(button=>button.addEventListener("click",()=>switchDashboardView(button.dataset.dashboardView)));
-document.querySelectorAll("#fly-nav-link,#fly-open-assistant").forEach(link=>{
- link.addEventListener("click",event=>{
-  event.preventDefault();
-  switchDashboardView("fly");
-  $("fly-assistant-section").scrollIntoView({behavior:"smooth",block:"start"});
- });
+function toggleFlyDrawer(open){
+ const drawer=$("fly-assistant-section");
+ drawer.hidden=!open;
+ $("fly-floating-trigger").setAttribute("aria-expanded",String(open));
+ $("fly-floating-trigger").setAttribute("aria-label",open?"Cerrar conversación con Compás Fly":"Abrir conversación con Compás Fly");
+ if(open)$("fly-chat-input").focus();
+ else $("fly-floating-trigger").focus();
+}
+$("fly-floating-trigger").addEventListener("click",()=>toggleFlyDrawer($("fly-assistant-section").hidden));
+$("fly-dialog-close").addEventListener("click",()=>toggleFlyDrawer(false));
+document.addEventListener("keydown",event=>{
+ if(event.key==="Escape"&&!$("fly-assistant-section").hidden)toggleFlyDrawer(false);
+});
+$("fly-nav-link").addEventListener("click",event=>{
+ event.preventDefault();
+ switchDashboardView("fly");
+ $("fly-ops-panel").scrollIntoView({behavior:"smooth",block:"start"});
 });
 $("fly-generate-report").addEventListener("click",()=>{
- switchDashboardView("fly");
  const prompt="Genera un reporte ejecutivo del periodo con los principales hallazgos, riesgos, datos pendientes y tres acciones priorizadas con criterios de verificación.";
  flyChatAsk(prompt);
 });
