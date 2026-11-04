@@ -13,22 +13,41 @@
     if (value) sessionStorage.setItem(SESSION_KEY, JSON.stringify(value));
     else sessionStorage.removeItem(SESSION_KEY);
   }
+  let refreshInFlight=null;
   async function refresh() {
+    if (refreshInFlight) return refreshInFlight;
     if (!session?.refresh_token) return null;
-    try {
-      const res = await fetch(BASE + "/auth/v1/token?grant_type=refresh_token", {
-        method: "POST", headers: { ...publicHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({ refresh_token: session.refresh_token })
-      });
-      if (!res.ok) throw new Error("Sesión caducada");
-      const data = await res.json();
-      saveSession(data); return data;
-    } catch { saveSession(null); return null; }
+    const originalRefreshToken=session.refresh_token;
+    refreshInFlight=(async()=>{
+      try {
+        const res=await fetch(BASE+"/auth/v1/token?grant_type=refresh_token",{
+          method:"POST",headers:{...publicHeaders(),"Content-Type":"application/json"},
+          body:JSON.stringify({refresh_token:originalRefreshToken}),cache:"no-store"
+        });
+        if(!res.ok)throw Error("Sesión caducada");
+        const data=await res.json();
+        if(!data?.access_token || !data?.user?.id)throw Error("Respuesta de sesión inválida");
+        if(session?.refresh_token===originalRefreshToken)saveSession(data);
+        return data;
+      }catch {
+        if(session?.refresh_token===originalRefreshToken)saveSession(null);
+        return null;
+      }
+    })();
+    try{return await refreshInFlight;}finally{refreshInFlight=null;}
   }
   async function token() {
     if (!present()) return null;
-    if (session.expires_at && session.expires_at < Math.floor(Date.now()/1000)+60) await refresh();
+    if (!session.expires_at || session.expires_at < Math.floor(Date.now()/1000)+60) await refresh();
     return session?.access_token || null;
+  }
+  async function accessToken({forceRefresh=false}={}) {
+    if(forceRefresh){
+      if(!present())return null;
+      const result=await refresh();
+      return result?.access_token||null;
+    }
+    return token();
   }
   async function request(path,{method="GET",body=null,staff=false,prefer=null}={}) {
     const auth = staff ? await token() : null;
@@ -216,5 +235,5 @@
     return imageUrl;
   }
   function logout(){saveSession(null);}
-  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,orderMessages,sendOrderMessage,catalog,extras,placeOrder,orderStatus,importCatalog,importExtras,uploadProductPhoto,present});
+  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,orderMessages,sendOrderMessage,catalog,extras,placeOrder,orderStatus,importCatalog,importExtras,uploadProductPhoto,present,accessToken});
 })();
