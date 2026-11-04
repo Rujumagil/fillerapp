@@ -346,6 +346,55 @@ async function renderCostAndInventory(token,firstDay){
  $("inventory-scope-note").textContent="Inventario físico actual, no histórico de "+firstDay.slice(0,7)+". No se descuenta automáticamente por ventas TPV sin recetas y equivalencias comprobadas.";
 }
 
+
+async function renderRecipeCosting(token){
+ const headers={apikey:KEY,Authorization:"Bearer "+token};
+ const [rr,lr,ir]=await Promise.all([
+  fetch(BASE+"/rest/v1/fiiller_recipe_costing?select=recipe_id,recipe_name,recipe_type,tpv_code,yield_quantity,yield_unit,yield_verified&order=recipe_id.asc",{headers,cache:"no-store"}),
+  fetch(BASE+"/rest/v1/fiiller_recipe_costing_lines?select=recipe_id,line_number,ingredient_name,required_quantity,required_unit,subrecipe_id,candidate_inventory_code,mapping_status,conversion_status,quantity_per_inventory_unit&order=recipe_id.asc,line_number.asc",{headers,cache:"no-store"}),
+  fetch(BASE+"/rest/v1/filler_inventory_items?select=code,name,unit_cost,unit_cost_source,unit_cost_verified_at&limit=1000",{headers,cache:"no-store"})
+ ]);
+ if(!rr.ok||!lr.ok||!ir.ok)throw Error("No fue posible cargar los vínculos de recetas e insumos.");
+ const recipes=await rr.json(),lines=await lr.json(),stock=await ir.json(),byStock=new Map(stock.map(x=>[x.code,x])),byRecipe=new Map(recipes.map(x=>[x.recipe_id,x]));
+ const fmtAmount=value=>Number(value).toLocaleString("es-MX",{maximumFractionDigits:2});
+ const costCache=new Map();
+ function compute(id,stack=new Set()){
+  if(costCache.has(id))return costCache.get(id);
+  const recipe=byRecipe.get(id),detail=lines.filter(x=>x.recipe_id===id);
+  if(!recipe||!detail.length||stack.has(id))return null;
+  const next=new Set(stack);next.add(id);
+  if(recipe.recipe_type==="subrecipe"&&!recipe.yield_verified)return null;
+  let sum=0;
+  for(const l of detail){
+   if(l.subrecipe_id){
+    const sub=byRecipe.get(l.subrecipe_id),subcost=compute(l.subrecipe_id,next);
+    if(subcost===null||!sub||l.required_unit!==sub.yield_unit)return null;
+    sum+=(Number(l.required_quantity)/Number(sub.yield_quantity))*subcost;
+   }else{
+    const item=byStock.get(l.candidate_inventory_code);
+    if(l.mapping_status!=="verified"||l.conversion_status!=="verified"||!item||l.quantity_per_inventory_unit===null||Number(l.quantity_per_inventory_unit)<=0||!(Number(item.unit_cost)>0)||!item.unit_cost_source||!item.unit_cost_verified_at)return null;
+    sum+=(Number(l.required_quantity)/Number(l.quantity_per_inventory_unit))*Number(item.unit_cost);
+   }
+  }
+  costCache.set(id,sum);return sum;
+ }
+ const withCost=recipes.filter(r=>compute(r.recipe_id)!==null);
+ $("recipe-coverage").textContent=withCost.length+" de "+recipes.length+" recetas con costo completamente verificable";
+ $("recipe-links-count").textContent=lines.filter(l=>l.mapping_status==="verified").length+" de "+lines.filter(l=>!l.subrecipe_id).length+" ingredientes vinculados y validados";
+ $("recipe-rows").innerHTML=recipes.map(r=>{
+  const detail=lines.filter(l=>l.recipe_id===r.recipe_id),verified=detail.filter(l=>l.mapping_status==="verified").length,proposed=detail.filter(l=>l.mapping_status==="candidate").length;
+  const cost=compute(r.recipe_id);
+  const label=cost===null?"Costo pendiente": "Costo por "+escape(r.yield_unit)+": "+money(cost/Number(r.yield_quantity));
+  const yieldStatus=r.recipe_type==="subrecipe"&&!r.yield_verified?" · Rendimiento físico pendiente":"";
+  return '<div class="cost-alert"><strong>'+escape(r.recipe_id+" · "+r.recipe_name)+'</strong><span>'+detail.length+' componentes · '+verified+' SKU confirmados · '+proposed+' propuestas'+yieldStatus+'</span><span>'+label+'</span></div>';
+ }).join("")||'<p class="small">No hay recetas registradas para este costeo.</p>';
+ $("recipe-proposals").innerHTML=lines.filter(l=>l.mapping_status!=="verified").map(l=>{
+  const item=byStock.get(l.candidate_inventory_code);
+  return '<div class="cost-alert"><strong>'+escape(l.recipe_id+" · "+l.ingredient_name)+'</strong><span>'+fmtAmount(l.required_quantity)+" "+escape(l.required_unit)+(item?" · SKU sugerido "+escape(item.code)+" ("+escape(item.name)+")":" · Falta identificar SKU")+(l.subrecipe_id?" · Subreceta "+escape(l.subrecipe_id):"")+'</span></div>';
+ }).join("")||'<p class="small">Todos los ingredientes vinculados.</p>';
+ $("recipe-caution").textContent="Los códigos propuestos NO se descuentan del almacén. El costo queda pendiente hasta validar el SKU, la equivalencia de unidades, el costo de compra y, cuando aplique, el rendimiento real del lote. La bechamel se consume una sola vez como subreceta.";
+}
+
 async function show(){
  const role=await FillerCloud.staffRole();
  if(role!=="admin"){$("login-card").hidden=false;$("dashboard").hidden=true;status(role?"Este tablero requiere acceso de administrador.":"Inicia sesión con tu cuenta de administrador.");return;}
@@ -387,6 +436,7 @@ async function show(){
  await renderKitchenRetail(session.access_token,firstDay);
  await renderExecutiveSummary(session.access_token,firstDay,dates,salesByDate,ticketByDate,monthNow);
  await renderCostAndInventory(session.access_token,firstDay);
+ await renderRecipeCosting(session.access_token);
  const sales=data.sales||{},orders=data.orders||{},inventory=data.inventory||{},feedback=data.feedback||{};
  $("login-card").hidden=true;$("dashboard").hidden=false;
  $("sales-amount").textContent=monthSales.length?money(monthAmount):"Sin cortes";
