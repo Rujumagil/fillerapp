@@ -10,9 +10,11 @@
   "sale_price_mxn": 85,
   "ingredients": [
     {
-      "name": "Pan de caja",
+      "name": "Pan Oroweat de 12 granos",
       "quantity": 2,
-      "unit": "rebanadas"
+      "unit": "rebanadas",
+      "inventory_code": "01230281",
+      "sku_selection_status": "confirmed_product_pending_pack_conversion_and_cost"
     },
     {
       "name": "Jamón",
@@ -48,21 +50,21 @@
   "preparation": {
     "method": "Tostar el pan con mantequilla, añadir jamón y queso manchego, gratinar y terminar con huevo estrellado; sazonar con sal y pimienta."
   },
-  "notes": "Ingredientes y cantidades confirmados, sin salsa. Candidatos SKU de queso manchego, huevo, sal y pimienta; pan, jamón y mantequilla por identificar. Los costos unitarios no están verificados. No activar descuentos de inventario.",
+  "notes": "Pan confirmado: Oroweat de 12 granos, SKU 01230281. Pendientes: rebanadas por paquete, costo de compra, y validación de otros SKU. Sin salsa ni descuentos automáticos.",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
   "cost_status": "awaiting_verified_inventory_costs",
   "subrecipe_links": [],
-  "ingredient_sku_mapping_status": "four_candidate_skus_three_pending_no_confirmed",
+  "ingredient_sku_mapping_status": "one_product_confirmed_pending_conversion_four_candidates_two_unassigned",
   "physical_yield_status": "not_applicable_without_subrecipe",
   "ingredients_confirmed": true,
   "sauce_used": false,
   "costing_review": {
     "sale_price_mxn": 85,
     "sku_candidates_pending_confirmation": 4,
-    "ingredients_without_sku_candidate": 3,
+    "ingredients_without_sku_candidate": 2,
     "verified_unit_costs": 0,
     "gross_margin_status": "not_calculable",
-    "review_note": "El huevo se almacena en kg pero la receta usa pieza; requiere equivalencia física. No inferir costos por ingredientes a partir del precio de venta."
+    "review_note": "Oroweat SKU 01230281 confirmado como producto, pero falta contar rebanadas por empaque y costo de compra. Huevo en kg requiere equivalencia física."
   }
 }
