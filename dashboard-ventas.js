@@ -21,8 +21,8 @@ function renderSalesTrend(dates,salesByDate,firstDay){
  $("trend-days").textContent=fmt(valid.length);
  const pending=entries.filter(e=>e.value===null);
  $("trend-pending").textContent=pending.length?"Días sin corte confirmado: "+pending.map(e=>Number(e.date.slice(-2))).join(", ")+". No representan ventas de $0.":"Todos los días del periodo tienen corte.";
- const colWidth=64,barWidth=49,left=78,right=20,top=30,bottom=63,height=390;
- const width=Math.max(1020,left+right+entries.length*colWidth),plotHeight=height-top-bottom;
+ const colWidth=64,barWidth=49,left=78,right=20,top=24,bottom=48,height=296;
+ const width=Math.max(580,left+right+entries.length*colWidth),plotHeight=height-top-bottom;
  const maximum=Math.max(1000,Math.ceil(Math.max(...valid.map(e=>e.value))*1.12/1000)*1000);
  const y=v=>top+plotHeight*(1-v/maximum),base=y(0);
  const avgY=y(average);
@@ -202,7 +202,12 @@ async function renderTrendComparisons(token,firstDay,monthEnd,dates,salesByDate,
  const points=allDays.filter(d=>salesByDate.has(d)&&ticketByDate.has(d)&&Number(ticketByDate.get(d))>0).map(d=>({d,avg:salesByDate.get(d)/ticketByDate.get(d)}));
  $("ticket-trend-count").textContent=points.length+" días comparables";
  if(!points.length){$("ticket-trend").innerHTML='<p class="small">Faltan cortes de venta y tickets positivos del mismo día. No se dibujan valores artificiales.</p>';return;}
- const maxAvg=Math.max(100,...points.map(p=>p.avg))*1.15,w=Math.max(560,points.length*58+70),height=230,left=52,bottom=35,top=20,usable=height-bottom-top;
+ if(points.length<=3){
+  const max=Math.max(100,...points.map(p=>p.avg));
+  $("ticket-trend").innerHTML='<div class="ticket-compact">'+points.map(p=>'<div class="ticket-compact-item"><div class="ticket-compact-meta"><strong>\uD83D\uDCC5 Día '+Number(p.d.slice(-2))+'</strong><strong>'+money(p.avg)+'</strong></div><div class="ticket-compact-track"><div class="ticket-compact-fill" style="width:'+(100*p.avg/max).toFixed(1)+'%"></div></div></div>').join('')+'</div>';
+  return;
+ }
+ const maxAvg=Math.max(100,...points.map(p=>p.avg))*1.15,w=Math.max(560,points.length*58+70),height=175,left=52,bottom=32,top=15,usable=height-bottom-top;
  const cx=i=>left+(w-left-22)*(points.length===1?.5:i/(points.length-1));
  const cy=v=>top+usable*(1-v/maxAvg);
  const path=points.map((p,i)=>(i?"L":"M")+cx(i).toFixed(1)+","+cy(p.avg).toFixed(1)).join(" ");
