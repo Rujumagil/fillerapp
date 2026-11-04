@@ -78,8 +78,18 @@
     "ingredients_without_sku_candidate": 0,
     "verified_unit_costs": 0,
     "gross_margin_status": "not_calculable",
-    "review_note": "Huevo blanco granjero SKU 01170024: usuario indica 17 piezas/kg, consumo 1/17 kg por orden. Todas las equivalencias listas; costo unitario comprobado aún no disponible para los seis insumos. No calcular margen hasta registrar los costos.",
+    "review_note": "Huevo blanco granjero SKU 01170024: usuario indica 17 piezas/kg, consumo 1/17 kg por orden. Todas las equivalencias listas; costo unitario comprobado aún no disponible para los seis insumos. No calcular margen hasta registrar los costos. Carga operativa CEDIS OCS del 25% sobre ingredientes configurada, sin estimar costo ni margen hasta contar con comprobantes.",
     "verified_conversions": 6,
     "pending_conversions": []
+  },
+  "operational_cost_allocation": {
+    "percentage": 25,
+    "basis": "verified_ingredient_cost",
+    "formula": "total_recipe_cost = verified_ingredient_cost * 1.25",
+    "description": "Cargo interno por operaciones y distribución mediante CEDIS OCS, aplicado una sola vez en receta de venta; no es margen de utilidad.",
+    "applies_to_sale_recipe": true,
+    "subrecipe_double_counting": false,
+    "cost_amount_status": "pending_verified_purchase_prices",
+    "public_visibility": "admin_only"
   }
 }
