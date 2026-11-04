@@ -100,6 +100,67 @@ async function renderTpvProductRanking(token,firstDay){
  $("tpv-products-note").textContent=items.length?"Fuente: TPV Arrow, importes y unidades netas; no incluye pedidos digitales.":"Todavía no hay archivo detallado de artículos del TPV para este mes. No se asume que las ventas sean cero.";
 }
 
+
+async function renderGoals(token,firstDay,monthEnd,dates,salesByDate,ticketByDate,monthNow){
+ const headers={apikey:KEY,Authorization:"Bearer "+token};
+ const targetResponse=await fetch(BASE+"/rest/v1/fiiller_monthly_targets?select=effective_month,sales_target,tickets_target,avg_ticket_target&effective_month=lte."+firstDay+"&order=effective_month.desc&limit=1",{headers,cache:"no-store"});
+ if(!targetResponse.ok)throw Error("No se pudieron consultar las metas mensuales.");
+ const targets=await targetResponse.json();
+ const target=targets[0];
+ const nowMonth=monthNow.slice(0,7),selected=firstDay.slice(0,7),future=selected>nowMonth,current=selected===nowMonth;
+ const amount=[...salesByDate.values()].reduce((a,v)=>a+v,0);
+ const ticketDays=dates.filter(d=>ticketByDate.has(d));
+ const ticketCount=ticketDays.reduce((a,d)=>a+ticketByDate.get(d),0);
+ const matched=dates.filter(d=>ticketByDate.get(d)>0&&salesByDate.has(d));
+ const matchedTickets=matched.reduce((a,d)=>a+ticketByDate.get(d),0);
+ const matchedSales=matched.reduce((a,d)=>a+salesByDate.get(d),0);
+ const average=matchedTickets?matchedSales/matchedTickets:null;
+ const observedDates=dates.filter(d=>salesByDate.has(d));
+ const missingSales=dates.filter(d=>!salesByDate.has(d));
+ const missingTickets=dates.filter(d=>!ticketByDate.has(d));
+ const targetSales=Number(target?.sales_target||0),targetTickets=Number(target?.tickets_target||0),targetAvg=Number(target?.avg_ticket_target||0);
+ const salesPct=targetSales?100*amount/targetSales:0;
+ const ticketsPct=targetTickets?100*ticketCount/targetTickets:0;
+ $("goal-period").textContent=new Date(firstDay+"T12:00:00Z").toLocaleDateString("es-MX",{month:"long",year:"numeric",timeZone:"UTC"});
+ $("goal-configuration").textContent=target?(target.effective_month===firstDay?"Metas configuradas para este mes":"Metas vigentes desde "+target.effective_month):"No hay una meta configurada para este mes";
+ const put=(id,text)=>$(id).textContent=text;
+ put("goal-sales",target?money(targetSales):"Sin meta");
+ put("goal-tickets",target?fmt(targetTickets):"Sin meta");
+ put("goal-average",target?money(targetAvg):"Sin meta");
+ put("goal-sales-actual",observedDates.length?money(amount):"Sin cortes");
+ put("goal-tickets-actual",ticketDays.length?fmt(ticketCount):"Pendiente");
+ put("goal-average-actual",average===null?"Pendiente":money(average));
+ put("goal-sales-remaining",target&&observedDates.length?money(Math.max(0,targetSales-amount)):"—");
+ put("goal-tickets-remaining",target&&ticketDays.length?fmt(Math.max(0,targetTickets-ticketCount)):"—");
+ put("goal-average-gap",target&&average!==null?money(targetAvg-average):"—");
+ put("goal-sales-progress",target&&observedDates.length?Math.round(salesPct)+"%":"—");
+ put("goal-tickets-progress",target&&ticketDays.length?Math.round(ticketsPct)+"%":"—");
+ $("goal-sales-bar").style.width=(target&&observedDates.length?Math.min(100,salesPct):0)+"%";
+ $("goal-tickets-bar").style.width=(target&&ticketDays.length?Math.min(100,ticketsPct):0)+"%";
+ put("goal-coverage",observedDates.length+" de "+dates.length+" días hábiles con corte; "+ticketDays.length+" con tickets. Los pendientes NO equivalen a ventas cero.");
+ const previous=new Date(firstDay+"T12:00:00Z");previous.setUTCMonth(previous.getUTCMonth()-1);
+ const prevFirst=previous.toISOString().slice(0,10);const prevNext=firstDay;
+ const prevResponse=await fetch(BASE+"/rest/v1/ocs_filler_sales_days?select=sale_date,amount&sale_date=gte."+prevFirst+"&sale_date=lt."+prevNext,{headers,cache:"no-store"});
+ if(!prevResponse.ok)throw Error("No se pudieron consultar las ventas históricas.");
+ const prevRows=await prevResponse.json();
+ const priorAll=prevRows.reduce((a,r)=>a+Number(r.amount),0);
+ const cutDay=Number(monthNow.slice(-2));
+ const priorComparable=prevRows.filter(r=>!current||Number(r.sale_date.slice(-2))<=cutDay);
+ const priorValue=priorComparable.reduce((a,r)=>a+Number(r.amount),0);
+ const isPriorComplete=prevRows.length>0;
+ const comparable=current?priorValue:priorAll;
+ put("goal-previous-value",isPriorComplete?money(comparable):"Sin histórico");
+ put("goal-previous-label",current?"Mes anterior, hasta el día "+cutDay:"Mes anterior completo");
+ put("goal-comparison",isPriorComplete&&observedDates.length&&comparable>0?((amount/comparable-1)*100).toFixed(1)+"% frente al periodo de referencia":"Comparación pendiente");
+ const completeCurrent=missingSales.length===0&&observedDates.length>=3;
+ const workdaysInMonth=(()=>{let n=0;for(let i=1;i<=Number(new Date(Date.UTC(Number(firstDay.slice(0,4)),Number(firstDay.slice(5,7)),0)).getUTCDate());i++){const day=new Date(Date.UTC(Number(firstDay.slice(0,4)),Number(firstDay.slice(5,7))-1,i)).getUTCDay();if(day!==0&&day!==6)n++;}return n;})();
+ const forecast=current&&completeCurrent?amount/observedDates.length*workdaysInMonth:null;
+ put("goal-forecast",forecast!==null?money(forecast):current?"Pendiente":future?"Mes futuro":"Mes histórico");
+ put("goal-forecast-note",forecast!==null?"Proyección: promedio por día hábil × "+workdaysInMonth+" días hábiles. No es una venta confirmada.":current?"Se requieren por lo menos 3 días hábiles con cortes completos para pronosticar.":future?"El periodo todavía no inicia.":"Las proyecciones se reservan para el mes en curso.");
+ const goalNarrative=!target?"No hay objetivos definidos para este mes.":future?"Mes futuro: solo objetivos, sin ventas observadas.":!observedDates.length?"Todavía no hay cortes del TPV para este mes. No se interpreta como venta de $0.":missingSales.length?"Hay "+missingSales.length+" días hábiles sin corte: avance parcial de "+money(amount)+" y pronóstico suspendido.":("Ventas registradas: "+money(amount)+" ("+Math.round(salesPct)+"% de meta). "+(forecast!==null?(forecast>=targetSales?"La proyección alcanza la meta.":"La proyección queda por debajo de la meta."):""));
+ put("goal-summary",goalNarrative+(missingTickets.length?" Faltan tickets en "+missingTickets.length+" día(s).":""));
+}
+
 async function show(){
  const role=await FillerCloud.staffRole();
  if(role!=="admin"){$("login-card").hidden=false;$("dashboard").hidden=true;status(role?"Este tablero requiere acceso de administrador.":"Inicia sesión con tu cuenta de administrador.");return;}
@@ -122,6 +183,7 @@ async function show(){
  const dayOfMonth=firstDay.slice(0,7)===monthNow.slice(0,7)?Number(monthNow.slice(-2)):Number(new Date(Date.UTC(Number(firstDay.slice(0,4)),Number(firstDay.slice(5,7)),0)).getUTCDate());
  const dates=Array.from({length:dayOfMonth},(_,i)=>firstDay.slice(0,8)+String(i+1).padStart(2,"0")).filter(day=>{const weekday=new Date(day+"T12:00:00Z").getUTCDay();return weekday!==0&&weekday!==6;});
  renderSalesTrend(dates,salesByDate,firstDay);
+ await renderGoals(session.access_token,firstDay,monthEnd,dates,salesByDate,ticketByDate,monthNow);
  const monthTickets=dates.reduce((sum,d)=>sum+(ticketByDate.get(d)||0),0);
  const monthAmount=dates.reduce((sum,d)=>sum+(salesByDate.get(d)||0),0);
  const monthBoth=dates.filter(d=>salesByDate.has(d)&&ticketByDate.has(d)&&ticketByDate.get(d)>0);
@@ -138,10 +200,10 @@ async function show(){
  await renderTpvProductRanking(session.access_token,firstDay);
  const sales=data.sales||{},orders=data.orders||{},inventory=data.inventory||{},feedback=data.feedback||{};
  $("login-card").hidden=true;$("dashboard").hidden=false;
- $("sales-amount").textContent=money(sales.amount);
- $("sales-tickets").textContent=fmt(actualTickets);
- $("ticket-average").textContent=actualTickets>0?money(Number(sales.amount)/actualTickets):"—";
- $("latest-day").textContent=sales.last_day||"Sin cortes";
+ $("sales-amount").textContent=monthSales.length?money(monthAmount):"Sin cortes";
+ $("sales-tickets").textContent=dates.some(d=>ticketByDate.has(d))?fmt(monthTickets):"Pendiente";
+ $("ticket-average").textContent=comparableTicketCount>0?money(comparableAmount/comparableTicketCount):"—";
+ $("latest-day").textContent=monthSales.length?monthSales[monthSales.length-1].sale_date:"Sin cortes";
  $("orders-total").textContent=fmt(orders.total);
  $("orders-open").textContent=fmt(orders.open);
  $("orders-delivered").textContent=fmt(orders.delivered);
