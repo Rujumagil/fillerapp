@@ -694,7 +694,16 @@ $("fly-copy-answer").addEventListener("click",async()=>{
 });
 switchDashboardView("resumen");
 document.querySelectorAll("[data-fly-question]").forEach(button=>{
- button.addEventListener("click",()=>flyChatAsk(button.dataset.flyQuestion));
+ button.addEventListener("click",()=>{
+ const questions={
+ ventas:"Analiza las ventas, avances y metas del mes seleccionado.",
+ tickets:"Analiza el ticket promedio y la integridad de los tickets.",
+ inventario:"Evalúa el abastecimiento e indica riesgos del inventario.",
+ prioridades:"Genera tres prioridades operativas para el periodo.",
+ recetas:"Revisa qué sabemos sobre recetas, costos y datos faltantes."
+ };
+ flyChatAsk(questions[button.dataset.flyQuestion]||"Resume los indicadores disponibles.");
+});
 });
 $("fly-chat-form").addEventListener("submit",event=>{
  event.preventDefault();
