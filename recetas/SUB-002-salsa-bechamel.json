@@ -41,22 +41,13 @@
   "preparation": {
     "method": "Derretir la mantequilla, incorporar harina y cocinar brevemente. Agregar la leche poco a poco mientras se mezcla hasta espesar. Sazonar con sal y pimienta."
   },
-  "notes": "",
-  "status": "confirmed",
-  "linked_recipes": [
-    {
-      "recipe_id": "REC-045",
-      "product_name": "Croque Madame",
-      "prepared_subrecipe_consumption": {
-        "quantity": 40,
-        "unit": "g"
-      }
-    }
-  ],
+  "notes": "No se utiliza en Fiiller Café. Retirada del costeo y de las recetas activas tras corrección operativa. Conservar solo como registro histórico.",
+  "status": "inactive_not_used",
+  "linked_recipes": [],
   "estimated_full_40g_portions_per_batch": 13,
   "estimated_remainder_g": 30,
-  "inventory_deduction_status": "pending_integration",
-  "cost_status": "pending_warehouse_unit_costs",
+  "inventory_deduction_status": "disabled",
+  "cost_status": "not_applicable_inactive",
   "ingredient_sku_mapping_status": "pending",
-  "inventory_accounting_note": "Consumir ingredientes al preparar lote de bechamel, y descontar 40 g de bechamel preparada en REC-045; no descontar materias primas dos veces. Los 10 g de mantequilla directa en REC-045 son independientes."
+  "inventory_accounting_note": "SUB-002 inactiva: no generar consumo ni costo, ni solicitar comprobación física."
 }
