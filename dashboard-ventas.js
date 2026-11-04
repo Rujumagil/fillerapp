@@ -496,6 +496,98 @@ async function flyChatAsk(question) {
  }
 }
 
+let flyPdfSnapshot=null;
+/* PDF export renders the same authenticated, checked data as the dashboard.
+   Vector SVG charts remain sharp when the browser saves the print output as PDF. */
+function flyPdfChart(points,field,{width=750,height=260,color="#087650",currency=false}={}){
+ const values=points.map(p=>Number.isFinite(Number(p[field]))&&p[field]!==null?Number(p[field]):null);
+ const valid=values.filter(x=>x!==null),max=Math.max(1,...valid);
+ const maxY=Math.ceil(max/1000)*1000 || 1;
+ const pad={left:66,right:15,top:24,bottom:41};
+ const plotH=height-pad.top-pad.bottom,usableW=width-pad.left-pad.right;
+ const colW=usableW/Math.max(points.length,1);
+ const rectangles=points.map((p,i)=>{
+  const v=values[i],x=pad.left+i*colW+colW*.12,w=colW*.76,day=Number(p.date.slice(-2));
+  const label='<text x="'+(x+w/2).toFixed(1)+'" y="'+(height-18)+'" text-anchor="middle" font-size="11" fill="#345b43">'+day+'</text>';
+  if(v===null)return '<rect x="'+x.toFixed(1)+'" y="'+(height-pad.bottom-28)+'" width="'+w.toFixed(1)+'" height="28" rx="3" fill="#f2f4f2" stroke="#a5b6aa" stroke-dasharray="3 3"/><text x="'+(x+w/2).toFixed(1)+'" y="'+(height-pad.bottom-10)+'" font-size="9" fill="#697a6c" text-anchor="middle">S/D</text>'+label;
+  const hh=Math.max(2,v/maxY*plotH);
+  const y=height-pad.bottom-hh;
+  const yLabel=y>33?y-5:y+12;
+  return '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+hh.toFixed(1)+'" rx="3" fill="'+color+'"/>'+
+   '<text x="'+(x+w/2).toFixed(1)+'" y="'+yLabel.toFixed(1)+'" text-anchor="middle" font-size="'+(points.length>15?8:10)+'" font-weight="700" fill="#24563b">'+escape(fmt(v))+'</text>'+label;
+ }).join("");
+ const grid=[0,.25,.5,.75,1].map(t=>{
+  const y=height-pad.bottom-t*plotH;
+  return '<line x1="'+pad.left+'" x2="'+(width-pad.right)+'" y1="'+y+'" y2="'+y+'" stroke="#e1eae4"/><text x="'+(pad.left-8)+'" y="'+(y+4)+'" font-size="10" text-anchor="end" fill="#6a796d">'+escape((currency?"$":"")+fmt(Math.round(maxY*t)))+'</text>';
+ }).join("");
+ return '<svg viewBox="0 0 '+width+' '+height+'" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+(currency?'Ventas diarias registradas':'Ticket promedio por día')+'">'+grid+rectangles+'</svg>';
+}
+function flyPdfDocument(d){
+ const m=money, v=d;
+ const title=new Date(v.period+"-01T12:00:00Z").toLocaleDateString("es-MX",{timeZone:"UTC",month:"long",year:"numeric"});
+ const lastCut=v.days.filter(x=>x.sales!==null).at(-1)?.date||"Sin corte";
+ const total=v.days.filter(x=>x.sales!==null).reduce((n,x)=>n+x.sales,0);
+ const count=v.days.filter(x=>x.tickets!==null).reduce((n,x)=>n+x.tickets,0);
+ const avgDays=v.days.filter(x=>x.sales!==null&&x.tickets>0);
+ const comparableSales=avgDays.reduce((n,x)=>n+x.sales,0);
+ const comparableTickets=avgDays.reduce((n,x)=>n+x.tickets,0);
+ const average=comparableTickets>0?comparableSales/comparableTickets:null;
+ const missingSales=v.days.filter(x=>x.sales===null),missingTickets=v.days.filter(x=>x.tickets===null);
+ const progress=v.salesGoal>0?Math.max(0,Math.min(100,total/v.salesGoal*100)):null;
+ const goalHtml=(label,value,goal,percent)=>{
+  const known=goal!==null&&Number.isFinite(goal)&&goal>0;
+  return '<div class="goal"><div class="muted">'+escape(label)+'</div><strong>'+escape(value)+'</strong><div class="track"><i style="width:'+(known?Math.max(0,Math.min(100,percent)).toFixed(1):"0")+'%"></i></div><small>'+(known?"Meta: "+escape(m(goal)):"Meta sin dato verificable")+'</small></div>';
+ };
+ const cards=[
+  ["Venta TPV confirmada",v.days.some(x=>x.sales!==null)?m(total):"Sin cortes"],
+  ["Tickets Arrow capturados",v.days.some(x=>x.tickets!==null)?fmt(count):"Pendiente"],
+  ["Ticket comparable",average!==null?m(average):"No calculable"],
+  ["Último corte TPV",lastCut],
+ ];
+ const table=v.days.map(x=>{
+  const avg=x.sales!==null&&x.tickets>0?m(x.sales/x.tickets):"—";
+  return '<tr><td>'+escape(x.date)+'</td><td class="num">'+(x.tickets===null?"Pendiente":escape(fmt(x.tickets)))+'</td><td class="num">'+(x.sales===null?"Sin corte":escape(m(x.sales)))+'</td><td class="num">'+escape(avg)+'</td></tr>';
+ }).join("");
+ const actions=v.actions.map((a,i)=>'<div class="action"><strong>'+(i+1)+'. '+escape(a.title)+'</strong><p><b>Prioridad / responsable:</b> '+escape(a.priority)+' · '+escape(a.owner)+'</p><p><b>Evidencia:</b> '+escape(a.evidence)+'</p><p><b>Acción:</b> '+escape(a.action)+'</p><p><b>Criterio de cierre:</b> '+escape(a.done)+'</p></div>').join("");
+ const traffic=v.semaphore.map(a=>'<div class="traffic '+escape(a.state)+'"><b>'+escape(a.title)+'</b><strong>'+escape(a.detail)+'</strong><small>'+escape(a.note)+'</small></div>').join("");
+ const separateOrders=v.orders?'<div class="orders"><h3>Órdenes digitales de Fiiller App · últimos 30 días</h3><p>'+escape(fmt(v.orders.total))+' pedidos solicitados · '+escape(fmt(v.orders.delivered))+' entregados · '+escape(fmt(v.orders.open))+' abiertos · importe solicitado '+escape(m(v.orders.value))+'.</p><p><b>NO son ventas TPV ni cobros confirmados.</b> No se suman al ingreso oficial.</p></div>':'<p class="muted">No se pudo verificar el conteo de pedidos digitales.</p>';
+ const maybeNote=v.comparables===0?"No hay suficientes días comparables para calcular ticket promedio.":"Los promedios consideran únicamente fechas con venta y tickets capturados en conjunto.";
+ const stamp=new Date(v.generatedAt).toLocaleString("es-MX",{dateStyle:"medium",timeStyle:"short"});
+ const chartSales=flyPdfChart(v.days.map(p=>({date:p.date,amount:p.sales})),"amount",{currency:true});
+ const chartAvg=flyPdfChart(v.days.map(p=>({date:p.date,ticketAvg:p.sales!==null&&p.tickets>0?p.sales/p.tickets:null})),"ticketAvg",{height:205,color:"#c08c2d",currency:true});
+ const goalPct=v.salesGoal>0?total/v.salesGoal*100:0;
+ const sourceText="Fuente: cortes TPV Arrow y tickets capturados manualmente en Fiiller. Inventario: consulta actual, no histórico. Solo días hábiles del periodo.";
+ return '<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Fiiller Café · Reporte ejecutivo '+escape(v.period)+'</title><style>'+
+ '@page{size:A4;margin:14mm 13mm}*{box-sizing:border-box}body{margin:0;font:11px/1.45 Arial,Helvetica,sans-serif;color:#193e2c;background:white}header{border-bottom:3px solid #006241;padding:0 0 12px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}header h1{font-size:23px;line-height:1.1;color:#006241;margin:0}header p{margin:3px 0;color:#526b5c}h2{font-size:15px;color:#005b3b;margin:17px 0 9px}h3{font-size:12px;margin:0 0 6px;color:#005d3c}p{margin:3px 0}.muted,.foot{color:#5c7163}.eyebrow{color:#9a6d20;font-weight:bold;letter-spacing:1px;text-transform:uppercase;font-size:10px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kpi{border:1px solid #dce8df;border-radius:7px;padding:10px;background:#f7faf7;min-height:73px}.kpi span{display:block;font-size:10px;color:#557360}.kpi strong{font-size:18px;color:#006241;display:block;margin-top:7px}.goals{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.goal{border:1px solid #e1e9e3;border-radius:8px;padding:10px}.goal strong{display:block;font-size:17px}.goal small{font-size:9px;color:#667d6d}.track{height:8px;background:#e5eee7;border-radius:7px;margin:7px 0}.track i{display:block;height:100%;background:#087650;border-radius:7px}.chart{border:1px solid #e3ece6;border-radius:8px;padding:8px 12px;break-inside:avoid;page-break-inside:avoid}.chart svg{width:100%;display:block;max-height:240px}.chart.average svg{max-height:200px}.traffic-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.traffic{padding:9px;border:1px solid #e1e9e4;border-left:4px solid #99a79c;border-radius:7px;break-inside:avoid}.traffic.good{border-left-color:#087650}.traffic.warn{border-left-color:#d39b2c}.traffic.bad{border-left-color:#c45139}.traffic strong,.traffic small{display:block;margin-top:4px}.traffic small{color:#6b7a6e}table{border-collapse:collapse;width:100%;font-size:10px}thead{display:table-header-group}th,td{text-align:left;padding:5px 8px;border-bottom:1px solid #dde8df}th{background:#eef6f0;color:#14563b}.num{text-align:right}tr{break-inside:avoid}.notes{background:#fff9ec;border-left:3px solid #d39b2c;padding:8px 10px;margin:10px 0}.action{padding:9px 0;border-bottom:1px solid #dfe7e0;break-inside:avoid}.action p{margin:3px 0}.orders{padding:9px;border:1px solid #e1e8df;border-radius:7px}.foot{margin-top:14px;border-top:1px solid #dce6df;padding-top:8px;font-size:9px}section{break-inside:auto}.pagebreak{break-before:page}button{display:none}@media screen{body{max-width:860px;margin:auto;padding:24px;background:#fff}.chart svg{max-height:300px}}'+
+ '</style></head><body><header><div><div class="eyebrow">FIILLER CAFÉ · INTELIGENCIA OPERATIVA</div><h1>Reporte ejecutivo de KPIs</h1><p>'+escape(title)+' · Emitido: '+escape(stamp)+'</p></div><div><strong style="color:#006241;font-size:18px">Fiiller Café</strong><p style="font-size:10px;text-align:right">Documento interno</p></div></header>'+
+ '<section><div class="kpis">'+cards.map(x=>'<div class="kpi"><span>'+escape(x[0])+'</span><strong>'+escape(x[1])+'</strong></div>').join("")+'</div></section>'+
+ '<section><h2>Metas y avance confirmado</h2><div class="goals">'+goalHtml("Ventas registradas / meta",m(total),v.salesGoal,goalPct)+goalHtml("Ticket promedio / meta",average===null?"No calculable":m(average),v.avgGoal,v.avgGoal>0&&average!==null?average/v.avgGoal*100:0)+'</div></section>'+
+ '<section><h2>Ventas oficiales por día hábil</h2><div class="chart">'+chartSales+'</div><p class="muted">S/D: día sin corte. No equivale a venta de $0.</p></section>'+
+ '<section><h2>Ticket promedio diario comparable</h2><div class="chart average">'+chartAvg+'</div><p class="muted">'+escape(maybeNote)+'</p></section>'+
+ '<section><h2>Semáforo operativo y alertas</h2><div class="traffic-grid">'+traffic+'</div></section>'+
+ '<section><h2>Acciones recomendadas · Fly Quality / Fly Delivery</h2>'+actions+'</section>'+
+ '<section><h2>Detalle diario del periodo</h2><table><thead><tr><th>Fecha</th><th class="num">Tickets</th><th class="num">Venta TPV</th><th class="num">Ticket medio</th></tr></thead><tbody>'+table+'</tbody></table>'+
+ '<div class="notes"><b>Integridad de registro:</b> '+missingSales.length+' días hábiles sin corte ('+escape(missingSales.map(x=>x.date).join(", ")||"ninguno")+') y '+missingTickets.length+' sin tickets ('+escape(missingTickets.map(x=>x.date).join(", ")||"ninguno")+'). Los pendientes se conservan como no disponibles.</div></section>'+
+ '<section><h2>Inventario y pedidos digitales, sin mezclar fuentes</h2><p>Insumos en mínimo o por debajo: <b>'+(v.low===null?"Dato no disponible":escape(fmt(v.low)))+'</b> (existencias actuales, no histórico de '+escape(title)+').</p>'+separateOrders+'</section>'+
+ '<div class="foot">'+escape(sourceText)+'<br>Las recomendaciones requieren revisión humana; no representan compras, movimientos ni cambios ejecutados. Costos de recetas y márgenes no se estiman si faltan comprobantes. Documento emitido desde el panel privado de Fiiller.</div>'+
+ '</body></html>';
+}
+function exportFlyPdf(){
+ const d=flyPdfSnapshot;
+ if(!d||$("dashboard").hidden){status("Actualiza los indicadores con sesión administrativa antes de exportar PDF.",true);return;}
+ const popup=window.open("","_blank");
+ if(!popup){status("El navegador bloqueó la ventana del PDF. Permite ventanas emergentes para Fiiller Café.",true);return;}
+ const html=flyPdfDocument(d);
+ popup.document.open();
+ popup.document.write(html);
+ popup.document.close();
+ popup.focus();
+ // Browser-native print produces a shareable PDF via "Guardar como PDF".
+ popup.addEventListener("load",()=>popup.print(),{once:true});
+ popup.setTimeout(()=>popup.print(),450);
+ status("Se abrió el reporte ejecutivo. Elige «Guardar como PDF» en el cuadro de impresión.");
+}
+
 let flyOpsReportText="";
 async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,inventory){
  const headers={apikey:KEY,Authorization:"Bearer "+token};
@@ -556,6 +648,25 @@ async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,i
   "Revisar integridad de datos e inventario en la próxima actualización.",
   "Los indicadores conservan fuentes completas y verificables.");
  const top=actionItems.slice(0,3);
+ flyPdfSnapshot={
+  period:firstDay.slice(0,7),
+  generatedAt:new Date().toISOString(),
+  salesGoal:target&&Number(target.sales_target)>0?Number(target.sales_target):null,
+  avgGoal:target&&Number(target.avg_ticket_target)>0?Number(target.avg_ticket_target):null,
+  days:dates.map(date=>({
+   date,
+   sales:salesByDate.has(date)?Number(salesByDate.get(date)):null,
+   tickets:ticketByDate.has(date)?Number(ticketByDate.get(date)):null
+  })),
+  low:Number.isFinite(low)?low:null,
+  actions:top.map(a=>({...a})),
+  semaphore:results.map(r=>({...r})),
+  comparables:pairs.length,
+  orders:null
+ };
+ $("fly-export-pdf").disabled=false;
+ $("fly-export-pdf-chat").disabled=false;
+
  flyChatContext={
   period:firstDay.slice(0,7),
   sales:cuts.reduce((n,d)=>n+Number(salesByDate.get(d)),0),
@@ -612,6 +723,9 @@ async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,i
 async function show(){
  flyOpsReportText="";
  flyChatContext=null;
+ flyPdfSnapshot=null;
+ $("fly-export-pdf").disabled=true;
+ $("fly-export-pdf-chat").disabled=true;
  $("fly-generate-report").disabled=true;
  $("fly-copy-report").disabled=true;
  const role=await FillerCloud.staffRole();
@@ -666,6 +780,12 @@ async function show(){
  $("orders-open").textContent=fmt(orders.open);
  $("orders-delivered").textContent=fmt(orders.delivered);
  $("orders-value").textContent=money(orders.ordered_value);
+ if(flyPdfSnapshot)flyPdfSnapshot.orders={
+  total:Number.isFinite(Number(orders.total))?Number(orders.total):null,
+  delivered:Number.isFinite(Number(orders.delivered))?Number(orders.delivered):null,
+  open:Number.isFinite(Number(orders.open))?Number(orders.open):null,
+  value:Number.isFinite(Number(orders.ordered_value))?Number(orders.ordered_value):null
+ };
  $("inventory-items").textContent=fmt(inventory.items);
  $("inventory-low").textContent=fmt(inventory.low);
  $("inventory-expiry").textContent=fmt(inventory.expiring);
@@ -726,6 +846,8 @@ $("fly-nav-link").addEventListener("click",event=>{
  switchDashboardView("fly");
  $("fly-ops-panel").scrollIntoView({behavior:"smooth",block:"start"});
 });
+$("fly-export-pdf").addEventListener("click",exportFlyPdf);
+$("fly-export-pdf-chat").addEventListener("click",exportFlyPdf);
 $("fly-generate-report").addEventListener("click",async()=>{
  if(!flyOpsReportText)return;
  const period=flyChatContext?.period||"periodo seleccionado";
