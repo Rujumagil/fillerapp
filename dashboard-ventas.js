@@ -435,10 +435,52 @@ function flyChatAnswer(question){
   return "Prioridades para "+period+": "+d.priorities.join("; ")+". Para revisión supervisada usa «Copiar reporte para Compás Fly» y regístralo en Compás Eco. Esta conversación no envía datos a los agentes ni ejecuta acciones.";
  return "Puedo consultar ventas, metas, tickets, cortes pendientes, inventario, recetas y prioridades del mes "+period+". Prueba una de las preguntas rápidas. Para análisis libre con IA, primero se necesita un endpoint autorizado de Compás Evolution.";
 }
-function flyChatAsk(question){
- if(!$("dashboard")||$("dashboard").hidden)return;
+let flyLastAnswer="";
+let flyBusy=false;
+const FLY_ENDPOINT="https://eco.proyectocompas.app/api/evolution/fly-ops/fiiller-chat";
+async function flyChatAsk(question) {
+ if(!$("dashboard")||$("dashboard").hidden||flyBusy)return;
+ const selected=$("fly-agent-selector").value;
+ const useAI=$("fly-ai-enabled").checked;
  flyChatAdd(question,"user");
- flyChatAdd(flyChatAnswer(question),"bot");
+ if(!useAI){
+  const answer=flyChatAnswer(question);
+  flyLastAnswer=answer;
+  flyChatAdd(answer+"\n\nModo: análisis local por reglas.","bot");
+  $("fly-copy-answer").disabled=false;
+  return;
+ }
+ if(!flyOpsReportText){
+  flyChatAdd("Primero actualiza los indicadores para generar el contexto real del reporte.","bot");
+  return;
+ }
+ flyBusy=true;
+ $("fly-chat-send").disabled=true;
+ $("fly-generate-report").disabled=true;
+ $("fly-ai-status").textContent="Consultando al agente supervisado de Compás Evolution…";
+ try{
+  const session=JSON.parse(sessionStorage.getItem("filler_staff_session_v1")||"null");
+  if(!session?.access_token)throw Error("Inicia sesión como administrador.");
+  const res=await fetch(FLY_ENDPOINT,{
+   method:"POST",cache:"no-store",
+   headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
+   body:JSON.stringify({agent:selected,question,report:flyOpsReportText})
+  });
+  const payload=await res.json().catch(()=>({}));
+  if(!res.ok)throw Error(payload.error||"El agente no respondió ("+res.status+").");
+  if(!payload.saved||!payload.answer)throw Error("La respuesta no fue registrada en el historial de auditoría.");
+  flyLastAnswer=payload.answer;
+  flyChatAdd(payload.answer+"\n\n"+(selected==="fly_quality"?"Fly Quality":"Fly Delivery")+" · IA supervisada · Historial registrado.","bot");
+  $("fly-copy-answer").disabled=false;
+  $("fly-ai-status").textContent="Respuesta guardada en Compás Evolution · Sin acciones ejecutadas.";
+ }catch(err){
+  flyChatAdd("No fue posible consultar la IA: "+String(err.message||err)+". Puedes desactivar «Usar IA supervisada» para consultar los datos locales.","bot");
+  $("fly-ai-status").textContent="Servicio IA no disponible; el dashboard y las reglas locales siguen funcionando.";
+ }finally{
+  flyBusy=false;
+  $("fly-chat-send").disabled=false;
+  $("fly-generate-report").disabled=!flyOpsReportText;
+ }
 }
 
 let flyOpsReportText="";
@@ -531,6 +573,7 @@ async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,i
  ));
  lines.push("","CONTROL: No se han ejecutado acciones, creado issues, contactado CEDIS ni invocado agentes. Ventas TPV y pedidos de app no se suman. Costos de compra internos no se incluyen.");
  flyOpsReportText=lines.join("\n");
+ $("fly-generate-report").disabled=false;
  $("fly-copy-report").disabled=false;
 
 }
@@ -603,6 +646,53 @@ async function show(){
 $("report-month").value=new Intl.DateTimeFormat("sv-SE",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit"}).format(new Date()).slice(0,7);
 $("report-month").addEventListener("change",()=>{$("report-month").dataset.userSelected="yes";show().catch(e=>status(e.message,true));});
 $("refresh").addEventListener("click",()=>show().catch(e=>status(e.message,true)));
+const viewGroups={
+ resumen:new Set([1,5,6]),
+ fly:new Set([2,3,4]),
+ ventas:new Set([7,8,9,11,12]),
+ operacion:new Set([10,13,14,15])
+};
+const viewDescriptions={
+ resumen:"Resumen ejecutivo · indicadores, metas y alertas de negocio",
+ fly:"Compás Fly · consulta, análisis IA supervisado y semáforo operativo",
+ ventas:"Ventas y tendencias · evolución y registro diario del TPV",
+ operacion:"Operación · cocina y retail, inventario, recetas y satisfacción"
+};
+let activeView="resumen";
+function switchDashboardView(view){
+ if(!viewGroups[view])return;
+ activeView=view;
+ const children=Array.from($("dashboard").children);
+ children.forEach((node,index)=>{
+  if(index===0||index===children.length-1)return;
+  node.classList.toggle("dashboard-view-hidden",!viewGroups[view].has(index));
+ });
+ document.querySelectorAll("[data-dashboard-view]").forEach(button=>{
+  button.setAttribute("aria-pressed",String(button.dataset.dashboardView===view));
+ });
+ $("dashboard-view-caption").textContent=viewDescriptions[view];
+}
+document.querySelectorAll("[data-dashboard-view]").forEach(button=>button.addEventListener("click",()=>switchDashboardView(button.dataset.dashboardView)));
+document.querySelectorAll("#fly-nav-link,#fly-open-assistant").forEach(link=>{
+ link.addEventListener("click",event=>{
+  event.preventDefault();
+  switchDashboardView("fly");
+  $("fly-assistant-section").scrollIntoView({behavior:"smooth",block:"start"});
+ });
+});
+$("fly-generate-report").addEventListener("click",()=>{
+ switchDashboardView("fly");
+ const prompt="Genera un reporte ejecutivo del periodo con los principales hallazgos, riesgos, datos pendientes y tres acciones priorizadas con criterios de verificación.";
+ flyChatAsk(prompt);
+});
+$("fly-copy-answer").addEventListener("click",async()=>{
+ if(!flyLastAnswer)return;
+ try{
+  await navigator.clipboard.writeText(flyLastAnswer);
+  $("fly-ai-status").textContent="Último análisis copiado al portapapeles.";
+ }catch{$("fly-ai-status").textContent="No se pudo copiar. Revisa los permisos del navegador.";}
+});
+switchDashboardView("resumen");
 document.querySelectorAll("[data-fly-question]").forEach(button=>{
  button.addEventListener("click",()=>flyChatAsk(button.dataset.flyQuestion));
 });
@@ -617,7 +707,7 @@ $("fly-copy-report").addEventListener("click",async()=>{
  if(!flyOpsReportText)return;
  try{
   await navigator.clipboard.writeText(flyOpsReportText);
-  $("fly-copy-state").textContent="Reporte copiado. Puedes pegarlo en Compás Fly Ops para la revisión de Quality y Delivery.";
+  $("fly-copy-state").textContent="Reporte copiado. Puedes consultarlo y generar análisis sin salir de Fiiller en la pestaña Compás Fly IA.";
  }catch(error){
   $("fly-copy-state").textContent="No se pudo acceder al portapapeles en este navegador. Revisa los permisos del sitio.";
  }
