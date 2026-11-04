@@ -355,7 +355,10 @@ async function renderRecipeCosting(token){
   fetch(BASE+"/rest/v1/filler_inventory_items?select=code,name,unit_cost,unit_cost_source,unit_cost_verified_at&limit=1000",{headers,cache:"no-store"})
  ]);
  if(!rr.ok||!lr.ok||!ir.ok)throw Error("No fue posible cargar los vínculos de recetas e insumos.");
- const recipes=await rr.json(),lines=await lr.json(),stock=await ir.json(),byStock=new Map(stock.map(x=>[x.code,x])),byRecipe=new Map(recipes.map(x=>[x.recipe_id,x]));
+ const recipes=await rr.json(),allLines=await lr.json(),stock=await ir.json();
+ const activeIds=new Set(recipes.map(r=>r.recipe_id));
+ const lines=allLines.filter(l=>activeIds.has(l.recipe_id));
+ const byStock=new Map(stock.map(x=>[x.code,x])),byRecipe=new Map(recipes.map(x=>[x.recipe_id,x]));
  const fmtAmount=value=>Number(value).toLocaleString("es-MX",{maximumFractionDigits:2});
  const costCache=new Map();
  function compute(id,stack=new Set()){
@@ -393,7 +396,7 @@ async function renderRecipeCosting(token){
   const item=byStock.get(l.candidate_inventory_code);
   return '<div class="cost-alert"><strong>'+escape(l.recipe_id+" · "+l.ingredient_name)+'</strong><span>'+fmtAmount(l.required_quantity)+" "+escape(l.required_unit)+(item?" · SKU sugerido "+escape(item.code)+" ("+escape(item.name)+")":" · Falta identificar SKU")+(l.subrecipe_id?" · Subreceta "+escape(l.subrecipe_id):"")+'</span></div>';
  }).join("")||'<p class="small">Todos los ingredientes vinculados.</p>';
- $("recipe-caution").textContent="El 25% de operación de CEDIS OCS es un recargo interno sobre el costo de ingredientes, NO un margen de utilidad. Se aplica una sola vez al producto final; subrecetas no lo duplican. Los códigos propuestos NO se descuentan del almacén. El costo queda pendiente hasta validar el SKU, la equivalencia de unidades, el costo de compra y, cuando aplique, el rendimiento real del lote. La bechamel se consume una sola vez como subreceta.";
+ $("recipe-caution").textContent="El 25% de operación de CEDIS OCS es un recargo interno sobre el costo de ingredientes, NO un margen de utilidad. Se aplica una sola vez al producto final; subrecetas no lo duplican. Los códigos propuestos NO se descuentan del almacén. El costo queda pendiente hasta validar el SKU, la equivalencia de unidades, el costo de compra y, cuando aplique, el rendimiento real del lote. Las recetas inactivas no aparecen en el panel ni se contabilizan en los pendientes.";
 }
 
 async function show(){
