@@ -34,7 +34,7 @@
       "quantity": 40,
       "unit": "g",
       "subrecipe_id": "SUB-002",
-      "subrecipe_status": "pending_formulation"
+      "subrecipe_status": "confirmed_recipe_yield_pending_physical_verification"
     },
     {
       "name": "Mantequilla",
@@ -66,9 +66,9 @@
       "name": "Salsa bechamel",
       "quantity_per_sale": 40,
       "unit": "g",
-      "status": "pending_formulation"
+      "status": "confirmed_recipe_yield_pending_physical_verification"
     }
   ],
-  "ingredient_sku_mapping_status": "pending",
+  "ingredient_sku_mapping_status": "candidate_mappings_pending_verification",
   "physical_yield_status": "pending_verification"
 }
