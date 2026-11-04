@@ -81,10 +81,23 @@ async function renderTpvProductRanking(token,firstDay){
  const res=await fetch(BASE+"/rest/v1/fiiller_tpv_product_monthly?select=product_code,product_name,net_units,net_amount&sale_month=eq."+firstDay+"&order=net_amount.desc&limit=1000",{headers:{"apikey":KEY,"Authorization":"Bearer "+token},cache:"no-store"});
  if(!res.ok)throw Error("No se pudieron consultar los movimientos de productos del TPV.");
  const items=await res.json();
- const max= Math.max(1,...items.map(p=>Number(p.net_amount)));
- $("tpv-product-count").textContent=fmt(items.filter(p=>Number(p.net_units)>0).length)+" códigos con movimiento neto";
- $("tpv-products-total").textContent=money(items.reduce((a,p)=>a+Number(p.net_amount),0));
- $("tpv-products").innerHTML=items.filter(p=>Number(p.net_units)>0).map((p,i)=>'<div class="list-line"><span class="num">'+(i+1)+'</span><span class="name">'+escape(p.product_name)+' <span class="small">('+escape(p.product_code)+')</span><br><span class="small">'+fmt(p.net_units)+' unidades netas · '+money(p.net_amount)+'</span></span><div class="bar"><div class="fill" style="width:'+Math.max(1,Math.round(Number(p.net_amount)/max*100))+'%"></div></div></div>').join("")||'<p class="small">Todavía no hay detalle de productos TPV para este periodo.</p>';
+ const active=items.filter(p=>Number(p.net_units)>0 && Number(p.net_amount)>0);
+ const total=items.reduce((a,p)=>a+Number(p.net_amount),0);
+ $("tpv-product-count").textContent=fmt(active.length)+" productos con movimiento neto";
+ $("tpv-products-total").textContent=money(total);
+ $("tpv-products-month").textContent=new Date(firstDay+"T12:00:00Z").toLocaleDateString("es-MX",{month:"long",year:"numeric",timeZone:"UTC"});
+ const byAmount=[...active].sort((a,b)=>Number(b.net_amount)-Number(a.net_amount)).slice(0,10);
+ const byUnits=[...active].sort((a,b)=>Number(b.net_units)-Number(a.net_units)).slice(0,10);
+ function renderRanking(id,records,key,unit){
+   const max=Math.max(1,...records.map(p=>Number(p[key])));
+   $(id).innerHTML=records.map((p,i)=>{
+    const val=Number(p[key]);
+    return '<div class="list-line"><span class="num">'+(i+1)+'</span><span class="name"><strong>'+escape(p.product_name)+'</strong><br><span class="small">'+escape(p.product_code)+'</span></span><div class="bar"><div class="fill" style="width:'+Math.max(1,Math.round(100*val/max))+'%"></div></div><span style="min-width:85px;text-align:right;font-weight:800">'+(unit==="money"?money(val):fmt(val)+" uds.")+'</span></div>';
+   }).join("")||'<p class="small">Sin movimientos de productos TPV en el mes elegido. Selecciona octubre de 2026 para ver el histórico conciliado.</p>';
+ }
+ renderRanking("tpv-products-income",byAmount,"net_amount","money");
+ renderRanking("tpv-products-units",byUnits,"net_units","units");
+ $("tpv-products-note").textContent=items.length?"Fuente: TPV Arrow, importes y unidades netas; no incluye pedidos digitales.":"Todavía no hay archivo detallado de artículos del TPV para este mes. No se asume que las ventas sean cero.";
 }
 
 async function show(){
@@ -96,7 +109,9 @@ async function show(){
  const data=await response.json().catch(()=>null);
  if(!response.ok)throw Error(data?.message||"No se pudieron consultar los KPIs.");
  const manual=await fetch(BASE+"/rest/v1/filler_arrow_ticket_counts?select=sale_date,ticket_count",{headers:{"apikey":KEY,"Authorization":"Bearer "+session.access_token},cache:"no-store"});if(!manual.ok)throw Error("No se pudieron leer los tickets Arrow.");const rows=await manual.json();const min=new Date(Date.now()-29*86400000).toLocaleDateString("sv-SE",{timeZone:"America/Mexico_City"});const actualTickets=rows.filter(x=>x.sale_date>=min).reduce((a,x)=>a+Number(x.ticket_count),0);const monthNow=new Intl.DateTimeFormat("sv-SE",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
- const firstDay=($("report-month").value||monthNow.slice(0,7))+"-01";
+ const monthControl=$("report-month");
+ if(!monthControl.dataset.userSelected && data.sales?.last_day && /^\\d{4}-\\d{2}-\\d{2}$/.test(data.sales.last_day)) monthControl.value=data.sales.last_day.slice(0,7);
+ const firstDay=(monthControl.value||monthNow.slice(0,7))+"-01";
  const nextMonth=new Date(firstDay+"T12:00:00Z");nextMonth.setUTCMonth(nextMonth.getUTCMonth()+1);
  const monthEnd=nextMonth.toISOString().slice(0,10);
  const monthRequest=await fetch(BASE+"/rest/v1/ocs_filler_sales_days?select=sale_date,amount&sale_date=gte."+firstDay+"&sale_date=lt."+monthEnd+"&order=sale_date.asc",{headers:{"apikey":KEY,"Authorization":"Bearer "+session.access_token},cache:"no-store"});
@@ -144,7 +159,7 @@ async function show(){
  status("✓ Indicadores actualizados desde Supabase. Ventas Arrow y pedidos de la app se mantienen separados.");
 }
 $("report-month").value=new Intl.DateTimeFormat("sv-SE",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit"}).format(new Date()).slice(0,7);
-$("report-month").addEventListener("change",()=>show().catch(e=>status(e.message,true)));
+$("report-month").addEventListener("change",()=>{$("report-month").dataset.userSelected="yes";show().catch(e=>status(e.message,true));});
 $("refresh").addEventListener("click",()=>show().catch(e=>status(e.message,true)));
 $("login-form").addEventListener("submit",async e=>{
  e.preventDefault();const f=e.currentTarget,b=f.querySelector("button");b.disabled=true;
