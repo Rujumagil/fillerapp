@@ -350,7 +350,7 @@ async function renderCostAndInventory(token,firstDay){
 async function renderRecipeCosting(token){
  const headers={apikey:KEY,Authorization:"Bearer "+token};
  const [rr,lr,ir]=await Promise.all([
-  fetch(BASE+"/rest/v1/fiiller_recipe_costing?select=recipe_id,recipe_name,recipe_type,tpv_code,yield_quantity,yield_unit,yield_verified&order=recipe_id.asc",{headers,cache:"no-store"}),
+  fetch(BASE+"/rest/v1/fiiller_recipe_costing?select=recipe_id,recipe_name,recipe_type,tpv_code,yield_quantity,yield_unit,yield_verified&status=eq.confirmed&order=recipe_id.asc",{headers,cache:"no-store"}),
   fetch(BASE+"/rest/v1/fiiller_recipe_costing_lines?select=recipe_id,line_number,ingredient_name,required_quantity,required_unit,subrecipe_id,candidate_inventory_code,mapping_status,conversion_status,quantity_per_inventory_unit&order=recipe_id.asc,line_number.asc",{headers,cache:"no-store"}),
   fetch(BASE+"/rest/v1/filler_inventory_items?select=code,name,unit_cost,unit_cost_source,unit_cost_verified_at&limit=1000",{headers,cache:"no-store"})
  ]);
