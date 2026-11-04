@@ -46,6 +46,36 @@ function renderSalesTrend(dates,salesByDate,firstDay){
  $("sales-trend-title").textContent="Ventas por día · "+new Date(firstDay+"T12:00:00Z").toLocaleDateString("es-MX",{month:"long",year:"numeric",timeZone:"UTC"});
 }
 
+
+// Referencia importada del reporte TPV octubre 2026: sólo importes positivos de la columna Importe.
+// Cantidad Presentación no es una venta monetaria; líneas negativas son movimientos internos excluidos.
+const OCTOBER_TPV_POSITIVE={"2026-10-01":8474,"2026-10-02":1037,"2026-10-05":5534,"2026-10-06":5776,"2026-10-07":9386,"2026-10-08":5620,"2026-10-09":1594,"2026-10-12":4055,"2026-10-13":8537,"2026-10-14":11449,"2026-10-15":5144,"2026-10-16":1008,"2026-10-19":5694,"2026-10-20":9855,"2026-10-21":10006,"2026-10-22":3483,"2026-10-23":877,"2026-10-26":8546,"2026-10-27":6447,"2026-10-28":4598,"2026-10-29":3552,"2026-10-30":611};
+async function showOctoberReconciliation(token){
+ const q=await fetch(BASE+"/rest/v1/ocs_filler_sales_days?select=sale_date,amount&sale_date=gte.2026-10-01&sale_date=lte.2026-10-31&order=sale_date.asc",{headers:{"apikey":KEY,"Authorization":"Bearer "+token},cache:"no-store"});
+ if(!q.ok)throw Error("No fue posible consultar los cortes de octubre para la conciliación.");
+ const rows=await q.json();
+ const stored=new Map(rows.map(r=>[r.sale_date,Number(r.amount)]));
+ const days=Object.entries(OCTOBER_TPV_POSITIVE);
+ const reference=days.reduce((s,[,n])=>s+n,0);
+ let matched=0,matchedReference=0,matchedStored=0;
+ const missing=[],different=[];
+ const lines=days.map(([date,tpv])=>{
+  const has=stored.has(date), app=has?stored.get(date):null;
+  if(has){matched++;matchedReference+=tpv;matchedStored+=app;if(Math.abs(tpv-app)>0.009)different.push(date);}else missing.push(date);
+  const delta=has?tpv-app:null;
+  const issue=!has?"Sin corte":Math.abs(delta)>0.009?"Diferencia":"Coincide";
+  return '<tr><td>'+escape(date)+'</td><td style="text-align:right">'+money(tpv)+'</td><td style="text-align:right">'+(has?money(app):"Pendiente")+'</td><td style="text-align:right">'+(has?money(delta):"—")+'</td><td>'+issue+'</td></tr>';
+ });
+ const unexpected=[...stored.keys()].filter(date=>!Object.prototype.hasOwnProperty.call(OCTOBER_TPV_POSITIVE,date));
+ $("oct-tpv-total").textContent=money(reference);
+ $("oct-app-total").textContent=money([...stored.values()].reduce((a,b)=>a+b,0));
+ $("oct-compared-days").textContent=matched+" de "+days.length;
+ $("oct-matched-difference").textContent=money(matchedReference-matchedStored);
+ $("oct-sales-rows").innerHTML=lines.join("");
+ $("oct-reconciliation-note").textContent="La diferencia corresponde únicamente a los "+matched+" días con corte en ambas fuentes. "+(missing.length?"Sin corte para "+missing.length+" día(s): "+missing.join(", ")+". ":"")+(unexpected.length?"Fechas adicionales en la app: "+unexpected.join(", ")+". ":"")+"Movimientos internos negativos excluidos: $14,461 (262 líneas); no se modifica el histórico de Supabase.";
+ $("oct-reconciliation-status").textContent=missing.length||different.length||unexpected.length?"Requiere conciliación: "+different.length+" día(s) con diferencias; "+missing.length+" sin corte.":"Todos los días disponibles coinciden con el reporte TPV positivo.";
+}
+
 async function show(){
  const role=await FillerCloud.staffRole();
  if(role!=="admin"){$("login-card").hidden=false;$("dashboard").hidden=true;status(role?"Este tablero requiere acceso de administrador.":"Inicia sesión con tu cuenta de administrador.");return;}
@@ -73,6 +103,7 @@ async function show(){
  $("monthly-tickets-total").textContent=fmt(monthTickets)+" registrados";
  $("monthly-sales-total").textContent=money(monthAmount);
  $("monthly-sales-note").textContent="Tickets manuales capturados: "+dates.filter(d=>ticketByDate.has(d)).length+" días. Cortes importados: "+dates.filter(d=>salesByDate.has(d)).length+" días. Los días pendientes no se consideran ventas de $0.";
+ await showOctoberReconciliation(session.access_token);
  const sales=data.sales||{},orders=data.orders||{},inventory=data.inventory||{},feedback=data.feedback||{};
  $("login-card").hidden=true;$("dashboard").hidden=false;
  $("sales-amount").textContent=money(sales.amount);
