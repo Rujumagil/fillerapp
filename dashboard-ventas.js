@@ -171,7 +171,7 @@ async function show(){
  if(!response.ok)throw Error(data?.message||"No se pudieron consultar los KPIs.");
  const manual=await fetch(BASE+"/rest/v1/filler_arrow_ticket_counts?select=sale_date,ticket_count",{headers:{"apikey":KEY,"Authorization":"Bearer "+session.access_token},cache:"no-store"});if(!manual.ok)throw Error("No se pudieron leer los tickets Arrow.");const rows=await manual.json();const min=new Date(Date.now()-29*86400000).toLocaleDateString("sv-SE",{timeZone:"America/Mexico_City"});const actualTickets=rows.filter(x=>x.sale_date>=min).reduce((a,x)=>a+Number(x.ticket_count),0);const monthNow=new Intl.DateTimeFormat("sv-SE",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
  const monthControl=$("report-month");
- if(!monthControl.dataset.userSelected && data.sales?.last_day && /^\d{4}-\d{2}-\d{2}$/.test(data.sales.last_day)) monthControl.value=data.sales.last_day.slice(0,7);
+ // Mes actual por defecto; el histórico de octubre se consulta con el selector.
  const firstDay=(monthControl.value||monthNow.slice(0,7))+"-01";
  const nextMonth=new Date(firstDay+"T12:00:00Z");nextMonth.setUTCMonth(nextMonth.getUTCMonth()+1);
  const monthEnd=nextMonth.toISOString().slice(0,10);
