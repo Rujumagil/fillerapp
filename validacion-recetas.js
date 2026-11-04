@@ -15,6 +15,11 @@ function render(){
   if(l.subrecipe_id)return '<div class="line"><h3>'+esc(l.ingredient_name)+' <span>'+esc(l.required_quantity+" "+l.required_unit)+" · "+esc(l.subrecipe_id)+'</span></h3><p class="muted">Subreceta vinculada. No se descuenta su materia prima por segunda vez.</p></div>';
   return '<form class="line" data-recipe="'+esc(l.recipe_id)+'" data-line="'+l.line_number+'"><h3>'+esc(l.ingredient_name)+' <span>'+esc(l.required_quantity+" "+l.required_unit)+' por receta</span></h3><div class="line-grid"><label>SKU de inventario<select name="sku" required>'+skuOptions(l.candidate_inventory_code||"")+'</select></label><label>Equivalencia: '+esc(l.required_unit)+' / 1 unidad de almacén<input name="factor" type="number" min="0.000001" step="any" value="'+esc(l.quantity_per_inventory_unit??"")+'" required placeholder="Ej. 1000"></label><label>Estado<select name="state"><option value="candidate" '+(l.mapping_status==="verified"?"":"selected")+'>Propuesta sin validar</option><option value="verified" '+(l.mapping_status==="verified"?"selected":"")+'>Confirmado tras comprobar</option></select></label><button>Guardar</button></div><p class="flag '+(l.mapping_status==="verified"?"ok":"")+'">'+(l.mapping_status==="verified"?"Confirmado":l.mapping_status==="candidate"?"SKU sugerido, no aprobado":"Sin asignación")+'</p></form>';
  }).join("")+'</div>').join("");
+ const active=lines.filter(l=>l.recipe_id==="REC-045"&&!l.subrecipe_id);
+ const linked=active.filter(l=>l.candidate_inventory_code).length;
+ const converted=active.filter(l=>l.mapping_status==="verified"&&l.conversion_status==="verified"&&Number(l.quantity_per_inventory_unit)>0).length;
+ const priced=active.filter(l=>{const item=items.find(i=>i.code===l.candidate_inventory_code);return item&&Number(item.unit_cost)>0&&item.unit_cost_source}).length;
+ $("rec045-cost-summary").innerHTML='<span>'+linked+'/'+active.length+' SKU identificados</span><span>'+converted+'/'+active.length+' equivalencias verificadas</span><span>'+priced+'/'+active.length+' costos con fuente registrada</span>';
  $("cost-sku").innerHTML=skuOptions();
 }
 async function load(){
