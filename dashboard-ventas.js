@@ -459,22 +459,35 @@ async function flyChatAsk(question) {
  $("fly-generate-report").disabled=true;
  $("fly-ai-status").textContent="Consultando al agente supervisado de Compás Evolution…";
  try{
-  const session=JSON.parse(sessionStorage.getItem("filler_staff_session_v1")||"null");
-  if(!session?.access_token)throw Error("Inicia sesión como administrador.");
-  const res=await fetch(FLY_ENDPOINT,{
-   method:"POST",cache:"no-store",
-   headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
-   body:JSON.stringify({agent:selected,question,report:flyOpsReportText})
+  let jwt=await FillerCloud.accessToken();
+  if(!jwt)throw Error("Tu sesión expiró. Inicia sesión nuevamente como administrador de Fiiller.");
+  const requestBody=JSON.stringify({agent:selected,question,report:flyOpsReportText});
+  const send=access=>fetch(FLY_ENDPOINT,{
+    method:"POST",cache:"no-store",signal:AbortSignal.timeout(24000),
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+access},
+    body:requestBody
   });
+  let res=await send(jwt);
+  if(res.status===401){
+    jwt=await FillerCloud.accessToken({forceRefresh:true});
+    if(!jwt)throw Error("Tu sesión caducó y no pudo renovarse. Vuelve a iniciar sesión como administrador.");
+    res=await send(jwt);
+  }
   const payload=await res.json().catch(()=>({}));
-  if(!res.ok)throw Error(payload.error||"El agente no respondió ("+res.status+").");
+  if(!res.ok){
+    if(res.status===401||res.status===403)throw Error("No tienes una sesión administrativa válida. Vuelve a iniciar sesión.");
+    if(res.status===429)throw Error("Se alcanzó el límite diario de consultas. Puedes usar el análisis local por reglas.");
+    if(res.status>=500)throw Error("Compás Fly no está disponible temporalmente; los KPIs locales siguen accesibles.");
+    throw Error(payload.error||"El agente rechazó la consulta ("+res.status+").");
+  }
   if(!payload.saved||!payload.answer)throw Error("La respuesta no fue registrada en el historial de auditoría.");
   flyLastAnswer=payload.answer;
   flyChatAdd(payload.answer+"\n\n"+(selected==="fly_quality"?"Fly Quality":"Fly Delivery")+" · IA supervisada · Historial registrado.","bot");
   $("fly-copy-answer").disabled=false;
   $("fly-ai-status").textContent="Respuesta guardada en Compás Evolution · Sin acciones ejecutadas.";
  }catch(err){
-  flyChatAdd("No fue posible consultar la IA: "+String(err.message||err)+". Puedes desactivar «Usar IA supervisada» para consultar los datos locales.","bot");
+  const message=err?.name==="TimeoutError"||err?.name==="AbortError"?"La IA superó el tiempo de respuesta. Intenta de nuevo; no se han realizado cambios.":String(err?.message||err);
+  flyChatAdd("No fue posible consultar la IA: "+message+" Puedes desactivar «Usar IA supervisada» para consultar los datos locales.","bot");
   $("fly-ai-status").textContent="Servicio IA no disponible; el dashboard y las reglas locales siguen funcionando.";
  }finally{
   flyBusy=false;
@@ -487,7 +500,8 @@ let flyOpsReportText="";
 async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,inventory){
  const headers={apikey:KEY,Authorization:"Bearer "+token};
  const res=await fetch(BASE+"/rest/v1/fiiller_monthly_targets?select=avg_ticket_target,sales_target&effective_month=lte."+firstDay+"&order=effective_month.desc&limit=1",{headers,cache:"no-store"});
- const target=res.ok?(await res.json())[0]:null;
+ const targetsAvailable=res.ok;
+ const target=targetsAvailable?(await res.json())[0]:null;
  const cuts=dates.filter(d=>salesByDate.has(d));
  const missing=dates.length-cuts.length;
  const missingTickets=dates.filter(d=>!ticketByDate.has(d)).length;
@@ -515,7 +529,7 @@ async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,i
   const grade=missing?"unknown":ratio>=.95?"good":ratio>=.8?"warn":"bad";
   add("Meta de ventas",grade,pct.toFixed(1)+"% del objetivo",missing?"Faltan cortes; ritmo sin calificar.":ratio>=.95?"Avance acorde al calendario hábil.":"Avance inferior a los días hábiles transcurridos.");
  }
- const low=Number(inventory?.low);
+ const low=inventory?.low===null||inventory?.low===undefined?NaN:Number(inventory.low);
  add("Abastecimiento",!Number.isFinite(low)?"unknown":low>0?(low>=20?"bad":"warn"):"good",Number.isFinite(low)?fmt(low)+" insumos en mínimo o por debajo":"Sin dato de inventario","Revisar reposición con el almacén de Fiiller.");
  $("fly-grid").innerHTML=results.map(r=>'<div class="fly-box '+r.state+'"><h3>'+escape(r.title)+'</h3><p>'+escape(r.detail)+'</p><small>'+escape(r.note)+'</small></div>').join("");
  $("fly-period").textContent=new Date(firstDay+"T12:00:00Z").toLocaleDateString("es-MX",{month:"long",year:"numeric",timeZone:"UTC"});
@@ -534,7 +548,7 @@ async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,i
   "Evaluar venta cruzada con complementos y comparar resultados tras nuevos cortes.",
   "El ticket promedio se vuelve a medir con tickets y ventas confirmados del mismo día.");
  if(!target||!Number(target.sales_target))task("Media","Fly Quality","Comprobar metas configuradas",
-  "No se encontró una meta de ventas aplicable.",
+  targetsAvailable?"No se encontró una meta de ventas aplicable.":"No se pudo consultar la fuente de metas (dato no disponible).",
   "Verificar vigencia y configuración administrativa de metas.",
   "Se confirma una meta activa y documentada para el mes seleccionado.");
  if(!actionItems.length)task("Seguimiento","Fly Quality","Mantener monitoreo preventivo",
@@ -555,11 +569,28 @@ async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,i
 
  $("fly-action-list").innerHTML='<div class="fly-action-list">'+top.map((t,i)=>'<article class="fly-task"><span class="fly-owner">'+escape(t.owner)+' · '+escape(t.priority)+'</span><h4>'+(i+1)+'. '+escape(t.title)+'</h4><p><strong>Evidencia:</strong> '+escape(t.evidence)+'</p><p><strong>Acción:</strong> '+escape(t.action)+'</p><small><strong>Cierre:</strong> '+escape(t.done)+'</small></article>').join("")+'</div>';
  const period=firstDay.slice(0,7);
+ const salesTotal=cuts.reduce((sum,d)=>sum+Number(salesByDate.get(d)),0);
+ const monthSalesTarget=target&&Number(target.sales_target)>0?Number(target.sales_target):null;
+ const avgTarget=target&&Number(target.avg_ticket_target)>0?Number(target.avg_ticket_target):null;
  const lines=[
   "FIILLER CAFÉ · REPORTE PARA COMPÁS FLY OPS",
   "Periodo de ventas: "+period,
-  "Fuente: cortes TPV Arrow y tickets manuales; inventario actual separado.",
-  "Tipo: diagnóstico basado en reglas, pendiente de revisión humana.",
+  "Emitido: "+new Date().toISOString(),
+  "Fuente: cortes oficiales TPV Arrow y tickets manuales de las mismas fechas; inventario actual separado.",
+  "Tipo: reporte operativo de solo lectura basado en registros comprobables. Revisión humana pendiente.",
+  "",
+  "INDICADORES VERIFICABLES",
+  "Ventas TPV Arrow confirmadas: "+money(salesTotal)+" (MXN; "+cuts.length+" fechas con corte).",
+  "Tickets Arrow registrados: "+fmt(dates.reduce((sum,d)=>sum+Number(ticketByDate.get(d)||0),0))+" (pueden incluir fechas sin corte de venta).",
+  "Ticket promedio comparable: "+(average===null?"NO CALCULABLE":money(average))+" en "+pairs.length+" fechas con venta y tickets válidos del mismo día.",
+  "Meta de ventas: "+(monthSalesTarget===null?(targetsAvailable?"NO CONFIGURADA":"FUENTE NO DISPONIBLE"):money(monthSalesTarget))+".",
+  "Meta de ticket promedio: "+(avgTarget===null?(targetsAvailable?"NO CONFIGURADA":"FUENTE NO DISPONIBLE"):money(avgTarget))+".",
+  "Días hábiles evaluados: "+dates.length+". Días con cortes pendientes: "+missing+". Días sin tickets: "+missingTickets+".",
+  "Fechas sin corte confirmado: "+(dates.filter(d=>!salesByDate.has(d)).join(", ")||"ninguna")+".",
+  "Fechas sin tickets capturados: "+(dates.filter(d=>!ticketByDate.has(d)).join(", ")||"ninguna")+".",
+  "Inventario actual en mínimo o debajo: "+(Number.isFinite(low)?fmt(low)+" insumos":"DATO NO DISPONIBLE")+". No es un saldo histórico del mes.",
+  "Pedidos digitales: NO SE SUMAN a ventas TPV y no se presentan como cobros.",
+  "Costos y márgenes: NO DETERMINADOS sin facturas y costeo validado.",
   "",
   "SEMÁFORO"
  ];
@@ -571,7 +602,7 @@ async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,i
   "Acción: "+t.action,
   "Criterio de cierre: "+t.done
  ));
- lines.push("","CONTROL: No se han ejecutado acciones, creado issues, contactado CEDIS ni invocado agentes. Ventas TPV y pedidos de app no se suman. Costos de compra internos no se incluyen.");
+ lines.push("","CONTROL: No se han ejecutado cambios de inventario, ventas, compras ni recetas. Días faltantes NO significan ventas de $0. Las metas ausentes y fuentes no consultables se identifican explícitamente.");
  flyOpsReportText=lines.join("\n");
  $("fly-generate-report").disabled=false;
  $("fly-copy-report").disabled=false;
