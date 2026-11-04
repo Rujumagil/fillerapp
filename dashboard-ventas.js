@@ -502,7 +502,8 @@ let flyPdfSnapshot=null;
 function flyPdfChart(points,field,{width=750,height=260,color="#087650",currency=false}={}){
  const values=points.map(p=>Number.isFinite(Number(p[field]))&&p[field]!==null?Number(p[field]):null);
  const valid=values.filter(x=>x!==null),max=Math.max(1,...valid);
- const maxY=Math.ceil(max/1000)*1000 || 1;
+ const step=max>=10000?2000:max>=2000?500:max>=500?100:max>=100?25:10;
+ const maxY=Math.max(step,Math.ceil(max/step)*step);
  const pad={left:66,right:15,top:24,bottom:41};
  const plotH=height-pad.top-pad.bottom,usableW=width-pad.left-pad.right;
  const colW=usableW/Math.max(points.length,1);
@@ -550,7 +551,7 @@ function flyPdfDocument(d){
  }).join("");
  const actions=v.actions.map((a,i)=>'<div class="action"><strong>'+(i+1)+'. '+escape(a.title)+'</strong><p><b>Prioridad / responsable:</b> '+escape(a.priority)+' · '+escape(a.owner)+'</p><p><b>Evidencia:</b> '+escape(a.evidence)+'</p><p><b>Acción:</b> '+escape(a.action)+'</p><p><b>Criterio de cierre:</b> '+escape(a.done)+'</p></div>').join("");
  const traffic=v.semaphore.map(a=>'<div class="traffic '+escape(a.state)+'"><b>'+escape(a.title)+'</b><strong>'+escape(a.detail)+'</strong><small>'+escape(a.note)+'</small></div>').join("");
- const separateOrders=v.orders?'<div class="orders"><h3>Órdenes digitales de Fiiller App · últimos 30 días</h3><p>'+escape(fmt(v.orders.total))+' pedidos solicitados · '+escape(fmt(v.orders.delivered))+' entregados · '+escape(fmt(v.orders.open))+' abiertos · importe solicitado '+escape(m(v.orders.value))+'.</p><p><b>NO son ventas TPV ni cobros confirmados.</b> No se suman al ingreso oficial.</p></div>':'<p class="muted">No se pudo verificar el conteo de pedidos digitales.</p>';
+ const separateOrders=v.orders&&v.orders.total!==null&&v.orders.delivered!==null&&v.orders.open!==null&&v.orders.value!==null?'<div class="orders"><h3>Órdenes digitales de Fiiller App · últimos 30 días</h3><p>'+escape(fmt(v.orders.total))+' pedidos solicitados · '+escape(fmt(v.orders.delivered))+' entregados · '+escape(fmt(v.orders.open))+' abiertos · importe solicitado '+escape(m(v.orders.value))+'.</p><p><b>NO son ventas TPV ni cobros confirmados.</b> No se suman al ingreso oficial.</p></div>':'<p class="muted">No se pudo verificar el conteo de pedidos digitales.</p>';
  const maybeNote=v.comparables===0?"No hay suficientes días comparables para calcular ticket promedio.":"Los promedios consideran únicamente fechas con venta y tickets capturados en conjunto.";
  const stamp=new Date(v.generatedAt).toLocaleString("es-MX",{dateStyle:"medium",timeStyle:"short"});
  const chartSales=flyPdfChart(v.days.map(p=>({date:p.date,amount:p.sales})),"amount",{currency:true});
@@ -583,8 +584,7 @@ function exportFlyPdf(){
  popup.document.close();
  popup.focus();
  // Browser-native print produces a shareable PDF via "Guardar como PDF".
- popup.addEventListener("load",()=>popup.print(),{once:true});
- popup.setTimeout(()=>popup.print(),450);
+ popup.setTimeout(()=>{try{popup.focus();popup.print();}catch{}},550);
  status("Se abrió el reporte ejecutivo. Elige «Guardar como PDF» en el cuadro de impresión.");
 }
 
