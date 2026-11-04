@@ -404,6 +404,48 @@ async function renderRecipeCosting(token){
  $("recipe-caution").textContent="El 25% de operación de CEDIS OCS es un recargo interno sobre el costo de ingredientes, NO un margen de utilidad. Se aplica una sola vez al producto final; subrecetas no lo duplican. Los códigos propuestos NO se descuentan del almacén. El costo queda pendiente hasta validar el SKU, la equivalencia de unidades, el costo de compra y, cuando aplique, el rendimiento real del lote. Las recetas inactivas no aparecen en el panel ni se contabilizan en los pendientes.";
 }
 
+
+async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,inventory){
+ const headers={apikey:KEY,Authorization:"Bearer "+token};
+ const targetResp=await fetch(BASE+"/rest/v1/fiiller_monthly_targets?select=effective_month,sales_target,tickets_target,avg_ticket_target&effective_month=lte."+firstDay+"&order=effective_month.desc&limit=1",{headers,cache:"no-store"});
+ const targets=targetResp.ok?await targetResp.json():[];
+ const goal=targets[0]||null;
+ const observed=dates.filter(d=>salesByDate.has(d));
+ const missing=dates.filter(d=>!salesByDate.has(d));
+ const missingTickets=dates.filter(d=>!ticketByDate.has(d));
+ const comparable=dates.filter(d=>salesByDate.has(d)&&Number(ticketByDate.get(d))>0);
+ const ticketSum=comparable.reduce((n,d)=>n+Number(ticketByDate.get(d)),0);
+ const mean=ticketSum?comparable.reduce((n,d)=>n+Number(salesByDate.get(d)),0)/ticketSum:null;
+ const sales=observed.reduce((n,d)=>n+Number(salesByDate.get(d)),0);
+ const statuses=[];
+ const push=(name,type,summary,note)=>statuses.push({name,type,summary,note});
+ if(!dates.length)push("Integridad de cortes","unknown","No hay días hábiles evaluables","Selecciona un periodo con registros.");
+ else if(missing.length||missingTickets.length)push("Integridad de cortes","warn",missing.length+" cortes y "+missingTickets.length+" días sin tickets","Los datos ausentes no representan ventas cero.");
+ else push("Integridad de cortes","good","Cortes y tickets al día","Todas las fechas hábiles evaluadas tienen registro.");
+ if(mean===null||!goal||!Number(goal.avg_ticket_target))push("Ticket promedio","unknown","Sin comparación válida","Faltan días comparables o una meta configurada.");
+ else if(mean>=Number(goal.avg_ticket_target))push("Ticket promedio","good",money(mean)+" frente a "+money(goal.avg_ticket_target),"Objetivo alcanzado en fechas comparables.");
+ else if(mean>=Number(goal.avg_ticket_target)*0.9)push("Ticket promedio","warn",money(mean)+" frente a "+money(goal.avg_ticket_target),"Promover complementos y medir el resultado.");
+ else push("Ticket promedio","bad",money(mean)+" frente a "+money(goal.avg_ticket_target),"Brecha de "+money(Number(goal.avg_ticket_target)-mean)+" por ticket.");
+ if(!goal||!Number(goal.sales_target)||!observed.length||!dates.length)push("Ritmo de ventas","unknown","Sin avance comparable","Se necesitan cortes y meta mensual.");
+ else{
+   const progress=sales/Number(goal.sales_target);
+   const periodEnd=new Date(Date.UTC(Number(firstDay.slice(0,4)),Number(firstDay.slice(5,7)),0));
+   let businessDays=0;for(let n=1;n<=periodEnd.getUTCDate();n++){const day=new Date(Date.UTC(periodEnd.getUTCFullYear(),periodEnd.getUTCMonth(),n)).getUTCDay();if(day!==0&&day!==6)businessDays++;}
+   const elapsed=dates.length/businessDays,ratio=elapsed?progress/elapsed:0;
+   if(missing.length)push("Ritmo de ventas","unknown",(100*progress).toFixed(1)+"% de meta registrada","Hay "+missing.length+" corte(s) pendiente(s); sin juicio sobre el ritmo.");
+   else if(ratio>=0.95)push("Ritmo de ventas","good",(100*progress).toFixed(1)+"% de la meta","Avance acorde con los días hábiles transcurridos; sin pronóstico.");
+   else if(ratio>=0.8)push("Ritmo de ventas","warn",(100*progress).toFixed(1)+"% de la meta","Revisar tendencia sin extrapolar días faltantes.");
+   else push("Ritmo de ventas","bad",(100*progress).toFixed(1)+"% de la meta","Ritmo inferior al avance proporcional del calendario.");
+ }
+ const low=Number(inventory?.low);
+ if(!Number.isFinite(low))push("Abastecimiento","unknown","Sin inventario disponible","No se pudo evaluar el almacén.");
+ else if(low>0)push("Abastecimiento",low>=20?"bad":"warn",fmt(low)+" insumos bajo o en mínimo","Verificar existencias y prioridades de compra. Inventario actual.");
+ else push("Abastecimiento","good","Sin alertas de mínimos","Revisar caducidades en almacén.");
+ $("fly-status-grid").innerHTML=statuses.map(x=>'<article class="fly-status '+x.type+'"><div class="fly-head"><i class="fly-dot" aria-hidden="true"></i>'+escape(x.name)+'</div><p><strong>'+escape(x.summary)+'</strong></p><small>'+escape(x.note)+'</small></article>').join("");
+ $("fly-period").textContent=new Date(firstDay+"T12:00:00Z").toLocaleDateString("es-MX",{month:"long",year:"numeric",timeZone:"UTC"});
+ $("fly-guidance").textContent="Fly Ops recomendado para coordinar "+statuses.filter(x=>x.type==="bad"||x.type==="warn").length+" prioridad(es) de operación; Fly Quality para revisar calidad de cortes, fuentes y costeo. Diagnóstico por reglas, sin automatización ni conexión directa a Compás Fly todavía.";
+}
+
 async function show(){
  const role=await FillerCloud.staffRole();
  if(role!=="admin"){$("login-card").hidden=false;$("dashboard").hidden=true;status(role?"Este tablero requiere acceso de administrador.":"Inicia sesión con tu cuenta de administrador.");return;}
@@ -446,6 +488,7 @@ async function show(){
  await renderExecutiveSummary(session.access_token,firstDay,dates,salesByDate,ticketByDate,monthNow);
  await renderCostAndInventory(session.access_token,firstDay);
  await renderRecipeCosting(session.access_token);
+ await renderFlySemaforo(session.access_token,firstDay,dates,salesByDate,ticketByDate,data.inventory||{});
  const sales=data.sales||{},orders=data.orders||{},inventory=data.inventory||{},feedback=data.feedback||{};
  $("login-card").hidden=true;$("dashboard").hidden=false;
  $("sales-amount").textContent=monthSales.length?money(monthAmount):"Sin cortes";
