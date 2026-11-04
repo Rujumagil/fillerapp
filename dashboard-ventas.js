@@ -446,6 +446,37 @@ async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,i
  $("fly-guidance").textContent="Fly Ops recomendado para coordinar "+statuses.filter(x=>x.type==="bad"||x.type==="warn").length+" prioridad(es) de operación; Fly Quality para revisar calidad de cortes, fuentes y costeo. Diagnóstico por reglas, sin automatización ni conexión directa a Compás Fly todavía.";
 }
 
+
+async function renderFlySemaforo(token,firstDay,dates,salesByDate,ticketByDate,inventory){
+ const headers={apikey:KEY,Authorization:"Bearer "+token};
+ const res=await fetch(BASE+"/rest/v1/fiiller_monthly_targets?select=avg_ticket_target,sales_target&effective_month=lte."+firstDay+"&order=effective_month.desc&limit=1",{headers,cache:"no-store"});
+ const target=res.ok?(await res.json())[0]:null;
+ const cuts=dates.filter(d=>salesByDate.has(d));
+ const missing=dates.length-cuts.length;
+ const missingTickets=dates.filter(d=>!ticketByDate.has(d)).length;
+ const pairs=dates.filter(d=>salesByDate.has(d)&&Number(ticketByDate.get(d))>0);
+ const tickets=pairs.reduce((n,d)=>n+Number(ticketByDate.get(d)),0);
+ const average=tickets?pairs.reduce((n,d)=>n+Number(salesByDate.get(d)),0)/tickets:null;
+ const results=[];
+ const add=(title,state,detail,note)=>results.push({title,state,detail,note});
+ add("Cortes y tickets",missing||missingTickets?"warn":dates.length?"good":"unknown",missing+" cortes y "+missingTickets+" tickets por registrar","Los registros ausentes no representan ventas cero.");
+ if(average===null||!target||!Number(target.avg_ticket_target))add("Ticket promedio","unknown","Sin comparación","Faltan datos comparables o meta.");
+ else {
+  const ratio=average/Number(target.avg_ticket_target);
+  add("Ticket promedio",ratio>=1?"good":ratio>=.9?"warn":"bad",money(average)+" / "+money(target.avg_ticket_target),ratio>=1?"Objetivo alcanzado.":"Revisar venta de complementos.");
+ }
+ if(!target||!Number(target.sales_target)||!cuts.length)add("Meta de ventas","unknown","Sin avance suficiente","Necesita cortes y meta.");
+ else {
+  const sum=cuts.reduce((n,d)=>n+Number(salesByDate.get(d)),0);
+  const pct=100*sum/Number(target.sales_target);
+  add("Meta de ventas",missing?"unknown":"warn",pct.toFixed(1)+"% del objetivo",missing?"Periodo incompleto: no calificar el ritmo.":"Revisar avance contra calendario; no es pronóstico.");
+ }
+ const low=Number(inventory?.low);
+ add("Abastecimiento",!Number.isFinite(low)?"unknown":low>0?(low>=20?"bad":"warn"):"good",Number.isFinite(low)?fmt(low)+" insumos en mínimo o por debajo":"Sin dato de inventario","Revisar reposición con el almacén de Fiiller.");
+ $("fly-grid").innerHTML=results.map(r=>'<div class="fly-box '+r.state+'"><h3>'+escape(r.title)+'</h3><p>'+escape(r.detail)+'</p><small>'+escape(r.note)+'</small></div>').join("");
+ $("fly-period").textContent=new Date(firstDay+"T12:00:00Z").toLocaleDateString("es-MX",{month:"long",year:"numeric",timeZone:"UTC"});
+}
+
 async function show(){
  const role=await FillerCloud.staffRole();
  if(role!=="admin"){$("login-card").hidden=false;$("dashboard").hidden=true;status(role?"Este tablero requiere acceso de administrador.":"Inicia sesión con tu cuenta de administrador.");return;}
@@ -488,6 +519,7 @@ async function show(){
  await renderExecutiveSummary(session.access_token,firstDay,dates,salesByDate,ticketByDate,monthNow);
  await renderCostAndInventory(session.access_token,firstDay);
  await renderRecipeCosting(session.access_token);
+ await renderFlySemaforo(session.access_token,firstDay,dates,salesByDate,ticketByDate,data.inventory||{});
  await renderFlySemaforo(session.access_token,firstDay,dates,salesByDate,ticketByDate,data.inventory||{});
  const sales=data.sales||{},orders=data.orders||{},inventory=data.inventory||{},feedback=data.feedback||{};
  $("login-card").hidden=true;$("dashboard").hidden=false;
