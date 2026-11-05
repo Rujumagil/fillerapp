@@ -70,63 +70,38 @@
       "quantity": 0.1142857142857143,
       "unit": "kg",
       "display": "114.285714 g crudos por 100 g cocidos"
-    }
-  ],
-  "unresolved": [
-    {
-      "ingredient": "Huevo",
-      "recipe_id": "REC-002",
-      "serving_quantity": 1,
-      "serving_unit": "pieza",
-      "catalog_candidate": "01170024 HUEVO BLANCO GRANJERO KG (confirmed)",
-      "reason": "Muestras físicas comprobadas: 53.20g con cáscara (10 unidades), 48.20g sin cáscara (5 unidades), rendimiento aproximado 90.60% con muestras independientes. Salida teórica 0.05320 kg por pieza, bloqueada para movimientos reales.",
-      "edible_weight_g": 48.2,
-      "inventory_code": "01170024",
-      "inventory_weight_unit": "kg",
-      "inventory_deduction_quantity_kg": null,
-      "inventory_weight_basis": "con_cascara_confirmed",
-      "shell_on_average_g": 53.2,
-      "measurement_plan": "Pesar individualmente 10 huevos completos con cáscara; promedio=sumatoria/piezas; consumo kg por REC-002=promedio g/1000",
-      "shell_on_measured_weights_g": [
-        57,
-        53,
-        55,
-        53,
-        48,
-        52,
-        54,
-        56,
-        48,
-        56
-      ],
-      "shell_on_total_g": 532,
-      "provisional_inventory_consumption_kg": 0.0532,
-      "measurement_status": "physical_samples_verified_pending_integration_test",
-      "edible_sample_weights_g": [
-        47,
-        48,
-        49,
-        48,
-        49
-      ],
-      "edible_sample_total_g": 241,
-      "estimated_edible_yield_percent": 90.6015
     },
     {
-      "ingredient": "Aceite de cocción",
-      "recipe_id": "REC-003",
-      "reason": "Cantidad de 3 ml por REC-003 confirmada; verificar que cocina utiliza aceite de canola Patrona antes de vincular SKU. No afectar existencias.",
-      "amount_ml": 3,
-      "catalog_candidate": "01010051 ACEITE DE CANOLA PATRONA BOT 1 L",
-      "candidate_package_ml": 1000,
-      "candidate_consumption_pieces": 0.003,
-      "inventory_code": null
+      "name": "Huevo Granjero con cáscara",
+      "ocs_code": "01170024",
+      "quantity": 0.0532,
+      "unit": "kg",
+      "display": "1 pieza; promedio medido 53.20 g con cáscara",
+      "basis": "provisional_test_average"
+    },
+    {
+      "name": "Aceite de canola Patrona botella 1 L",
+      "ocs_code": "01010051",
+      "quantity": 0.003,
+      "unit": "pieza",
+      "display": "3 ml (0.003 botella)",
+      "basis": "confirmed"
     }
   ],
+  "unresolved": [],
   "acceptance_criteria": [
     "No actualizar tablas de inventario, movimientos, lotes ni existencias en modo simulación",
     "No activar descuentos mientras falte la integración y conversiones de ingredientes",
     "Totales deben coincidir con suma por receta y unidades del catálogo OCS",
     "Al probar integración real usar transacción idempotente por identificador de venta, con rollback y registro de auditoría"
-  ]
+  ],
+  "pre_activation_checks": [
+    "Verificar en la API de almacén que permita salidas fraccionarias de las piezas 3 kg salsa roja, 4 kg crema y 1 L aceite; de no permitirlas, diseñar control en unidades base sin reducir fracciones indebidamente.",
+    "Verificar consumo de huevo por kg con cáscara según promedio físico 53.20 g, con variación de lotes y tolerancias.",
+    "Comprobar idempotencia por folio de venta, trazabilidad por ingrediente, reversión por cancelación y ausencia de descontar dos veces si un pedido reaparece.",
+    "Validar que la venta provenga del canal correcto: TPV cobrado vs pedido digital no necesariamente cobrado.",
+    "Verificar costos unitarios y lote/FEFO cuando corresponda; no habilitar ventas de prueba contra stock real.",
+    "Comparar inventario antes y después de simulación: sin alteraciones."
+  ],
+  "notes": "Escenario: una unidad por cada REC-001, REC-002 y REC-003; valores agregados en unidad del catálogo. Los cálculos no constituyen consumos reales."
 }
