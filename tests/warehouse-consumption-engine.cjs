@@ -3,7 +3,6 @@
  * Fiiller: simulador AISLADO de consumos. No usa red, Supabase, DOM ni disco.
  * No modifica existencias ni representa la implementación operativa.
  */
-const assert = require("node:assert/strict");
 
 function round(value, places=9) {
   if (!Number.isFinite(value)) throw new Error("Cantidad no finita");
