@@ -22,6 +22,13 @@
     input{border:1px solid #b6cbc0;border-radius:10px;padding:12px;font:inherit}
     .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     #logout{background:#edf5ef;color:#006241;border:1px solid #b8d5c5}#logout:focus-visible{outline:3px solid #006241;outline-offset:3px}
+    .chatlog{display:grid;gap:10px;max-height:350px;overflow-y:auto;margin:14px 0}
+    .bubble{padding:12px 16px;border-radius:14px;background:#edf5ef;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+    .bubble.user{background:#006241;color:#fff;justify-self:end}
+    .bubble.fly{justify-self:start;max-width:90%}
+    .chat-controls{display:flex;gap:8px;flex-wrap:wrap}
+    .chat-controls input{flex:1;min-width:210px}
+    .chat-help{font-size:13px;color:#5b6e63}
     @media(max-width:700px){.grid{grid-template-columns:1fr}main{padding:14px}}
   </style>
 </head>
@@ -56,6 +63,17 @@
     <p id="summary"></p>
     <small>Fuente: pedidos digitales visibles para el personal autorizado. Se consultan hasta 90 pedidos; no son las ventas totales de TPV Arrow.</small>
   </section>
+  <section class="panel" id="fly-chat" hidden>
+    <h2>Pregúntale a Fly · Piloto de conversación</h2>
+    <p class="chat-help">Respuestas obtenidas con reglas y los pedidos digitales de esta sesión. Todavía no utiliza un modelo de IA ni consulta ventas de Arrow.</p>
+    <div id="chatlog" class="chatlog" aria-live="polite"></div>
+    <form id="fly-question" class="chat-controls">
+      <label for="fly-input">Pregunta sobre pedidos digitales</label>
+      <input id="fly-input" name="question" maxlength="180" placeholder="¿Cómo van los pedidos esta semana?" required>
+      <button type="submit">Preguntar</button>
+    </form>
+    <p class="chat-help">Prueba: «¿Cuántos pedidos hubo?», «¿Hay pendientes?» o «¿Cuántos se entregaron?».</p>
+  </section>
   <p><a href="admin.html">← Volver a Fiiller Admin</a> · <a href="pedidos.html">Abrir acceso de cocina</a></p>
 </main>
 <script src="filler-cloud.js"></script>
@@ -66,8 +84,30 @@
   const status=text=>{byId("status").textContent=text;};
   const roles=["admin","cocina"];
   let activeRole=null;
+  let snapshot=null;
+  function say(message,kind) {
+    const bubble=document.createElement("div");
+    bubble.className="bubble "+kind;
+    bubble.textContent=message;
+    byId("chatlog").appendChild(bubble);
+    byId("chatlog").scrollTop=byId("chatlog").scrollHeight;
+  }
+  function answerQuestion(input) {
+    if(!snapshot)return "Primero consulta los pedidos para actualizar el informe.";
+    const q=String(input||"").toLocaleLowerCase("es-MX");
+    if(/pendient|prepar|atenci[oó]n|nuevo/.test(q))
+      return "Entre los pedidos digitales de los últimos 7 días, "+snapshot.pending+" no figuran como Listo o Entregado. Revísalos desde Pedidos para verificar su estado.";
+    if(/entreg|listo|terminad|complet/.test(q))
+      return "En los últimos 7 días, "+snapshot.completed+" pedidos digitales están marcados como Listo o Entregado. Este conteo no distingue entre ambos estados.";
+    if(/pedido|semana|c[oó]mo va|resumen|hoy|venta/.test(q))
+      return "Se consultaron hasta 90 pedidos digitales: "+snapshot.total+" registros disponibles, "+snapshot.recent+" de los últimos 7 días y "+snapshot.pending+" recientes sin estado Listo o Entregado. No cuento con ventas Arrow ni un filtro específico de hoy.";
+    return "Por ahora puedo responder sobre pedidos digitales recientes, pendientes y estados Listo o Entregado. Prueba una de las preguntas sugeridas.";
+  }
   function showLogin(message) {
     activeRole=null;
+    snapshot=null;
+    byId("fly-chat").hidden=true;
+    byId("chatlog").replaceChildren();
     byId("fly-login").hidden=false;
     byId("refresh").hidden=true;
     byId("refresh").disabled=true;
@@ -102,6 +142,9 @@
       byId("count").textContent=orders.length;
       byId("week").textContent=recent.length;
       byId("ready").textContent=completed.length;
+      snapshot={total:orders.length,recent:recent.length,completed:completed.length,pending:recent.length-completed.length};
+      byId("fly-chat").hidden=false;
+      if(!byId("chatlog").childElementCount)say("Hola. Ya consulté los pedidos digitales autorizados. Puedes preguntarme por pedidos recientes o pendientes.","fly");
       byId("summary").textContent=role==="admin"
         ? "En los últimos 7 días hay "+recent.length+" pedidos digitales. "+completed.length+" están Listo o Entregado."
         : "En los últimos 7 días hay "+(recent.length-completed.length)+" pedidos que requieren seguimiento (no figuran como Listo o Entregado).";
@@ -109,6 +152,8 @@
       status("Consulta completada · "+new Date().toLocaleString("es-MX"));
     }catch(error) {
       byId("results").hidden=true;
+      snapshot=null;
+      byId("fly-chat").hidden=true;
       status("No se pudo consultar: "+(error?.message||"Error de acceso"));
     }finally {
       button.disabled=!activeRole;
@@ -134,6 +179,23 @@
       await analyze();
     }catch(error){showLogin(error?.message||"No se pudo iniciar sesión.");}
     finally{button.disabled=false;}
+  });
+  byId("fly-question").addEventListener("submit",async event=>{
+    event.preventDefault();
+    const form=event.currentTarget;
+    const input=form.elements.namedItem("question");
+    const question=String(input.value||"").trim();
+    if(!question)return;
+    input.value="";
+    const submit=form.querySelector("button");
+    submit.disabled=true;
+    try {
+      const role=await FillerCloud.staffRole();
+      if(!roles.includes(role)||role!==activeRole){showLogin("La sesión expiró. Vuelve a entrar para preguntar.");return;}
+      say(question,"user");
+      say(answerQuestion(question),"fly");
+    }catch{showLogin("No fue posible verificar tu acceso. Inicia sesión nuevamente.");}
+    finally{submit.disabled=false;}
   });
   byId("refresh").addEventListener("click",analyze);
   byId("logout").addEventListener("click",()=>{FillerCloud.logout();showLogin("Sesión local cerrada. Ya puedes entrar con admin o cocina.");byId("fly-login").querySelector("input").focus();});
