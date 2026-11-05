@@ -195,6 +195,56 @@ async function loadMyOrderHistory(){
   }
 }
 $("refresh-my-orders")?.addEventListener("click",loadMyOrderHistory);
+
+const trackingUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+function parseGuestTracking(value){
+  const raw=String(value||"").trim();
+  if(trackingUuid.test(raw))return raw;
+  const match=raw.match(/(?:^|[#?&])token=([0-9a-f-]{36})(?:$|[&#?])/i);
+  if(match&&trackingUuid.test(match[1]))return match[1];
+  throw Error("Pega el enlace privado de seguimiento del pedido, no solo el folio.");
+}
+function claimStatus(text,bad=false){
+  const el=$("claim-order-status");
+  if(!el)return;
+  el.textContent=text;el.style.color=bad?"#a63327":"#006241";
+}
+$("claim-last-device")?.addEventListener("click",()=>{
+  let saved=null;
+  try{saved=JSON.parse(localStorage.getItem("filler_last_tracking_v1")||"null");}catch{}
+  const value=String(saved?.token||"");
+  if(!trackingUuid.test(value)){
+    claimStatus("No hay un enlace de pedido guardado en este celular. Pega el que recibiste al comprar.",true);
+    return;
+  }
+  $("claim-order-form").elements.tracking.value="./pedido.html#token="+value;
+  claimStatus("Enlace recuperado de este celular. Confirma el teléfono usado en ese pedido.");
+});
+$("claim-order-form")?.addEventListener("submit",async event=>{
+  event.preventDefault();
+  const form=event.currentTarget,button=$("claim-order-submit");
+  if(button.disabled)return;
+  button.disabled=true;claimStatus("Verificando el pedido…");
+  try{
+    const access=await token();
+    if(!access)throw Error("Inicia sesión para vincular un pedido.");
+    const tracking_token=parseGuestTracking(form.elements.tracking.value);
+    const phone=form.elements.phone.value.trim();
+    if(phone.replace(/\D/g,"").length<8)throw Error("Escribe el teléfono que registraste al comprar.");
+    const response=await fetch(BASE+"/functions/v1/filler-claim-guest-order",{
+      method:"POST",
+      headers:{apikey:KEY,Authorization:"Bearer "+access,"Content-Type":"application/json"},
+      body:JSON.stringify({tracking_token,phone}),cache:"no-store"
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok||!data.ok)throw Error(data.message||"No pudimos vincular ese pedido.");
+    claimStatus("✓ Pedido "+String(data.code||"")+" vinculado a tu cuenta. Ya aparece en tu historial.");
+    form.elements.tracking.value="";
+    await loadMyOrderHistory();
+  }catch(error){claimStatus(error.message||"No pudimos vincular el pedido.",true);}
+  finally{button.disabled=false;}
+});
+
 function showMember(){
   $("visitor").hidden=true;$("member").hidden=false;
   const display=String(profile?.full_name||session?.user?.user_metadata?.filler_display_name||"cliente").trim()||"cliente";
@@ -208,6 +258,7 @@ function showMember(){
   const f=$("preferences");f.elements.name.value=display;
   f.elements.phone.value=profile?.phone||"";
   f.elements.promotions.checked=!!profile?.promotions_opt_in;
+  const claimForm=$("claim-order-form");if(claimForm)claimForm.elements.phone.value=profile?.phone||"";
   editProfile(false);
   updateLastOrder();
   loadMyOrderHistory();
