@@ -44,9 +44,16 @@
     "Aguacate"
   ],
   "notes": "",
-  "status": "confirmed",
+  "status": "confirmed_ingredients_pending_cooking_method",
   "distinct_from": "REC-010",
   "inventory_deduction_status": "pending_integration",
   "cost_status": "pending_warehouse_unit_costs",
-  "ingredient_sku_mapping_status": "pending"
+  "ingredient_sku_mapping_status": "pending",
+  "preparation": {
+    "service_temperature": "caliente",
+    "method": "Preparar y servir caliente. Técnica de calentamiento y equipo pendientes de confirmación operativa.",
+    "cooking_fat_status": "not_confirmed_no_extra_deduction"
+  },
+  "side_dish": "Sin guarnición",
+  "cooking_input_validation": "No incluir aceite, mantequilla u otros insumos de cocción hasta confirmar uso y cantidades."
 }
