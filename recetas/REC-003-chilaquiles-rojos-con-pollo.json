@@ -49,7 +49,11 @@
       "measurement_state": "cocido",
       "inventory_code": "03050031",
       "inventory_purchase_unit": "kg",
-      "inventory_deduction_status": "pending_raw_to_cooked_yield"
+      "inventory_deduction_status": "pending_integration_test",
+      "raw_weight_per_portion_g": 114.29,
+      "raw_weight_per_portion_kg": 0.114286,
+      "raw_weight_exact_calculation": "100 g cooked / (875 g cooked / 1000 g raw)",
+      "inventory_weight_basis": "crudo"
     }
   ],
   "preparation": {
@@ -60,7 +64,7 @@
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
   "cost_status": "pending_warehouse_unit_costs",
-  "chicken_raw_to_cooked_yield_status": "pending",
+  "chicken_raw_to_cooked_yield_status": "confirmed_physical_test",
   "cooking_oil_quantity_status": "pending_if_used",
   "sauce_subrecipe_status": "not_applicable_purchased_prepared",
   "sauce_inventory": {
@@ -77,5 +81,15 @@
     "unit_conversion_status": "not_required_confirmed_80_g"
   },
   "cheese_inventory_sku_status": "confirmed_catalog_match",
-  "chicken_inventory_sku_status": "confirmed_catalog_match"
+  "chicken_inventory_sku_status": "confirmed_catalog_match",
+  "chicken_cooking_yield": {
+    "raw_batch_g": 1000,
+    "cooked_batch_g": 875,
+    "yield_percent": 87.5,
+    "raw_grams_per_100g_cooked": 114.29,
+    "raw_kg_per_100g_cooked": 0.114286,
+    "test_status": "confirmed_by_user",
+    "rounding_note": "Valor de referencia para integración. Usar fracción exacta 100/0.875 al acumular consumos, redondear solo al mostrar.",
+    "inventory_deduction_enabled": false
+  }
 }
