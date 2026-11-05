@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#006241">
+<title>Arranque de almacén · Fiiller Café</title>
+<style>
+:root{font-family:Inter,system-ui,Arial,sans-serif;color:#193c2c;background:#f4f7f4}*{box-sizing:border-box}
+body{margin:0}header{background:#006241;color:white;padding:21px max(16px,calc((100vw - 1050px)/2))}header a{color:#c8f2d9}
+main{max-width:1050px;margin:auto;padding:23px 16px 70px}.card{background:white;border:1px solid #dbe8df;border-radius:17px;padding:21px;margin:15px 0;box-shadow:0 6px 18px #092b1008}
+h1{font-size:26px;margin:8px 0}h2{font-size:20px;margin:0 0 10px}p,li{line-height:1.55}.muted{color:#627d6c}.pill{display:inline-block;font-size:12px;font-weight:700;padding:6px 9px;border-radius:20px;background:#edf4ea;color:#006241}
+.warning{background:#fff8e9;border:1px solid #edcb8c;padding:13px;border-radius:10px}
+.actions{display:flex;flex-wrap:wrap;gap:11px}a.button,button{background:#006241;color:white;text-decoration:none;border:0;border-radius:10px;padding:11px 17px;font-size:14px;cursor:pointer}button[disabled]{opacity:.45;cursor:not-allowed}
+label{display:block;font-weight:650;margin:12px 0 5px}input,select{font:inherit;padding:10px;border-radius:9px;border:1px solid #bbccbf;max-width:100%;width:100%}input[type=checkbox]{width:auto;margin-right:6px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}@media(max-width:660px){.grid{grid-template-columns:1fr}}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:9px;border-bottom:1px solid #e5eae5;text-align:left} .scroll{overflow:auto}
+small{color:#617766}.readonly{background:#eef5ef;padding:14px;border-radius:12px}a{color:#087544}pre{overflow:auto}
+</style></head><body>
+<header><a href="./admin.html">← Panel Fiiller</a><h1>Arranque de almacén · 5 de noviembre de 2026</h1><p>Conteo físico + conciliación del corte Arrow. Etapa de preparación, sin descuentos automáticos.</p></header>
+<main>
+<section class="card"><span class="pill">Fecha de control: 05/11/2026</span>
+<h2>1. Registrar existencias reales</h2>
+<p>Realiza el conteo con el módulo actual de Fiiller. Ese módulo guarda cada conteo y ajuste mediante la operación protegida de administrador.</p>
+<div class="actions"><a class="button" href="./almacen-fiiller.html">Abrir conteo físico</a><a href="./control-arrow.html">Ver tickets Arrow</a></div>
+<p class="warning"><strong>Importante:</strong> evita descontar el corte de ventas del mismo día si esas ventas ocurrieron antes de que contaras los productos. Anota el momento real de finalización del conteo.</p>
+<div class="grid"><div><label for="cutoff">Hora de cierre del conteo (México Centro)</label><input id="cutoff" type="datetime-local" min="2026-11-05T00:00"></div>
+<div><label for="counter">Responsable del conteo</label><input id="counter" placeholder="Nombre de quien revisó"></div></div>
+<label><input type="checkbox" id="count-confirmed"> Confirmo que el conteo físico terminó y se revisaron las diferencias.</label>
+<p><small>Los datos de este bloque permanecen en esta vista mientras esté abierta; no modifican el almacén.</small></p>
+</section>
+<section class="card"><h2>2. Vista previa del archivo diario de ventas</h2>
+<p>Adjunta el archivo CSV exportado de Arrow. Esta pantalla <strong>no envía archivos a un servidor</strong> ni genera movimientos; valida columnas y muestra líneas para conciliación. Para Excel (.xlsx), exporta una copia CSV del detalle por ticket.</p>
+<label for="file">Archivo de ventas por ticket (CSV)</label><input id="file" type="file" accept=".csv,text/csv">
+<p class="muted">Columnas requeridas para la prueba: <code>fecha,folio,codigo_producto,producto,cantidad,importe,estado</code>. Para prevenir duplicación cuando haya varias cajas/sucursales, agrega <code>sucursal</code> y <code>linea_id</code>.</p>
+<div id="file-message" role="status" class="readonly">Todavía no hay archivo cargado.</div>
+<div class="scroll"><table><thead><tr><th>Fecha</th><th>Folio</th><th>Producto</th><th>Cant.</th><th>Importe</th><th>Estado</th></tr></thead><tbody id="preview"></tbody></table></div>
+</section>
+<section class="card"><h2>3. Validación del corte</h2>
+<p>El conteo de tickets y el total de ventas se comparan contra el archivo. Sin datos de recetas por código Arrow, cualquier artículo desconocido permanece pendiente de vincular; no se descuenta por semejanza de nombre.</p>
+<div class="grid"><div><label for="tickets">Tickets registrados en Arrow (corte)</label><input id="tickets" type="number" min="0" step="1" placeholder="Total del corte"></div>
+<div><label for="sales">Venta neta registrada en Arrow (MXN)</label><input id="sales" type="number" step=".01" placeholder="Importe neto"></div></div>
+<button id="validate" type="button">Revisar conciliación</button><div id="results" class="readonly" aria-live="polite">Pendiente de validación.</div>
+</section>
+<section class="card"><h2>4. Control de activación</h2><p><strong>Descuentos de recetas: DESACTIVADOS.</strong> Hasta validar el formato real y los códigos de producto de Arrow, el resultado es únicamente informativo.</p>
+<p>Esta pantalla permite iniciar el proceso hoy, sin riesgo de duplicar consumos de ventas anteriores al conteo físico.</p>
+</section>
+</main>
+<script src="./arranque-almacen.js?v=1"></script></body></html>
