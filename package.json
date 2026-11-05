@@ -6,6 +6,6 @@
   "scripts": {
     "dev": "npx serve .",
     "start": "npx serve .",
-    "test:warehouse": "node --test tests/warehouse-consumption-engine.test.cjs"
+    "test:warehouse": "node --test tests/warehouse-consumption-engine.test.cjs tests/warehouse-order-event-adapter.test.cjs"
   }
 }
