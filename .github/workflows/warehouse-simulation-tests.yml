@@ -4,6 +4,8 @@ on:
     paths:
       - "tests/warehouse-consumption-engine.cjs"
       - "tests/warehouse-consumption-engine.test.cjs"
+      - "tests/warehouse-order-event-adapter.cjs"
+      - "tests/warehouse-order-event-adapter.test.cjs"
       - "recetas/REC-00[123]-*.json"
       - "package.json"
       - ".github/workflows/warehouse-simulation-tests.yml"
