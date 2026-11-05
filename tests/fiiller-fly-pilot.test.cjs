@@ -29,3 +29,10 @@ test("Fly pilot stays read-only and never includes credentials", () => {
 test("admin menu points to the pilot", () => {
   assert.match(admin, /href="fly-control\.html"/);
 });
+
+test("Fly offers logout and account switching even without a session", () => {
+  assert.match(page, /id="logout" type="button">Cerrar sesión \/ Cambiar usuario/);
+  assert.doesNotMatch(page, /id="logout"[^>]*hidden/);
+  assert.match(page, /FillerCloud\.logout\(\)/);
+  assert.match(page, /href="pedidos\.html"/);
+});
