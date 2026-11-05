@@ -115,7 +115,12 @@
     {
       "ingredient": "Aceite de cocción",
       "recipe_id": "REC-003",
-      "reason": "Uso y cantidad pendiente de confirmación"
+      "reason": "Cantidad de 3 ml por REC-003 confirmada; verificar que cocina utiliza aceite de canola Patrona antes de vincular SKU. No afectar existencias.",
+      "amount_ml": 3,
+      "catalog_candidate": "01010051 ACEITE DE CANOLA PATRONA BOT 1 L",
+      "candidate_package_ml": 1000,
+      "candidate_consumption_pieces": 0.003,
+      "inventory_code": null
     }
   ],
   "acceptance_criteria": [
