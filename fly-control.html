@@ -18,6 +18,10 @@
     button:disabled{opacity:.5;cursor:not-allowed}
     .alert{border-left:4px solid #cb8c2c;background:#fff7e8;padding:14px;border-radius:8px}
     #status{font-size:13px}a{color:#006241}
+    form{display:grid;gap:10px;max-width:400px;margin:18px 0}label{display:grid;gap:5px;font-weight:700}
+    input{border:1px solid #b6cbc0;border-radius:10px;padding:12px;font:inherit}
+    .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    #logout{background:#edf5ef;color:#006241}
     @media(max-width:700px){.grid{grid-template-columns:1fr}main{padding:14px}}
   </style>
 </head>
@@ -32,12 +36,21 @@
     <p>Revisaré los pedidos digitales de Fiiller utilizando tu sesión autorizada de personal. No cambiaré pedidos, inventario ni clientes.</p>
     <div class="alert">Este piloto muestra un resumen determinístico de datos reales. La conversación con un modelo de IA y las acciones automáticas se incorporarán después de validar Fly API.</div>
     <p id="status" role="status">Comprobando acceso...</p>
-    <button id="refresh" type="button" disabled>Analizar pedidos</button>
+    <form id="fly-login" hidden>
+      <label>Usuario de Fiiller<input name="username" autocomplete="username" placeholder="admin o cocina" required></label>
+      <label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label>
+      <button type="submit">Entrar a Fly</button>
+    </form>
+    <div class="actions">
+      <button id="refresh" type="button" disabled hidden>Analizar pedidos</button>
+      <button id="logout" type="button" hidden>Cerrar sesión</button>
+    </div>
   </section>
   <section class="panel" id="results" hidden>
-    <h2>Informe operativo</h2>
+    <h2 id="report-title">Informe operativo</h2>
+    <p id="role-label"></p>
     <div class="grid">
-      <div class="metric"><div class="value" id="count">—</div><div class="label">Pedidos digitales consultados</div></div>
+      <div class="metric" id="admin-count"><div class="value" id="count">—</div><div class="label">Pedidos digitales consultados</div></div>
       <div class="metric"><div class="value" id="week">—</div><div class="label">Pedidos en últimos 7 días</div></div>
       <div class="metric"><div class="value" id="ready">—</div><div class="label">Pedidos Listo o Entregado en últimos 7 días</div></div>
     </div>
@@ -51,12 +64,40 @@
 (() => {
   "use strict";
   const byId=id=>document.getElementById(id);
-  const status=(text)=>byId("status").textContent=text;
-  async function analyze(){
+  const status=text=>{byId("status").textContent=text;};
+  const roles=["admin","cocina"];
+  let activeRole=null;
+  function showLogin(message) {
+    activeRole=null;
+    byId("fly-login").hidden=false;
+    byId("refresh").hidden=true;
+    byId("refresh").disabled=true;
+    byId("logout").hidden=true;
+    byId("results").hidden=true;
+    status(message||"Inicia sesión con tu cuenta de personal de Fiiller.");
+  }
+  function showRole(role) {
+    if(!roles.includes(role))throw Error("Tu cuenta no tiene autorización de personal.");
+    activeRole=role;
+    byId("fly-login").hidden=true;
+    byId("fly-login").reset();
+    byId("refresh").hidden=false;
+    byId("refresh").disabled=false;
+    byId("logout").hidden=false;
+    byId("admin-count").hidden=role!=="admin";
+    byId("report-title").textContent=role==="admin"?"Fly Admin · Informe":"Fly Operativo · Pedidos";
+    byId("role-label").textContent=role==="admin"?"Administrador · Resumen de pedidos digitales":"Personal de cocina · Seguimiento operativo sin informes administrativos";
+  }
+  async function analyze() {
     const button=byId("refresh");
-    button.disabled=true;status("Consultando pedidos autorizados...");
-    try{
-      if((await FillerCloud.staffRole())!=="admin")throw Error("Acceso reservado al administrador de Fiiller.");
+    button.disabled=true;
+    status("Consultando pedidos autorizados...");
+    try {
+      const role=await FillerCloud.staffRole();
+      if(!roles.includes(role)||role!==activeRole) {
+        showLogin("Tu sesión ya no está autorizada. Inicia sesión nuevamente.");
+        return;
+      }
       const orders=await FillerCloud.orders();
       const cutoff=Date.now()-7*24*60*60*1000;
       const recent=orders.filter(o=>Number.isFinite(o.createdTs)&&o.createdTs>=cutoff);
@@ -64,22 +105,41 @@
       byId("count").textContent=orders.length;
       byId("week").textContent=recent.length;
       byId("ready").textContent=completed.length;
-      byId("summary").textContent=recent.length
-        ? "Fly Control detectó "+recent.length+" pedidos digitales recientes. "+completed.length+" están marcados como Listo o Entregado. Revisa los demás estados desde el panel de pedidos."
-        : "No se registraron pedidos digitales recientes entre los registros consultados.";
+      byId("summary").textContent=role==="admin"
+        ? "En los últimos 7 días hay "+recent.length+" pedidos digitales. "+completed.length+" están Listo o Entregado."
+        : "En los últimos 7 días hay "+(recent.length-completed.length)+" pedidos que requieren seguimiento (no figuran como Listo o Entregado).";
       byId("results").hidden=false;
       status("Consulta completada · "+new Date().toLocaleString("es-MX"));
-    }catch(error){byId("results").hidden=true;status("No se pudo consultar: "+(error?.message||"Error de acceso"));}
-    finally{button.disabled=false;}
+    }catch(error) {
+      byId("results").hidden=true;
+      status("No se pudo consultar: "+(error?.message||"Error de acceso"));
+    }finally {
+      button.disabled=!activeRole;
+    }
   }
-  async function initialize(){
-    try{
-      if((await FillerCloud.staffRole())!=="admin"){status("Inicia sesión como administrador desde Fiiller Admin para usar este piloto.");return;}
-      byId("refresh").disabled=false;
+  async function initialize() {
+    try {
+      const role=await FillerCloud.staffRole();
+      if(!roles.includes(role)){showLogin("Ingresa como admin o cocina para abrir Compás Fly.");return;}
+      showRole(role);
       await analyze();
-    }catch{status("No se pudo verificar tu sesión de administrador.");}
+    }catch{showLogin("No se pudo verificar tu sesión. Inicia sesión para continuar.");}
   }
+  byId("fly-login").addEventListener("submit",async event=>{
+    event.preventDefault();
+    const form=event.currentTarget;
+    const button=form.querySelector("button");
+    button.disabled=true;
+    status("Validando acceso con Fiiller...");
+    try {
+      const role=(await FillerCloud.login(form.elements.namedItem("username").value,form.elements.namedItem("password").value)).role;
+      showRole(role);
+      await analyze();
+    }catch(error){showLogin(error?.message||"No se pudo iniciar sesión.");}
+    finally{button.disabled=false;}
+  });
   byId("refresh").addEventListener("click",analyze);
+  byId("logout").addEventListener("click",()=>{FillerCloud.logout();showLogin("Sesión cerrada correctamente.");});
   initialize();
 })();
 </script>
