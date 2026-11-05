@@ -100,6 +100,22 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <div id="member-orders-summary" style="font-weight:750;color:#006241;margin:12px 0"></div>
 <div id="member-orders-list" aria-live="polite" style="display:grid;gap:12px"><p class="muted">Cargando tu historial…</p></div>
 </section>
+<section class="card" id="guest-order-claim" style="margin:18px 0 22px;padding:20px" aria-label="Vincular pedido de invitado">
+<div class="section-heading"><h3>¿Compraste como invitado?</h3></div>
+<p class="muted mini">Agrega a tu cuenta un pedido de los últimos 90 días. Necesitas su enlace privado de seguimiento y el teléfono que registraste al comprar.</p>
+<form id="claim-order-form" class="stack">
+<label>Enlace privado de seguimiento
+<input name="tracking" type="text" maxlength="500" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Pega aquí el enlace de seguimiento de tu pedido" required></label>
+<label>Teléfono usado al realizar el pedido
+<input name="phone" type="tel" maxlength="25" autocomplete="tel" inputmode="tel" placeholder="Ej. 3312345678" required></label>
+<div class="actions">
+<button type="submit" id="claim-order-submit">Vincular pedido a mi cuenta</button>
+<button type="button" id="claim-last-device" class="secondary">Usar último pedido de este celular</button>
+</div>
+<p id="claim-order-status" role="status" aria-live="polite" style="font-size:13px;line-height:1.5;margin:0"></p>
+<small class="muted">Solo puedes vincular pedidos que no pertenezcan a otra cuenta. Nadie puede verlos sin comprobar los datos.</small>
+</form>
+</section>
 <section class="card" id="feedback-survey" style="margin:18px 0 22px;padding:22px;background:linear-gradient(120deg,#f1f8f3,#fff);border:1px solid #dbe9dd;border-radius:19px">
 <div style="display:flex;align-items:flex-start;gap:15px">
   <div style="background:#e3f2e7;color:#006241;border-radius:15px;width:52px;height:52px;display:grid;place-items:center;font-size:26px;flex-shrink:0" aria-hidden="true">★</div>
@@ -155,7 +171,7 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <p class="foot-note">Fiiller Café · Tus datos y preferencias permanecen en tu cuenta.</p>
 </main>
 <script src="./pwa.js?v=3"></script>
-<script src="./mi-filler.js?v=54"></script>
+<script src="./mi-filler.js?v=55"></script>
 <script src="./filler-marketing-push-client.js?v=5"></script>
 
 </body>
