@@ -1,0 +1,29 @@
+{
+  "project": "Fiiller Café",
+  "warehouse": "Fiiller / OCS",
+  "timezone": "America/Mexico_City",
+  "effective_date": "2026-11-05",
+  "baseline_source": "physical_count_in_almacen-fiiller",
+  "baseline_status": "pending_physical_count_completion",
+  "physical_count_cutoff_local": null,
+  "operating_rule": "Only sales whose fulfillment/consumption occurs strictly after physical count cutoff may be deducted from the baseline. If count completed at end of day, start deductions with 2026-11-06 and do not reapply 2026-11-05 sales.",
+  "sales_source": "Arrow POS daily line-item file",
+  "sales_import_status": "awaiting_real_file_schema_and_matching",
+  "reconcile_by": [
+    "branch",
+    "sale_date",
+    "ticket_id",
+    "line_id",
+    "item_code",
+    "quantity",
+    "amount",
+    "cancellation_ref"
+  ],
+  "unmapped_items_policy": "manual_review_no_deduction",
+  "retail_products_policy": "separate_direct_stock_rule_not_recipe",
+  "duplicates_policy": "idempotent_source_file_and_ticket_line",
+  "audit_policy": "require_preview_and_approval",
+  "inventory_writes_enabled": false,
+  "automatic_deductions_enabled": false,
+  "notes": "Date establishes control period, not permission to mutate production stock."
+}
