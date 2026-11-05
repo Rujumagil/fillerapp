@@ -43,3 +43,12 @@ test("Fiiller Admin exposes account access and logout", () => {
   assert.match(admin, /FillerCloud\.logout\(\)/);
   assert.match(admin, /href="fly-control\.html"/);
 });
+
+test("Fly conversation is grounded and safe for staff", () => {
+  assert.match(page, /id="fly-chat"/);
+  assert.match(page, /answerQuestion\(question\)/);
+  assert.match(page, /snapshot=\{total:orders\.length/);
+  assert.match(page, /role!==activeRole/);
+  assert.match(page, /bubble\.textContent=message/);
+  assert.doesNotMatch(page, /innerHTML\s*=\s*question/);
+});
