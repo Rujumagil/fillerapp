@@ -36,3 +36,10 @@ test("Fly offers logout and account switching even without a session", () => {
   assert.match(page, /FillerCloud\.logout\(\)/);
   assert.match(page, /href="pedidos\.html"/);
 });
+
+test("Fiiller Admin exposes account access and logout", () => {
+  assert.match(admin, /id="admin-session-status"/);
+  assert.match(admin, /id="admin-logout"/);
+  assert.match(admin, /FillerCloud\.logout\(\)/);
+  assert.match(admin, /href="fly-control\.html"/);
+});
