@@ -1,0 +1,29 @@
+name: Fiiller Fly Pilot QA
+on:
+  push:
+    branches:
+      - feature/fiiller-fly-readonly-pilot
+    paths:
+      - "fly-control.html"
+      - "admin.html"
+      - "tests/fiiller-fly-pilot.test.cjs"
+      - ".github/workflows/fiiller-fly-pilot.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "fly-control.html"
+      - "admin.html"
+      - "tests/fiiller-fly-pilot.test.cjs"
+      - ".github/workflows/fiiller-fly-pilot.yml"
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --test tests/fiiller-fly-pilot.test.cjs
