@@ -11,7 +11,7 @@ function round(value, places=9) {
 function insist(condition, message) { if (!condition) throw new Error(message); }
 function consumptionForIngredient(item, recipe) {
   const code = item.inventory_code;
-  insist(/^\\d{8}$/.test(code || ""), "Ingrediente sin SKU OCS: " + item.name);
+  insist(/^\d{8}$/.test(code || ""), "Ingrediente sin SKU OCS: " + item.name);
   let amount, unit;
   switch (code) {
     case "01320026": // totopos kg
