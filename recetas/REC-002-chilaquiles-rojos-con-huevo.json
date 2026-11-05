@@ -14,9 +14,9 @@
       "unit": "g"
     },
     {
-      "name": "Salsa roja",
-      "quantity": 60,
-      "unit": "ml"
+      "name": "Salsa roja preparada",
+      "quantity": 80,
+      "unit": "g"
     },
     {
       "name": "Crema",
@@ -61,8 +61,8 @@
     },
     "inventory_unit": "g",
     "sku_status": "pending_mapping",
-    "stock_deduction_status": "pending_portion_grams_confirmation",
+    "stock_deduction_status": "80_g_confirmed_pending_integration",
     "notes": "Producto recibido ya preparado; no desglosar ingredientes internos ni crear subreceta.",
-    "unit_conversion_status": "current_recipe_60_ml_requires_measured_grams_do_not_assume_density"
+    "unit_conversion_status": "not_required_confirmed_80_g"
   }
 }
