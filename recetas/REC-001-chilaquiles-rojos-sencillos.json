@@ -10,27 +10,27 @@
   "ingredients": [
     {
       "name": "Totopos",
-      "quantity": 130,
+      "quantity": 140,
       "unit": "g"
     },
     {
-      "name": "Salsa roja",
-      "quantity": 60,
-      "unit": "ml"
+      "name": "Salsa roja preparada",
+      "quantity": 80,
+      "unit": "g"
     },
     {
       "name": "Crema",
-      "quantity": 10,
+      "quantity": 30,
       "unit": "g"
     },
     {
       "name": "Queso",
-      "quantity": 15,
+      "quantity": 30,
       "unit": "g"
     },
     {
       "name": "Cebolla",
-      "quantity": 5,
+      "quantity": 10,
       "unit": "g"
     },
     {
@@ -39,9 +39,10 @@
       "unit": "g"
     }
   ],
-  "notes": "",
+  "notes": "Sin ingredientes ni guarniciones adicionales. Salsa roja expresada en gramos conforme a validación operativa; no convertir desde ml sin medición de densidad.",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
   "cost_status": "pending_warehouse_unit_costs",
-  "sauce_subrecipe_status": "pending"
+  "sauce_subrecipe_status": "pending_ingredients_and_batch_yield",
+  "side_dish": "Sin guarnición"
 }
