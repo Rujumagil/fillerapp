@@ -146,6 +146,69 @@ function updateLastOrder(){
   link.classList.add("is-inactive");
 }
 const escHistory=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const DRAFT_KEY="filler_pending_cart_v1";
+let recentOrders=[];
+function prepareCart(lines,source){
+  const safe=(Array.isArray(lines)?lines:[]).slice(0,80).map(item=>({
+    id:String(item?.id||"").slice(0,180),
+    qty:Number(item?.qty),
+    extras:(Array.isArray(item?.extras)?item.extras:[]).slice(0,15)
+      .map(extra=>String(typeof extra==="string"?extra:extra?.id||"").slice(0,180)).filter(Boolean)
+  })).filter(item=>item.id&&Number.isSafeInteger(item.qty)&&item.qty>0&&item.qty<=100);
+  if(!safe.length)throw Error("Este pedido ya no tiene productos disponibles para preparar.");
+  sessionStorage.setItem(DRAFT_KEY,JSON.stringify({createdAt:Date.now(),source,lines:safe}));
+  window.location.assign("./index.html#pedido");
+}
+async function loadMyFavorites(){
+  const list=$("member-favorites-list"),summary=$("member-favorites-summary");
+  if(!list||!summary||!session?.user?.id)return;
+  list.innerHTML='<p class="muted">Consultando tus favoritos…</p>';
+  try{
+    const [rows,products]=await Promise.all([
+      request("filler_customer_favorites?select=product_id,created_at&user_id=eq."+encodeURIComponent(session.user.id)+"&order=created_at.desc"),
+      request("filler_products?select=id,name,price,stock,active&active=eq.true")
+    ]);
+    const byId=new Map((Array.isArray(products)?products:[]).map(p=>[String(p.id),p]));
+    const favorites=Array.isArray(rows)?rows:[];
+    summary.textContent=favorites.length+" producto"+(favorites.length===1?"":"s")+" guardado"+(favorites.length===1?"":"s")+" en tu cuenta.";
+    if(!favorites.length){
+      list.innerHTML='<p class="muted">Aún no guardas favoritos. En el menú, toca el corazón ♡ de los productos que te gustan.</p>';
+      return;
+    }
+    const money=value=>"$"+Number(value||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
+    list.innerHTML=favorites.map(f=>{
+      const id=String(f.product_id),product=byId.get(id);
+      const canOrder=Boolean(product&&Number(product.stock)>0);
+      return '<article style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border:1px solid #d6e6d8;border-radius:14px;padding:14px;background:#fafffa">'+
+        '<div style="min-width:145px;flex:1"><strong style="display:block">'+escHistory(product?.name||"Producto no disponible")+'</strong><span class="muted" style="font-size:12px">'+
+        (product?(money(product.price)+(canOrder?" · Disponible":" · Agotado")):"Ya no está en el menú")+'</span></div>'+
+        '<div class="actions"><button type="button" data-favorite-order="'+escHistory(id)+'"'+(canOrder?"":" disabled")+' style="padding:9px 12px;font-size:12px">Agregar al pedido</button>'+
+        '<button type="button" class="secondary" data-favorite-remove="'+escHistory(id)+'" style="padding:9px 12px;font-size:12px">Quitar ♡</button></div></article>';
+    }).join("");
+  }catch(error){
+    summary.textContent="";
+    list.textContent="No se pudieron consultar tus favoritos: "+error.message;
+  }
+}
+$("refresh-my-favorites")?.addEventListener("click",loadMyFavorites);
+$("member-favorites-list")?.addEventListener("click",async event=>{
+  const order=event.target.closest("[data-favorite-order]");
+  if(order){
+    try{prepareCart([{id:order.dataset.favoriteOrder,qty:1,extras:[]}],"favoritos");}
+    catch(error){message(error.message,true);}
+    return;
+  }
+  const remove=event.target.closest("[data-favorite-remove]");
+  if(!remove)return;
+  remove.disabled=true;
+  try{
+    await request("filler_customer_favorites?user_id=eq."+encodeURIComponent(session.user.id)+"&product_id=eq."+encodeURIComponent(remove.dataset.favoriteRemove),{method:"DELETE"});
+    await loadMyFavorites();
+  }catch(error){message("No pudimos quitar el favorito: "+error.message,true);}
+  finally{remove.disabled=false;}
+});
+
 async function loadMyOrderHistory(){
   const list=$("member-orders-list"),summary=$("member-orders-summary");
   if(!list||!summary||!session?.user?.id)return;
@@ -153,10 +216,11 @@ async function loadMyOrderHistory(){
   try{
     const since=new Date(Date.now()-90*24*60*60*1000).toISOString();
     // Supabase RLS comprueba auth.uid() tanto en órdenes como en sus artículos.
-    const path="filler_orders?select=id,public_code,tracking_token,pickup,status,total,created_at,filler_order_items(name,qty,price)&customer_user_id=eq."+
+    const path="filler_orders?select=id,public_code,tracking_token,pickup,status,total,created_at,filler_order_items(product_id,name,qty,price,extras)&customer_user_id=eq."+
       encodeURIComponent(session.user.id)+"&created_at=gte."+encodeURIComponent(since)+"&order=created_at.desc&limit=100";
     const rows=await request(path);
     const orders=Array.isArray(rows)?rows:[];
+    recentOrders=orders;
     const money=value=>"$"+Number(value||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
     summary.textContent=orders.length+" pedido"+(orders.length===1?"":"s")+" en los últimos 90 días · Total registrado "+money(orders.reduce((n,o)=>n+Number(o.total||0),0));
     // El pedido más reciente de la cuenta se puede consultar desde otro dispositivo.
@@ -187,7 +251,8 @@ async function loadMyOrderHistory(){
         '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><strong>'+escHistory(o.public_code)+'</strong><strong style="color:#006241">'+escHistory(o.status)+'</strong></div>'+
         '<span class="muted" style="font-size:12px">Registrado: '+escHistory(date)+' · Recoger: '+escHistory(pickup)+'</span>'+
         '<div style="font-size:13px">'+(items||"Productos registrados")+'</div>'+
-        '<strong style="text-align:right">'+money(o.total)+'</strong>'+follow+'</article>';
+        '<strong style="text-align:right">'+money(o.total)+'</strong><div class="actions">'+follow+
+        '<button type="button" class="secondary" data-reorder="'+escHistory(o.id)+'" style="font-size:12px;padding:9px 12px">Repetir pedido ↻</button></div></article>';
     }).join("");
   }catch(error){
     summary.textContent="";
@@ -195,6 +260,17 @@ async function loadMyOrderHistory(){
   }
 }
 $("refresh-my-orders")?.addEventListener("click",loadMyOrderHistory);
+$("member-orders-list")?.addEventListener("click",event=>{
+  const button=event.target.closest("[data-reorder]");
+  if(!button)return;
+  const order=recentOrders.find(item=>item.id===button.dataset.reorder);
+  if(!order)return;
+  try{
+    prepareCart((order.filler_order_items||[]).map(item=>({
+      id:item.product_id,qty:item.qty,extras:item.extras
+    })),"repetir pedido");
+  }catch(error){message(error.message,true);}
+});
 
 const trackingUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function parseGuestTracking(value){
@@ -262,6 +338,7 @@ function showMember(){
   editProfile(false);
   updateLastOrder();
   loadMyOrderHistory();
+  loadMyFavorites();
   window.FillerPushClient?.refresh?.();
 }
 $("edit-profile").addEventListener("click",()=>{
