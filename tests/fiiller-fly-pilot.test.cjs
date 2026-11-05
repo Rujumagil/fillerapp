@@ -6,9 +6,18 @@ const path = require("node:path");
 const page = fs.readFileSync(path.join(__dirname, "..", "fly-control.html"), "utf8");
 const admin = fs.readFileSync(path.join(__dirname, "..", "admin.html"), "utf8");
 
-test("Fly pilot requires Fiiller admin role", () => {
+test("Fly accepts only authorized staff roles", () => {
   assert.match(page, /FillerCloud\.staffRole\(\)/);
-  assert.match(page, /!==["']admin["']/);
+  assert.match(page, /roles=\["admin","cocina"\]/);
+  assert.match(page, /FillerCloud\.login\(/);
+  assert.match(page, /FillerCloud\.logout\(/);
+  assert.match(page, /role!==activeRole/);
+});
+test("Fly separates admin and operator summaries", () => {
+  assert.match(page, /role!=="admin"/);
+  assert.match(page, /Fly Operativo/);
+  assert.match(page, /Fly Admin/);
+  assert.match(page, /fly-login/);
 });
 
 test("Fly pilot stays read-only and never includes credentials", () => {
