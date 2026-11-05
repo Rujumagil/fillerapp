@@ -16,7 +16,12 @@
     {
       "name": "Salsa roja preparada",
       "quantity": 80,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "01280238",
+      "inventory_purchase_unit": "pieza",
+      "purchase_package_g": 3000,
+      "inventory_consumption_pieces": 0.02666666666666667,
+      "inventory_conversion_status": "confirmed_package_3kg"
     },
     {
       "name": "Crema",
@@ -35,12 +40,18 @@
     {
       "name": "Cebolla",
       "quantity": 10,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "05020205",
+      "inventory_purchase_unit": "kg",
+      "inventory_consumption_kg": 0.01
     },
     {
       "name": "Cilantro",
       "quantity": 5,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "05020162",
+      "inventory_purchase_unit": "kg",
+      "inventory_consumption_kg": 0.005
     },
     {
       "name": "Huevo",
@@ -64,10 +75,18 @@
       "unit": "g"
     },
     "inventory_unit": "g",
-    "sku_status": "pending_mapping",
-    "stock_deduction_status": "80_g_confirmed_pending_integration",
+    "sku_status": "confirmed_catalog_match",
+    "stock_deduction_status": "pending_integration",
     "notes": "Producto recibido ya preparado; no desglosar ingredientes internos ni crear subreceta.",
-    "unit_conversion_status": "not_required_confirmed_80_g"
+    "unit_conversion_status": "not_required_confirmed_80_g",
+    "sku": "01280238",
+    "inventory_purchase_unit": "pieza",
+    "portion_consumption_g": 80,
+    "portion_consumption_pieces": 0.02666666666666667
   },
-  "cheese_inventory_sku_status": "confirmed_catalog_match"
+  "cheese_inventory_sku_status": "confirmed_catalog_match",
+  "pending_inventory_sku_confirmations": [
+    "Totopos (01320026 granel o 01320198 Milpa Real)",
+    "Crema (06010074 ácida Lala u otra)"
+  ]
 }
