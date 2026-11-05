@@ -11,7 +11,10 @@
     {
       "name": "Totopos",
       "quantity": 140,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "01320026",
+      "inventory_purchase_unit": "kg",
+      "inventory_consumption_kg": 0.14
     },
     {
       "name": "Salsa roja preparada",
@@ -26,7 +29,12 @@
     {
       "name": "Crema",
       "quantity": 30,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "06010074",
+      "inventory_purchase_unit": "pieza",
+      "inventory_package_g": 4000,
+      "inventory_consumption_pieces": 0.0075,
+      "inventory_conversion_status": "confirmed_package_4kg"
     },
     {
       "name": "Queso panela",
@@ -107,8 +115,6 @@
     "rounding_note": "Valor de referencia para integración. Usar fracción exacta 100/0.875 al acumular consumos, redondear solo al mostrar.",
     "inventory_deduction_enabled": false
   },
-  "pending_inventory_sku_confirmations": [
-    "Totopos (01320026 granel o 01320198 Milpa Real)",
-    "Crema (06010074 ácida Lala u otra)"
-  ]
+  "pending_inventory_sku_confirmations": [],
+  "inventory_integration_test_status": "not_executed_no_stock_changes"
 }
