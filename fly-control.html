@@ -21,7 +21,7 @@
     form{display:grid;gap:10px;max-width:400px;margin:18px 0}form[hidden]{display:none!important}label{display:grid;gap:5px;font-weight:700}
     input{border:1px solid #b6cbc0;border-radius:10px;padding:12px;font:inherit}
     .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    #logout{background:#edf5ef;color:#006241}
+    #logout{background:#edf5ef;color:#006241;border:1px solid #b8d5c5}#logout:focus-visible{outline:3px solid #006241;outline-offset:3px}
     @media(max-width:700px){.grid{grid-template-columns:1fr}main{padding:14px}}
   </style>
 </head>
@@ -29,7 +29,7 @@
 <main>
   <header>
     <div class="brand">✦ COMPÁS FLY <span style="font-size:14px;font-weight:500">× Fiiller Café</span></div>
-    <span class="tag">Piloto · Solo lectura</span>
+    <div class="actions"><span class="tag">Piloto · Solo lectura</span><button id="logout" type="button">Cerrar sesión / Cambiar usuario</button></div>
   </header>
   <section class="panel">
     <h1>Hola, soy Fly Control</h1>
@@ -43,7 +43,6 @@
     </form>
     <div class="actions">
       <button id="refresh" type="button" disabled hidden>Analizar pedidos</button>
-      <button id="logout" type="button" hidden>Cerrar sesión</button>
     </div>
   </section>
   <section class="panel" id="results" hidden>
@@ -57,7 +56,7 @@
     <p id="summary"></p>
     <small>Fuente: pedidos digitales visibles para el personal autorizado. Se consultan hasta 90 pedidos; no son las ventas totales de TPV Arrow.</small>
   </section>
-  <p><a href="admin.html">← Volver a Fiiller Admin</a></p>
+  <p><a href="admin.html">← Volver a Fiiller Admin</a> · <a href="pedidos.html">Abrir acceso de cocina</a></p>
 </main>
 <script src="filler-cloud.js"></script>
 <script>
@@ -72,7 +71,6 @@
     byId("fly-login").hidden=false;
     byId("refresh").hidden=true;
     byId("refresh").disabled=true;
-    byId("logout").hidden=true;
     byId("results").hidden=true;
     status(message||"Inicia sesión con tu cuenta de personal de Fiiller.");
   }
@@ -83,7 +81,6 @@
     byId("fly-login").reset();
     byId("refresh").hidden=false;
     byId("refresh").disabled=false;
-    byId("logout").hidden=false;
     byId("admin-count").hidden=role!=="admin";
     byId("report-title").textContent=role==="admin"?"Fly Admin · Informe":"Fly Operativo · Pedidos";
     byId("role-label").textContent=role==="admin"?"Administrador · Resumen de pedidos digitales":"Personal de cocina · Seguimiento operativo sin informes administrativos";
@@ -139,7 +136,7 @@
     finally{button.disabled=false;}
   });
   byId("refresh").addEventListener("click",analyze);
-  byId("logout").addEventListener("click",()=>{FillerCloud.logout();showLogin("Sesión cerrada correctamente.");});
+  byId("logout").addEventListener("click",()=>{FillerCloud.logout();showLogin("Sesión local cerrada. Ya puedes entrar con admin o cocina.");byId("fly-login").querySelector("input").focus();});
   initialize();
 })();
 </script>
