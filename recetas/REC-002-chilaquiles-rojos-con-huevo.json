@@ -72,8 +72,10 @@
       "edible_weight_basis": "sin_cascara",
       "inventory_stock_weight_basis": "con_cascara_confirmed",
       "inventory_raw_deduction_kg": null,
-      "inventory_deduction_status": "blocked_pending_measured_shell_on_weight",
-      "shell_on_weight_per_piece_g": null
+      "inventory_deduction_status": "blocked_pending_weight_consistency_and_integration_validation",
+      "shell_on_weight_per_piece_g": 53.2,
+      "provisional_inventory_consumption_kg": 0.053200000000000004,
+      "weight_validation_note": "Peso promedio con cáscara confirmado mediante 10 unidades (53.20 g); peso previo reportado de 53 g sin cáscara no concuerda plausiblemente con esta medición y requiere verificación independiente antes de habilitar descuentos."
     }
   ],
   "preparation": {
@@ -105,16 +107,28 @@
   "pending_inventory_sku_confirmations": [],
   "inventory_integration_test_status": "simulation_only_no_stock_changes",
   "egg_inventory_sku_status": "confirmed_catalog_match",
-  "egg_conversion_status": "pending_shell_on_average_measurement",
+  "egg_conversion_status": "measured_shell_on_weight_pending_consistency_check",
   "egg_weight_test": {
     "method": "Pesar individualmente 10 huevos completos con cáscara y obtener el peso promedio en g; usar huevos de la presentación recibida OCS 01170024",
     "sample_count_target": 10,
-    "recorded_weights_g": [],
-    "shell_on_average_g": null,
+    "recorded_weights_g": [
+      57,
+      53,
+      55,
+      53,
+      48,
+      52,
+      54,
+      56,
+      48,
+      56
+    ],
+    "shell_on_average_g": 53.2,
     "edible_weight_per_piece_g": 53,
     "stock_unit": "kg",
-    "stock_kg_per_piece": null,
-    "test_status": "awaiting_physical_measurement",
-    "discounts_enabled": false
+    "stock_kg_per_piece": 0.053200000000000004,
+    "test_status": "measured_arithmetic_verified_pending_edible_weight_consistency",
+    "discounts_enabled": false,
+    "total_shell_on_weight_g": 532
   }
 }
