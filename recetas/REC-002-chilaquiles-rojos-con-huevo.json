@@ -26,7 +26,11 @@
     {
       "name": "Queso panela",
       "quantity": 30,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "06040154",
+      "inventory_purchase_unit": "kg",
+      "inventory_deduction_quantity": 0.03,
+      "inventory_deduction_unit": "kg"
     },
     {
       "name": "Cebolla",
@@ -65,5 +69,5 @@
     "notes": "Producto recibido ya preparado; no desglosar ingredientes internos ni crear subreceta.",
     "unit_conversion_status": "not_required_confirmed_80_g"
   },
-  "cheese_inventory_sku_status": "pending_catalog_verification"
+  "cheese_inventory_sku_status": "confirmed_catalog_match"
 }
