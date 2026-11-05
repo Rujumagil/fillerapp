@@ -17,6 +17,66 @@
     banner.style.color=error?"#953b2c":"#07583d";
   };
   function block(message){enabled=false;window.FillerOnlineActive=false;button.disabled=true;button.textContent="Pedidos en línea aún no disponibles";status(message,true);}
+
+  const DRAFT_KEY="filler_pending_cart_v1";
+  let draftProcessed=false;
+  function consumePendingDraft(){
+    if(draftProcessed)return null;
+    let raw;
+    try{raw=sessionStorage.getItem(DRAFT_KEY);}catch{}
+    if(!raw){draftProcessed=true;return null;}
+    draftProcessed=true;
+    try{sessionStorage.removeItem(DRAFT_KEY);}catch{}
+    let draft;
+    try{draft=JSON.parse(raw);}catch{return null;}
+    if(!draft||!Array.isArray(draft.lines)||!Number.isFinite(Number(draft.createdAt))||
+      Date.now()-Number(draft.createdAt)>20*60*1000||Number(draft.createdAt)>Date.now()+60000)return null;
+    let added=0,adjusted=0,extrasRemoved=0,unavailable=0;
+    for(const line of draft.lines.slice(0,80)){
+      const id=String(line?.id||"");
+      const item=state.menu.find(product=>product.id===id);
+      if(!item||!Number.isFinite(Number(item.stock))||Number(item.stock)<=0){unavailable++;continue;}
+      const count=Number(line.qty);
+      if(!Number.isSafeInteger(count)||count<1||count>100){adjusted++;continue;}
+      const allowed=window.FillerAllowedExtrasForProduct?.(id)||[];
+      const byId=new Map(allowed.map(extra=>[String(extra.id),extra]));
+      const wanted=Array.isArray(line.extras)?[...new Set(line.extras.map(String))].slice(0,15):[];
+      const picked=wanted.map(extraId=>byId.get(extraId)).filter(Boolean).sort((a,b)=>a.id.localeCompare(b.id));
+      extrasRemoved+=wanted.length-picked.length;
+      const coffee=/^fiiller-cafe-(8|12|16)$/.test(id);
+      const extras=coffee?picked.slice(0,1):picked;
+      if(coffee&&picked.length>1)extrasRemoved+=picked.length-1;
+      const key=extras.length?id+"::"+extras.map(extra=>extra.id).join(","):id;
+      const reserved=Object.entries(state.cart).filter(([cartKey])=>cartKey.split("::")[0]===id)
+        .reduce((sum,[,qty])=>sum+Number(qty||0),0);
+      const available=Math.max(0,Math.floor(Number(item.stock))-reserved);
+      const qty=Math.min(count,available);
+      if(qty<count)adjusted++;
+      if(qty<1){unavailable++;continue;}
+      state.cart[key]=Number(state.cart[key]||0)+qty;
+      state.extraSelections[key]=extras.map(extra=>({id:extra.id,name:extra.name,price:Number(extra.price)}));
+      added+=qty;
+    }
+    if(!added)return {added:0,message:"No se pudieron agregar productos: todos están agotados o fuera del menú. Elige otros del catálogo."};
+    const limitations=(unavailable||adjusted||extrasRemoved)?" Algunos productos, cantidades o extras ya no están disponibles y se ajustaron al menú vigente.":"";
+    return {added,message:"Se preparó tu pedido con "+added+" producto"+(added===1?"":"s")+
+      ". Verifica los precios, extras y horario de recolección antes de confirmar."+limitations};
+  }
+  function showDraftNotice(info){
+    if(!info)return;
+    const cart=document.getElementById("filler-cart");
+    if(!cart)return;
+    let note=document.getElementById("filler-draft-notice");
+    if(!note){
+      note=document.createElement("div");note.id="filler-draft-notice";note.setAttribute("role","status");
+      note.style.cssText="padding:13px 14px;background:#fff4e7;color:#7a431c;border:1px solid #f1d2ab;border-radius:13px;font-size:13px;font-weight:750;line-height:1.55";
+      const lines=document.getElementById("cart-lines");
+      lines?.parentNode?.insertBefore(note,lines);
+    }
+    note.textContent=info.message;
+    if(info.added){toast("Pedido preparado. ¡Revisa tu carrito!");setTimeout(()=>window.openFillerCart?.(),80);}
+    else toast("Revisa los productos disponibles del menú.");
+  }
   async function refresh(){
     try {
       const [products,extras]=await Promise.all([FillerCloud.catalog(),FillerCloud.extras()]);
@@ -34,10 +94,12 @@
         if(wanted>product.stock)state.cart[key]=Math.max(0,Number(state.cart[key])- (wanted-product.stock));
         if(!state.cart[key])delete state.cart[key];
       }
+      const draftInfo=consumePendingDraft();
       window.FillerOnlineActive = true;
       enabled=true;button.disabled=working;button.textContent="Confirmar pedido";
       status("✓ Menú actualizado · Elige tus favoritos y recógelos en Fiiller Café");
       render();
+      if(draftInfo)showDraftNotice(draftInfo);
     }catch(error){block("No se puede comprobar la recepción de pedidos. "+error.message);}
   }
   async function loadCustomerAccount(){
