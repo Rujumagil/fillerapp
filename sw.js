@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v73";
+const CACHE_NAME = "filler-app-v74";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -88,12 +88,20 @@ self.addEventListener("fetch", event => {
   }
 });
 
-// Abre la pantalla de cocina a la que pertenece el aviso.
+// Destinos internos permitidos; evita abrir enlaces externos desde un push.
+function safeMarketingTarget(value){
+  if(typeof value!=="string")return null;
+  if(/^\.\/index\.html(?:\?fiiller_daily=\d{8}-(?:09|12))?#(?:promociones|proximos|menu|menu-list)$/.test(value))return value;
+  if(value==="./promo-chilaquiles-rojos.html")return value;
+  return null;
+}
+
+// Abre la pantalla correspondiente al aviso de cocina o promoción.
 self.addEventListener("notificationclick", event => {
   event.notification.close();
   const raw=event.notification.data?.url || "./pedidos.html";
   const isPromotion=event.notification.data?.type==="promotion" &&
-    typeof raw==="string" && /^\.\/(?:index\.html#(?:promociones|menu|menu-list)|promo-chilaquiles-rojos\.html)$/.test(raw);
+    Boolean(safeMarketingTarget(raw));
   const isPrivateTracking=typeof raw==="string" &&
     /^\.\/pedido\.html#token=[0-9a-f-]{36}$/i.test(raw);
   const target=isPromotion?raw:(isPrivateTracking?raw:(raw==="./pedido.html"?"./pedido.html":(raw==="./monitor.html"?"./monitor.html":"./pedidos.html")));
@@ -133,8 +141,7 @@ self.addEventListener("push",event=>{
     customer?"☕ Aviso de tu pedido Fiiller":"🔔 Nuevo pedido Fiiller Café";
   const body=promo?String(payload.body||"¡Descubre nuestras promociones!").slice(0,200):
     customer?String(payload.body||"Tu pedido tiene una actualización.").slice(0,160):code;
-  const marketingTarget=promo && payload.url==="./promo-chilaquiles-rojos.html"
-    ?"./promo-chilaquiles-rojos.html":"./index.html#promociones";
+  const marketingTarget=promo?(safeMarketingTarget(payload.url)||"./index.html#promociones"):null;
   const photo=typeof payload.image==="string" && /^https:\/\/qwxydjotwhniahaovrff\.supabase\.co\/storage\/v1\/object\/public\/filler-product-images\//.test(payload.image)?
     payload.image:undefined;
   const options={
