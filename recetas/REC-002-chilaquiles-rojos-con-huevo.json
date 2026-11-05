@@ -64,7 +64,15 @@
     {
       "name": "Huevo",
       "quantity": 1,
-      "unit": "pieza"
+      "unit": "pieza",
+      "inventory_code": "01170024",
+      "inventory_catalog_name": "HUEVO BLANCO GRANJERO KG",
+      "inventory_purchase_unit": "kg",
+      "edible_weight_per_piece_g": 53,
+      "edible_weight_basis": "sin_cascara",
+      "inventory_stock_weight_basis": "unknown_shell_inclusion",
+      "inventory_raw_deduction_kg": null,
+      "inventory_deduction_status": "blocked_pending_shell_weight_basis_and_yield_verification"
     }
   ],
   "preparation": {
@@ -94,5 +102,7 @@
   },
   "cheese_inventory_sku_status": "confirmed_catalog_match",
   "pending_inventory_sku_confirmations": [],
-  "inventory_integration_test_status": "not_executed_no_stock_changes"
+  "inventory_integration_test_status": "simulation_only_no_stock_changes",
+  "egg_inventory_sku_status": "confirmed_catalog_match",
+  "egg_conversion_status": "pending_verification_of_inventory_weight_basis"
 }
