@@ -79,14 +79,29 @@
       "serving_quantity": 1,
       "serving_unit": "pieza",
       "catalog_candidate": "01170024 HUEVO BLANCO GRANJERO KG (confirmed)",
-      "reason": "Base con cáscara confirmada; falta promedio físico real del lote. El peso comestible de 53g no es la base de salida de OCS.",
+      "reason": "Promedio con cáscara 53.20g validado; dato histórico 53g sin cáscara requiere segunda medición por inconsistencia física. No activar movimiento.",
       "edible_weight_g": 53,
       "inventory_code": "01170024",
       "inventory_weight_unit": "kg",
       "inventory_deduction_quantity_kg": null,
       "inventory_weight_basis": "con_cascara_confirmed",
-      "shell_on_average_g": null,
-      "measurement_plan": "Pesar individualmente 10 huevos completos con cáscara; promedio=sumatoria/piezas; consumo kg por REC-002=promedio g/1000"
+      "shell_on_average_g": 53.2,
+      "measurement_plan": "Pesar individualmente 10 huevos completos con cáscara; promedio=sumatoria/piezas; consumo kg por REC-002=promedio g/1000",
+      "shell_on_measured_weights_g": [
+        57,
+        53,
+        55,
+        53,
+        48,
+        52,
+        54,
+        56,
+        48,
+        56
+      ],
+      "shell_on_total_g": 532,
+      "provisional_inventory_consumption_kg": 0.0532,
+      "measurement_status": "measured_pending_53g_edible_weight_recheck"
     },
     {
       "ingredient": "Aceite de cocción",
