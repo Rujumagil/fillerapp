@@ -1,0 +1,22 @@
+name: Fiiller warehouse simulation tests
+on:
+  push:
+    paths:
+      - "tests/warehouse-consumption-engine.cjs"
+      - "tests/warehouse-consumption-engine.test.cjs"
+      - "recetas/REC-00[123]-*.json"
+      - "package.json"
+      - ".github/workflows/warehouse-simulation-tests.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run isolated tests (no warehouse API credentials)
+        run: npm run test:warehouse
