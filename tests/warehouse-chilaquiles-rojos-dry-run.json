@@ -4,7 +4,7 @@
   "mode": "simulation_only",
   "writes_enabled": false,
   "stock_mutation_allowed": false,
-  "execution_status": "prepared_not_executed",
+  "execution_status": "arithmetic_dry_run_verified_node_suite_unverified",
   "scenario": {
     "sales": [
       {
@@ -103,5 +103,47 @@
     "Verificar costos unitarios y lote/FEFO cuando corresponda; no habilitar ventas de prueba contra stock real.",
     "Comparar inventario antes y después de simulación: sin alteraciones."
   ],
-  "notes": "Escenario: una unidad por cada REC-001, REC-002 y REC-003; valores agregados en unidad del catálogo. Los cálculos no constituyen consumos reales."
+  "notes": "Escenario: una unidad por cada REC-001, REC-002 y REC-003; valores agregados en unidad del catálogo. Los cálculos no constituyen consumos reales.",
+  "isolated_scenario": {
+    "reference": "One of each REC-001/002/003; projected only, no inventory writes",
+    "mock_stock_before": {
+      "01320026": 5,
+      "01280238": 2,
+      "06010074": 1,
+      "06040154": 3,
+      "05020205": 2,
+      "05020162": 1,
+      "03050031": 8,
+      "01170024": 4,
+      "01010051": 2
+    },
+    "mock_stock_after_if_sale": {
+      "01320026": 4.58,
+      "01280238": 1.92,
+      "06010074": 0.9775,
+      "06040154": 2.91,
+      "05020205": 1.97,
+      "05020162": 0.985,
+      "03050031": 7.885714286,
+      "01170024": 3.9468,
+      "01010051": 1.997
+    },
+    "expected_after_cancel": {
+      "01320026": 5,
+      "01280238": 2,
+      "06010074": 1,
+      "06040154": 3,
+      "05020205": 2,
+      "05020162": 1,
+      "03050031": 8,
+      "01170024": 4,
+      "01010051": 2
+    },
+    "checks": {
+      "all_nine_skus_present": true,
+      "all_projected_stocks_nonnegative": true,
+      "real_stock_modified": false
+    },
+    "validation_scope": "independent arithmetic dry-run; Node test workflow result not yet verified"
+  }
 }
