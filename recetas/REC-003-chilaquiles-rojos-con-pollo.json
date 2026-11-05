@@ -75,18 +75,17 @@
       "inventory_weight_basis": "crudo"
     },
     {
-      "name": "Aceite de cocción",
+      "name": "Aceite de canola Patrona",
       "quantity": 3,
       "unit": "ml",
-      "inventory_code": null,
-      "inventory_sku_status": "pending_type_confirmation",
-      "catalog_candidate": {
-        "code": "01010051",
-        "name": "ACEITE DE CANOLA PATRONA BOT 1 L",
-        "package_ml": 1000
-      },
-      "inventory_consumption_pieces_if_candidate_confirmed": 0.003,
-      "inventory_deduction_status": "disabled_pending_sku_confirmation"
+      "inventory_code": "01010051",
+      "inventory_sku_status": "confirmed",
+      "inventory_deduction_status": "pending_integration_test",
+      "inventory_catalog_name": "ACEITE DE CANOLA PATRONA BOT 1 L",
+      "inventory_purchase_unit": "pieza",
+      "inventory_package_ml": 1000,
+      "inventory_consumption_pieces": 0.003,
+      "inventory_conversion_status": "confirmed_3ml_per_1l_bottle"
     }
   ],
   "preparation": {
@@ -130,5 +129,6 @@
     "inventory_deduction_enabled": false
   },
   "pending_inventory_sku_confirmations": [],
-  "inventory_integration_test_status": "not_executed_no_stock_changes"
+  "inventory_integration_test_status": "not_executed_no_stock_changes",
+  "cooking_oil_inventory_sku_status": "confirmed_catalog_match"
 }
