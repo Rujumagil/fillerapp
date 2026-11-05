@@ -43,6 +43,18 @@
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
   "cost_status": "pending_warehouse_unit_costs",
-  "sauce_subrecipe_status": "pending_ingredients_and_batch_yield",
-  "side_dish": "Sin guarnición"
+  "sauce_subrecipe_status": "not_applicable_purchased_prepared",
+  "side_dish": "Sin guarnición",
+  "sauce_inventory": {
+    "ingredient": "Salsa roja preparada",
+    "type": "purchased_ready_to_use",
+    "purchase_package": {
+      "quantity": 3000,
+      "unit": "g"
+    },
+    "inventory_unit": "g",
+    "sku_status": "pending_mapping",
+    "stock_deduction_status": "80_g_confirmed_pending_integration",
+    "notes": "Producto recibido ya preparado; no desglosar ingredientes internos ni crear subreceta."
+  }
 }
