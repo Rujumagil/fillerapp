@@ -5,6 +5,7 @@
   "description": "App web para menu digital, pedidos para recoger y control de existencias.",
   "scripts": {
     "dev": "npx serve .",
-    "start": "npx serve ."
+    "start": "npx serve .",
+    "test:warehouse": "node --test tests/warehouse-consumption-engine.test.cjs"
   }
 }
