@@ -59,3 +59,32 @@ test("Seguridad: sin API, sin escrituras y rechaza SKU desconocido",()=>{
   recipes[0].ingredients[0].inventory_code="99999999";
   assert.throws(()=>sim.compute([{recipe_id:"REC-001",quantity:1}]),/SKU no contemplado/);
 });
+
+test("Inventario ficticio: proyectar salidas sin modificar existencias",()=>{
+  const sim=createSimulator(fixture());
+  const stock=Object.freeze({
+    "01320026":5,"01280238":2,"06010074":1,
+    "06040154":3,"05020205":2,"05020162":1,
+    "03050031":8,"01170024":4,"01010051":2
+  });
+  const before=JSON.stringify(stock);
+  const sale=sim.apply("SIMULACION-REC-001-002-003",[
+    {recipe_id:"REC-001",quantity:1},
+    {recipe_id:"REC-002",quantity:1},
+    {recipe_id:"REC-003",quantity:1}
+  ]);
+  assert.equal(sale.status,"simulated");
+  assert.equal(sale.consumption.length,9);
+  const projected=Object.fromEntries(sale.consumption.map(row=>
+    [row.code,stock[row.code]-row.amount]
+  ));
+  assert.ok(Object.values(projected).every(value=>value>=0));
+  approx(projected["01320026"],4.58);
+  approx(projected["01280238"],1.92);
+  approx(projected["01170024"],3.9468);
+  approx(projected["01010051"],1.997);
+  assert.equal(JSON.stringify(stock),before,"No modificar existencias ficticias");
+  assert.equal(sim.cancel("SIMULACION-REC-001-002-003").status,"simulated_reversal");
+  assert.ok(sim.snapshot().theoretical_net_consumption.every(row=>Math.abs(row.amount)<1e-8));
+  assert.equal(JSON.stringify(stock),before);
+});
