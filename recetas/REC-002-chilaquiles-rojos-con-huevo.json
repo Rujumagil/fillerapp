@@ -68,14 +68,14 @@
       "inventory_code": "01170024",
       "inventory_catalog_name": "HUEVO BLANCO GRANJERO KG",
       "inventory_purchase_unit": "kg",
-      "edible_weight_per_piece_g": 53,
-      "edible_weight_basis": "sin_cascara",
+      "edible_weight_per_piece_g": 48.2,
+      "edible_weight_basis": "sin_cascara_promedio_muestra_5",
       "inventory_stock_weight_basis": "con_cascara_confirmed",
       "inventory_raw_deduction_kg": null,
-      "inventory_deduction_status": "blocked_pending_weight_consistency_and_integration_validation",
+      "inventory_deduction_status": "pending_integration_test_no_stock_changes",
       "shell_on_weight_per_piece_g": 53.2,
-      "provisional_inventory_consumption_kg": 0.053200000000000004,
-      "weight_validation_note": "Peso promedio con cáscara confirmado mediante 10 unidades (53.20 g); peso previo reportado de 53 g sin cáscara no concuerda plausiblemente con esta medición y requiere verificación independiente antes de habilitar descuentos."
+      "provisional_inventory_consumption_kg": 0.0532,
+      "weight_validation_note": "Cinco pesos sin cáscara (47,48,49,48,49 g): promedio 48.20 g. Diez pesos con cáscara: promedio 53.20 g. Rendimiento estimado 90.60 % por comparación de promedios de muestras independientes, no medidas pareadas. No activar descuentos."
     }
   ],
   "preparation": {
@@ -107,7 +107,7 @@
   "pending_inventory_sku_confirmations": [],
   "inventory_integration_test_status": "simulation_only_no_stock_changes",
   "egg_inventory_sku_status": "confirmed_catalog_match",
-  "egg_conversion_status": "measured_shell_on_weight_pending_consistency_check",
+  "egg_conversion_status": "measured_ready_for_simulation_only",
   "egg_weight_test": {
     "method": "Pesar individualmente 10 huevos completos con cáscara y obtener el peso promedio en g; usar huevos de la presentación recibida OCS 01170024",
     "sample_count_target": 10,
@@ -124,11 +124,21 @@
       56
     ],
     "shell_on_average_g": 53.2,
-    "edible_weight_per_piece_g": 53,
+    "edible_weight_per_piece_g": 48.2,
     "stock_unit": "kg",
     "stock_kg_per_piece": 0.053200000000000004,
-    "test_status": "measured_arithmetic_verified_pending_edible_weight_consistency",
+    "test_status": "physical_measurements_validated_pending_integration",
     "discounts_enabled": false,
-    "total_shell_on_weight_g": 532
+    "total_shell_on_weight_g": 532,
+    "edible_samples_g": [
+      47,
+      48,
+      49,
+      48,
+      49
+    ],
+    "edible_sample_count": 5,
+    "edible_total_g": 241,
+    "estimated_edible_yield_percent": 90.6015
   }
 }
