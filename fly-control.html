@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fly Control · Fiiller Café (piloto de lectura)</title>
+  <style>
+    :root{font-family:Inter,system-ui,sans-serif;color:#17392d;background:#f7f1e7}
+    *{box-sizing:border-box}body{margin:0}main{max-width:1060px;margin:0 auto;padding:24px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+    .brand{font-weight:850;font-size:27px}.tag{background:#e8f3ec;border-radius:999px;padding:8px 12px;font-size:12px;color:#006241}
+    .panel{background:white;border:1px solid #e4ded4;border-radius:20px;padding:24px;margin-top:20px;box-shadow:0 10px 30px #42321a12}
+    h1{font-size:28px;margin:10px 0}p{line-height:1.5;color:#5b6e63}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .metric{border:1px solid #e3ebe5;padding:18px;border-radius:15px;background:#f9fcfa}
+    .value{font-size:33px;font-weight:800;color:#006241}.label{font-size:12px;color:#5a7365}
+    button{background:#006241;color:white;border:0;border-radius:12px;padding:12px 16px;font:inherit;font-weight:750;cursor:pointer}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .alert{border-left:4px solid #cb8c2c;background:#fff7e8;padding:14px;border-radius:8px}
+    #status{font-size:13px}a{color:#006241}
+    @media(max-width:700px){.grid{grid-template-columns:1fr}main{padding:14px}}
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="brand">✦ COMPÁS FLY <span style="font-size:14px;font-weight:500">× Fiiller Café</span></div>
+    <span class="tag">Piloto · Solo lectura</span>
+  </header>
+  <section class="panel">
+    <h1>Hola, soy Fly Control</h1>
+    <p>Revisaré los pedidos digitales de Fiiller utilizando tu sesión autorizada de personal. No cambiaré pedidos, inventario ni clientes.</p>
+    <div class="alert">Este piloto muestra un resumen determinístico de datos reales. La conversación con un modelo de IA y las acciones automáticas se incorporarán después de validar Fly API.</div>
+    <p id="status" role="status">Comprobando acceso...</p>
+    <button id="refresh" type="button" disabled>Analizar pedidos</button>
+  </section>
+  <section class="panel" id="results" hidden>
+    <h2>Informe operativo</h2>
+    <div class="grid">
+      <div class="metric"><div class="value" id="count">—</div><div class="label">Pedidos digitales consultados</div></div>
+      <div class="metric"><div class="value" id="week">—</div><div class="label">Pedidos en últimos 7 días</div></div>
+      <div class="metric"><div class="value" id="ready">—</div><div class="label">Pedidos Listo o Entregado en últimos 7 días</div></div>
+    </div>
+    <p id="summary"></p>
+    <small>Fuente: pedidos digitales visibles para el personal autorizado. Se consultan hasta 90 pedidos; no son las ventas totales de TPV Arrow.</small>
+  </section>
+  <p><a href="admin.html">← Volver a Fiiller Admin</a></p>
+</main>
+<script src="filler-cloud.js"></script>
+<script>
+(() => {
+  "use strict";
+  const byId=id=>document.getElementById(id);
+  const status=(text)=>byId("status").textContent=text;
+  async function analyze(){
+    const button=byId("refresh");
+    button.disabled=true;status("Consultando pedidos autorizados...");
+    try{
+      if((await FillerCloud.staffRole())!=="admin")throw Error("Acceso reservado al administrador de Fiiller.");
+      const orders=await FillerCloud.orders();
+      const cutoff=Date.now()-7*24*60*60*1000;
+      const recent=orders.filter(o=>Number.isFinite(o.createdTs)&&o.createdTs>=cutoff);
+      const completed=recent.filter(o=>["Listo","Entregado"].includes(o.status));
+      byId("count").textContent=orders.length;
+      byId("week").textContent=recent.length;
+      byId("ready").textContent=completed.length;
+      byId("summary").textContent=recent.length
+        ? "Fly Control detectó "+recent.length+" pedidos digitales recientes. "+completed.length+" están marcados como Listo o Entregado. Revisa los demás estados desde el panel de pedidos."
+        : "No se registraron pedidos digitales recientes entre los registros consultados.";
+      byId("results").hidden=false;
+      status("Consulta completada · "+new Date().toLocaleString("es-MX"));
+    }catch(error){byId("results").hidden=true;status("No se pudo consultar: "+(error?.message||"Error de acceso"));}
+    finally{button.disabled=false;}
+  }
+  async function initialize(){
+    try{
+      if((await FillerCloud.staffRole())!=="admin"){status("Inicia sesión como administrador desde Fiiller Admin para usar este piloto.");return;}
+      byId("refresh").disabled=false;
+      await analyze();
+    }catch{status("No se pudo verificar tu sesión de administrador.");}
+  }
+  byId("refresh").addEventListener("click",analyze);
+  initialize();
+})();
+</script>
+</body>
+</html>
