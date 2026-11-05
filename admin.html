@@ -20,6 +20,15 @@
       <h1>Control Fiiller</h1>
       <p>Panel de operaciones: pedidos, catálogo y CRM de clientes.</p>
     </section>
+    <section aria-label="Acceso y sesión de personal" style="background:white;border:1px solid #b5d5c5;padding:18px 22px;border-radius:20px;margin-bottom:18px;box-shadow:var(--shadow)">
+      <strong style="font-size:21px">Acceso y sesión</strong>
+      <p id="admin-session-status" role="status" style="color:var(--muted);line-height:1.5">Comprobando sesión de personal...</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <a href="fly-control.html" style="display:inline-block;background:#006241;color:#fff;padding:13px 16px;border-radius:12px;text-decoration:none;font-weight:800">Entrar a Compás Fly</a>
+        <button id="admin-logout" type="button" style="background:#e8f2ed;color:#006241;border:1px solid #bfd8c9;border-radius:12px;padding:13px 16px;font:inherit;font-weight:800;cursor:pointer">Cerrar sesión / Cambiar usuario</button>
+      </div>
+      <p style="font-size:13px;color:var(--muted)">Para entrar como admin o cocina, utiliza el acceso de Compás Fly. Cerrar sesión aquí también limpia la sesión de personal de Fiiller en esta pestaña.</p>
+    </section>
     <section data-install-panel style="background:white;border:1px solid #e4ded4;padding:18px 22px;border-radius:20px;margin-bottom:18px;box-shadow:var(--shadow)">
       <strong style="font-size:21px">Instala Fiiller Admin en tu dispositivo</strong>
       <p style="color:var(--muted);line-height:1.5">Abre el panel directamente desde tu pantalla de inicio o escritorio, separado de la app para clientes. El acceso a las áreas protegidas seguirá requiriendo tu cuenta de administrador.</p>
@@ -79,7 +88,19 @@
     <div class="links"><a href="index.html">Menu publico</a><a href="monitor.html">Monitor de cocina</a></div>
   </main>
   <script src="pwa.js?v=2"></script>
+  <script src="filler-cloud.js"></script>
   <script>
+    (async()=>{
+      const status=document.getElementById("admin-session-status");
+      try {
+        const role=await FillerCloud.staffRole();
+        status.textContent=role==="admin"?"Sesión activa: administrador":role==="cocina"?"Sesión activa: cocina":"Sin sesión de personal activa en esta pestaña. Puedes entrar desde Compás Fly.";
+      }catch{status.textContent="No se pudo comprobar la sesión. Puedes entrar desde Compás Fly.";}
+    })();
+    document.getElementById("admin-logout").addEventListener("click",()=>{
+      FillerCloud.logout();
+      document.getElementById("admin-session-status").textContent="Sesión cerrada en esta pestaña. Entra a Compás Fly para cambiar de usuario.";
+    });
     document.getElementById("install-fiiller-admin").addEventListener("click",async()=>{
       if(window.fillerInstallApp) await window.fillerInstallApp();
     });
