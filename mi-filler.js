@@ -139,20 +139,11 @@ function editProfile(open){
 function updateLastOrder(){
   const link=$("member-orders-link"),description=$("member-orders-description");
   if(!link||!description)return;
-  let saved=null;
-  try{saved=JSON.parse(localStorage.getItem("filler_last_tracking_v1")||"null");}catch{}
-  const tokenValue=String(saved?.token||"");
-  const valid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(tokenValue);
-  // Este acceso es del navegador actual, no un historial ligado a la cuenta.
-  description.textContent=valid?"Ver seguimiento guardado en este dispositivo":"Sin pedidos guardados en este dispositivo";
-  if(valid){
-    link.href="./pedido.html#token="+encodeURIComponent(tokenValue);
-    link.removeAttribute("aria-disabled");link.removeAttribute("tabindex");
-    link.classList.remove("is-inactive");
-  }else{
-    link.removeAttribute("href");link.setAttribute("aria-disabled","true");link.tabIndex=-1;
-    link.classList.add("is-inactive");
-  }
+  // Una cuenta autenticada solo puede abrir pedidos asociados a esa misma cuenta.
+  // No reutilizar enlaces locales de invitados u otras personas en dispositivos compartidos.
+  description.textContent="Buscando tu último pedido…";
+  link.removeAttribute("href");link.setAttribute("aria-disabled","true");link.tabIndex=-1;
+  link.classList.add("is-inactive");
 }
 const escHistory=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 async function loadMyOrderHistory(){
