@@ -78,8 +78,12 @@
       "recipe_id": "REC-002",
       "serving_quantity": 1,
       "serving_unit": "pieza",
-      "catalog_candidate": "01170024 HUEVO BLANCO GRANJERO KG",
-      "reason": "Conversión pieza a kg y correspondencia de código requieren validación antes de descuento"
+      "catalog_candidate": "01170024 HUEVO BLANCO GRANJERO KG (confirmed)",
+      "reason": "53 g por pieza es peso sin cáscara. No está documentado si el kg del almacén incluye cáscara; no calcular ni registrar salida hasta confirmar la base de pesaje y factor.",
+      "edible_weight_g": 53,
+      "inventory_code": "01170024",
+      "inventory_weight_unit": "kg",
+      "inventory_deduction_quantity_kg": null
     },
     {
       "ingredient": "Aceite de cocción",
