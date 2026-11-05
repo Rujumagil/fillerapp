@@ -24,7 +24,7 @@
       "unit": "g"
     },
     {
-      "name": "Queso",
+      "name": "Queso panela",
       "quantity": 30,
       "unit": "g"
     },
@@ -64,5 +64,6 @@
     "stock_deduction_status": "80_g_confirmed_pending_integration",
     "notes": "Producto recibido ya preparado; no desglosar ingredientes internos ni crear subreceta.",
     "unit_conversion_status": "not_required_confirmed_80_g"
-  }
+  },
+  "cheese_inventory_sku_status": "pending_catalog_verification"
 }
