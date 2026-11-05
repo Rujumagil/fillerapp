@@ -1,0 +1,96 @@
+{
+  "id": "FIILLER-CHILAQUILES-ROJOS-DRY-RUN",
+  "description": "Prueba de cálculo SIN llamadas a API, SIN movimientos ni modificación de existencias",
+  "mode": "simulation_only",
+  "writes_enabled": false,
+  "stock_mutation_allowed": false,
+  "execution_status": "prepared_not_executed",
+  "scenario": {
+    "sales": [
+      {
+        "recipe_id": "REC-001",
+        "quantity": 1
+      },
+      {
+        "recipe_id": "REC-002",
+        "quantity": 1
+      },
+      {
+        "recipe_id": "REC-003",
+        "quantity": 1
+      }
+    ]
+  },
+  "expected_consumption": [
+    {
+      "name": "Totopos granel",
+      "ocs_code": "01320026",
+      "quantity": 0.42,
+      "unit": "kg",
+      "display": "420 g"
+    },
+    {
+      "name": "Salsa roja preparada bolsa 3 kg",
+      "ocs_code": "01280238",
+      "quantity": 0.08,
+      "unit": "pieza",
+      "display": "240 g (0.08 bolsas)"
+    },
+    {
+      "name": "Crema ácida Lala cubeta 4 kg",
+      "ocs_code": "06010074",
+      "quantity": 0.0225,
+      "unit": "pieza",
+      "display": "90 g (0.0225 cubetas)"
+    },
+    {
+      "name": "Queso panela",
+      "ocs_code": "06040154",
+      "quantity": 0.09,
+      "unit": "kg",
+      "display": "90 g"
+    },
+    {
+      "name": "Cebolla blanca",
+      "ocs_code": "05020205",
+      "quantity": 0.03,
+      "unit": "kg",
+      "display": "30 g"
+    },
+    {
+      "name": "Cilantro",
+      "ocs_code": "05020162",
+      "quantity": 0.015,
+      "unit": "kg",
+      "display": "15 g"
+    },
+    {
+      "name": "Pollo crudo",
+      "ocs_code": "03050031",
+      "quantity": 0.1142857142857143,
+      "unit": "kg",
+      "display": "114.285714 g crudos por 100 g cocidos"
+    }
+  ],
+  "unresolved": [
+    {
+      "ingredient": "Huevo",
+      "recipe_id": "REC-002",
+      "serving_quantity": 1,
+      "serving_unit": "pieza",
+      "catalog_candidate": "01170024 HUEVO BLANCO GRANJERO KG",
+      "reason": "Conversión pieza a kg y correspondencia de código requieren validación antes de descuento"
+    },
+    {
+      "ingredient": "Aceite de cocción",
+      "recipe_id": "REC-003",
+      "reason": "Uso y cantidad pendiente de confirmación"
+    }
+  ],
+  "acceptance_criteria": [
+    "No actualizar tablas de inventario, movimientos, lotes ni existencias en modo simulación",
+    "No activar descuentos mientras falte la integración y conversiones de ingredientes",
+    "Totales deben coincidir con suma por receta y unidades del catálogo OCS",
+    "Al probar integración real usar transacción idempotente por identificador de venta, con rollback y registro de auditoría"
+  ]
+}
