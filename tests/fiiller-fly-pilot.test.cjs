@@ -7,10 +7,10 @@ const page = fs.readFileSync(path.join(__dirname, "..", "fly-control.html"), "ut
 const admin = fs.readFileSync(path.join(__dirname, "..", "admin.html"), "utf8");
 
 test("Fly accepts only authorized staff roles", () => {
-  assert.match(page, /FillerCloud\\.staffRole\\(\\)/);
-  assert.match(page, /roles=\\["admin","cocina"\\]/);
-  assert.match(page, /FillerCloud\\.login\\(/);
-  assert.match(page, /FillerCloud\\.logout\\(/);
+  assert.match(page, /FillerCloud\.staffRole\(\)/);
+  assert.match(page, /roles=\["admin","cocina"\]/);
+  assert.match(page, /FillerCloud\.login\(/);
+  assert.match(page, /FillerCloud\.logout\(/);
   assert.match(page, /role!==activeRole/);
 });
 test("Fly separates admin and operator summaries", () => {
