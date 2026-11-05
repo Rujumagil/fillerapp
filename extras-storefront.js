@@ -31,6 +31,7 @@
   const milkIds = new Set(["fiiller-leche-entera","tpv117","tpv119","tpv118"]);
   const isFiillerCoffee = item => item && /^fiiller-cafe-(8|12|16)$/.test(String(item.id));
   const extrasFor = item => activeExtras().filter(e => isFiillerCoffee(item) ? milkIds.has(e.id) : !milkIds.has(e.id));
+  window.FillerAllowedExtrasForProduct = id => { const item=itemById(id); return item&&eligible(item)?extrasFor(item):[]; };
   // Ventas netas por artículo del reporte del 1 al 14 de octubre de 2026.
   const featuredSales = [
     {id:"sandwich-pollo",units:78},{id:"verdes-con-pollo",units:47},
