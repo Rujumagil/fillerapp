@@ -55,8 +55,9 @@
     function remindUntilAcknowledged(){
       stopReminder();
       // Solo mientras el personal no confirme que vio el pedido.
-      reminder=setInterval(()=>{if(!overlay.hidden && audioEnabled && !document.hidden)sound();},11000);
+      reminder=setInterval(()=>{if(!overlay.hidden && audioEnabled)sound();},11000);
     }
+    // La alarma solo se silencia con una acción explícita del operador.
     overlay.querySelector("#filler-popup-close").addEventListener("click",close);
     overlay.querySelector("#filler-popup-show").addEventListener("click",()=>{
       close();document.getElementById("orders")?.scrollIntoView({behavior:"smooth",block:"start"});
@@ -131,6 +132,11 @@
         return o?.status==="Nuevo"&&id&&Number.isFinite(ts)&&age>=-120000&&age<MAX_AGE&&!seen.includes(id);
       });
       if(!incomingOrders.length)return;
+      // Si entra otro pedido antes de confirmar el anterior, seguir mostrando la alerta.
+      if(!overlay.hidden){
+        const previous=overlay.querySelector("#filler-popup-details")?.textContent||"";
+        onStatus("Hay nuevos pedidos mientras una alarma sigue pendiente de confirmación.");
+      }
       const ids=incomingOrders.map(o=>String(o.uuid||o.id));
       seen=[...new Set([...seen,...ids])].slice(-350);
       saveSeen();
