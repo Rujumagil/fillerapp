@@ -151,13 +151,20 @@
   }
   async function catalog() {
     const rows=await request("filler_products?select=id,category,name,price,stock,image_url,active&active=eq.true&order=category.asc,name.asc");
-    return (rows||[]).map(i=>({id:i.id,cat:i.category,name:i.name,price:Number(i.price),stock:Number(i.stock),image:i.image_url||""}));
+    const products=(rows||[]).map(i=>({id:i.id,cat:i.category,name:i.name,price:Number(i.price),stock:Number(i.stock),image:i.image_url||""}));
+    return window.FiillerAvailability?.applyProducts(products)||products;
   }
   async function extras() {
     const rows=await request("filler_extras?select=id,name,price,enabled&enabled=eq.true&order=name.asc");
-    return (rows||[]).map(i=>({id:i.id,name:i.name,price:Number(i.price),enabled:true}));
+    const items=(rows||[]).map(i=>({id:i.id,name:i.name,price:Number(i.price),enabled:true}));
+    return window.FiillerAvailability?.applyExtras(items)||items;
   }
   async function placeOrder(data) {
+    const lines=Array.isArray(data?.p_lines)?data.p_lines:[];
+    if(lines.some(line=>window.FiillerAvailability?.isChickenProduct({id:line.id,name:line.name})))
+      throw new Error("Los productos con pollo están agotados temporalmente.");
+    if(lines.some(line=>(line.extras||[]).some(extra=>window.FiillerAvailability?.isChickenExtra({id:extra}))))
+      throw new Error("El extra de pollo está agotado temporalmente.");
     // Cuando el cliente inició sesión en Mi Fiiller, asociar el pedido a su
     // usuario validado por Supabase; el invitado conserva el flujo habitual.
     let customerAccess=null;
