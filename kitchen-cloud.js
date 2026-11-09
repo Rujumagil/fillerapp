@@ -24,7 +24,12 @@
     const url="https://wa.me/"+number+"?text="+encodeURIComponent(text);
     return '<a class="whatsapp-ready" href="'+escape(url)+'" target="_blank" rel="noopener noreferrer" aria-label="Abrir WhatsApp con aviso de pedido listo para '+escape(o.customer)+'">🟢 WhatsApp · Avisar listo</a>';
   }
-  let role=null, orders=[], running=false, timer=null;
+  let role=null, orders=[], running=false, timer=null, lastSuccessfulPoll=0;
+  const REFRESH_MS=3000;
+  const retryNow=()=>{if(!role||running)return; if(timer)clearTimeout(timer);timer=setTimeout(poll,0);};
+  window.addEventListener("online",retryNow);
+  window.addEventListener("focus",retryNow);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)retryNow();});
   const shell=document.createElement("section");
   shell.className="card";
   shell.style.marginBottom="12px";
@@ -132,7 +137,7 @@
     }
     if(!changeId)return;
     button.disabled=true;
-    try{await FillerCloud.updateOrder(changeId,button.dataset.status);await poll();}
+    try{await FillerCloud.updateOrder(changeId,button.dataset.status);retryNow();}
     catch(error){message(error.message,true);}
     finally{button.disabled=false;}
   });
@@ -167,11 +172,18 @@
     try{
       const fresh=await FillerCloud.orders();
       notifier.incoming(fresh.filter(o=>!isScheduled(o)));
-      orders=fresh;render();
+      orders=fresh;lastSuccessfulPoll=Date.now();render();
       message("En línea con Supabase · "+new Date().toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit",second:"2-digit"})+" · Pedidos sincronizados cada 3 segundos");
     }catch(err){message("Sin conexión a pedidos: "+err.message,true);}
-    finally {running=false;if(role)timer=setTimeout(poll,3000);}
+    finally {running=false;if(role)timer=setTimeout(poll,REFRESH_MS);}
   }
+  // Indicador independiente del sondeo: señala si el navegador dejó de consultar.
+  setInterval(()=>{
+    if(!role||running)return;
+    if(!navigator.onLine){message("Sin conexión de Windows. Los pedidos se recuperarán al volver internet.",true);return;}
+    if(lastSuccessfulPoll && Date.now()-lastSuccessfulPoll>20000)
+      message("⚠ Sin sincronización confirmada desde hace más de 20 segundos. Reintentando…",true);
+  },5000);
   async function start(){activationUI();await poll();}
   (async()=>{
     role=await FillerCloud.staffRole();
