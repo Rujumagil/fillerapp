@@ -6,6 +6,11 @@
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   let currentOrders=[];
   let role=null, permissionMessage="Activa las notificaciones para ver avisos del sistema.";
+  let refreshRunning=false,refreshTimer=null,lastSuccess=0;
+  function reconnect(){if(!role||refreshRunning)return;if(refreshTimer)clearTimeout(refreshTimer);refreshTimer=setTimeout(refresh,0);}
+  window.addEventListener("online",reconnect);
+  window.addEventListener("focus",reconnect);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)reconnect();});
   function enableControls(){
     const button=document.getElementById("monitor-sound");
     if(button)button.addEventListener("click",async()=>{
@@ -59,10 +64,11 @@
     });
   }
   async function refresh(){
-    if(!role)return;
+    if(!role||refreshRunning)return;
+    refreshRunning=true;
     try {
       const orders=(await FillerCloud.orders()).filter(o=>o.status!=="Entregado");
-      currentOrders=orders;
+      currentOrders=orders;lastSuccess=Date.now();
       notifier.incoming(orders);
       clock.textContent=new Date().toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});
       root.innerHTML=orders.length?orders.map(o=>{
@@ -77,7 +83,8 @@
       document.getElementById("monitor-volume").value=notifier.soundLevel();
       enableControls();
     }catch(err){msg("No se pudo actualizar: "+err.message);}
-    if(role)setTimeout(refresh,3000);
+    finally{refreshRunning=false;if(role)refreshTimer=setTimeout(refresh,3000);}
   }
+  setInterval(()=>{if(!role||refreshRunning)return;if(!navigator.onLine)msg("Sin internet; esperando reconexión.");else if(lastSuccess&&Date.now()-lastSuccess>20000)msg("⚠ Monitor sin sincronización confirmada durante 20 segundos.");},5000);
   (async()=>{role=await FillerCloud.staffRole();if(role)refresh();else login();})();
 })();
