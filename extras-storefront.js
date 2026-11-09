@@ -23,7 +23,7 @@
       // No aceptar configuraciones locales diferentes en cada teléfono.
       const cloud = window.FillerCloudExtras;
       const data = Array.isArray(cloud) ? cloud : [];
-      return data.filter(e => e && e.enabled === true && e.name && e.price !== null &&
+      return data.filter(e => !window.FiillerAvailability?.isChickenExtra(e) && e && e.enabled === true && e.name && e.price !== null &&
         e.price !== "" && Number.isFinite(Number(e.price)) && Number(e.price) >= 0)
         .map(e => ({ id: String(e.id), name: String(e.name), price: Number(e.price) }));
     } catch { return []; }
@@ -110,7 +110,7 @@
   }
   function addConfigured(id, extras = []) {
     const item = itemById(id);
-    if (!item || reserved(id) >= Number(item.stock)) { toast("No hay más existencias de este platillo."); return false; }
+    if (!item || window.FiillerAvailability?.isChickenProduct(item) || reserved(id) >= Number(item.stock)) { toast("Este platillo está agotado temporalmente."); return false; }
     const ordered = [...extras].sort((a, b) => a.id.localeCompare(b.id));
     const key = ordered.length ? id + "::" + ordered.map(e => e.id).join(",") : id;
     state.cart[key] = Number(state.cart[key] || 0) + 1;
@@ -285,7 +285,7 @@
   }
   addToCart = function(id) {
     const item = itemById(id);
-    if (!item || reserved(id) >= Number(item.stock)) { toast("No hay más existencias."); return; }
+    if (!item || window.FiillerAvailability?.isChickenProduct(item) || reserved(id) >= Number(item.stock)) { toast("Este producto está agotado temporalmente."); return; }
     if (isChilaquiles(item)) {openChilaquilWizard(id);return;}
     if (classicKind(item)) {openClassicPicker(classicKind(item));return;}
     if (eligible(item) && extrasFor(item).length) openModal(id);
@@ -369,7 +369,7 @@
       const available = groupVariants ? groupVariants.reduce((sum,v)=>sum+Math.max(0,Number(v.stock)-reserved(v.id)),0) : Number(selected.stock) - reserved(selected.id);
       const photo = item.image ? 'style="background-image:url(&quot;' + esc(item.image) + '&quot;);background-size:contain;background-position:center center;background-repeat:no-repeat;background-color:#fff"' : "";
       const options = eligible(selected) && extrasFor(selected).length;
-      const stockLabel = available <= 0 ? "Agotado" : "Disponible";
+      const stockLabel = available <= 0 ? "Agotado temporalmente" : "Disponible";
       const stockClass = available <= 0 ? "sold-out" : available <= 5 ? "low" : "";
       const addLabel = available <= 0 ? "Agotado" : groupVariants ? "Elegir" : options ? "Elegir" : "Agregar";
       const sizeSelector = variants ? '<div class="fx-size-picker"><label for="size-' + esc(selected.id) + '">Elige tu tamaño</label><select id="size-' + esc(selected.id) + '" data-coffee-size aria-label="Tamaño de ' + esc(item.name) + '">' + variants.map(v => '<option value="' + esc(v.id) + '" data-price="' + Number(v.price) + '" data-stock="' + Math.max(0,Number(v.stock)-reserved(v.id)) + '"' + (v.id===selected.id?' selected':'') + (Number(v.stock)-reserved(v.id)<=0?' disabled':'') + '>' + v.sizeOz + ' oz · ' + money(Number(v.price)) + (Number(v.stock)-reserved(v.id)<=0?' · Agotado':'') + '</option>').join('') + '</select></div>' : '';
