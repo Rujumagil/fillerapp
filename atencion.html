@@ -28,4 +28,4 @@ $("send-form").onsubmit=async e=>{e.preventDefault();if(!current)return;const bo
 try{await load();const order=new URLSearchParams(location.search).get("pedido");if(order&&!staff){const existing=threads.find(t=>t.order_id===order);if(existing)await select(existing.id);else{const rows=await request("filler_support_threads?select=id",{method:"POST",headers:{Prefer:"return=representation"},body:JSON.stringify([{customer_user_id:myId,order_id:order,subject:"Consulta sobre mi pedido"}])});await load();await select(rows[0].id)}}}catch(e){feedback(e.message);$("threads").textContent="Inicia sesión para consultar tus mensajes."}
 setInterval(async()=>{if(current&&document.visibilityState==="visible")try{await select(current)}catch{}},15000);
 })();
-</script></body></html>
+</script><script src="./filler-sounds.js?v=39"></script><script src="./fiiller-support-alerts.js?v=1"></script></body></html>
