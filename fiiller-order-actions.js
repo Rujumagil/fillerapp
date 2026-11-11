@@ -7,7 +7,7 @@ anchor.after(panel);
 const root=panel.querySelector("#fiiller-change-orders");
 const BASE="https://qwxydjotwhniahaovrff.supabase.co/rest/v1/",KEY="sb_publishable_17NekbDHp_ssL_Pf-CnqPg_v0acxqn3";
 const session=()=>{try{return JSON.parse(localStorage.getItem("filler_customer_session_v1")||sessionStorage.getItem("filler_customer_session_v1")||"null")}catch{return null}};
-async function api(path,init={}){const token=session()?.access_token;if(!token)throw Error("Inicia sesión en Mi Fiiller.");const response=await fetch(BASE+path,{...init,headers:{apikey:KEY,Authorization:"Bearer "+token,...(init.body?{"Content-Type":"application/json"}:{})},cache:"no-store"});const data=await response.json().catch(()=>({}));if(!response.ok)throw Error(data.message||"No pudimos realizar la operación");return data}
+async function api(path,init={}){const auth=await window.FillerCustomerAuth?.getSession();const token=auth?.access_token;if(!token)throw Error("Inicia sesión en Mi Fiiller.");const response=await fetch(BASE+path,{...init,headers:{apikey:KEY,Authorization:"Bearer "+token,...(init.body?{"Content-Type":"application/json"}:{})},cache:"no-store"});const data=await response.json().catch(()=>({}));if(!response.ok)throw Error(data.message||"No pudimos realizar la operación");return data}
 const el=(t,s)=>{const n=document.createElement(t);n.textContent=s;return n};
 async function load(){if(!session()?.user?.id){root.textContent="Inicia sesión para modificar tus pedidos.";return}
 root.textContent="Consultando…";try{
