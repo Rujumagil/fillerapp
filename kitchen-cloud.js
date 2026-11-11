@@ -68,7 +68,11 @@
   const shell=document.createElement("section");
   shell.className="card";
   shell.style.marginBottom="12px";
-  root.parentElement.before(shell);
+  // Barra de conexión y controles fuera del grid: evita desplazar las comandas y el detalle.
+  const workspace=document.getElementById("fiiller-workspace");
+  if(workspace?.parentElement)workspace.before(shell);
+  else root.parentElement.before(shell);
+  shell.classList.add("fiiller-kitchen-toolbar");
   shell.innerHTML='<div id="filler-kitchen-info" class="muted">Conectando con Supabase…</div><div id="filler-kitchen-access"></div>';
   const info=document.getElementById("filler-kitchen-info");
   const access=document.getElementById("filler-kitchen-access");
