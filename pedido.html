@@ -51,6 +51,13 @@
     .customer-message:last-child{margin-bottom:0}
     .customer-message .customer-message-date{display:block;color:#697c70;font-size:11px;margin:0 0 7px;font-weight:750}
     .customer-message p{color:#163f2b;font-size:14px;line-height:1.55;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+    .customer-chat-form{display:grid;gap:9px;margin-top:13px}
+    .customer-chat-form label{font-size:13px;font-weight:800;color:#0d5838}
+    .customer-chat-form textarea{display:block;width:100%;resize:vertical;min-height:95px;border:1px solid #a6d0b3;border-radius:12px;padding:12px;font:inherit;color:#183a2c;background:#fff}
+    .customer-chat-form button{justify-self:start;padding:11px 16px}
+    .customer-chat-result{font-size:12px;line-height:1.5;margin:0;color:#4b6c59}
+    .customer-message.from-customer{background:#e5f4eb;border-color:#b7ddc3;margin-left:16px}
+    .customer-message.from-kitchen{margin-right:16px}
     [hidden]{display:none!important}
     @media(min-width:650px){main{padding-top:45px}}
   </style>
@@ -71,9 +78,15 @@
         <div class="step" data-step="3" role="listitem"><div class="symbol">✓</div>Entregado</div>
       </div>
       <div id="ready-banner" class="ready" hidden>🎉 ¡Tu pedido ya está listo! Puedes pasar a recogerlo.</div>
-      <section class="customer-messages" id="customer-messages" aria-label="Mensajes de cocina" aria-live="polite" hidden>
-        <h2>✉ Mensajes de Fiiller Café</h2>
-        <div id="customer-message-list"></div>
+      <section class="customer-messages" id="customer-messages" aria-label="Conversación de este pedido" hidden>
+        <h2>💬 Conversación con Fiiller Café</h2>
+        <div id="customer-message-list" role="log" aria-live="polite"></div>
+        <form class="customer-chat-form" id="customer-chat-form">
+          <label for="customer-chat-text">Escribe a cocina sobre tu pedido</label>
+          <textarea id="customer-chat-text" maxlength="500" placeholder="Ej. ¿Puedo cambiar la bebida por una deslactosada?" required></textarea>
+          <button id="customer-chat-send" type="submit" disabled>Enviar mensaje a Fiiller</button>
+          <p class="customer-chat-result" id="customer-chat-result" role="status"></p>
+        </form>
       </section>
       <div class="info">
         <div class="details"><span class="label">Recolección</span><span class="value" id="pickup">—</span></div>
@@ -90,6 +103,6 @@
   <script src="pwa.js?v=2"></script>
   <script src="filler-cloud.js?v=39"></script>
   <script src="filler-sounds.js?v=39"></script>
-  <script src="order-tracking.js?v=39"></script>
+  <script src="order-tracking.js?v=40"></script>
 </body>
 </html>
