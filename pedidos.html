@@ -93,8 +93,8 @@
     .fiiller-chat-heading{display:flex;gap:10px;justify-content:space-between;align-items:center;margin:0 0 6px;flex-wrap:wrap}
     .fiiller-chat-heading h2{font-size:17px;margin:0;color:var(--green)}
     .fiiller-chat-heading a{font-size:12px;color:var(--green);font-weight:800}
-    .fiiller-chat-frame{width:100%;height:126px;min-height:0;border:1px solid #d4e5d8;border-radius:12px;background:#fffdf8;display:block;transition:height .2s}
-    .fiiller-chat-panel.is-chat-open .fiiller-chat-frame{height:440px}
+    .fiiller-chat-frame{width:100%;height:465px;min-height:0;border:1px solid #d4e5d8;border-radius:12px;background:#fffdf8;display:block;transition:height .2s}
+    .fiiller-chat-panel.is-chat-open .fiiller-chat-frame{height:650px}
     .fiiller-chat-toggle{font-size:12px;border-radius:9px;padding:7px 10px}
     .fiiller-view-switch{display:none}
     @media(max-width:1040px){.fiiller-workspace{grid-template-columns:minmax(0,1fr)}.fiiller-detail-panel{position:static}.fiiller-orders-panel .kitchen-orders{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -104,8 +104,8 @@
       .fiiller-view-switch button[aria-pressed="true"]{background:var(--green);color:white}
       .fiiller-workspace[data-view="mensajes"] .fiiller-orders-panel,.fiiller-workspace[data-view="mensajes"] .fiiller-detail-panel{display:none}
       .fiiller-workspace[data-view="pedidos"] .fiiller-chat-panel{display:none}
-      .fiiller-chat-frame{height:68dvh;min-height:390px}
-      .fiiller-chat-panel.is-chat-open .fiiller-chat-frame{height:68dvh}
+      .fiiller-chat-frame{height:66dvh;min-height:440px}
+      .fiiller-chat-panel.is-chat-open .fiiller-chat-frame{height:82dvh}
     }
     @media(max-width:460px){.fiiller-orders-panel .kitchen-orders{grid-template-columns:1fr}.fiiller-orders-panel .order-card{min-height:105px}}
 
@@ -130,10 +130,10 @@
         <section class="card fiiller-chat-panel" id="fiiller-chat-panel" aria-label="Mensajería de clientes">
           <div class="fiiller-chat-heading">
             <h2>💬 Atención a clientes</h2>
-            <button class="fiiller-chat-toggle" type="button" id="fiiller-chat-toggle" aria-expanded="false">Ver conversaciones</button>
+            <button class="fiiller-chat-toggle" type="button" id="fiiller-chat-toggle" aria-expanded="false">Ampliar conversaciones</button>
             <a href="./atencion.html?personal=1" target="_blank" rel="noopener">Abrir aparte</a>
           </div>
-          <iframe class="fiiller-chat-frame" title="Mensajes de los clientes de Fiiller Café" src="./atencion.html?personal=1&amp;integrado=1&amp;compacto=1" loading="eager"></iframe>
+          <iframe class="fiiller-chat-frame" title="Mensajes de los clientes de Fiiller Café" src="./atencion.html?personal=1&amp;integrado=1&amp;vista=amplia" loading="eager"></iframe>
         </section>
         <section class="card fiiller-orders-panel" aria-label="Comandas y preparación"><div id="orders"></div></section>
       </div>
@@ -158,8 +158,8 @@
       toggle.addEventListener("click",()=>{
         const open=chatPanel.classList.toggle("is-chat-open");
         toggle.setAttribute("aria-expanded",String(open));
-        toggle.textContent=open?"Contraer mensajes":"Ver conversaciones";
-        chatPanel.querySelector("iframe")?.contentWindow?.postMessage({kind:"fiiller-set-chat-expanded",expanded:open},location.origin);
+        toggle.textContent=open?"Tamaño normal":"Ampliar conversaciones";
+        
       });
       document.querySelectorAll("[data-workspace-view]").forEach(button=>{
         button.addEventListener("click",()=>{
