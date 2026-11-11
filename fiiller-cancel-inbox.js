@@ -9,11 +9,11 @@ function el(tag,txt){const node=document.createElement(tag);node.textContent=txt
 async function req(path,options={}){const jwt=await FillerCloud.accessToken();if(!jwt)throw Error("Inicia sesión como administrador.");const r=await fetch(BASE+path,{...options,headers:{apikey:KEY,Authorization:"Bearer "+jwt,...(options.body?{"Content-Type":"application/json"}:{})},cache:"no-store"});const text=await r.text();let data;try{data=JSON.parse(text)}catch{data={}}if(!r.ok)throw Error(data.message||"No fue posible consultar la solicitud.");return data}
 async function refresh(){
 const role=await FillerCloud.staffRole();if(role!=="admin"){status.textContent="Entra como administrador para revisar autorizaciones.";return}
-const rows=await req("filler_cancel_requests?select=id,order_id,item_id,reason,created_at,filler_orders(public_code,status),filler_order_items(name,qty,price)&status=eq.pendiente&order=created_at.asc&limit=50");
+const rows=await req("filler_cancel_requests?select=id,order_id,item_id,reason,created_at,item_name,item_qty,filler_orders(public_code,status)&status=eq.pendiente&order=created_at.asc&limit=50");
 list.replaceChildren();status.textContent=rows.length?rows.length+" solicitud(es) pendiente(s).":"Sin solicitudes pendientes.";
 for(const x of rows){
  const card=el("article","");card.style.cssText="border:1px solid #d7e6d9;border-radius:14px;padding:13px;margin:10px 0;background:#f9fcf9";
- card.append(el("strong",(x.filler_orders?.public_code||"Pedido")+" · "+(x.filler_order_items?.qty||"")+" × "+(x.filler_order_items?.name||"Producto")));
+ card.append(el("strong",(x.filler_orders?.public_code||"Pedido")+" · "+(x.item_qty||"")+" × "+(x.item_name||"Producto")));
  card.append(el("p","Motivo: "+x.reason));
  const controls=el("div","");controls.style.cssText="display:flex;gap:10px;flex-wrap:wrap";
  for(const [approve,label] of [[true,"Aprobar cancelación"],[false,"Rechazar solicitud"]]){
