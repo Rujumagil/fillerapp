@@ -23,6 +23,7 @@
     .filler-msg-item{padding:11px;border-radius:11px;background:#f2f8f3;margin-bottom:8px}
     .filler-msg-item p{margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.5}
     .filler-msg-item small{color:#607267}
+    .filler-msg-item.filler-msg-customer{background:#e4f5e9;border:1px solid #b6ddc0}
     .filler-msg-status{font-size:12px;font-weight:750;line-height:1.5;margin:10px 0}
     .filler-msg-status.error{color:#a53b24}
     .filler-msg-warning{background:#fff2db;border:1px solid #f4d2a4;border-radius:10px;padding:10px;font-size:12px;line-height:1.45;color:#89500f;margin:10px 0}
@@ -48,7 +49,7 @@
       <div id="filler-msg-warning" class="filler-msg-warning" hidden></div>
       <button type="button" class="filler-msg-submit" id="filler-msg-send">Enviar mensaje al cliente</button>
       <p id="filler-msg-result" class="filler-msg-status" role="status" aria-live="polite"></p>
-      <section class="filler-msg-history" aria-label="Mensajes enviados"><h3>Mensajes enviados</h3><div id="filler-msg-list" class="filler-msg-mini">Cargando mensajes…</div></section>
+      <section class="filler-msg-history" aria-label="Mensajes enviados"><h3>Conversación con el cliente</h3><div id="filler-msg-list" class="filler-msg-mini">Cargando mensajes…</div></section>
     </div>`;
   document.body.appendChild(modal);
   const get=id=>document.getElementById(id);
@@ -93,20 +94,28 @@
   }));
   function renderHistory(items){
     history.replaceChildren();
-    if(!items.length){history.textContent="Todavía no hay mensajes enviados a este cliente.";return;}
+    if(!items.length){history.textContent="Todavía no hay mensajes en esta conversación.";return;}
     for(const item of items){
       const block=document.createElement("article"),when=document.createElement("small"),paragraph=document.createElement("p");
-      block.className="filler-msg-item";
+      block.className="filler-msg-item"+(item.kind==="cliente"?" filler-msg-customer":"");
       const date=new Date(item.created_at);
-      when.textContent=(item.kind==="listo"?"✅ Pedido listo · ":"✉ Cocina · ")+
+      when.textContent=(item.kind==="cliente"?"👤 Cliente · ":item.kind==="listo"?"✅ Pedido listo · ":"✉ Cocina · ")+
         (Number.isFinite(date.getTime())?date.toLocaleString("es-MX",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"");
       paragraph.textContent=String(item.message||"");
       block.append(when,paragraph);history.append(block);
     }
   }
   async function loadHistory(orderId,requestId){
-    try{const items=await FillerCloud.orderMessages(orderId);if(requestId===sequence)renderHistory(items);}
-    catch(error){if(requestId===sequence)history.textContent="No pudimos cargar los mensajes: "+error.message;}
+    try{
+      const [staffMessages,customerReplies]=await Promise.all([
+        FillerCloud.orderMessages(orderId),
+        FillerCloud.orderCustomerReplies(orderId)
+      ]);
+      if(requestId===sequence){
+        const all=[...staffMessages,...customerReplies].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+        renderHistory(all);
+      }
+    }catch(error){if(requestId===sequence)history.textContent="No pudimos cargar la conversación: "+error.message;}
   }
   send.addEventListener("click",async()=>{
     if(busy||!current)return;
@@ -138,5 +147,10 @@
     updateAction();get("filler-msg-close").focus();
     loadHistory(order.uuid,sequence);
   }
+  // Actualizar las respuestas mientras el personal tenga abierta la conversación.
+  setInterval(()=>{
+    if(!modal.hidden&&current?.uuid&&!busy&&document.visibilityState==="visible")
+      loadHistory(current.uuid,sequence);
+  },8000);
   window.FillerKitchenMessages=Object.freeze({open});
 })();
