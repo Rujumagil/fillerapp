@@ -25,6 +25,41 @@
     return '<a class="whatsapp-ready" href="'+escape(url)+'" target="_blank" rel="noopener noreferrer" aria-label="Abrir WhatsApp con aviso de pedido listo para '+escape(o.customer)+'">🟢 WhatsApp · Avisar listo</a>';
   }
   let role=null, orders=[], running=false, timer=null, lastSuccessfulPoll=0;
+  const detailRoot=document.getElementById("fiiller-order-detail");
+  let selectedOrderId=null;
+  function syncCompactView(){
+    if(!detailRoot)return;
+    const cards=[...root.querySelectorAll(".order-card[data-order-id]")];
+    const available=cards.map(card=>card.dataset.orderId);
+    if(!available.includes(selectedOrderId))selectedOrderId=available[0]||null;
+    for(const card of cards){
+      const order=orders.find(o=>o.uuid===card.dataset.orderId);
+      if(!order)continue;
+      card.classList.toggle("is-selected",card.dataset.orderId===selectedOrderId);
+      const meta=document.createElement("div");
+      meta.className="fiiller-compact-meta";
+      const name=document.createElement("span");name.textContent="👤 "+String(order.customer||"Cliente");
+      const total=document.createElement("strong");total.textContent=money(order.total);
+      meta.append(name,total);
+      const pickup=document.createElement("div");pickup.className="fiiller-compact-meta";
+      pickup.textContent="🕒 "+String(order.pickup||"Sin horario");
+      const select=document.createElement("button");
+      select.type="button";select.className="fiiller-select-order";
+      select.dataset.select=card.dataset.orderId;
+      select.textContent=card.dataset.orderId===selectedOrderId?"✓ Seleccionado":"Ver detalle";
+      meta.append(select);
+      card.append(meta,pickup);
+    }
+    const active=cards.find(c=>c.dataset.orderId===selectedOrderId);
+    if(active){
+      const detail=active.cloneNode(true);
+      detail.classList.remove("is-selected");
+      detail.classList.add("detail-expanded");
+      detail.querySelectorAll(".fiiller-compact-meta").forEach(el=>el.remove());
+      detailRoot.replaceChildren(detail);
+    }else detailRoot.textContent="No hay pedidos para mostrar.";
+  }
+
   const REFRESH_MS=3000;
   const retryNow=()=>{if(!role||running)return; if(timer)clearTimeout(timer);timer=setTimeout(poll,0);};
   window.addEventListener("online",retryNow);
@@ -75,6 +110,7 @@
   function render(){
     if(!orders.length){
       root.innerHTML='<div class="empty">No hay pedidos reales registrados en Supabase.</div>';
+      if(detailRoot)detailRoot.textContent="No hay pedidos para mostrar.";
       return;
     }
     root.innerHTML=sections.map(group=>{
@@ -114,11 +150,18 @@
             '</article>';
         }).join("")+'</div></section>';
     }).join("");
+    syncCompactView();
   }
   // Un único controlador, preservado aunque los pedidos se refresquen cada tres segundos.
-  root.addEventListener("click",async event=>{
+  async function handleOrderClick(event){
     const button=event.target.closest("button");
-    if(!button||!root.contains(button))return;
+    if(!button||( !root.contains(button) && !detailRoot?.contains(button)))return;
+    const selectId=button.dataset.select;
+    if(selectId){
+      selectedOrderId=selectId;
+      syncCompactView();
+      return;
+    }
     const messageId=button.dataset.message;
     if(messageId){
       const order=orders.find(o=>o.uuid===messageId);
@@ -140,7 +183,9 @@
     try{await FillerCloud.updateOrder(changeId,button.dataset.status);retryNow();}
     catch(error){message(error.message,true);}
     finally{button.disabled=false;}
-  });
+  }
+  root.addEventListener("click",handleOrderClick);
+  detailRoot?.addEventListener("click",handleOrderClick);
   function activationUI(){
     access.innerHTML='<div class="actions"><button id="kitchen-sound" type="button">🔔 Activar alarma y probar sonido</button><label class="paper-choice">Intensidad: <select id="kitchen-volume" aria-label="Intensidad de la alarma de pedidos"><option value="normal">Normal</option><option value="alto">Alto</option><option value="max">Muy alto</option></select></label><label class="paper-choice">Papel: <select id="kitchen-paper" aria-label="Ancho de papel"><option value="80">80 mm</option><option value="58">58 mm</option></select></label><button id="kitchen-exit" class="secondary" type="button">Cerrar sesión</button><span id="sound-status" class="muted">En el celular toca Activar alarma al abrir Cocina; ajusta también el volumen multimedia.</span></div>';
     const paperInput=document.getElementById("kitchen-paper");
