@@ -11,6 +11,35 @@
   let lastStatus=null, audio=null, soundEnabled=false, firstLoad=true, timer=null;
   let hasAlerts=false;
   let messagesLoaded=false,knownMessages=new Set();
+  const CHAT_API="https://qwxydjotwhniahaovrff.supabase.co/rest/v1/";
+  const CHAT_KEY="sb_publishable_17NekbDHp_ssL_Pf-CnqPg_v0acxqn3";
+  async function chatRpc(name,data){
+    const res=await fetch(CHAT_API+"rpc/"+name,{method:"POST",headers:{apikey:CHAT_KEY,"Content-Type":"application/json"},body:JSON.stringify(data),cache:"no-store"});
+    const result=await res.json().catch(()=>null);
+    if(!res.ok)throw Error(result?.message||"No pudimos enviar tu mensaje.");
+    return result;
+  }
+  const chatForm=el("customer-chat-form"),chatText=el("customer-chat-text"),chatButton=el("customer-chat-send");
+  async function sendCustomerReply(event){
+    event.preventDefault();
+    const text=chatText.value.trim();
+    if(!text||text.length>500)return;
+    chatButton.disabled=true;
+    el("customer-chat-result").textContent="Enviando mensaje…";
+    try{
+      await chatRpc("filler_send_customer_order_reply",{p_token:token,p_message:text});
+      chatText.value="";
+      el("customer-chat-result").textContent="✓ Mensaje recibido por Fiiller Café. Puedes continuar la conversación aquí.";
+      await checkChat();
+    }catch(error){el("customer-chat-result").textContent=error.message;}
+    finally{chatButton.disabled=false;}
+  }
+  chatForm?.addEventListener("submit",sendCustomerReply);
+  async function checkChat(){
+    if(!valid.test(token))return;
+    const result=await chatRpc("filler_customer_order_chat",{p_token:token});
+    if(result?.code)renderKitchenMessages(result.messages);
+  }
   const PUSH_API="https://filler-push.proyectocompas-info.workers.dev";
   const VAPID_PUBLIC="BAbjSZ6EjTAd00X6YZApNN8O2fWj5P2o8XSQbuUJTRX9pbQ5G9dZWne12rSSu3lI3BQhslH9FHhqHtWlYyKp8oQ";
   function vapidBytes(value){
@@ -66,21 +95,21 @@
     const fresh=messagesLoaded?messages.filter(m=>m.id&&!knownMessages.has(m.id)):[];
     knownMessages=new Set(messages.map(m=>m.id).filter(Boolean));
     messagesLoaded=true;
-    panel.hidden=messages.length===0;
+    panel.hidden=false;
     list.replaceChildren();
     for(const m of messages){
       const card=document.createElement("article");
-      card.className="customer-message";
+      card.className="customer-message "+(m.kind==="cliente"?"from-customer":"from-kitchen");
       const date=document.createElement("small");
       date.className="customer-message-date";
       const moment=new Date(m.created_at);
-      date.textContent=(m.kind==="listo"?"✅ Listo · ":"☕ Cocina · ")+
+      date.textContent=(m.kind==="cliente"?"👤 Tú · ":m.kind==="listo"?"✅ Listo · ":"☕ Cocina · ")+
         (Number.isFinite(moment.getTime())?moment.toLocaleString("es-MX",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"");
       const content=document.createElement("p");
       content.textContent=m.message;
       card.append(date,content);list.append(card);
     }
-    const extra=fresh.find(m=>m.kind!=="listo");
+    const extra=fresh.find(m=>m.kind!=="listo"&&m.kind!=="cliente");
     if(extra && hasAlerts && !document.hidden){
       sound("message");
       if("Notification" in window&&Notification.permission==="granted"){
@@ -129,9 +158,13 @@
     try{
       const order=await FillerCloud.orderStatus(token);
       updateView(order);
-      renderKitchenMessages(order.messages);
+      try{await checkChat();}catch(error){renderKitchenMessages(order.messages);el("customer-chat-result").textContent="No fue posible actualizar los mensajes. "+error.message;}
       try{localStorage.setItem("filler_last_tracking_v1",JSON.stringify({token,code:order.code}));}catch{}
       if(lastStatus!=="Listo" && order.status==="Listo"&&!firstLoad)notifyReady(order.code);
+      const canReply=["Nuevo","Preparando","Listo","Entregado"].includes(order.status);
+      if(chatButton)chatButton.disabled=!canReply;
+      if(chatText)chatText.disabled=!canReply;
+      if(!canReply)el("customer-chat-result").textContent="Esta conversación ya está cerrada.";
       lastStatus=order.status;
       firstLoad=false;
       if(["Listo","Entregado","Cancelado"].includes(order.status)){
