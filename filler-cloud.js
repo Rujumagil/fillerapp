@@ -138,6 +138,12 @@
       encodeURIComponent(orderId)+"&order=created_at.desc&limit=30",{staff:true});
     return Array.isArray(records)?records.reverse():[];
   }
+  async function orderCustomerReplies(orderId){
+    if(!/^[0-9a-f-]{36}$/i.test(String(orderId||"")))throw new Error("Pedido no válido.");
+    const rows=await request("filler_order_customer_replies?select=id,message,created_at&order_id=eq."+
+      encodeURIComponent(orderId)+"&order=created_at.desc&limit=50",{staff:true});
+    return (Array.isArray(rows)?rows:[]).map(row=>({...row,kind:"cliente"})).reverse();
+  }
   async function sendOrderMessage(orderId,text,kind="observacion") {
     const message=String(text||"").trim();
     if (!/^[0-9a-f-]{36}$/i.test(String(orderId||""))) throw new Error("Pedido no válido.");
@@ -242,5 +248,5 @@
     return imageUrl;
   }
   function logout(){saveSession(null);}
-  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,orderMessages,sendOrderMessage,catalog,extras,placeOrder,orderStatus,importCatalog,importExtras,uploadProductPhoto,present,accessToken});
+  window.FillerCloud=Object.freeze({login,logout,staffRole,orders,updateOrder,orderMessages,orderCustomerReplies,sendOrderMessage,catalog,extras,placeOrder,orderStatus,importCatalog,importExtras,uploadProductPhoto,present,accessToken});
 })();
