@@ -87,8 +87,8 @@
     .fiiller-chat-heading{display:flex;gap:10px;justify-content:space-between;align-items:center;margin:0 0 6px;flex-wrap:wrap}
     .fiiller-chat-heading h2{font-size:17px;margin:0;color:var(--green)}
     .fiiller-chat-heading a{font-size:12px;color:var(--green);font-weight:800}
-    .fiiller-chat-frame{width:100%;height:230px;min-height:0;border:1px solid #d4e5d8;border-radius:12px;background:#fffdf8;display:block;transition:height .2s}
-    .fiiller-chat-panel:focus-within .fiiller-chat-frame,.fiiller-chat-panel.is-chat-open .fiiller-chat-frame{height:510px}
+    .fiiller-chat-frame{width:100%;height:151px;min-height:0;border:1px solid #d4e5d8;border-radius:12px;background:#fffdf8;display:block;transition:height .2s}
+    .fiiller-chat-panel.is-chat-open .fiiller-chat-frame{height:510px}
     .fiiller-chat-toggle{font-size:12px;border-radius:9px;padding:7px 10px}
     .fiiller-view-switch{display:none}
     @media(max-width:1040px){.fiiller-workspace{grid-template-columns:minmax(0,1fr)}.fiiller-detail-panel{position:static}.fiiller-orders-panel .kitchen-orders{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -99,7 +99,7 @@
       .fiiller-workspace[data-view="mensajes"] .fiiller-orders-panel,.fiiller-workspace[data-view="mensajes"] .fiiller-detail-panel{display:none}
       .fiiller-workspace[data-view="pedidos"] .fiiller-chat-panel{display:none}
       .fiiller-chat-frame{height:68dvh;min-height:390px}
-      .fiiller-chat-panel:focus-within .fiiller-chat-frame,.fiiller-chat-panel.is-chat-open .fiiller-chat-frame{height:68dvh}
+      .fiiller-chat-panel.is-chat-open .fiiller-chat-frame{height:68dvh}
     }
     @media(max-width:460px){.fiiller-orders-panel .kitchen-orders{grid-template-columns:1fr}.fiiller-orders-panel .order-card{min-height:105px}}
 
@@ -153,6 +153,7 @@
         const open=chatPanel.classList.toggle("is-chat-open");
         toggle.setAttribute("aria-expanded",String(open));
         toggle.textContent=open?"Contraer mensajes":"Ver conversaciones";
+        chatPanel.querySelector("iframe")?.contentWindow?.postMessage({kind:"fiiller-set-chat-expanded",expanded:open},location.origin);
       });
       document.querySelectorAll("[data-workspace-view]").forEach(button=>{
         button.addEventListener("click",()=>{
