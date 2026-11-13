@@ -75,7 +75,7 @@
   async function login(username,password) {
     const raw=String(username||"").trim().toLowerCase();
     const account=USER_ACCOUNTS[raw]?raw:Object.keys(USER_ACCOUNTS).find(k=>USER_ACCOUNTS[k]===raw);
-    const email=raw==="proyectocompas.info@gmail.com"?raw:(account?USER_ACCOUNTS[account]:null);
+    const email=raw==="proyectocompas.info@gmail.com"?raw:(account?USER_ACCOUNTS[account]:(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(raw)?raw:null));
     if(!email)throw new Error('Usuario no reconocido. Usa "admin", "cocina" o "cajera1".');
     if(typeof password!=="string" || !password)throw new Error("Escribe tu contraseña de Fiiller Café.");
     let res;
@@ -106,7 +106,7 @@
       const staff = await request("filler_staff?select=user_id,role&user_id=eq."+encodeURIComponent(data.user.id),{staff:true});
       if (!staff?.length) throw new Error("Este usuario todavía no está autorizado para operar Fiiller Café.");
       // El perfil Auth y el rol permitido deben coincidir con el nombre de usuario elegido.
-      const expectedRole=account==="cocina"?"cocina":account==="cajera1"?"cajera":"admin";
+      const expectedRole=account==="cocina"?"cocina":(account==="cajera1" || (!account && raw!=="proyectocompas.info@gmail.com"))?"cajera":"admin";
       if(staff[0].role!==expectedRole) throw new Error("Los permisos de este usuario necesitan revisión.");
       return staff[0];
     } catch(error) {saveSession(null);throw error;}
