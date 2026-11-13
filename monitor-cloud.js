@@ -86,5 +86,5 @@
     finally{refreshRunning=false;if(role)refreshTimer=setTimeout(refresh,3000);}
   }
   setInterval(()=>{if(!role||refreshRunning)return;if(!navigator.onLine)msg("Sin internet; esperando reconexión.");else if(lastSuccess&&Date.now()-lastSuccess>20000)msg("⚠ Monitor sin sincronización confirmada durante 20 segundos.");},5000);
-  (async()=>{role=await FillerCloud.staffRole();if(role)refresh();else login();})();
+  (async()=>{role=await FillerCloud.staffRole();if(role==="cajera"){window.location.replace("caja.html");return;}if(role)refresh();else login();})();
 })();
