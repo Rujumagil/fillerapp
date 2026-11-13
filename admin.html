@@ -95,6 +95,7 @@
       const status=document.getElementById("admin-session-status");
       try {
         const role=await FillerCloud.staffRole();
+        if(role==="cajera"){window.location.replace("caja.html");return;}
         status.textContent=role==="admin"?"Sesión activa: administrador":role==="cocina"?"Sesión activa: cocina":"Sin sesión de personal activa en esta pestaña. Puedes entrar desde Compás Fly.";
       }catch{status.textContent="No se pudo comprobar la sesión. Puedes entrar desde Compás Fly.";}
     })();
