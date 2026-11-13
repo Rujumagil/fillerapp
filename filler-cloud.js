@@ -69,13 +69,14 @@
   // Crear estas cuentas de forma privada en Supabase Authentication > Users.
   const USER_ACCOUNTS = Object.freeze({
     admin: "filler.admin@proyectocompas.com",
-    cocina: "filler.cocina@proyectocompas.com"
+    cocina: "filler.cocina@proyectocompas.com",
+    cajera1: "filler.cajera1@proyectocompas.com"
   });
   async function login(username,password) {
     const raw=String(username||"").trim().toLowerCase();
     const account=USER_ACCOUNTS[raw]?raw:Object.keys(USER_ACCOUNTS).find(k=>USER_ACCOUNTS[k]===raw);
     const email=raw==="proyectocompas.info@gmail.com"?raw:(account?USER_ACCOUNTS[account]:null);
-    if(!email)throw new Error('Usuario no reconocido. Usa "admin", "cocina" o tu correo administrador de Fiiller.');
+    if(!email)throw new Error('Usuario no reconocido. Usa "admin", "cocina" o "cajera1".');
     if(typeof password!=="string" || !password)throw new Error("Escribe tu contraseña de Fiiller Café.");
     let res;
     try {
@@ -105,7 +106,7 @@
       const staff = await request("filler_staff?select=user_id,role&user_id=eq."+encodeURIComponent(data.user.id),{staff:true});
       if (!staff?.length) throw new Error("Este usuario todavía no está autorizado para operar Fiiller Café.");
       // El perfil Auth y el rol permitido deben coincidir con el nombre de usuario elegido.
-      const expectedRole=account==="cocina"?"cocina":"admin";
+      const expectedRole=account==="cocina"?"cocina":account==="cajera1"?"cajera":"admin";
       if(staff[0].role!==expectedRole) throw new Error("Los permisos de este usuario necesitan revisión.");
       return staff[0];
     } catch(error) {saveSession(null);throw error;}
@@ -128,6 +129,8 @@
   }
   async function updateOrder(id,status) {
     if (!["Preparando","Listo","Entregado"].includes(status)) throw new Error("Estado no válido.");
+    const role=await staffRole();
+    if(!role || (role==="cajera" && status!=="Entregado"))throw new Error("Tu perfil no puede cambiar ese estado.");
     return request("filler_orders?id=eq."+encodeURIComponent(id),{
       method:"PATCH", staff:true, body:{ status,status_updated_at:new Date().toISOString() },prefer:"return=minimal"
     });
