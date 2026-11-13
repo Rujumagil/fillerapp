@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#006241">
+<link rel="icon" href="assets/filler-icon-192.png">
+<title>Fiiller Café | Caja 1</title>
+<style>
+:root{font-family:system-ui,Arial,sans-serif;color:#17382a;background:#faf6ed}
+*{box-sizing:border-box}body{margin:0}header{background:#006241;color:white;padding:20px 5%;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+h1{margin:0;font-size:1.35rem}header p{margin:4px 0 0;color:#dbede3}
+main{max-width:1050px;margin:28px auto;padding:0 16px}
+.card{background:white;border:1px solid #e5e5dc;border-radius:20px;padding:22px;margin-bottom:16px;box-shadow:0 9px 28px #1c392510}
+label{display:block;font-size:.9rem;font-weight:700;margin:12px 0}
+input{display:block;padding:12px;margin-top:6px;width:100%;border-radius:10px;border:1px solid #b7c8bc;font:inherit}
+button{background:#006241;color:white;border:0;border-radius:10px;padding:12px 17px;font:inherit;font-weight:700;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.outline{border:1px solid #c3d4c8;color:#006241;background:white}
+#logout{border:1px solid #fff;color:#fff;background:transparent}
+#login{max-width:430px;margin:9vh auto}
+.error{color:#a32921;font-weight:650}.muted{color:#5b7263}.stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}.stat{flex:1;min-width:120px;background:#e9f4ed;padding:15px;border-radius:14px}.stat b{display:block;font-size:1.7rem}
+.order{border:1px solid #dee8de;border-radius:16px;padding:18px;margin:12px 0;display:grid;gap:8px}
+.order h3{margin:0}.order-head{display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.tag{background:#e2f1e6;padding:6px 10px;border-radius:20px;font-size:.85rem;font-weight:800}
+ul{margin:4px 0 8px;padding-left:20px}li{padding:2px}
+#message{min-height:22px}section[hidden]{display:none!important}
+@media(max-width:550px){.card{padding:15px}header{padding:18px}main{margin:14px auto}}
+</style>
+</head>
+<body>
+<header><div><h1>Fiiller Café · Caja 1</h1><p>Pedidos y entrega a clientes</p></div><button id="logout" type="button" hidden>Cerrar sesión</button></header>
+<main>
+<section id="login" class="card">
+<h2>Acceso de cajera</h2>
+<p class="muted">Ingresa con la contraseña asignada a Cajera 1. Tu acceso no incluye administración ni reportes.</p>
+<form id="login-form">
+<label>Usuario<input value="cajera1" readonly autocomplete="username"></label>
+<label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label>
+<button id="login-button">Entrar a mis pedidos</button>
+</form><p id="login-error" class="error" role="alert"></p>
+</section>
+<section id="workspace" hidden>
+<div class="stats">
+<div class="stat"><span>Nuevos</span><b id="new-count">0</b></div>
+<div class="stat"><span>En preparación</span><b id="preparing-count">0</b></div>
+<div class="stat"><span>Listos para entregar</span><b id="ready-count">0</b></div>
+</div>
+<div class="card"><div class="order-head"><h2>Pedidos para entregar</h2><button id="refresh" class="outline" type="button">Actualizar</button></div>
+<p class="muted">Solo puedes marcar como entregados los pedidos que cocina haya dejado en «Listo».</p>
+<p id="message" role="status" aria-live="polite"></p><div id="ready-orders"></div></div>
+<div class="card"><h2>Pedidos en proceso</h2><div id="other-orders"></div></div>
+</section>
+</main>
+<script src="filler-cloud.js?v=52"></script>
+<script>
+(()=>{"use strict";
+const el=id=>document.getElementById(id);
+const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=n=>"$"+Number(n||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
+let interval=null,loading=false;
+function hideWorkspace(){el("workspace").hidden=true;el("login").hidden=false;el("logout").hidden=true;if(interval){clearInterval(interval);interval=null;}}
+function showWorkspace(){el("workspace").hidden=false;el("login").hidden=true;el("logout").hidden=false;if(!interval)interval=setInterval(refresh,12000);refresh();}
+function renderOrder(o,canDeliver){
+const items=(o.items||[]).map(i=>"<li>"+esc(i.qty)+" × "+esc(i.name)+"</li>").join("");
+return '<article class="order"><div class="order-head"><h3>Pedido #'+esc(o.id)+'</h3><span class="tag">'+esc(o.status)+'</span></div><div><strong>'+esc(o.customer)+'</strong> · Recoge: '+esc(o.pickup||"Sin horario")+'</div><ul>'+items+'</ul>'+(o.notes?'<div><strong>Notas:</strong> '+esc(o.notes)+'</div>':"")+'<div><strong>Total:</strong> '+money(o.total)+'</div>'+(canDeliver?'<button type="button" data-deliver="'+esc(o.uuid)+'">Marcar como entregado</button>':"")+'</article>';
+}
+async function refresh(){
+if(loading||el("workspace").hidden)return;loading=true;
+try{
+if(await FillerCloud.staffRole()!=="cajera"){FillerCloud.logout();hideWorkspace();el("login-error").textContent="Acceso no autorizado para Caja 1.";return;}
+const orders=await FillerCloud.orders();
+const ready=orders.filter(o=>o.status==="Listo");
+const inProcess=orders.filter(o=>o.status==="Nuevo"||o.status==="Preparando");
+el("new-count").textContent=orders.filter(o=>o.status==="Nuevo").length;
+el("preparing-count").textContent=orders.filter(o=>o.status==="Preparando").length;
+el("ready-count").textContent=ready.length;
+el("ready-orders").innerHTML=ready.length?ready.map(o=>renderOrder(o,true)).join(""):'<p class="muted">No hay pedidos pendientes de entrega.</p>';
+el("other-orders").innerHTML=inProcess.length?inProcess.map(o=>renderOrder(o,false)).join(""):'<p class="muted">Sin pedidos en preparación.</p>';
+el("message").textContent="Actualizado "+new Date().toLocaleTimeString("es-MX");
+}catch(e){el("message").textContent="No se pudo actualizar: "+e.message;}
+finally{loading=false;}
+}
+el("ready-orders").addEventListener("click",async event=>{
+const button=event.target.closest("button[data-deliver]");if(!button||button.disabled)return;
+if(!confirm("¿Confirmas la entrega de este pedido al cliente?"))return;
+button.disabled=true;
+try{await FillerCloud.updateOrder(button.dataset.deliver,"Entregado");el("message").textContent="Pedido entregado correctamente.";await refresh();}
+catch(e){el("message").textContent="No se pudo entregar: "+e.message;button.disabled=false;}
+});
+el("login-form").addEventListener("submit",async event=>{
+event.preventDefault();const button=el("login-button");button.disabled=true;el("login-error").textContent="";
+try{const result=await FillerCloud.login("cajera1",el("password").value);if(result.role!=="cajera")throw Error("La cuenta no tiene permisos de caja.");el("password").value="";showWorkspace();}
+catch(e){FillerCloud.logout();el("login-error").textContent=e.message;}
+finally{button.disabled=false;}
+});
+el("logout").addEventListener("click",()=>{FillerCloud.logout();hideWorkspace();el("password").value="";});
+el("refresh").addEventListener("click",refresh);
+FillerCloud.staffRole().then(role=>{if(role==="cajera")showWorkspace();else hideWorkspace();}).catch(hideWorkspace);
+})();
+</script>
+</body></html>
