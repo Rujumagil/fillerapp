@@ -236,6 +236,7 @@
   async function start(){activationUI();await poll();}
   (async()=>{
     role=await FillerCloud.staffRole();
+    if(role==="cajera"){window.location.replace("caja.html");return;}
     if(role)await start();else{message("Inicia sesión para recibir pedidos en esta computadora.");loginForm();}
   })();
 })();
