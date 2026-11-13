@@ -34,7 +34,7 @@ ul{margin:4px 0 8px;padding-left:20px}li{padding:2px}
 <h2>Acceso de cajera</h2>
 <p class="muted">Ingresa con la contraseña asignada a Cajera 1. Tu acceso no incluye administración ni reportes.</p>
 <form id="login-form">
-<label>Usuario<input value="cajera1" readonly autocomplete="username"></label>
+<label>Correo de Lupita<input id="email" type="email" placeholder="Correo registrado para Caja 1" autocomplete="username" required></label>
 <label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label>
 <button id="login-button">Entrar a mis pedidos</button>
 </form><p id="login-error" class="error" role="alert"></p>
@@ -51,7 +51,7 @@ ul{margin:4px 0 8px;padding-left:20px}li{padding:2px}
 <div class="card"><h2>Pedidos en proceso</h2><div id="other-orders"></div></div>
 </section>
 </main>
-<script src="filler-cloud.js?v=52"></script>
+<script src="filler-cloud.js?v=53"></script>
 <script>
 (()=>{"use strict";
 const el=id=>document.getElementById(id);
@@ -89,7 +89,7 @@ catch(e){el("message").textContent="No se pudo entregar: "+e.message;button.disa
 });
 el("login-form").addEventListener("submit",async event=>{
 event.preventDefault();const button=el("login-button");button.disabled=true;el("login-error").textContent="";
-try{const result=await FillerCloud.login("cajera1",el("password").value);if(result.role!=="cajera")throw Error("La cuenta no tiene permisos de caja.");el("password").value="";showWorkspace();}
+try{const result=await FillerCloud.login(el("email").value,el("password").value);if(result.role!=="cajera")throw Error("La cuenta no tiene permisos de caja.");el("password").value="";showWorkspace();}
 catch(e){FillerCloud.logout();el("login-error").textContent=e.message;}
 finally{button.disabled=false;}
 });
