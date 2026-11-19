@@ -1,5 +1,5 @@
 /* Fiiller Café · Disponibilidad temporal del menú.
-   Pollo habilitado; todas las variedades de chilaquiles deshabilitadas.
+   Pollo habilitado; chilaquiles y productos fuera del menú deshabilitados.
    No borra recetas ni historial y no modifica existencias físicas en Supabase. */
 (function(){
   "use strict";
@@ -27,9 +27,21 @@
     const id=norm(p.id), name=norm(p.name), cat=norm(p.cat||p.category);
     return chilaquilesIds.has(id) || /chilaquiles/.test(name+" "+cat);
   }
+  const discontinuedIds = new Set([
+    "tpv018","tpv017","tpv020","tpvs065",
+    "molletes-con-tocino-1792010418029-535","licuado-de-platano-1792010641761-563"
+  ]);
+  function isDiscontinuedProduct(p){
+    if(!p)return false;
+    const id=norm(p.id), name=norm(p.name);
+    if(discontinuedIds.has(id))return true;
+    if(/^(torta de |lonche)/.test(name) || /\\bmolletes?\\b/.test(name) || /licuado de platano/.test(name))return true;
+    return /(nestle|nescafe)/.test(name) &&
+      /(cafe|americano|cappuccino|capuchino|latte|moka|mokaccino|frappe)/.test(name);
+  }
   window.FiillerAvailability=Object.freeze({
-    isChickenProduct, isChickenExtra, isGreenChilaquiles, isChilaquiles,
-    applyProducts:items=>(items||[]).filter(p=>!isChilaquiles(p)).map(p=>isChickenProduct(p)?{...p,stock:0,temporarilyUnavailable:true}:p),
+    isChickenProduct, isChickenExtra, isGreenChilaquiles, isChilaquiles, isDiscontinuedProduct,
+    applyProducts:items=>(items||[]).filter(p=>!isChilaquiles(p) && !isDiscontinuedProduct(p)).map(p=>isChickenProduct(p)?{...p,stock:0,temporarilyUnavailable:true}:p),
     applyExtras:items=>(items||[]).filter(e=>!isChickenExtra(e))
   });
 })();
