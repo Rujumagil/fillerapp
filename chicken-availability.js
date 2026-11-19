@@ -35,7 +35,7 @@
     if(!p)return false;
     const id=norm(p.id), name=norm(p.name);
     if(discontinuedIds.has(id))return true;
-    if(/^(torta de |lonche)/.test(name) || /\\bmolletes?\\b/.test(name) || /licuado de platano/.test(name))return true;
+    if(/^(torta de |lonche)/.test(name) || /\bmolletes?\b/.test(name) || /licuado de platano/.test(name))return true;
     return /(nestle|nescafe)/.test(name) &&
       /(cafe|americano|cappuccino|capuchino|latte|moka|mokaccino|frappe)/.test(name);
   }
