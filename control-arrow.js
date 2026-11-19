@@ -24,6 +24,30 @@ function renderProducts(){const queryText=$("search").value.trim().toLocaleLower
 $("ticket-rows").addEventListener("click",e=>{const b=e.target.closest("[data-edit]");if(!b)return;const x=tickets.find(v=>v.sale_date===b.dataset.edit);$("day").value=b.dataset.edit;$("count").value=x?x.ticket_count:"";$("notes").value=x?.notes||"";$("count").focus();say("ticket-message",(x?"Editando ":"Capturando ")+b.dataset.edit+". Guardar reemplazará el conteo de esa fecha, sin duplicar registros.")});
 $("ticket-form").addEventListener("submit",async e=>{e.preventDefault();const day=$("day").value,count=Number($("count").value),notes=$("notes").value.trim();if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!Number.isSafeInteger(count)||count<0||count>100000){say("ticket-message","Revisa fecha y número entero de tickets.",true);return}const b=$("save-ticket");b.disabled=true;try{await query("filler_arrow_ticket_counts?on_conflict=sale_date",{method:"POST",prefer:"resolution=merge-duplicates,return=minimal",body:{sale_date:day,ticket_count:count,notes,updated_by:userId,updated_at:new Date().toISOString()}});tickets=await query("filler_arrow_ticket_counts?select=sale_date,ticket_count,notes&order=sale_date.desc");renderTickets();say("ticket-message","✓ "+count+" tickets guardados para "+day+". Sin duplicar registros.");}catch(err){say("ticket-message",err.message,true)}finally{b.disabled=false}});
 $("product-rows").addEventListener("change",async e=>{const el=e.target.closest("select[data-product]");if(!el)return;const p=products.find(x=>x.id===el.dataset.product);if(!p)return;const previous=p.product_type;el.disabled=true;try{await query("filler_products?id=eq."+encodeURIComponent(p.id),{method:"PATCH",prefer:"return=minimal",body:{product_type:el.value}});p.product_type=el.value;say("products-message","✓ Clasificación guardada: "+p.name+".");renderProducts()}catch(err){el.value=previous;el.disabled=false;say("products-message",err.message,true)}});
+
+// Registro asistido de cortes reportados. Nunca asignar fechas por inferencia.
+$("pending-sales-rows").addEventListener("click",async e=>{
+ const button=e.target.closest(".pending-save");if(!button)return;
+ const row=button.closest("tr"),date=row.querySelector('input[type="date"]').value;
+ const amount=Number(row.dataset.amount),count=Number(row.dataset.count),weekday=Number(row.dataset.weekday);
+ const report=$("pending-sales-status");
+ if(!/^2026-11-\d{2}$/.test(date)||new Date(date+"T12:00:00Z").getUTCDay()!==weekday){say("pending-sales-status","Selecciona una fecha real de noviembre de 2026 que corresponda al día indicado.",true);return;}
+ button.disabled=true;
+ try{
+  const existing=sales.find(r=>r.sale_date===date);
+  const previous=tickets.find(r=>r.sale_date===date);
+  if(existing&&Math.abs(Number(existing.amount)-amount)>.009&&!confirm("Ya existe un corte TPV por $"+existing.amount+" en "+date+". ¿Reemplazarlo por $"+amount+"?"))return;
+  if(previous&&Number(previous.ticket_count)!==count&&!confirm("Ya existen "+previous.ticket_count+" tickets en "+date+". ¿Reemplazarlos por "+count+"?"))return;
+  // Primero venta; si no hay permiso o falla, no escribir tickets que quedarían inconciliables.
+  await query("ocs_filler_sales_days?on_conflict=sale_date",{method:"POST",prefer:"resolution=merge-duplicates,return=minimal",body:{sale_date:date,amount}});
+  await query("filler_arrow_ticket_counts?on_conflict=sale_date",{method:"POST",prefer:"resolution=merge-duplicates,return=minimal",body:{sale_date:date,ticket_count:count,notes:"Corte manual confirmado 19/11/2026",updated_by:userId,updated_at:new Date().toISOString()}});
+  [sales,tickets]=await Promise.all([query("ocs_filler_sales_days?select=sale_date,amount&order=sale_date.desc"),query("filler_arrow_ticket_counts?select=sale_date,ticket_count,notes&order=sale_date.desc")]);
+  row.querySelector("td:last-child").textContent="Registrado ✓";renderTickets();
+  say("pending-sales-status","✓ Corte guardado para "+date+": $"+amount.toLocaleString("es-MX")+" · "+count+" tickets.");
+ }catch(err){say("pending-sales-status","No se pudo completar el corte: "+err.message+". Comprueba ambas tablas antes de reintentar.",true)}
+ finally{button.disabled=false}
+});
+
 $("day").addEventListener("change",renderTickets);$("search").addEventListener("input",renderProducts);$("filter").addEventListener("change",renderProducts);
 $("login-form").addEventListener("submit",async e=>{e.preventDefault();const b=e.target.querySelector("button");b.disabled=true;try{await FillerCloud.login("admin",e.target.elements.password.value);await init()}catch(err){alert(err.message)}finally{b.disabled=false}});
 const today=new Intl.DateTimeFormat("sv-SE",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());$("day").value=today;init().catch(err=>say("ticket-message",err.message,true));
