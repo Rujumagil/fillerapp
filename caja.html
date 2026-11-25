@@ -120,7 +120,7 @@ async function request(suffix,body){
  const res=await fetch(BASE+suffix,{method:body?"PATCH":"GET",headers:{apikey:KEY,Authorization:"Bearer "+token,Accept:"application/json",...(body?{"Content-Type":"application/json",Prefer:"return=representation"}:{})},...(body?{body:JSON.stringify(body)}:{}),cache:"no-store"});
  if(!res.ok)throw Error("No se pudo sincronizar la prueba ("+res.status+").");return res.json();
 }
-function announce(id){if(seen.has(id))return;seen.add(id);window.dispatchEvent(new CustomEvent("fiiller-cashier-test",{detail:id}));if("Notification" in window&&Notification.permission==="granted"){const opts={body:"Pedido simulado: 1 sándwich y 1 café. No preparar ni cobrar.",tag:"fiiller-test-"+id,data:{url:"./caja.html",type:"cashier"}};try{new Notification("Fiiller Caja · Pedido de prueba",opts)}catch{navigator.serviceWorker?.getRegistration().then(r=>r?.showNotification("Fiiller Caja · Pedido de prueba",opts)).catch(()=>{})}}}
+function announce(id){if(seen.has(id))return;seen.add(id);window.dispatchEvent(new CustomEvent("fiiller-cashier-test",{detail:id}));if("Notification" in window&&Notification.permission==="granted"){const opts={body:"Pedido simulado: 1 sándwich y 1 café. No preparar ni cobrar.",tag:"fiiller-cashier-"+id,silent:true,data:{url:"./caja.html",type:"cashier"}};try{new Notification("Fiiller Caja · Pedido de prueba",opts)}catch{navigator.serviceWorker?.getRegistration().then(r=>r?.showNotification("Fiiller Caja · Pedido de prueba",opts)).catch(()=>{})}}}
 async function refreshTests(){
  if(workspace.hidden||busy)return;busy=true;
  try{
@@ -144,9 +144,21 @@ setInterval(refreshTests,3000);refreshTests();
 (()=>{"use strict";
 const b=document.getElementById("cashier-alert-enable"),s=document.getElementById("cashier-alert-status"),banner=document.getElementById("cashier-alert-banner");
 let audio=null;const seen=new Set();
-function tone(){if(!audio)return;try{if(window.FillerSounds?.play(audio,"newOrder","max"))return;const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=880;g.gain.value=.12;o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+.35)}catch{}}
-async function notify(id,body,isTest){if(seen.has(id))return;seen.add(id);banner.hidden=false;banner.textContent=(isTest?"PRUEBA · ":"🔔 NUEVO PEDIDO · ")+body;banner.onclick=()=>banner.hidden=true;tone();try{navigator.vibrate?.([180,80,180])}catch{}if(!isTest&&"Notification" in window&&Notification.permission==="granted"){const opt={body,tag:"fiiller-cashier-"+id,icon:"./assets/filler-icon-192.png",data:{url:"./caja.html",type:"cashier"}};try{const r=await navigator.serviceWorker?.getRegistration();if(r?.active)await r.showNotification("Fiiller Caja · Nuevo pedido",opt);else new Notification("Fiiller Caja · Nuevo pedido",opt)}catch{}}}
-b.onclick=async()=>{const permission="Notification" in window?Notification.requestPermission():Promise.resolve("unsupported");try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();await audio.resume();tone()}catch{}const p=await permission;s.textContent="Sonido "+(audio?"activado":"no disponible")+" · Avisos "+(p==="granted"?"permitidos":"no autorizados")+". Mantén abierta la aplicación para recibir avisos locales.";};
+let playing=false;
+async function tone({force=false}={}){
+ if(!audio||playing)return false;
+ playing=true;
+ try{
+  await audio.resume();
+  if(!window.FillerSounds)throw Error("El módulo de sonidos de Fiiller no está disponible.");
+  await window.FillerSounds.prepare(audio,{force});
+  if(!window.FillerSounds.play(audio,"newOrder","max"))throw Error("El navegador no permitió reproducir la alarma.");
+  return true;
+ }catch(e){s.textContent=e.message;return false}
+ finally{playing=false}
+}
+async function notify(id,body,isTest){if(seen.has(id))return;seen.add(id);banner.hidden=false;banner.textContent=(isTest?"PRUEBA · ":"🔔 NUEVO PEDIDO · ")+body;banner.onclick=()=>banner.hidden=true;tone();try{navigator.vibrate?.([180,80,180])}catch{}if(!isTest&&"Notification" in window&&Notification.permission==="granted"){const opt={body,tag:"fiiller-cashier-"+id,silent:true,icon:"./assets/filler-icon-192.png",data:{url:"./caja.html",type:"cashier"}};try{const r=await navigator.serviceWorker?.getRegistration();if(r?.active)await r.showNotification("Fiiller Caja · Nuevo pedido",opt);else new Notification("Fiiller Caja · Nuevo pedido",opt)}catch{}}}
+b.onclick=async()=>{const permission="Notification" in window?Notification.requestPermission():Promise.resolve("unsupported");try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();await audio.resume();}catch{}const played=await tone({force:true});const p=await permission;s.textContent="Sonido oficial "+(played?"activado":"no disponible")+" · Avisos "+(p==="granted"?"permitidos":"no autorizados")+". Mantén abierta la aplicación para recibir avisos locales.";};
 window.addEventListener("fiiller-cashier-orders",e=>{for(const o of e.detail||[])notify(o.uuid,"Pedido #"+o.id+" · "+(o.items||[]).reduce((n,i)=>n+Number(i.qty||0),0)+" artículos",false)});
 window.addEventListener("fiiller-cashier-test",e=>notify("test-"+e.detail,"Pedido simulado. No preparar ni cobrar.",true));
 })();
