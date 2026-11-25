@@ -1,10 +1,10 @@
 /* Fiiller Café · Disponibilidad temporal del menú.
-   Pollo habilitado; chilaquiles y productos fuera del menú deshabilitados.
+   Pollo, chilaquiles y molletes habilitados; otros productos retirados siguen ocultos.
    No borra recetas ni historial y no modifica existencias físicas en Supabase. */
 (function(){
   "use strict";
   const CHICKEN_UNAVAILABLE = false;
-  const CHILAQUILES_UNAVAILABLE = true;
+  const CHILAQUILES_UNAVAILABLE = false;
   const norm = v => String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
   const chickenProducts = new Set(["club-sandwich","tpvs027","tpv027"]);
   function isChickenProduct(p){
@@ -28,14 +28,14 @@
     return chilaquilesIds.has(id) || /chilaquiles/.test(name+" "+cat);
   }
   const discontinuedIds = new Set([
-    "tpv018","tpv017","tpv020","tpvs065",
-    "molletes-con-tocino-1792010418029-535","licuado-de-platano-1792010641761-563"
+    "tpv018","tpv017","tpv020",
+    "licuado-de-platano-1792010641761-563"
   ]);
   function isDiscontinuedProduct(p){
     if(!p)return false;
     const id=norm(p.id), name=norm(p.name);
     if(discontinuedIds.has(id))return true;
-    if(/^(torta de |lonche)/.test(name) || /\bmolletes?\b/.test(name) || /licuado de platano/.test(name))return true;
+    if(/^(torta de |lonche)/.test(name) || /licuado de platano/.test(name))return true;
     return /(nestle|nescafe)/.test(name) &&
       /(cafe|americano|cappuccino|capuchino|latte|moka|mokaccino|frappe)/.test(name);
   }
