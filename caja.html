@@ -108,6 +108,7 @@ finally{button.disabled=false;}
 el("logout").addEventListener("click",()=>{FillerCloud.logout();hideWorkspace();el("password").value="";});
 el("refresh").addEventListener("click",refresh);
 window.addEventListener("focus",refresh);
+navigator.serviceWorker?.addEventListener("message",e=>{if(e.data?.kind==="fiiller-cashier-refresh")refresh()});
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh()});
 FillerCloud.staffRole().then(role=>{if(role==="cajera")showWorkspace();else hideWorkspace();}).catch(hideWorkspace);
 })();
@@ -140,7 +141,7 @@ async function refreshTests(){
  }catch(e){box.textContent=e.message}finally{busy=false}
 }
 document.getElementById("test-enable").onclick=async()=>{if(!("Notification" in window)){status.textContent="Este dispositivo no admite avisos del sistema.";return}const p=await Notification.requestPermission();status.textContent=p==="granted"?"Avisos habilitados.":"Permiso de avisos no concedido."};
-setInterval(refreshTests,3000);window.addEventListener("focus",refreshTests);document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshTests()});refreshTests();
+setInterval(refreshTests,3000);window.addEventListener("focus",refreshTests);navigator.serviceWorker?.addEventListener("message",e=>{if(e.data?.kind==="fiiller-cashier-refresh")refreshTests()});document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshTests()});refreshTests();
 })();
 </script>
 <script>
