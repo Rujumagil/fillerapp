@@ -51,32 +51,34 @@ ul{margin:4px 0 8px;padding-left:20px}li{padding:2px}
 </div>
 <div class="card"><h2>Pedidos nuevos por aceptar</h2><p class="muted">Acepta el pedido para enviarlo a preparación. Los pedidos programados para otro día se mantienen pendientes.</p><div id="new-orders"></div></div>
 <div class="card"><div class="order-head"><h2>Pedidos para entregar</h2><button id="refresh" class="outline" type="button">Actualizar</button></div>
-<p class="muted">Solo puedes marcar como entregados los pedidos que cocina haya dejado en «Listo».</p>
+<p class="muted">Marca como entregados únicamente los pedidos listos. También puedes avisar al cliente desde el chat.</p>
 <p id="message" role="status" aria-live="polite"></p><div id="ready-orders"></div></div>
 <div class="card"><h2>Pedidos en proceso</h2><div id="other-orders"></div></div>
 </section>
 </main>
 <script src="pwa.js?v=2"></script>
 <script src="filler-sounds.js?v=40"></script>
-<script src="filler-cloud.js?v=55"></script>
+<script src="filler-cloud.js?v=56"></script>
+<script src="kitchen-messages.js?v=41"></script>
 <script>
 (()=>{"use strict";
 const el=id=>document.getElementById(id);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const money=n=>"$"+Number(n||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
-let interval=null,loading=false;
-function hideWorkspace(){el("workspace").hidden=true;window.dispatchEvent(new Event("fiiller-cashier-logout"));el("login").hidden=false;el("logout").hidden=true;if(interval){clearInterval(interval);interval=null;}}
+let interval=null,loading=false,latestOrders=new Map();
+function hideWorkspace(){latestOrders.clear();el("filler-msg-close")?.click();el("workspace").hidden=true;window.dispatchEvent(new Event("fiiller-cashier-logout"));el("login").hidden=false;el("logout").hidden=true;if(interval){clearInterval(interval);interval=null;}}
 function showWorkspace(){el("workspace").hidden=false;el("login").hidden=true;el("logout").hidden=false;if(!interval)interval=setInterval(refresh,3000);refresh();}
 function scheduled(o){const m=String(o.pickup||"").match(/^(20\d{2}-\d{2}-\d{2})\s/);const today=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());return !!m&&m[1]>today;}
 function renderOrder(o,canDeliver){
 const items=(o.items||[]).map(i=>"<li>"+esc(i.qty)+" × "+esc(i.name)+"</li>").join("");
-return '<article class="order"><div class="order-head"><h3>Pedido #'+esc(o.id)+'</h3><span class="tag">'+esc(o.status)+'</span></div><div><strong>'+esc(o.customer)+'</strong> · Recoge: '+esc(o.pickup||"Sin horario")+'</div><ul>'+items+'</ul>'+(o.notes?'<div><strong>Notas:</strong> '+esc(o.notes)+'</div>':"")+'<div><strong>Total:</strong> '+money(o.total)+'</div>'+(o.status==='Nuevo'?(scheduled(o)?'<span class="muted">Programado para otro día</span>':'<button type="button" data-accept="'+esc(o.uuid)+'">Aceptar pedido</button>'):'')+(canDeliver?'<button type="button" data-deliver="'+esc(o.uuid)+'">Marcar como entregado</button>':"")+'</article>';
+return '<article class="order"><div class="order-head"><h3>Pedido #'+esc(o.id)+'</h3><span class="tag">'+esc(o.status)+'</span></div><div><strong>'+esc(o.customer)+'</strong> · Recoge: '+esc(o.pickup||"Sin horario")+'</div><ul>'+items+'</ul>'+(o.notes?'<div><strong>Notas:</strong> '+esc(o.notes)+'</div>':"")+'<div><strong>Total:</strong> '+money(o.total)+'</div>'+(o.status==='Nuevo'?(scheduled(o)?'<span class="muted">Programado para otro día</span>':'<button type="button" data-accept="'+esc(o.uuid)+'">Aceptar pedido</button>'):'')+(o.status==="Preparando"&&!scheduled(o)?'<button type="button" data-ready="'+esc(o.uuid)+'">✅ Platillo listo · Avisar al cliente</button>':"")+(canDeliver?'<button type="button" data-deliver="'+esc(o.uuid)+'">Marcar como entregado</button>':"")+'<button type="button" class="outline" data-chat="'+esc(o.uuid)+'">💬 Chat con el cliente</button></article>';
 }
 async function refresh(){
 if(loading||el("workspace").hidden)return;loading=true;
 try{
 if(await FillerCloud.staffRole()!=="cajera"){FillerCloud.logout();hideWorkspace();el("login-error").textContent="Acceso no autorizado para Caja.";return;}
 const orders=await FillerCloud.orders();
+latestOrders=new Map(orders.map(o=>[String(o.uuid),o]));
 const ready=orders.filter(o=>o.status==="Listo");
 const pending=orders.filter(o=>o.status==="Nuevo");
 window.dispatchEvent(new CustomEvent("fiiller-cashier-orders",{detail:pending.filter(o=>!scheduled(o))}));
@@ -91,6 +93,14 @@ el("message").textContent="Actualizado "+new Date().toLocaleTimeString("es-MX");
 }catch(e){el("message").textContent="No se pudo actualizar: "+e.message;}
 finally{loading=false;}
 }
+el("workspace").addEventListener("click",event=>{
+const button=event.target.closest("button[data-chat],button[data-ready]");if(!button||button.disabled)return;
+const order=latestOrders.get(button.dataset.chat||button.dataset.ready);if(!order)return;
+if(button.dataset.ready&&order.status!=="Preparando"){refresh();return;}
+if(!window.FillerKitchenMessages){el("message").textContent="No se pudo abrir el chat. Actualiza la aplicación.";return;}
+FillerKitchenMessages.open(order,{ready:!!button.dataset.ready});
+});
+window.addEventListener("fiiller-order-message-sent",refresh);
 el("new-orders").addEventListener("click",async event=>{const button=event.target.closest("button[data-accept]");if(!button||button.disabled)return;button.disabled=true;try{await FillerCloud.updateOrder(button.dataset.accept,"Preparando");await refresh();el("message").textContent="Pedido aceptado y enviado a preparación.";}catch(e){await refresh();el("message").textContent=e.message;button.disabled=false;}});
 el("ready-orders").addEventListener("click",async event=>{
 const button=event.target.closest("button[data-deliver]");if(!button||button.disabled)return;
