@@ -131,10 +131,13 @@
   async function updateOrder(id,status) {
     if (!["Preparando","Listo","Entregado"].includes(status)) throw new Error("Estado no válido.");
     const role=await staffRole();
-    if(!role || (role==="cajera" && status!=="Entregado"))throw new Error("Tu perfil no puede cambiar ese estado.");
-    return request("filler_orders?id=eq."+encodeURIComponent(id),{
-      method:"PATCH", staff:true, body:{ status,status_updated_at:new Date().toISOString() },prefer:"return=minimal"
+    if(!role || (role==="cajera" && !["Preparando","Entregado"].includes(status)))throw new Error("Tu perfil no puede cambiar ese estado.");
+    const expected=role==="cajera"?(status==="Preparando"?"Nuevo":"Listo"):null;
+    const result=await request("filler_orders?id=eq."+encodeURIComponent(id)+(expected?"&status=eq."+expected:""),{
+      method:"PATCH", staff:true, body:{status,status_updated_at:new Date().toISOString()},prefer:"return=representation"
     });
+    if(!Array.isArray(result)||!result.length)throw new Error("El pedido ya cambió de estado. Actualiza la lista.");
+    return result;
   }
   async function orderMessages(orderId) {
     if (!/^[0-9a-f-]{36}$/i.test(String(orderId||""))) throw new Error("Pedido no válido.");
