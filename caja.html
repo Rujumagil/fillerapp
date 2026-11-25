@@ -40,7 +40,7 @@ ul{margin:4px 0 8px;padding-left:20px}li{padding:2px}
 </form><p id="login-error" class="error" role="alert"></p>
 </section>
 <section id="workspace" hidden>
-<div class="stats">
+<div class="card" style="border:2px dashed #d5a13a;background:#fff8e7"><div class="order-head"><h2>Prueba de pedidos</h2><button id="test-enable" type="button" class="outline">Activar avisos de prueba</button></div><p class="muted">Simulación · No preparar, no cobrar. No afecta ventas ni inventario.</p><div id="test-orders" aria-live="polite">Buscando pruebas…</div><p id="test-status" role="status"></p></div><div class="stats">
 <div class="stat"><span>Nuevos</span><b id="new-count">0</b></div>
 <div class="stat"><span>En preparación</span><b id="preparing-count">0</b></div>
 <div class="stat"><span>Listos para entregar</span><b id="ready-count">0</b></div>
@@ -101,6 +101,36 @@ finally{button.disabled=false;}
 el("logout").addEventListener("click",()=>{FillerCloud.logout();hideWorkspace();el("password").value="";});
 el("refresh").addEventListener("click",refresh);
 FillerCloud.staffRole().then(role=>{if(role==="cajera")showWorkspace();else hideWorkspace();}).catch(hideWorkspace);
+})();
+</script>
+<script>
+(()=>{"use strict";
+const box=document.getElementById("test-orders"),status=document.getElementById("test-status"),workspace=document.getElementById("workspace");
+const BASE="https://qwxydjotwhniahaovrff.supabase.co/rest/v1/filler_order_alert_tests",KEY="sb_publishable_17NekbDHp_ssL_Pf-CnqPg_v0acxqn3";
+let busy=false,seen=new Set();
+async function request(suffix,body){
+ const token=await FillerCloud.accessToken();if(!token)throw Error("Inicia sesión.");
+ const res=await fetch(BASE+suffix,{method:body?"PATCH":"GET",headers:{apikey:KEY,Authorization:"Bearer "+token,Accept:"application/json",...(body?{"Content-Type":"application/json",Prefer:"return=representation"}:{})},...(body?{body:JSON.stringify(body)}:{}),cache:"no-store"});
+ if(!res.ok)throw Error("No se pudo sincronizar la prueba ("+res.status+").");return res.json();
+}
+function announce(id){if(seen.has(id))return;seen.add(id);if("Notification" in window&&Notification.permission==="granted"){const opts={body:"Pedido simulado: 1 sándwich y 1 café. No preparar ni cobrar.",tag:"fiiller-test-"+id};try{new Notification("Fiiller Caja · Pedido de prueba",opts)}catch{navigator.serviceWorker?.getRegistration().then(r=>r?.showNotification("Fiiller Caja · Pedido de prueba",opts)).catch(()=>{})}}}
+async function refreshTests(){
+ if(workspace.hidden||busy)return;busy=true;
+ try{
+ const rows=await request("?select=id,created_at,accepted_by&order=created_at.desc&limit=5");
+ box.replaceChildren();
+ if(!rows.length){box.textContent="No hay pruebas vigentes.";return}
+ for(const r of rows){
+ const card=document.createElement("article");card.className="order";
+ const h=document.createElement("strong");h.textContent="PRUEBA-"+r.id.slice(0,8).toUpperCase()+" · "+(r.accepted_by?"Aceptado":"Nuevo");card.append(h);
+ const p=document.createElement("p");p.textContent="1 sándwich de jamón · 1 café americano · $0.00 (simulado)";card.append(p);
+ if(!r.accepted_by){announce(r.id);const b=document.createElement("button");b.type="button";b.textContent="Aceptar pedido de prueba";b.onclick=async()=>{if(b.disabled)return;b.disabled=true;try{const session=JSON.parse(sessionStorage.getItem("filler_staff_session_v1")||"null");if(!session?.user?.id)throw Error("Inicia sesión.");const result=await request("?id=eq."+encodeURIComponent(r.id)+"&accepted_by=is.null",{accepted_by:session.user.id});status.textContent=result.length?"Prueba aceptada. Sin venta registrada.":"La prueba ya fue aceptada por otra caja."; }catch(e){status.textContent=e.message}finally{b.disabled=false;refreshTests()}};card.append(b)}
+ box.append(card);
+ }
+ }catch(e){box.textContent=e.message}finally{busy=false}
+}
+document.getElementById("test-enable").onclick=async()=>{if(!("Notification" in window)){status.textContent="Este dispositivo no admite avisos del sistema.";return}const p=await Notification.requestPermission();status.textContent=p==="granted"?"Avisos habilitados.":"Permiso de avisos no concedido."};
+setInterval(refreshTests,3000);refreshTests();
 })();
 </script>
 </body></html>
