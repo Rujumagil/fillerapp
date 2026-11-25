@@ -1,5 +1,5 @@
 /* Fiiller Café · Disponibilidad temporal del menú.
-   Pollo, chilaquiles y molletes habilitados; otros productos retirados siguen ocultos.
+   Pollo, chilaquiles, molletes y tortas habilitados; otros productos retirados siguen ocultos.
    No borra recetas ni historial y no modifica existencias físicas en Supabase. */
 (function(){
   "use strict";
@@ -28,14 +28,13 @@
     return chilaquilesIds.has(id) || /chilaquiles/.test(name+" "+cat);
   }
   const discontinuedIds = new Set([
-    "tpv018","tpv017","tpv020",
     "licuado-de-platano-1792010641761-563"
   ]);
   function isDiscontinuedProduct(p){
     if(!p)return false;
     const id=norm(p.id), name=norm(p.name);
     if(discontinuedIds.has(id))return true;
-    if(/^(torta de |lonche)/.test(name) || /licuado de platano/.test(name))return true;
+    if(/licuado de platano/.test(name))return true;
     return /(nestle|nescafe)/.test(name) &&
       /(cafe|americano|cappuccino|capuchino|latte|moka|mokaccino|frappe)/.test(name);
   }
