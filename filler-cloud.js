@@ -131,8 +131,8 @@
   async function updateOrder(id,status) {
     if (!["Preparando","Listo","Entregado"].includes(status)) throw new Error("Estado no válido.");
     const role=await staffRole();
-    if(!role || (role==="cajera" && !["Preparando","Entregado"].includes(status)))throw new Error("Tu perfil no puede cambiar ese estado.");
-    const expected=role==="cajera"?(status==="Preparando"?"Nuevo":"Listo"):null;
+    if(!role || (role==="cajera" && !["Preparando","Listo","Entregado"].includes(status)))throw new Error("Tu perfil no puede cambiar ese estado.");
+    const expected=role==="cajera"?(status==="Preparando"?"Nuevo":status==="Listo"?"Preparando":"Listo"):null;
     const result=await request("filler_orders?id=eq."+encodeURIComponent(id)+(expected?"&status=eq."+expected:""),{
       method:"PATCH", staff:true, body:{status,status_updated_at:new Date().toISOString()},prefer:"return=representation"
     });
