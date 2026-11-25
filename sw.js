@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v81";
+const CACHE_NAME = "filler-app-v82";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -9,6 +9,8 @@ const APP_SHELL = [
   "./pedido.html",
   "./order-tracking.js",
   "./admin.html",
+  "./caja.html",
+  "./manifest-caja.json",
   "./manifest-admin.json",
   "./manifest-pedidos.json",
   "./control-arrow.html",
@@ -111,7 +113,7 @@ self.addEventListener("notificationclick", event => {
   const isPrivateTracking=typeof raw==="string" &&
     /^\.\/pedido\.html#token=[0-9a-f-]{36}$/i.test(raw);
   const supportTarget=isSupport && (raw==="./atencion.html"||raw==="./atencion.html?personal=1")?raw:null;
-  const target=supportTarget|| (isPromotion?raw:(isPrivateTracking?raw:(raw==="./pedido.html"?"./pedido.html":(raw==="./monitor.html"?"./monitor.html":"./pedidos.html"))));
+  const target=raw==="./caja.html"?"./caja.html":supportTarget|| (isPromotion?raw:(isPrivateTracking?raw:(raw==="./pedido.html"?"./pedido.html":(raw==="./monitor.html"?"./monitor.html":"./pedidos.html"))));
   const absolute=new URL(target,self.registration.scope).href;
   event.waitUntil((async()=>{
     const all=await clients.matchAll({type:"window",includeUncontrolled:true});
