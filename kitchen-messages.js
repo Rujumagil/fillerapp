@@ -56,6 +56,7 @@
   const textarea=get("filler-msg-text"),send=get("filler-msg-send");
   const status=get("filler-msg-result"),history=get("filler-msg-list");
   let current=null,kind="observacion",previousFocus=null,busy=false,sequence=0;
+  const cashier=location.pathname.endsWith("/caja.html");
   const templates={
     ready:"Tu pedido está listo. Puedes pasar a recogerlo en Fiiller Café. ¡Gracias por esperar!",
     prep:"Ya estamos preparando tu pedido. ¡Gracias por tu paciencia!",
@@ -66,10 +67,13 @@
   function updateAction(){
     const isReady=kind==="listo"&&current?.status!=="Listo";
     const isDone=["Entregado","Cancelado"].includes(current?.status);
+    const invalidCashierReady=cashier&&kind==="listo"&&!["Preparando","Listo"].includes(current?.status);
+    const readyButton=modal.querySelector('[data-template="ready"]');
+    readyButton.disabled=cashier&&!["Preparando","Listo"].includes(current?.status);
     get("filler-msg-warning").hidden=!isReady;
     get("filler-msg-warning").textContent=isReady?"Esta acción también cambiará el estado del pedido a «Listo». Úsala solo cuando esté preparado.":"";
     send.textContent=isReady&&!isDone?"Marcar como Listo y enviar mensaje":"Enviar mensaje al cliente";
-    send.disabled=busy||!textarea.value.trim()||(isReady&&isDone);
+    send.disabled=busy||!textarea.value.trim()||(isReady&&isDone)||invalidCashierReady;
     get("filler-msg-count").textContent=textarea.value.length+"/500";
   }
   function close(){
@@ -99,7 +103,7 @@
       const block=document.createElement("article"),when=document.createElement("small"),paragraph=document.createElement("p");
       block.className="filler-msg-item"+(item.kind==="cliente"?" filler-msg-customer":"");
       const date=new Date(item.created_at);
-      when.textContent=(item.kind==="cliente"?"👤 Cliente · ":item.kind==="listo"?"✅ Pedido listo · ":"✉ Cocina · ")+
+      when.textContent=(item.kind==="cliente"?"👤 Cliente · ":item.kind==="listo"?"✅ Pedido listo · ":"✉ Fiiller Café · ")+
         (Number.isFinite(date.getTime())?date.toLocaleString("es-MX",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"");
       paragraph.textContent=String(item.message||"");
       block.append(when,paragraph);history.append(block);
@@ -130,6 +134,7 @@
         order.status="Listo";
       }
       await FillerCloud.sendOrderMessage(order.uuid,value,kind);
+      window.dispatchEvent(new CustomEvent("fiiller-order-message-sent",{detail:{orderId:order.uuid,status:order.status}}));
       setStatus("✓ Mensaje enviado. El cliente lo verá en su seguimiento privado.");
       textarea.value="";kind="observacion";updateAction();
       await loadHistory(order.uuid,sequence);
@@ -138,10 +143,10 @@
         (order.status==="Listo"&&kind==="listo"?" El estado ya pudo cambiar a «Listo»; revisa la comanda.":""),true);
     }finally{busy=false;updateAction();}
   });
-  function open(order){
+  function open(order,{ready=false}={}){
     if(!order?.uuid)return;
-    current={...order};kind="observacion";previousFocus=document.activeElement;
-    textarea.value="";history.textContent="Cargando mensajes…";setStatus("");
+    current={...order};kind=ready?"listo":"observacion";previousFocus=document.activeElement;
+    textarea.value=ready?templates.ready:"";history.textContent="Cargando mensajes…";setStatus("");
     get("filler-msg-customer").textContent="Pedido "+String(order.id||"")+" · "+String(order.customer||"Cliente");
     modal.hidden=false;sequence++;
     updateAction();get("filler-msg-close").focus();
