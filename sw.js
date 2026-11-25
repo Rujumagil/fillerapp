@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v82";
+const CACHE_NAME = "filler-app-v83";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -142,6 +142,9 @@ self.addEventListener("push",event=>{
   if(!event.data)return;
   let payload={};
   try{payload=event.data.json();}catch{payload={body:event.data.text()};}
+  if(payload?.type==="cashier"){
+    event.waitUntil(self.registration.showNotification(String(payload.title||"Fiiller Caja").slice(0,110),{body:String(payload.body||"Nuevo aviso").slice(0,160),icon:"./assets/filler-icon-192.png",badge:"./assets/filler-icon-192.png",tag:"fiiller-cashier-"+String(payload.id||"").slice(0,40),data:{type:"cashier",url:"./caja.html"}}));return;
+  }
   const support=payload?.type==="support";
   const customer=payload?.type==="customer";
   const promo=payload?.type==="promotion";
