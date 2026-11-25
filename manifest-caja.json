@@ -1,0 +1,25 @@
+{
+  "id": "./fiiller-caja",
+  "name": "Fiiller Caja",
+  "short_name": "Fiiller Caja",
+  "description": "Pedidos y entregas del personal de Caja.",
+  "start_url": "./caja.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#faf6ed",
+  "theme_color": "#006241",
+  "icons": [
+    {
+      "src": "assets/filler-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/filler-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
