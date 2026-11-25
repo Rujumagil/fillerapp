@@ -166,11 +166,34 @@
       return buffer.duration;
     }catch(error){await ctx.close().catch(()=>{});throw error;}
   }
+  // Un único reproductor Web Audio en bucle: no depende de intervalos de JS.
+  async function createLoop(context,kind="newOrder",volume="max",{force=false}={}){
+    if(!context||context.state==="closed")throw Error("Audio no disponible.");
+    await prepare(context,{force});
+    let buffer=decoded.get(context)?.get(kind)?.buffer;
+    const custom=!!buffer;
+    if(!buffer){
+      const Offline=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+      if(!Offline)throw Error("No se pudo cargar el sonido oficial.");
+      const offline=new Offline(1,Math.ceil(context.sampleRate*4.5),context.sampleRate);
+      synthesise(offline,kind,volume);
+      buffer=await offline.startRendering();
+    }
+    const node=context.createBufferSource(),gain=context.createGain();
+    node.buffer=buffer;node.loop=true;
+    gain.gain.value=custom?loudness(volume)*1.5:1;
+    node.connect(gain);gain.connect(context.destination);
+    let started=false,stopped=false;
+    return Object.freeze({
+      start(){if(stopped||started)return false;node.start();started=true;return true;},
+      stop(){if(stopped)return;stopped=true;try{if(started)node.stop()}catch{}try{node.disconnect();gain.disconnect()}catch{}}
+    });
+  }
   function state(kind){
     return {...(configs[kind]||{kind,mode:"modern",object_path:null})};
   }
   window.FillerSounds=Object.freeze({
-    play,preview,prepare,previewFile,state,levels,motifs:KINDS.slice(),
+    play,preview,prepare,previewFile,createLoop,state,levels,motifs:KINDS.slice(),
     reload:()=>loadConfig(true)
   });
   // Consultar configuración al abrir, sin reproducir nada automáticamente.
