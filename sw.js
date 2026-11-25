@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v83";
+const CACHE_NAME = "filler-app-v84";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -143,7 +143,11 @@ self.addEventListener("push",event=>{
   let payload={};
   try{payload=event.data.json();}catch{payload={body:event.data.text()};}
   if(payload?.type==="cashier"){
-    event.waitUntil(self.registration.showNotification(String(payload.title||"Fiiller Caja").slice(0,110),{body:String(payload.body||"Nuevo aviso").slice(0,160),icon:"./assets/filler-icon-192.png",badge:"./assets/filler-icon-192.png",tag:"fiiller-cashier-"+String(payload.id||"").slice(0,40),data:{type:"cashier",url:"./caja.html"}}));return;
+    event.waitUntil((async()=>{
+      await self.registration.showNotification(String(payload.title||"Fiiller Caja").slice(0,110),{body:String(payload.body||"Nuevo aviso").slice(0,160),icon:"./assets/filler-icon-192.png",badge:"./assets/filler-icon-192.png",tag:"fiiller-cashier-"+String(payload.id||"").slice(0,40),data:{type:"cashier",url:"./caja.html"}});
+      const windows=await clients.matchAll({type:"window",includeUncontrolled:true});
+      for(const client of windows){if(new URL(client.url).pathname.endsWith("/caja.html"))client.postMessage({kind:"fiiller-cashier-refresh"});}
+    })());return;
   }
   const support=payload?.type==="support";
   const customer=payload?.type==="customer";
