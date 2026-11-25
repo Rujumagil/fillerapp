@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#006241">
 <link rel="icon" href="assets/filler-icon-192.png">
-<title>Fiiller Café | Caja 1</title>
+<title>Fiiller Café | Caja</title>
 <style>
 :root{font-family:system-ui,Arial,sans-serif;color:#17382a;background:#faf6ed}
 *{box-sizing:border-box}body{margin:0}header{background:#006241;color:white;padding:20px 5%;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
@@ -28,13 +28,13 @@ ul{margin:4px 0 8px;padding-left:20px}li{padding:2px}
 </style>
 </head>
 <body>
-<header><div><h1>Fiiller Café · Caja 1</h1><p>Pedidos y entrega a clientes</p></div><button id="logout" type="button" hidden>Cerrar sesión</button></header>
+<header><div><h1>Fiiller Café · Caja</h1><p>Pedidos y entrega a clientes</p></div><button id="logout" type="button" hidden>Cerrar sesión</button></header>
 <main>
 <section id="login" class="card">
 <h2>Acceso de cajera</h2>
 <p class="muted">Ingresa con la contraseña asignada a Cajera 1. Tu acceso no incluye administración ni reportes.</p>
 <form id="login-form">
-<label>Correo de Lupita<input id="email" type="email" placeholder="Correo registrado para Caja 1" autocomplete="username" required></label>
+<label>Usuario o correo<input id="email" type="text" placeholder="cajera1 o cajera2" autocomplete="username" required></label>
 <label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label>
 <button id="login-button">Entrar a mis pedidos</button>
 </form><p id="login-error" class="error" role="alert"></p>
@@ -51,7 +51,7 @@ ul{margin:4px 0 8px;padding-left:20px}li{padding:2px}
 <div class="card"><h2>Pedidos en proceso</h2><div id="other-orders"></div></div>
 </section>
 </main>
-<script src="filler-cloud.js?v=53"></script>
+<script src="filler-cloud.js?v=54"></script>
 <script>
 (()=>{"use strict";
 const el=id=>document.getElementById(id);
@@ -67,7 +67,7 @@ return '<article class="order"><div class="order-head"><h3>Pedido #'+esc(o.id)+'
 async function refresh(){
 if(loading||el("workspace").hidden)return;loading=true;
 try{
-if(await FillerCloud.staffRole()!=="cajera"){FillerCloud.logout();hideWorkspace();el("login-error").textContent="Acceso no autorizado para Caja 1.";return;}
+if(await FillerCloud.staffRole()!=="cajera"){FillerCloud.logout();hideWorkspace();el("login-error").textContent="Acceso no autorizado para Caja.";return;}
 const orders=await FillerCloud.orders();
 const ready=orders.filter(o=>o.status==="Listo");
 const inProcess=orders.filter(o=>o.status==="Nuevo"||o.status==="Preparando");
