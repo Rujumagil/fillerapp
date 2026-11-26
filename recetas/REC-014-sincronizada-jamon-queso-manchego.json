@@ -12,17 +12,29 @@
     {
       "name": "Tortillas de harina",
       "quantity": 3,
-      "unit": "piezas"
+      "unit": "piezas",
+      "inventory_code": "01320041",
+      "quantity_per_inventory_unit": 24,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.125,
+      "cost_per_portion_mxn": 3.735
     },
     {
       "name": "Jamón",
       "quantity": 80,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "08020104",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.08,
+      "cost_per_portion_mxn": 8.24
     },
     {
       "name": "Queso manchego",
       "quantity": 50,
-      "unit": "g"
+      "unit": "g",
+      "candidate_inventory_code": "06040093",
+      "sku_selection_status": "pending_confirmation"
     }
   ],
   "preparation": {
@@ -32,6 +44,11 @@
   "notes": "",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
-  "cost_status": "pending_warehouse_unit_costs",
-  "cooking_oil_or_butter_status": "not_confirmed"
+  "cost_status": "partial_pending_confirmation",
+  "cooking_oil_or_butter_status": "oil_confirmed_quantity_pending",
+  "costing": {
+    "date": "2026-11-26",
+    "partial_confirmed_ingredient_cost_mxn": 11.975,
+    "note": "No calcular margen definitivo hasta completar datos."
+  }
 }
