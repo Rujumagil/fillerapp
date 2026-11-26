@@ -12,12 +12,23 @@
     {
       "name": "Huevo",
       "quantity": 2,
-      "unit": "piezas"
+      "unit": "piezas",
+      "inventory_code": "01170024",
+      "quantity_per_inventory_unit": 18.79699248120301,
+      "inventory_conversion_status": "confirmed_by_user_or_reused",
+      "inventory_units_per_order": 0.1064,
+      "cost_per_portion_mxn": 2.76415496,
+      "shell_on_weight_per_piece_g": 53.2
     },
     {
       "name": "Jamón",
       "quantity": 50,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "08020104",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user_or_reused",
+      "inventory_units_per_order": 0.05,
+      "cost_per_portion_mxn": 5.15
     },
     {
       "name": "Queso",
@@ -27,7 +38,12 @@
     {
       "name": "Aceite",
       "quantity": 5,
-      "unit": "ml"
+      "unit": "ml",
+      "inventory_code": "01010051",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user_or_reused",
+      "inventory_units_per_order": 0.005,
+      "cost_per_portion_mxn": 0.155
     }
   ],
   "preparation": {
@@ -37,6 +53,11 @@
   "notes": "",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
-  "cost_status": "pending_warehouse_unit_costs",
-  "cheese_inventory_sku_status": "pending"
+  "cost_status": "partial_pending_confirmation",
+  "cheese_inventory_sku_status": "pending",
+  "costing": {
+    "date": "2026-11-26",
+    "partial_confirmed_ingredient_cost_mxn": 8.06915496,
+    "note": "Queso pendiente; no calcular margen definitivo."
+  }
 }
