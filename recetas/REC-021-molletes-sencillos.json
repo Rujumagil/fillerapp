@@ -14,17 +14,31 @@
       "name": "Bolillo",
       "quantity": 1,
       "unit": "pieza",
-      "preparation": "Dividido en dos mitades"
+      "preparation": "Dividido en dos mitades",
+      "direct_unit_cost_mxn": 9,
+      "direct_cost_source": "Rojos; confirmado previamente",
+      "inventory_sku_status": "pending",
+      "cost_per_portion_mxn": 9
     },
     {
       "name": "Frijoles refritos",
       "quantity": 80,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "01040488",
+      "quantity_per_inventory_unit": 3000,
+      "inventory_conversion_status": "confirmed_reused_REC-016",
+      "inventory_units_per_order": 0.02666666666666667,
+      "cost_per_portion_mxn": 0.8533333333333334
     },
     {
       "name": "Queso manchego",
       "quantity": 50,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "06040093",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_reused_REC-016",
+      "inventory_units_per_order": 0.05,
+      "cost_per_portion_mxn": 7.75
     }
   ],
   "excluded_ingredients": [
@@ -37,6 +51,15 @@
   "notes": "",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
-  "cost_status": "pending_warehouse_unit_costs",
-  "beans_subrecipe_status": "pending_if_prepared_in_kitchen"
+  "cost_status": "calculated_from_confirmed_inputs",
+  "beans_subrecipe_status": "not_applicable_purchased_prepared",
+  "costing": {
+    "date": "2026-11-26",
+    "ingredient_cost_mxn": 17.60333333333333,
+    "operational_overhead_pct": 25,
+    "total_cost_mxn": 22.004166666666663,
+    "sale_price_mxn": 55,
+    "contribution_mxn": 32.99583333333334,
+    "margin_pct": 59.99242424242425
+  }
 }
