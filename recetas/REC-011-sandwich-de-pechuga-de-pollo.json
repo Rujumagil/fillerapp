@@ -11,33 +11,76 @@
     {
       "name": "Pan integral",
       "quantity": 2,
-      "unit": "rebanadas"
+      "unit": "rebanadas",
+      "inventory_code": "01230855",
+      "quantity_per_inventory_unit": 9,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.2222222222222222,
+      "cost_per_portion_mxn": 9.59111111111111
     },
     {
       "name": "Pechuga de pollo",
       "quantity": 100,
       "unit": "g",
-      "measurement_state": "cocido"
+      "measurement_state": "cocido",
+      "inventory_code": "03050031",
+      "quantity_per_inventory_unit": 714.2857142857143,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.13999999999999999,
+      "cost_per_portion_mxn": 9.91795,
+      "raw_weight_per_portion_g": 140,
+      "raw_weight_per_portion_kg": 0.14,
+      "cooking_yield_percent": 71.42857142857143
     },
     {
       "name": "Queso",
       "quantity": 30,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "06040010",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.03,
+      "cost_per_portion_mxn": 2.07
     },
     {
       "name": "Lechuga",
       "quantity": 10,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "05020127",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.01,
+      "cost_per_portion_mxn": 0.424273
     },
     {
       "name": "Jitomate",
       "quantity": 10,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "05020481",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.01,
+      "cost_per_portion_mxn": 0.25238900000000003
     },
     {
       "name": "Mayonesa",
       "quantity": 15,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "01210046",
+      "quantity_per_inventory_unit": 3800,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.003947368421052632,
+      "cost_per_portion_mxn": 0.7940822368421052
+    },
+    {
+      "name": "Aceite de canola Patrona",
+      "quantity": 3,
+      "unit": "ml",
+      "inventory_code": "01010051",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_units_per_order": 0.003,
+      "inventory_conversion_status": "confirmed_by_user",
+      "cost_per_portion_mxn": 0.093
     }
   ],
   "preparation": {
@@ -47,8 +90,18 @@
   "notes": "",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
-  "cost_status": "pending_warehouse_unit_costs",
-  "chicken_raw_to_cooked_yield_status": "pending",
-  "cooking_oil_quantity_status": "pending_if_used",
-  "cheese_inventory_sku_status": "pending"
+  "cost_status": "calculated_from_confirmed_inputs",
+  "chicken_raw_to_cooked_yield_status": "confirmed_by_user",
+  "cooking_oil_quantity_status": "confirmed_3_ml_per_portion",
+  "cheese_inventory_sku_status": "pending",
+  "costing": {
+    "date": "2026-11-26",
+    "warehouse_price_reference": "2026-10-24",
+    "ingredient_cost_mxn": 23.142805347953214,
+    "operational_overhead_pct": 25,
+    "total_cost_mxn": 28.928506684941517,
+    "sale_price_mxn": 48,
+    "contribution_mxn": 19.071493315058483,
+    "margin_pct": 39.73227773970517
+  }
 }
