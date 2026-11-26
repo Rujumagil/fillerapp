@@ -33,8 +33,21 @@
       "name": "Queso manchego",
       "quantity": 50,
       "unit": "g",
-      "candidate_inventory_code": "06040093",
-      "sku_selection_status": "pending_confirmation"
+      "inventory_code": "06040093",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.05,
+      "cost_per_portion_mxn": 7.75
+    },
+    {
+      "name": "Aceite de canola Patrona",
+      "quantity": 3,
+      "unit": "ml",
+      "inventory_code": "01010051",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.003,
+      "cost_per_portion_mxn": 0.093
     }
   ],
   "preparation": {
@@ -44,11 +57,16 @@
   "notes": "",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
-  "cost_status": "partial_pending_confirmation",
-  "cooking_oil_or_butter_status": "oil_confirmed_quantity_pending",
+  "cost_status": "calculated_from_confirmed_inputs",
+  "cooking_oil_or_butter_status": "confirmed_3_ml_oil",
   "costing": {
     "date": "2026-11-26",
-    "partial_confirmed_ingredient_cost_mxn": 11.975,
-    "note": "No calcular margen definitivo hasta completar datos."
+    "warehouse_price_reference": "2026-10-24",
+    "ingredient_cost_mxn": 19.818,
+    "operational_overhead_pct": 25,
+    "total_cost_mxn": 24.7725,
+    "sale_price_mxn": 50,
+    "contribution_mxn": 25.2275,
+    "margin_pct": 50.455000000000005
   }
 }
