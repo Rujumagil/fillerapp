@@ -7,15 +7,20 @@
     "quantity": 631,
     "unit": "g",
     "type": "theoretical",
-    "actual_yield_status": "pending_measurement"
+    "actual_yield_status": "pending_reconciliation",
+    "reported_actual_g": 210,
+    "validation_note": "210 g reportados frente a 631 g de ingredientes; confirmar si es lote completo o porción y explicar merma antes de aplicar."
   },
   "ingredients": [
     {
       "name": "Atún",
       "quantity": 500,
       "unit": "g",
-      "candidate_inventory_code": "01240022",
-      "sku_selection_status": "brand_confirmed_conversion_pending"
+      "inventory_code": "01240022",
+      "quantity_per_inventory_unit": 1880,
+      "inventory_conversion_status": "confirmed_by_user_reported_drained_weight",
+      "inventory_units_per_order": 0.26595744680851063,
+      "cost_per_portion_mxn": 51.371569148936175
     },
     {
       "name": "Jitomate",
@@ -30,7 +35,12 @@
     {
       "name": "Cebolla",
       "quantity": 50,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "05020205",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.05,
+      "cost_per_portion_mxn": 0.95
     },
     {
       "name": "Mayonesa",
@@ -50,7 +60,9 @@
     {
       "name": "Pimienta",
       "quantity": 3,
-      "unit": "g"
+      "unit": "g",
+      "reported_brand": "markonic",
+      "sku_selection_status": "pending_exact_brand_presentation_and_price"
     }
   ],
   "used_by": [
@@ -69,7 +81,7 @@
   "inventory_handling": "Consume ingredientes al preparar el lote; el producto final consume inventario de ensalada, no vuelve a descontar ingredientes del lote.",
   "costing": {
     "date": "2026-11-26",
-    "partial_confirmed_ingredient_cost_mxn": 2.585415394736842,
-    "note": "No calcular margen definitivo hasta completar datos."
+    "partial_confirmed_ingredient_cost_mxn": 54.90698454367302,
+    "note": "Sal y pimienta pendientes de validación; rendimiento real no validado."
   }
 }
