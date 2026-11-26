@@ -13,12 +13,19 @@
     {
       "name": "Atún",
       "quantity": 500,
-      "unit": "g"
+      "unit": "g",
+      "candidate_inventory_code": "01240022",
+      "sku_selection_status": "brand_confirmed_conversion_pending"
     },
     {
       "name": "Jitomate",
       "quantity": 50,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "05020481",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.05,
+      "cost_per_portion_mxn": 1.261945
     },
     {
       "name": "Cebolla",
@@ -28,7 +35,12 @@
     {
       "name": "Mayonesa",
       "quantity": 25,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "01210046",
+      "quantity_per_inventory_unit": 3800,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.006578947368421052,
+      "cost_per_portion_mxn": 1.323470394736842
     },
     {
       "name": "Sal",
@@ -53,6 +65,11 @@
   },
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
-  "cost_status": "pending_warehouse_unit_costs",
-  "inventory_handling": "Consume ingredientes al preparar el lote; el producto final consume inventario de ensalada, no vuelve a descontar ingredientes del lote."
+  "cost_status": "partial_pending_confirmation",
+  "inventory_handling": "Consume ingredientes al preparar el lote; el producto final consume inventario de ensalada, no vuelve a descontar ingredientes del lote.",
+  "costing": {
+    "date": "2026-11-26",
+    "partial_confirmed_ingredient_cost_mxn": 2.585415394736842,
+    "note": "No calcular margen definitivo hasta completar datos."
+  }
 }
