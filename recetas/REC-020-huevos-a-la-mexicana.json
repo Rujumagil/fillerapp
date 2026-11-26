@@ -12,34 +12,65 @@
     {
       "name": "Huevo",
       "quantity": 2,
-      "unit": "piezas"
+      "unit": "piezas",
+      "inventory_code": "01170024",
+      "quantity_per_inventory_unit": 18.79699248120301,
+      "inventory_conversion_status": "confirmed_by_user_or_reused",
+      "inventory_units_per_order": 0.1064,
+      "cost_per_portion_mxn": 2.76415496,
+      "shell_on_weight_per_piece_g": 53.2
     },
     {
       "name": "Jitomate",
       "quantity": 30,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "05020481",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user_or_reused",
+      "inventory_units_per_order": 0.03,
+      "cost_per_portion_mxn": 0.757167
     },
     {
       "name": "Cebolla",
       "quantity": 20,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "05020205",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user_or_reused",
+      "inventory_units_per_order": 0.02,
+      "cost_per_portion_mxn": 0.38
     },
     {
       "name": "Chile verde",
       "quantity": 10,
       "unit": "g",
-      "variety": "pending"
+      "variety": "serrano",
+      "inventory_code": "05020118",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user_or_reused",
+      "inventory_units_per_order": 0.01,
+      "cost_per_portion_mxn": 0.25731000000000004
     },
     {
       "name": "Aceite",
       "quantity": 5,
-      "unit": "ml"
+      "unit": "ml",
+      "inventory_code": "01010051",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user_or_reused",
+      "inventory_units_per_order": 0.005,
+      "cost_per_portion_mxn": 0.155
     },
     {
       "name": "Pan integral",
       "quantity": 1,
       "unit": "rebanada",
-      "role": "guarnición"
+      "role": "guarnición",
+      "inventory_code": "01230855",
+      "quantity_per_inventory_unit": 9,
+      "inventory_conversion_status": "confirmed_by_user_or_reused",
+      "inventory_units_per_order": 0.1111111111111111,
+      "cost_per_portion_mxn": 4.795555555555555
     }
   ],
   "preparation": {
@@ -48,5 +79,14 @@
   "notes": "",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
-  "cost_status": "pending_warehouse_unit_costs"
+  "cost_status": "calculated_from_confirmed_inputs",
+  "costing": {
+    "date": "2026-11-26",
+    "ingredient_cost_mxn": 9.109187515555554,
+    "operational_overhead_pct": 25,
+    "total_cost_mxn": 11.386484394444443,
+    "sale_price_mxn": 55,
+    "contribution_mxn": 43.613515605555556,
+    "margin_pct": 79.29730110101009
+  }
 }
