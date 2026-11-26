@@ -11,32 +11,66 @@
     {
       "name": "Bolillo",
       "quantity": 1,
-      "unit": "pieza"
+      "unit": "pieza",
+      "direct_unit_cost_mxn": 9,
+      "direct_cost_source": "Rojos; confirmado por usuario 2026-11-26",
+      "inventory_sku_status": "pending",
+      "cost_per_portion_mxn": 9
     },
     {
       "name": "Jamón",
       "quantity": 80,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "08020104",
+      "inventory_unit": "kg",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.08,
+      "cost_per_portion_mxn": 8.24
     },
     {
       "name": "Queso",
       "quantity": 30,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "06040010",
+      "inventory_unit": "kg",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.03,
+      "cost_per_portion_mxn": 2.07
     },
     {
       "name": "Lechuga",
       "quantity": 10,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "05020127",
+      "inventory_unit": "kg",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.01,
+      "cost_per_portion_mxn": 0.424273
     },
     {
       "name": "Jitomate",
       "quantity": 10,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "05020481",
+      "inventory_unit": "kg",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.01,
+      "cost_per_portion_mxn": 0.25238900000000003
     },
     {
       "name": "Mayonesa",
       "quantity": 20,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "01210046",
+      "inventory_unit": "pza",
+      "quantity_per_inventory_unit": 3800,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.005263157894736842,
+      "cost_per_portion_mxn": 1.0587763157894736
     }
   ],
   "excluded_ingredients": [
@@ -45,5 +79,17 @@
   "notes": "",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
-  "cost_status": "pending_warehouse_unit_costs"
+  "cost_status": "calculated_from_confirmed_inputs",
+  "ingredient_sku_mapping_status": "bolillo_sku_pending",
+  "costing": {
+    "date": "2026-11-26",
+    "warehouse_price_reference": "2026-10-24",
+    "ingredient_cost_mxn": 21.045438315789475,
+    "operational_overhead_pct": 25,
+    "total_cost_mxn": 26.306797894736846,
+    "sale_price_mxn": 45,
+    "contribution_mxn": 18.693202105263154,
+    "margin_pct": 41.54044912280701,
+    "note": "Antes de otros gastos e impuestos; sin movimientos de almacén. Bolillo de compra directa Rojos cuando aplica."
+  }
 }
