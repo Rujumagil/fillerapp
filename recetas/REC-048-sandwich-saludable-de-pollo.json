@@ -18,7 +18,12 @@
       "name": "Pechuga de pollo a la plancha",
       "quantity": 100,
       "unit": "g",
-      "measurement_state": "peso cocido"
+      "measurement_state": "peso cocido",
+      "raw_quantity_g": 110,
+      "cooked_quantity_g": 100,
+      "cooking_yield_fraction": 0.9090909090909091,
+      "cooking_weight_loss_g": 10,
+      "cooking_weight_loss_fraction": 0.09090909090909091
     },
     {
       "name": "Queso panela",
@@ -45,13 +50,63 @@
     "Aguacate"
   ],
   "preparation": {
-    "method": "Cocinar la pechuga de pollo a la plancha, pesar 100 g después de la cocción y colocarla entre dos rebanadas de pan de 12 granos con queso panela, lechuga, jitomate y mayonesa."
+    "method": "Cocinar 110 g de pechuga de pollo cruda a la plancha, pesar 100 g después de la cocción y colocarla entre dos rebanadas de pan de 12 granos con queso panela, lechuga, jitomate y mayonesa."
   },
   "notes": "",
   "status": "confirmed",
   "distinct_from": "REC-011",
   "inventory_deduction_status": "pending_integration",
   "cost_status": "pending_warehouse_unit_costs",
-  "ingredient_sku_mapping_status": "pending",
-  "chicken_raw_to_cooked_yield_status": "pending"
+  "ingredient_sku_mapping_status": "candidate_mapping_pending_confirmation",
+  "chicken_raw_to_cooked_yield_status": "confirmed_by_user",
+  "inventory_mapping_preview": {
+    "status": "draft_no_stock_changes",
+    "lines": [
+      {
+        "ingredient": "Pan de 12 granos",
+        "candidate_inventory_code": "01230281",
+        "candidate_source": "REC-045",
+        "quantity_per_inventory_unit": 14,
+        "inventory_unit": "paquete",
+        "planned_consumption": 0.14285714285714285,
+        "status": "candidate_pending_same_product_confirmation"
+      },
+      {
+        "ingredient": "Pechuga de pollo cruda",
+        "candidate_inventory_code": null,
+        "planned_consumption": 0.11,
+        "inventory_unit": "kg",
+        "status": "pending_sku_and_warehouse_unit"
+      },
+      {
+        "ingredient": "Queso panela",
+        "candidate_inventory_code": "06040154",
+        "candidate_source": "REC-001",
+        "planned_consumption": 0.04,
+        "inventory_unit": "kg",
+        "status": "candidate_pending_same_product_confirmation"
+      },
+      {
+        "ingredient": "Lechuga",
+        "candidate_inventory_code": null,
+        "planned_consumption": 0.015,
+        "inventory_unit": "kg",
+        "status": "pending_sku_and_warehouse_unit"
+      },
+      {
+        "ingredient": "Jitomate",
+        "candidate_inventory_code": null,
+        "planned_consumption": 0.02,
+        "inventory_unit": "kg",
+        "status": "pending_sku_and_warehouse_unit"
+      },
+      {
+        "ingredient": "Mayonesa",
+        "candidate_inventory_code": null,
+        "planned_consumption_g": 10,
+        "status": "pending_sku_and_package_conversion"
+      }
+    ],
+    "note": "Las unidades de almacén no verificadas son propuestas; no generar movimientos. Cantidades de receta y equivalencia de pollo confirmadas por usuario el 2026-11-26."
+  }
 }
