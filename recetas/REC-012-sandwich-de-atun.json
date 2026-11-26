@@ -12,7 +12,12 @@
     {
       "name": "Pan integral",
       "quantity": 2,
-      "unit": "rebanadas"
+      "unit": "rebanadas",
+      "inventory_code": "01230855",
+      "quantity_per_inventory_unit": 9,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.2222222222222222,
+      "cost_per_portion_mxn": 9.59111111111111
     },
     {
       "name": "Ensalada de atún preparada",
@@ -24,19 +29,34 @@
     {
       "name": "Lechuga",
       "quantity": 10,
-      "unit": "g"
+      "unit": "g",
+      "inventory_code": "05020127",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.01,
+      "cost_per_portion_mxn": 0.424273
     },
     {
       "name": "Jitomate",
       "quantity": 10,
       "unit": "g",
-      "role": "adicional al preparado"
+      "role": "adicional al preparado",
+      "inventory_code": "05020481",
+      "quantity_per_inventory_unit": 1000,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.01,
+      "cost_per_portion_mxn": 0.25238900000000003
     },
     {
       "name": "Mayonesa",
       "quantity": 15,
       "unit": "g",
-      "role": "adicional al preparado"
+      "role": "adicional al preparado",
+      "inventory_code": "01210046",
+      "quantity_per_inventory_unit": 3800,
+      "inventory_conversion_status": "confirmed_by_user",
+      "inventory_units_per_order": 0.003947368421052632,
+      "cost_per_portion_mxn": 0.7940822368421052
     }
   ],
   "preparation": {
@@ -45,6 +65,11 @@
   "notes": "",
   "status": "confirmed",
   "inventory_deduction_status": "pending_integration",
-  "cost_status": "pending_warehouse_unit_costs",
-  "inventory_handling": "Al preparar SUB-001 se descuentan sus ingredientes; al vender REC-012 se descuentan 80 g de ensalada preparada y el resto de los ingredientes del sándwich. Evitar doble descuento."
+  "cost_status": "partial_pending_confirmation",
+  "inventory_handling": "Al preparar SUB-001 se descuentan sus ingredientes; al vender REC-012 se descuentan 80 g de ensalada preparada y el resto de los ingredientes del sándwich. Evitar doble descuento.",
+  "costing": {
+    "date": "2026-11-26",
+    "partial_confirmed_ingredient_cost_mxn": 11.061855347953214,
+    "note": "No calcular margen definitivo hasta completar datos."
+  }
 }
