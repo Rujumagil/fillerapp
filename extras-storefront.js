@@ -311,8 +311,7 @@
   renderMenu = function() {
     const menu = document.getElementById("menu-list");
     if (!menu) return;
-    // Mantener la posición de cada carrusel al actualizar el carrito.
-    const priorScroll = new Map(Array.from(menu.querySelectorAll(".filler-family-track")).map(el => [el.dataset.family, el.scrollLeft]));
+    // La nueva vista en cuadrícula no conserva posiciones de carrusel.
     const categoryProducts = state.category === "Todos" ? state.menu : state.category === featuredCategory ? state.menu.filter(i => featuredIds.includes(i.id)) : state.menu.filter(i => i.cat === state.category);
     const products = searchQuery ? categoryProducts.filter(i => normalize(i.name + " " + i.cat).includes(searchQuery)) : categoryProducts;
     // Agrupar presentaciones en una tarjeta; cada tamaño conserva su propio SKU, precio y stock.
@@ -371,9 +370,13 @@
       const options = eligible(selected) && extrasFor(selected).length;
       const stockLabel = available <= 0 ? "Agotado temporalmente" : "Disponible";
       const stockClass = available <= 0 ? "sold-out" : available <= 5 ? "low" : "";
-      const addLabel = available <= 0 ? "Agotado" : groupVariants ? "Elegir" : options ? "Elegir" : "Agregar";
+      const addLabel = available <= 0 ? "Agotado" : groupVariants || options || variants ? "Elegir" : "Agregar";
+      const description = String(item.description || "").trim().slice(0,100) || (variants ? "Selecciona tu tamaño preferido." : options ? "Puedes personalizar este producto." : "Disponible para pedir y recoger.");
+      const priceOptions = groupVariants || variants || [selected];
+      const prices = priceOptions.map(v=>Number(v.price)).filter(Number.isFinite);
+      const displayPrice = prices.length ? Math.min(...prices) : Number(selected.price);
       const sizeSelector = variants ? '<div class="fx-size-picker"><label for="size-' + esc(selected.id) + '">Elige tu tamaño</label><select id="size-' + esc(selected.id) + '" data-coffee-size aria-label="Tamaño de ' + esc(item.name) + '">' + variants.map(v => '<option value="' + esc(v.id) + '" data-price="' + Number(v.price) + '" data-stock="' + Math.max(0,Number(v.stock)-reserved(v.id)) + '"' + (v.id===selected.id?' selected':'') + (Number(v.stock)-reserved(v.id)<=0?' disabled':'') + '>' + v.sizeOz + ' oz · ' + money(Number(v.price)) + (Number(v.stock)-reserved(v.id)<=0?' · Agotado':'') + '</option>').join('') + '</select></div>' : '';
-      return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3>' + sizeSelector + '<div class="item-bottom">' + (variants ? '' : '<strong class="price">' + (groupVariants ? "Desde "+money(Math.min(...groupVariants.filter(v=>Number(v.stock)>reserved(v.id)).map(v=>Number(v.price)))) : money(Number(selected.price))) + '</strong>') + '<button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options ? "Seleccionar " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(groupVariants ? (groupVariants.find(v=>Number(v.stock)>reserved(v.id))?.id||selected.id) : selected.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
+      return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" role="img" aria-label="' + esc(item.image ? "Fotografía de "+item.name : "Fotografía pendiente de "+item.name) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3><p class="fiiller-item-description">' + esc(description) + '</p>' + sizeSelector + '<div class="item-bottom"><strong class="price">' + (variants || groupVariants ? "Desde " : "") + money(displayPrice) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options || variants || groupVariants ? "Elegir " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(groupVariants ? (groupVariants.find(v=>Number(v.stock)>reserved(v.id))?.id||selected.id) : selected.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
     }
 
     if (!products.length) {
@@ -383,13 +386,10 @@
         const family = section.name;
         const items = section.items;
         const heading = family;
-        return '<section class="filler-family"><div class="filler-family-header"><div><h3>' + esc(heading) + '</h3><small>' + items.length + (items.length === 1 ? " producto" : " productos") + '</small></div><div class="filler-family-controls"><button type="button" class="filler-family-arrow" data-slide="' + idx + '" data-dir="-1" aria-label="Ver productos anteriores de ' + esc(family) + '">‹</button><button type="button" class="filler-family-arrow" data-slide="' + idx + '" data-dir="1" aria-label="Ver más productos de ' + esc(family) + '">›</button></div></div><div class="filler-family-track" id="filler-family-' + idx + '" data-family="' + esc(family) + '" role="region" aria-label="Productos de ' + esc(family) + '" tabindex="0">' + items.map(productCard).join("") + '</div></section>';
+        return '<section class="filler-family"><div class="filler-family-header"><div><h3>' + esc(heading) + '</h3><small>' + items.length + (items.length === 1 ? " producto" : " productos") + '</small></div></div><div class="filler-family-track" id="filler-family-' + idx + '" data-family="' + esc(family) + '" role="region" aria-label="Productos de ' + esc(family) + '" tabindex="0">' + items.map(productCard).join("") + '</div></section>';
       }).join("");
     }
     FillerPhotos.applyImages(menu);
-    menu.querySelectorAll(".filler-family-track").forEach(el => {
-      if (priorScroll.has(el.dataset.family)) el.scrollLeft = priorScroll.get(el.dataset.family);
-    });
     menu.querySelectorAll("[data-coffee-size]").forEach(select => select.addEventListener("change", () => {
       const chosen = select.selectedOptions[0];
       if (!chosen) return;
@@ -400,16 +400,15 @@
       button.dataset.add = select.value;
       button.disabled = stock <= 0;
       button.querySelector("span:last-child").textContent = stock <= 0 ? "Agotado" : (withExtras ? "Elegir" : "Agregar");
+      const shownPrice=card.querySelector(".price");
+      if(shownPrice && Number.isFinite(Number(chosen.dataset.price)))shownPrice.textContent=money(Number(chosen.dataset.price));
       // El precio ya se muestra junto a cada tamaño disponible en el selector.
       const badge = card.querySelector(".item-stock-badge");
       badge.textContent = stock <= 0 ? "Agotado" : "Disponible";
       badge.className = "item-stock-badge " + (stock<=0?"sold-out":stock<=5?"low":"");
     }));
     menu.querySelectorAll("[data-add]").forEach(b => b.addEventListener("click", () => addToCart(b.dataset.add)));
-    menu.querySelectorAll("[data-slide]").forEach(b => b.addEventListener("click", () => {
-      const track = document.getElementById("filler-family-" + b.dataset.slide);
-      if (track) track.scrollBy({left: Number(b.dataset.dir) * Math.max(180, track.clientWidth * 0.75), behavior: "smooth"});
-    }));
+
   };
   renderCart = function() {
     try{
