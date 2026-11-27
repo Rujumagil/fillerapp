@@ -362,45 +362,49 @@
     };
     const featured = displayProducts.filter(p=>!isComplement(p) && inStock(p) &&
       (p.classicGroup ? p.classicVariants.some(v=>featuredIds.includes(v.id)) :
-       p.chilaquilesGroup ? p.chilaquilesVariants.some(v=>featuredIds.includes(v.id)) :
-       p.sizeVariants ? p.sizeVariants.some(v=>featuredIds.includes(v.id)) : featuredIds.includes(p.id))
+        p.chilaquilesGroup ? p.chilaquilesVariants.some(v=>featuredIds.includes(v.id)) :
+        p.sizeVariants ? p.sizeVariants.some(v=>featuredIds.includes(v.id)) : featuredIds.includes(p.id))
     ).sort((a,b)=>{
       const rank=p=>Math.min(...(p.classicGroup ? p.classicVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) :
         p.chilaquilesGroup ? p.chilaquilesVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) :
         p.sizeVariants ? p.sizeVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) : [featuredRank.get(p.id)?.rank ?? 999]));
       return rank(a)-rank(b);
     });
-    const allView=state.category==="Todos";
-    const preparedGroups=families
-      .map(name=>({name,items:displayProducts.filter(p=>(p.cat||"Otros")===name&&!isComplement(p)&&!featured.includes(p)),isRetail:false}))
-      .filter(section=>section.items.length);
-    // Dar variedad al bloque corto: bebidas empaquetadas y botanas alternadas.
-    // Los agotados no ocupan un lugar destacado; siguen sujetos a catálogo/stock.
+    const ux=window.FiillerAppExperience;
+    const view=ux?.getView()||"home";
+    const limit=ux?.getVisibleCount()||8;
+    const searchActive=Boolean(searchQuery);
+    const prepared=displayProducts.filter(p=>!isComplement(p));
+    const retail=displayProducts.filter(isComplement);
+    const rankedPrepared=[...featured,...prepared.filter(p=>!featured.includes(p))];
     const retailPools=new Map();
-    displayProducts.filter(p=>isComplement(p)&&inStock(p)).forEach(p=>{
-      const category=p.cat||"Otros";
-      if(!retailPools.has(category))retailPools.set(category,[]);
-      retailPools.get(category).push(p);
+    retail.filter(inStock).forEach(p=>{
+      const family=p.cat||"Otros";
+      if(!retailPools.has(family))retailPools.set(family,[]);
+      retailPools.get(family).push(p);
     });
-    const retailItems=[];
-    while([...retailPools.values()].some(pool=>pool.length)){
-      retailPools.forEach(pool=>{if(pool.length)retailItems.push(pool.shift())});
-    }
-    const retailLimit=6;
-    const sections=allView
-      ? [
-          ...(featured.length?[{name:"Preparados destacados",items:featured,isRetail:false}]:[]),
-          ...preparedGroups,
-          ...(retailItems.length?[{
-            name:"Complementos para tu pedido",
-            items:!searchQuery&&!retailExpanded?retailItems.slice(0,retailLimit):retailItems,
-            totalItems:retailItems.length,isRetail:true
-          }]:[])
-        ]
-      : state.category===featuredCategory
-        ? [{name:"Preparados destacados",items:featured,isRetail:false}]
-        : families.map(name=>({name,items:displayProducts.filter(p=>(p.cat||"Otros")===name),isRetail:menuPriority?.isComplementCategory(name)}));
-
+    const retailMix=[];
+    while([...retailPools.values()].some(pool=>pool.length))retailPools.forEach(pool=>{
+      if(pool.length)retailMix.push(pool.shift());
+    });
+    const cards=items=>items.slice(0,limit);
+    const sections=searchActive
+      ? [{name:"Resultados",items:cards([...prepared,...retail]),totalItems:displayProducts.length,isRetail:false,more:true}]
+      : view==="favorites"
+        ? (()=>{const fav=window.FiillerFavoriteIds?.get()||new Set();
+            const matches=displayProducts.filter(p=>fav.has(p.id)||
+              [p.classicVariants,p.chilaquilesVariants,p.sizeVariants].some(group=>
+                Array.isArray(group)&&group.some(v=>fav.has(v.id))));
+            return [{name:"Tus favoritos",items:cards(matches),totalItems:matches.length,isRetail:false,more:true}];
+          })()
+        : view==="category" && state.category!=="Todos"
+          ? [{name:ux?.label(state.category)||state.category,items:cards(displayProducts),totalItems:displayProducts.length,isRetail:menuPriority?.isComplementCategory(state.category),more:true}]
+          : view==="menu"
+            ? [{name:"Preparados para ti",items:cards(rankedPrepared),totalItems:rankedPrepared.length,isRetail:false,more:true}]
+            : [
+                {name:"Preparados destacados",items:rankedPrepared.filter(inStock).slice(0,6),isRetail:false},
+                ...(retailMix.length?[{name:"Complementos",items:retailMix.slice(0,4),totalItems:retailMix.length,isRetail:true,compact:true}]:[])
+              ];
 
     function productCard(item) {
       const chilaquilesGroup=Boolean(item.chilaquilesGroup);
