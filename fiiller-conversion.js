@@ -37,6 +37,25 @@ function availableCategories(){
  const types=new Set(currentProducts().filter(allowed).map(x=>String(x.cat||"")));
  return [...categoryLabels.filter(x=>types.has(x.value)),{label:"Ver todo",value:"Todos"}];
 }
+const fiillerIconPaths={
+ "Todos":"M12 2v20 M2 12h20 M5 5l14 14 M19 5L5 19",
+ "De la plancha":"M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0 M15 15l6 6 M7 10a3 3 0 1 0 6 0 3 3 0 1 0-6 0",
+ "Sándwiches y más":"M2 10l10-7 10 7-10 7z M2 14l10 7 10-7 M5 13l4-2 4 2 5-2",
+ "Bebidas calientes":"M3 7h14v7a6 6 0 0 1-6 6H9a6 6 0 0 1-6-6z M17 8h2a3 3 0 0 1 0 6h-2 M7 2v2 M12 2v2",
+ "Bebidas frías":"M6 7h12l-2 14H8z M4 7h16 M12 7l2-5h4 M9 12h6",
+ "Ensaladas":"M3 12h18a9 9 0 0 1-18 0 M7 12C2 4 10 3 12 12 M12 12C11 3 21 3 17 12",
+ "Frutas y bowls":"M12 7c-8-7-14 6 0 15C26 13 20 0 12 7 M12 7l-3-5 M12 7l4-5 M8 11v1 M16 11v1 M12 15v1",
+ "Panadería":"M3 17C0 7 8 2 12 7c4-5 12 0 9 10l-5-3-4 4-4-4z M8 5l2 9 M16 5l-2 9",
+ "Galletas y repostería":"M20 8a9 9 0 1 1-9-5 5 5 0 0 0 9 5 M7 11h.1 M12 8h.1 M12 16h.1 M17 14h.1",
+ "Bebidas embotelladas":"M9 3h6v5l3 4v9H6v-9l3-4z M9 3V1h6v2 M6 14h12",
+ "Botanas y dulces":"M5 3h14v18H5z M5 9h14 M5 15h14 M12 3v18"
+};
+function fiillerCategoryIcon(value){
+ const ns="http://www.w3.org/2000/svg";
+ const svg=document.createElementNS(ns,"svg");svg.setAttribute("viewBox","0 0 24 24");svg.setAttribute("aria-hidden","true");
+ const path=document.createElementNS(ns,"path");path.setAttribute("d",fiillerIconPaths[value]||fiillerIconPaths.Todos);svg.append(path);return svg;
+}
+
 function drawCategories(){
  const available=availableCategories();
  const signature=available.map(x=>x.value).join("|");
@@ -46,7 +65,7 @@ function drawCategories(){
    button.type="button";button.dataset.quickCategory=category.value;
    const symbol=document.createElement("span");symbol.className="fiiller-cat-icon";
    symbol.setAttribute("aria-hidden","true");
-   symbol.textContent=window.FiillerAppExperience?.icon(category.value)||"🍽️";
+   symbol.append(fiillerCategoryIcon(category.value));
    const text=document.createElement("span");text.className="fiiller-cat-name";text.textContent=category.label;
    button.append(symbol,text);
    button.setAttribute("aria-label","Mostrar "+category.label);
