@@ -92,6 +92,7 @@ button{cursor:pointer}
 @media(max-width:490px){.admin-shell{padding:12px 11px 45px}.hero__brand{gap:12px}.hero h1{font-size:26px}.hero p{font-size:11px}.hero__eyebrow{font-size:9px}.module-grid{gap:9px}.module-card{padding:12px;min-height:142px;border-radius:13px}.module-card--featured{min-height:153px}.module-card strong{font-size:13px}.module-desc{font-size:11px}.module-tag{display:none}.module-icon{width:34px;height:34px;border-radius:10px}.module-svg{width:20px;height:20px}.jump-nav a{font-size:11px;padding:8px 10px}.activity-card,.install-card{padding:13px 14px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.module-card{transition:none}}
 </style>
+<link rel="stylesheet" href="./fiiller-admin-dashboard.css?v=1">
 </head>
 <body>
 
@@ -260,7 +261,7 @@ button{cursor:pointer}
  }catch{status.textContent="No se pudo comprobar la sesión. Ingresa desde Compás Fly.";}
 })();
 document.getElementById("admin-logout").addEventListener("click",()=>{
- FillerCloud.logout();
+ FillerCloud.logout();window.dispatchEvent(new Event("fiiller-admin:logout"));
  document.getElementById("admin-session-status").textContent="Sesión cerrada. Ingresa desde Compás Fly para cambiar de usuario.";
 });
 document.getElementById("install-fiiller-admin").addEventListener("click",async()=>{
@@ -286,9 +287,11 @@ function filterModules(){
 }
 search.addEventListener("input",filterModules);
 </script>
+<script src="./fiiller-admin-layout.js?v=1"></script>
 <script src="./fiiller-cancel-inbox.js?v=1"></script>
 <script src="./filler-sounds.js?v=39"></script>
 <script src="./fiiller-support-alerts.js?v=1"></script>
 <script src="./fiiller-support-push-client.js?v=1"></script>
+<script src="./fiiller-admin-kpis.js?v=1"></script>
 </body>
 </html>
