@@ -166,3 +166,9 @@ body.mi-v2-authenticated main{padding-top:16px}
 @media(prefers-reduced-motion:reduce){
  #member #member-favorites-list{scroll-behavior:auto}
 }
+
+/* Contraste AA: texto oscuro sobre el naranja oficial, incluso en hover. */
+#member .mi-v2-order-cta,
+#member .profile-logout .order-cta{color:#062a1d!important}
+#member .mi-v2-order-cta:hover,
+#member .profile-logout .order-cta:hover{color:#062a1d!important}
