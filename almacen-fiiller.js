@@ -137,13 +137,14 @@ function renderExtra(){
  const withoutCost=inventory.filter(i=>Number(i.unit_cost)<=0).length;
  $("priority-alerts").innerHTML=[
   ['expiry','red','◷','Capturar fechas de caducidad',inventory.filter(i=>!i.expiration_date).length,'No se registraron vencimientos en la migración'],
-  ['inventory','orange','!','Insumos bajo mínimo',low.length,'Revisar existencias y puntos de reposición','low'],
+  ['review-low','orange','!','Insumos bajo mínimo',low.length,'Contar y validar insumos uno por uno'],
   ['purchase','orange','≋','Mínimos y unidades por validar',suspect.length,'No generar compras sin confirmar unidades'],
   ['counts','','✓','Conteo físico pendiente',inventory.length-new Set(counts.map(c=>c.item_id)).size,'Comparar cantidades reales con sistema']
  ].map(([pane,color,symbol,title,count,subtitle,filter])=>
  '<button type="button" class="priority-action" data-priority="'+pane+'" '+(filter?'data-filter="'+filter+'"':'')+'><span class="priority-symbol '+color+'">'+symbol+'</span><span class="priority-copy"><strong>'+title+'</strong><small>'+subtitle+'</small></span><strong class="priority-count">'+count+'</strong><span aria-hidden="true">›</span></button>').join("");
  $("priority-alerts").querySelectorAll("[data-priority]").forEach(button=>button.addEventListener("click",()=>{
    navigate(button.dataset.priority);
+   if(button.dataset.priority==="review-low")quick.setReviewMode(true);
    if(button.dataset.filter && $("status-filter")){ $("status-filter").value=button.dataset.filter;render();}
  }));
  const done=new Set(counts.map(c=>c.item_id)).size;
@@ -180,6 +181,7 @@ function renderExtra(){
 }
 document.querySelectorAll("[data-jump]").forEach(button=>button.addEventListener("click",()=>{
  navigate(button.dataset.jump);
+  if(button.dataset.jump==="review-low")quick.setReviewMode(true);
  if(button.dataset.setStatus && $("status-filter")){ $("status-filter").value=button.dataset.setStatus;render(); }
 }));
 $("source-info-toggle").addEventListener("click",()=>{
