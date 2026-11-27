@@ -35,7 +35,7 @@ const categoryLabels=[
 ];
 function availableCategories(){
  const types=new Set(currentProducts().filter(allowed).map(x=>String(x.cat||"")));
- return [{label:"Todos",value:"Todos"},...categoryLabels.filter(x=>types.has(x.value))];
+ return [...categoryLabels.filter(x=>types.has(x.value)),{label:"Ver todo",value:"Todos"}];
 }
 function drawCategories(){
  const available=availableCategories();
@@ -43,14 +43,20 @@ function drawCategories(){
  if(lastCategories!==signature){
   categories.replaceChildren(...available.map(category=>{
    const button=document.createElement("button");
-   button.type="button";button.textContent=category.label;button.dataset.quickCategory=category.value;
+   button.type="button";button.dataset.quickCategory=category.value;
+   const symbol=document.createElement("span");symbol.className="fiiller-cat-icon";
+   symbol.setAttribute("aria-hidden","true");
+   symbol.textContent=window.FiillerAppExperience?.icon(category.value)||"🍽️";
+   const text=document.createElement("span");text.className="fiiller-cat-name";text.textContent=category.label;
+   button.append(symbol,text);
+   button.setAttribute("aria-label","Mostrar "+category.label);
    button.setAttribute("aria-pressed","false");
    return button;
   }));
   lastCategories=signature;
  }
  categories.querySelectorAll("[data-quick-category]").forEach(button=>
-  button.setAttribute("aria-pressed",String(state.category===button.dataset.quickCategory))
+  button.setAttribute("aria-pressed",String(state.category===button.dataset.quickCategory && (button.dataset.quickCategory!=="Todos" || window.FiillerAppExperience?.getView()==="home")))
  );
 }
 function updateSearchStatus(){
@@ -71,17 +77,22 @@ categories.addEventListener("click",e=>{
  if(!chip)return;
  const cat=chip.dataset.quickCategory;
  if(!availableCategories().some(c=>c.value===cat))return;
- state.category=cat;
  if(search.value){
   search.value="";
   search.dispatchEvent(new Event("input",{bubbles:true}));
  }
+ state.category=cat;
+ window.FiillerAppExperience?.setView(cat==="Todos"?"home":"category",{scroll:false,renderNow:false});
  render();
  gotoMenu();
 });
 search.addEventListener("input",()=>{
  // El buscador explora todo el menú, no únicamente la categoría previa.
- if(search.value.trim()&&state.category!=="Todos"){state.category="Todos";render();}
+ if(search.value.trim()){
+   state.category="Todos";
+   window.FiillerAppExperience?.setView("menu",{scroll:false,renderNow:false});
+   renderMenu();
+ }
  drawCategories();updateSearchStatus();
 });
 search.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();gotoMenu();}});
