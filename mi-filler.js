@@ -141,9 +141,9 @@ function updateLastOrder(){
   if(!link||!description)return;
   // Una cuenta autenticada solo puede abrir pedidos asociados a esa misma cuenta.
   // No reutilizar enlaces locales de invitados u otras personas en dispositivos compartidos.
-  description.textContent="Buscando tu último pedido…";
-  link.removeAttribute("href");link.setAttribute("aria-disabled","true");link.tabIndex=-1;
-  link.classList.add("is-inactive");
+  description.textContent="Ver mi historial de pedidos";
+  link.href="./mi-filler.html#mi-pedidos";link.removeAttribute("aria-disabled");link.removeAttribute("tabindex");
+  link.classList.remove("is-inactive");
 }
 const escHistory=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
@@ -167,11 +167,12 @@ async function loadMyFavorites(){
   try{
     const [rows,products]=await Promise.all([
       request("filler_customer_favorites?select=product_id,created_at&user_id=eq."+encodeURIComponent(session.user.id)+"&order=created_at.desc"),
-      request("filler_products?select=id,name,price,stock,active&active=eq.true")
+      request("filler_products?select=id,name,category,price,stock,image_url,active&active=eq.true")
     ]);
     const byId=new Map((Array.isArray(products)?products:[]).map(p=>[String(p.id),p]));
     const favorites=Array.isArray(rows)?rows:[];
     summary.textContent=favorites.length+" producto"+(favorites.length===1?"":"s")+" guardado"+(favorites.length===1?"":"s")+" en tu cuenta.";
+    window.dispatchEvent(new CustomEvent("fiiller:my-favorites-count",{detail:{count:favorites.length}}));
     if(!favorites.length){
       list.innerHTML='<p class="muted">Aún no guardas favoritos. En el menú, toca el corazón ♡ de los productos que te gustan.</p>';
       return;
@@ -179,12 +180,20 @@ async function loadMyFavorites(){
     const money=value=>"$"+Number(value||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
     list.innerHTML=favorites.map(f=>{
       const id=String(f.product_id),product=byId.get(id);
-      const canOrder=Boolean(product&&Number(product.stock)>0);
-      return '<article style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border:1px solid #d6e6d8;border-radius:14px;padding:14px;background:#fafffa">'+
-        '<div style="min-width:145px;flex:1"><strong style="display:block">'+escHistory(product?.name||"Producto no disponible")+'</strong><span class="muted" style="font-size:12px">'+
-        (product?(money(product.price)+(canOrder?" · Disponible":" · Agotado")):"Ya no está en el menú")+'</span></div>'+
-        '<div class="actions"><button type="button" data-favorite-order="'+escHistory(id)+'"'+(canOrder?"":" disabled")+' style="padding:9px 12px;font-size:12px">Agregar al pedido</button>'+
-        '<button type="button" class="secondary" data-favorite-remove="'+escHistory(id)+'" style="padding:9px 12px;font-size:12px">Quitar ♡</button></div></article>';
+      const blocked=Boolean(product && (
+        window.FiillerAvailability?.isChilaquiles({id:product.id,name:product.name,cat:product.category}) ||
+        window.FiillerAvailability?.isDiscontinuedProduct({id:product.id,name:product.name,cat:product.category}) ||
+        /hot\s*cakes?|panqueques?/i.test(product.name)
+      ));
+      const canOrder=Boolean(product&&Number(product.stock)>0&&!blocked);
+      const image=product?.image_url&&/^https:\/\//i.test(product.image_url)
+        ? '<img src="'+escHistory(product.image_url)+'" alt="" loading="lazy" decoding="async">'
+        : '<span aria-hidden="true">☕</span>';
+      return '<article class="mi-v2-favorite-card"><div class="mi-v2-fav-image">'+image+'</div>'+
+        '<div class="mi-v2-fav-content"><strong>'+escHistory(product?.name||"Producto no disponible")+'</strong><small>'+
+        (product?(money(product.price)+(canOrder?" · Disponible":blocked?" · Fuera del menú":" · Agotado")):"Ya no está en el menú")+'</small>'+
+        '<div class="mi-v2-fav-actions"><button type="button" data-favorite-order="'+escHistory(id)+'"'+(canOrder?"":" disabled")+'>+ Agregar</button>'+
+        '<button type="button" class="secondary" data-favorite-remove="'+escHistory(id)+'" aria-label="Quitar '+escHistory(product?.name||"producto")+' de mis favoritos">Quitar ♡</button></div></div></article>';
     }).join("");
   }catch(error){
     summary.textContent="";
@@ -246,30 +255,57 @@ async function loadMyOrderHistory(){
       const pickup=String(o.pickup||"");
       const tracking=String(o.tracking_token||"");
       const follow=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(tracking)
-        ? '<a href="./pedido.html#token='+encodeURIComponent(tracking)+'" style="justify-self:start;color:#006241;font-size:13px;font-weight:800;text-decoration:underline">Ver seguimiento →</a>' : '';
-      return '<article style="border:1px solid #d6e6d8;background:#f9fcf9;border-radius:14px;padding:14px;display:grid;gap:6px">'+
-        '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><strong>'+escHistory(o.public_code)+'</strong><strong style="color:#006241">'+escHistory(o.status)+'</strong></div>'+
-        '<span class="muted" style="font-size:12px">Registrado: '+escHistory(date)+' · Recoger: '+escHistory(pickup)+'</span>'+
-        '<div style="font-size:13px">'+(items||"Productos registrados")+'</div>'+
-        '<strong style="text-align:right">'+money(o.total)+'</strong><div class="actions">'+follow+
-        '<button type="button" class="secondary" data-reorder="'+escHistory(o.id)+'" style="font-size:12px;padding:9px 12px">Repetir pedido ↻</button></div></article>';
-    }).join("");
+        ? '<a href="./pedido.html#token='+encodeURIComponent(tracking)+'">Ver seguimiento →</a>' : '';
+      const status=String(o.status||"");
+      return '<article class="mi-v2-order-item">'+
+        '<div class="mi-v2-order-header"><strong>'+escHistory(o.public_code)+'</strong><span class="mi-v2-order-status" data-status="'+escHistory(status)+'">'+escHistory(status)+'</span></div>'+
+        '<span class="mi-v2-order-date">Registrado: '+escHistory(date)+' · Recoger: '+escHistory(pickup)+'</span>'+
+        '<p class="mi-v2-order-products">'+(items||"Productos registrados")+'</p>'+
+        '<div class="mi-v2-order-bottom"><strong>'+money(o.total)+'</strong><div class="mi-v2-order-actions">'+follow+
+        '<button type="button" class="secondary" data-reorder="'+escHistory(o.id)+'">Volver a pedir ↻</button></div></div></article>';
+    }).join("");;
   }catch(error){
     summary.textContent="";
     list.textContent="No se pudo consultar tu historial: "+error.message;
   }
 }
 $("refresh-my-orders")?.addEventListener("click",loadMyOrderHistory);
+// Antes de repetir un pedido, consultar el catálogo vigente. No reactivar recetas retiradas.
+async function repeatOrderSafely(order){
+ const button=$("member-orders-list").querySelector('[data-reorder="'+CSS.escape(String(order.id))+'"]');
+ if(button)button.disabled=true;
+ try{
+   const products=await request("filler_products?select=id,name,category,stock,active&active=eq.true");
+   if(!Array.isArray(products))throw Error("No pudimos verificar el catálogo actual.");
+   const available=new Map(products.map(product=>[String(product.id),product]));
+   const source=Array.isArray(order.filler_order_items)?order.filler_order_items:[];
+   const valid=[];
+   let skipped=0;
+   for(const line of source){
+     const product=available.get(String(line.product_id||""));
+     const blocked=product&&(
+       window.FiillerAvailability?.isChilaquiles({id:product.id,name:product.name,cat:product.category}) ||
+       window.FiillerAvailability?.isDiscontinuedProduct({id:product.id,name:product.name,cat:product.category}) ||
+       /hot\s*cakes?|panqueques?/i.test(product.name)
+     );
+     if(!product||blocked||!Number.isFinite(Number(product.stock))||Number(product.stock)<=0){skipped++;continue;}
+     const requested=Math.floor(Number(line.qty||0));
+     const qty=Math.min(requested,Math.floor(Number(product.stock)));
+     if(qty<1){skipped++;continue;}
+     if(qty<requested)skipped++;
+     valid.push({id:product.id,qty,extras:line.extras});
+   }
+   if(!valid.length)throw Error("Los productos de este pedido ya no están disponibles. Explora el menú actual.");
+   if(skipped && !window.confirm("Algunos productos ya no están disponibles o cambiaron de existencia. Se omitirá o ajustará "+skipped+" artículo(s). ¿Deseas continuar con los disponibles?"))return;
+   prepareCart(valid,"repetir pedido");
+ }catch(error){message(error.message,true);}
+ finally{if(button?.isConnected)button.disabled=false;}
+}
 $("member-orders-list")?.addEventListener("click",event=>{
-  const button=event.target.closest("[data-reorder]");
-  if(!button)return;
-  const order=recentOrders.find(item=>item.id===button.dataset.reorder);
-  if(!order)return;
-  try{
-    prepareCart((order.filler_order_items||[]).map(item=>({
-      id:item.product_id,qty:item.qty,extras:item.extras
-    })),"repetir pedido");
-  }catch(error){message(error.message,true);}
+ const button=event.target.closest("[data-reorder]");
+ if(!button)return;
+ const order=recentOrders.find(item=>item.id===button.dataset.reorder);
+ if(order)repeatOrderSafely(order);
 });
 
 const trackingUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -339,6 +375,7 @@ function showMember(){
   updateLastOrder();
   loadMyOrderHistory();
   loadMyFavorites();
+  window.dispatchEvent(new Event("fiiller:member-ready"));
   window.FillerPushClient?.refresh?.();
 }
 $("edit-profile").addEventListener("click",()=>{
@@ -452,7 +489,8 @@ e.preventDefault();const f=e.currentTarget,b=f.querySelector("button[type=submit
 try{await saveProfile({full_name:f.elements.name.value.trim(),phone:f.elements.phone.value.trim(),promotions_opt_in:f.elements.promotions.checked});showMember();message("Preferencias actualizadas.");}
 catch(err){message(err.message,true);}finally{b.disabled=false;}
 });
-$("logout").addEventListener("click",async()=>{const access=await token();if(access)fetch(BASE+"/auth/v1/logout",{method:"POST",headers:{...headers(),Authorization:"Bearer "+access}}).catch(()=>{});save(null);profile=null;$("member").hidden=true;$("visitor").hidden=false;tab("login");message("Sesión cerrada.");});
+$("logout").addEventListener("click",async()=>{const access=await token();if(access)fetch(BASE+"/auth/v1/logout",{method:"POST",headers:{...headers(),Authorization:"Bearer "+access}}).catch(()=>{});save(null);profile=null;recentOrders=[];$("member").hidden=true;$("visitor").hidden=false;
+window.dispatchEvent(new Event("fiiller:member-logout"));tab("login");message("Sesión cerrada.");});
 // El enlace de confirmación de Supabase regresa con los tokens en el fragmento.
 async function receiveEmailConfirmation(params){
   const access=params.get("access_token"), refresh=params.get("refresh_token");

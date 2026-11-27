@@ -1,0 +1,125 @@
+/* Mi Fiiller V2 · Perfil y pedidos como app, diseño Fiiller Café */
+:root{--mi-green:#006241;--mi-dark:#063d2c;--mi-orange:#f47b20;--mi-cream:#fbf8f2}
+html{scroll-padding-top:88px}
+main{max-width:1120px;padding-top:20px}
+.brand-inner{max-width:1120px}
+.page-eyebrow{font-size:10px}
+.page-heading{font-size:clamp(24px,3.6vw,32px);margin-bottom:3px}
+.page-intro{font-size:13px;margin-bottom:18px}
+#member .member-hero{min-height:138px;padding:22px 25px;align-items:center;border-radius:22px}
+#member .member-hero:after{opacity:.55;transform:scale(.85)}
+#member .avatar{width:61px;height:61px;flex-basis:61px;font-size:20px}
+#member .member-hero .eyebrow{font-size:10px;margin-bottom:6px}
+#member .member-hero h2{font-size:clamp(22px,3.2vw,30px);line-height:1.15}
+#member .member-hero p.mi-v2-private-email{display:none}
+#member .member-hero .subline{margin-top:5px;font-size:12px}
+#member .mi-v2-order-cta{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:36px;padding:8px 13px;margin-top:11px;border-radius:11px;background:#f47b20;color:#fff;text-decoration:none;font-size:12px;font-weight:850;box-shadow:0 5px 14px #0002}
+#member .mi-v2-order-cta:hover{background:#e16b0f}
+#member .mi-v2-nav{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;background:#fbf8f2f5;border-radius:18px;padding:10px 0;margin:11px 0 17px;backdrop-filter:blur(12px)}
+#member .mi-v2-nav button{border:1px solid #dbe7df;background:#fff;color:#506b5d;border-radius:13px;min-height:49px;display:flex;gap:9px;align-items:center;justify-content:center;padding:8px 12px;font-size:13px;transition:color .18s ease,background .18s ease,transform .18s ease}
+#member .mi-v2-nav button>span:first-child{font-size:20px;line-height:1}
+#member .mi-v2-nav button[aria-current="page"]{background:#006241;color:white;border-color:#006241;box-shadow:0 6px 17px #00573d22}
+#member .mi-v2-nav button:active{transform:scale(.97)}
+#member [data-mi-screen]{min-height:275px;animation:mi-v2-appear .26s ease both}
+#member [data-mi-screen][hidden]{display:none!important}
+@keyframes mi-v2-appear{from{opacity:.5;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+#member .mi-v2-home-label{margin:10px 0 7px}
+#member .mi-v2-home-label h3{font-size:19px;margin-bottom:3px}
+#member .mi-v2-home-label p{font-size:12px;color:#6a7d6b;margin:0}
+#member .quick-grid{grid-template-columns:repeat(3,minmax(0,1fr));margin:12px 0 14px}
+#member .quick-card{min-height:98px;transition:transform .2s ease,box-shadow .2s ease}
+#member .quick-card:hover{transform:translateY(-2px);box-shadow:0 10px 23px #1e482018}
+#member .mi-v2-quick-button{text-align:left;grid-template-columns:42px 1fr;font-weight:normal;background:white;color:#183629}
+#member .mi-v2-quick-button strong{font-weight:850}
+#member .mi-v2-home-banner{background:linear-gradient(125deg,#e9f6ed,#fffaf3);border:1px solid #d6e5da;border-radius:18px;display:flex;align-items:center;gap:15px;padding:16px 19px}
+#member .mi-v2-home-banner>span{font-size:29px}
+#member .mi-v2-home-banner>div{flex:1}
+#member .mi-v2-home-banner strong{color:#0b4830;font-size:14px}
+#member .mi-v2-home-banner p{font-size:12px;color:#64786c;margin:4px 0 0}
+#member .mi-v2-home-banner>a{flex-shrink:0;background:#fff;border:1px solid #cfe5d5;border-radius:11px;color:#006241;padding:10px 12px;font-size:12px;font-weight:800;text-decoration:none}
+#member .mi-v2-screen-head{padding:8px 2px 4px}
+#member .mi-v2-screen-head h2{font-size:clamp(23px,3vw,30px);margin:2px 0 4px;letter-spacing:-.045em;color:#083c2b}
+#member .mi-v2-screen-head p{font-size:13px;color:#6b7e70;max-width:560px;margin-bottom:0}
+#member :is(#member-order-history,#member-favorites,#guest-order-claim,#feedback-survey){margin:12px 0 17px!important;border-radius:18px}
+#member #member-order-history .section-heading h3{font-size:17px}
+#member .mi-v2-claim-details{border:1px solid #dce8de;background:white;border-radius:16px;margin:15px 0 20px;overflow:hidden}
+#member .mi-v2-claim-details summary{cursor:pointer;list-style:none;padding:16px 19px;font-size:13px;font-weight:850;color:#145c3d;display:flex;justify-content:space-between;gap:10px}
+#member .mi-v2-claim-details summary::-webkit-details-marker{display:none}
+#member .mi-v2-claim-details summary>span{transition:transform .2s ease}
+#member .mi-v2-claim-details[open] summary>span{transform:rotate(180deg)}
+#member .mi-v2-claim-details #guest-order-claim{border:0!important;box-shadow:none;border-radius:0;padding-top:4px!important;margin:0!important}
+#member .mi-v2-order-item{display:grid;gap:10px;padding:15px;border:1px solid #dae6dc;border-radius:16px;background:#fcfefc;margin-bottom:10px}
+#member .mi-v2-order-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+#member .mi-v2-order-header strong{font-size:14px;color:#133f2c}
+#member .mi-v2-order-status{border-radius:999px;background:#e6f3e9;color:#066143;font-size:11px;font-weight:850;padding:5px 10px}
+#member .mi-v2-order-status[data-status="Preparando"],#member .mi-v2-order-status[data-status="Nuevo"]{background:#fff1de;color:#7b4c19}
+#member .mi-v2-order-item .mi-v2-order-date{font-size:12px;color:#6f7f72}
+#member .mi-v2-order-products{font-size:13px;line-height:1.5;margin:0;color:#254c38}
+#member .mi-v2-order-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#member .mi-v2-order-bottom strong{color:#006241;font-size:17px}
+#member .mi-v2-order-actions{display:flex;flex-wrap:wrap;gap:8px}
+#member .mi-v2-order-actions a,#member .mi-v2-order-actions button{font-size:12px!important;min-height:38px;padding:9px 12px!important;border-radius:10px;text-decoration:none}
+#member #member-favorites-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px!important}
+#member .mi-v2-favorite-card{display:flex;align-items:center;gap:13px;min-width:0;min-height:110px;padding:12px;background:#fcfefb;border:1px solid #dbe9de;border-radius:15px}
+#member .mi-v2-fav-image{width:74px;height:74px;flex:0 0 74px;border-radius:13px;overflow:hidden;background:#e9f1e9;display:grid;place-items:center;color:#306746;font-size:25px}
+#member .mi-v2-fav-image img{width:100%;height:100%;object-fit:cover}
+#member .mi-v2-fav-content{flex:1;min-width:0;display:grid;gap:3px}
+#member .mi-v2-fav-content strong{font-size:13px;color:#0d3b29;line-height:1.3;overflow-wrap:anywhere}
+#member .mi-v2-fav-content small{color:#687c6d;font-size:11px}
+#member .mi-v2-fav-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:5px}
+#member .mi-v2-fav-actions button{padding:7px 9px!important;font-size:11px!important;border-radius:10px!important;min-height:34px}
+#member .member-grid{gap:13px;grid-template-columns:1.1fr .9fr}
+#member #feedback-survey{padding:15px 18px!important}
+#member #feedback-survey .section-heading h3{font-size:16px}
+#member #feedback-survey p{font-size:12px!important;margin-bottom:10px!important}
+#member .profile-logout{margin:16px 0}
+#member #app-settings{margin-top:15px}
+#member .app-card{grid-template-columns:1fr;align-items:start}
+#member .app-actions button{min-height:41px}
+#member .quick-card:focus-visible,#member .mi-v2-nav button:focus-visible,#member .mi-v2-claim-details summary:focus-visible{outline:3px solid #f2a05f;outline-offset:2px}
+body.mi-v2-authenticated #fiiller-message-alerts{max-width:1120px!important;margin:0 auto 12px!important;padding:9px 13px!important}
+body.mi-v2-authenticated #fiiller-message-alerts button,body.mi-v2-authenticated #fiiller-message-alerts a{font-size:11px!important;padding:8px 11px!important;min-height:36px!important}
+body.mi-v2-authenticated #fiiller-message-alerts p{font-size:11px!important}
+@media(max-width:740px){
+ main{padding:15px 13px 108px}
+ #member .member-hero{padding:18px 16px;min-height:129px;gap:12px}
+ #member .member-hero h2{font-size:21px}
+ #member .member-hero .eyebrow{font-size:9px}
+ #member .avatar{width:48px;height:48px;flex-basis:48px;font-size:16px}
+ #member .mi-v2-nav{position:fixed;bottom:0;left:0;right:0;top:auto;margin:0;grid-template-columns:repeat(4,minmax(0,1fr));background:#fffdf9fa;border-top:1px solid #dce8de;border-radius:19px 19px 0 0;padding:8px 9px calc(9px + env(safe-area-inset-bottom));box-shadow:0 -9px 25px #092d1919}
+ #member .mi-v2-nav button{display:grid;justify-items:center;align-content:center;gap:2px;padding:7px 3px;min-height:50px;border:none;font-size:10px;background:transparent;border-radius:12px}
+ #member .mi-v2-nav button>span:first-child{font-size:23px}
+ #member .mi-v2-nav button[aria-current="page"]{background:#e4f3e8;box-shadow:none;color:#005d3d}
+ #member .quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ #member .quick-card{min-height:95px;grid-template-columns:35px 1fr;padding:13px}
+ #member .quick-card:last-child{grid-column:1/-1;min-height:75px}
+ #member .quick-card .quick-icon{width:35px;height:35px}
+ #member .mi-v2-home-banner{flex-wrap:wrap;padding:13px 15px;gap:9px}
+ #member .mi-v2-home-banner>a{width:100%;text-align:center}
+ #member .member-grid{grid-template-columns:1fr}
+ #member #member-favorites-list{grid-template-columns:1fr}
+ #member .mi-v2-favorite-card{min-height:100px}
+ #member .mi-v2-order-bottom{align-items:flex-start}
+ #member .mi-v2-order-actions{justify-content:flex-start}
+ body.mi-v2-authenticated #fiiller-message-alerts{margin:0 11px 10px!important}
+}
+@media(max-width:400px){
+ #member .member-hero{gap:9px}
+ #member .member-hero h2{font-size:19px}
+ #member .mi-v2-quick-button{grid-template-columns:1fr;align-items:start}
+ #member .quick-grid .quick-card{padding:11px}
+ #member .mi-v2-order-bottom{flex-direction:column;align-items:flex-start}
+ #member .mi-v2-favorite-card{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){
+ #member [data-mi-screen],#member .mi-v2-nav button,#member .quick-card,#member .mi-v2-claim-details summary>span{animation:none!important;transition:none!important;transform:none!important}
+ html{scroll-behavior:auto}
+}
+
+/* Acciones de pedidos pendientes: visibles solo después de validar sesión y tener pendientes. */
+#member .mi-v2-change-orders{background:#fff;border:1px solid #dbe8dd;border-radius:17px;padding:16px 19px;margin:12px 0 17px}
+#member .mi-v2-change-orders[hidden]{display:none!important}
+#member .mi-v2-change-orders h3{color:#0c422c;font-size:16px}
+#member .mi-v2-change-orders button{min-height:38px}
+#member #member-order-history .mi-v2-order-item:focus-within{outline:2px solid #b1d5b9;outline-offset:2px}
+#member #member-favorites-list .mi-v2-fav-image img{background-color:#e7efe6}

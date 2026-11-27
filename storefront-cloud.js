@@ -51,7 +51,7 @@
     for(const line of draft.lines.slice(0,80)){
       const id=String(line?.id||"");
       const item=state.menu.find(product=>product.id===id);
-      if(!item||!Number.isFinite(Number(item.stock))||Number(item.stock)<=0){unavailable++;continue;}
+      if(!item||!fiillerMenuPermitido(item)||!Number.isFinite(Number(item.stock))||Number(item.stock)<=0){unavailable++;continue;}
       const count=Number(line.qty);
       if(!Number.isSafeInteger(count)||count<1||count>100){adjusted++;continue;}
       const allowed=window.FillerAllowedExtrasForProduct?.(id)||[];
