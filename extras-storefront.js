@@ -425,6 +425,10 @@
       return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" role="img" aria-label="' + esc(item.image ? "Fotografía de "+item.name : "Fotografía pendiente de "+item.name) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3><p class="fiiller-item-description">' + esc(description) + '</p>' + sizeSelector + '<div class="item-bottom"><strong class="price">' + (variants || groupVariants ? "Desde " : "") + money(displayPrice) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options || variants || groupVariants ? "Elegir " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(groupVariants ? (groupVariants.find(v=>Number(v.stock)>reserved(v.id))?.id||selected.id) : selected.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
     }
 
+    // Mantener la posición del carrusel cuando se actualiza el carrito o el stock.
+    const previousSliderScroll=new Map(
+      [...menu.querySelectorAll('[data-fiiller-slider="true"]')].map(track=>[track.id,track.scrollLeft])
+    );
     const hasCards=sections.some(section=>section.items.length);
     if(!products.length||!hasCards){
       const unregistered=view==="favorites"&&!window.FiillerFavoriteIds?.signedIn();
@@ -453,6 +457,9 @@
           '<div class="filler-family-track" id="filler-family-'+idx+'" role="region" aria-label="'+esc(section.name)+'" tabindex="0"'+(slider?' data-fiiller-slider="true"':'')+'>'+
           section.items.map(productCard).join('')+'</div>'+more+'</section>';
       }).join("");
+    }
+    for(const track of menu.querySelectorAll('[data-fiiller-slider="true"]')){
+      if(previousSliderScroll.has(track.id))track.scrollLeft=previousSliderScroll.get(track.id);
     }
     menu.querySelectorAll("[data-fiiller-more]").forEach(button=>button.addEventListener("click",()=>{
       window.FiillerAppExperience?.loadMore();
