@@ -96,14 +96,15 @@ const paneLabels={
  recipes:["Recetas y consumo","Conexión del menú con costos e ingredientes."]
 };
 function navigate(key){
- const chosen=paneLabels[key]?key:"overview";
+ const chosen=key==="review-low"?"quick":paneLabels[key]?key:"overview";
+ const route=key==="review-low"?"review-low":chosen;
  if(chosen!=="barcode" && cameraStream)stopBarcodeCamera();
  document.querySelectorAll("[data-pane]").forEach(b=>{b.classList.toggle("active",b.dataset.pane===chosen);b.setAttribute("aria-current",b.dataset.pane===chosen?"page":"false");});
  document.querySelectorAll("[data-view]").forEach(p=>p.classList.toggle("active",p.dataset.view===chosen));
  $("workspace-title").textContent=paneLabels[chosen][0];
  $("workspace-description").textContent=paneLabels[chosen][1];
  $("quick-movement").hidden=chosen==="quick";
- if(location.hash!=="#"+chosen)history.replaceState(null,"","#"+chosen);
+ if(location.hash!=="#"+route)history.replaceState(null,"","#"+route);
 }
 document.querySelectorAll("[data-pane]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.pane)));
 $("quick-scan").addEventListener("click",()=>{navigate("barcode");$("barcode-input").focus();});
@@ -443,6 +444,9 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden)stopBarcode
 window.addEventListener("pagehide",stopBarcodeCamera);
 
 const quick=window.FiillerWarehouseQuick.init({call,getInventory:()=>inventory,getBarcodes:()=>barcodes,getLots:()=>lots,getCounts:()=>counts,refresh:load,navigate});
+quick.setReviewMode(location.hash==="#review-low");
+window.addEventListener("hashchange",()=>quick.setReviewMode(location.hash==="#review-low"));
+document.querySelector('[data-pane="quick"]').addEventListener("click",()=>quick.setReviewMode(false));
 $("barcode-move-quick").addEventListener("click",()=>{if(barcodeSelected)quick.select(barcodeSelected.id);});
 $("inventory-list").addEventListener("click",event=>{const button=event.target.closest("[data-quick-select]");if(button)quick.select(button.dataset.quickSelect);});
 async function load(){
