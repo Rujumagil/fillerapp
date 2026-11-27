@@ -54,6 +54,7 @@
     }
     return method==="GET"?response.json():true;
   }
+  window.FiillerFavoriteIds=Object.freeze({get:()=>new Set(saved),signedIn:()=>Boolean(currentUser)});
   function updateButtons(){
     document.querySelectorAll("#menu-list .filler-favorite-toggle").forEach(button=>{
       const id=button.closest(".item")?.querySelector("[data-add]")?.dataset.add;
@@ -93,6 +94,7 @@
             saved.add(id);toast("¡Guardado en Mis favoritos!");
           }
           updateButtons();
+          window.dispatchEvent(new Event("fiiller:favorites-updated"));
         }catch(error){toast(error.message||"Inténtalo de nuevo.");}
         finally{loading=false;button.disabled=false;}
       });
@@ -112,6 +114,7 @@
         for(const row of Array.isArray(rows)?rows:[])saved.add(String(row.product_id));
       }
       updateButtons();
+      window.dispatchEvent(new Event("fiiller:favorites-updated"));
     }catch(error){console.warn("No se pudieron cargar Mis favoritos:",error);}
     finally{loading=false;}
   }
