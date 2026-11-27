@@ -438,8 +438,17 @@
         // No se ofrecen para mañana ni después del cierre de pedidos de hoy.
         if(!selectedTomorrow)for(const delay of [15,20,30])addSlot(current+delay,delay);
       }
-      slots.sort((a,b)=>a.minuteOfDay-b.minuteOfDay);
       const previous=select.value;
+      // Mantener una selección rápida válida aunque los minutos del reloj avancen.
+      // Rechazarla únicamente si ya no cumple los 10 minutos de anticipación.
+      if(!selectedTomorrow&&previous.startsWith(target+" ")){
+        const hm=previous.slice(target.length+1).match(/^(\d{2}):(\d{2})$/);
+        if(hm){
+          const timeValue=Number(hm[1])*60+Number(hm[2]);
+          if(timeValue>=current+10&&timeValue<=16*60+30)addSlot(timeValue);
+        }
+      }
+      slots.sort((a,b)=>a.minuteOfDay-b.minuteOfDay);
       const signature=target+"|"+slots.map(x=>x.value).join("|");
       if(select.dataset.available===signature)return;
       select.dataset.available=signature;
