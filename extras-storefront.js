@@ -425,30 +425,32 @@
       return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" role="img" aria-label="' + esc(item.image ? "Fotografía de "+item.name : "Fotografía pendiente de "+item.name) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3><p class="fiiller-item-description">' + esc(description) + '</p>' + sizeSelector + '<div class="item-bottom"><strong class="price">' + (variants || groupVariants ? "Desde " : "") + money(displayPrice) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options || variants || groupVariants ? "Elegir " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(groupVariants ? (groupVariants.find(v=>Number(v.stock)>reserved(v.id))?.id||selected.id) : selected.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
     }
 
-    if (!products.length) {
-      menu.innerHTML = '<div class="empty">No encontramos productos para esta búsqueda. Prueba otra familia o palabra.</div>';
+    const hasCards=sections.some(section=>section.items.length);
+    if(!products.length||!hasCards){
+      const unregistered=view==="favorites"&&!window.FiillerFavoriteIds?.signedIn();
+      menu.innerHTML='<div class="fiiller-app-empty"><span aria-hidden="true">'+(view==="favorites"?"♡":"⌕")+'</span><h3>'+
+        (view==="favorites"?"Tus favoritos estarán aquí":"No encontramos productos")+'</h3><p>'+
+        (unregistered?"Inicia sesión en Mi Fiiller para guardar y consultar tus favoritos.":view==="favorites"?"Guarda un producto con el corazón para tenerlo a la mano.":"Prueba otra categoría o una palabra diferente.")+
+        '</p>'+(unregistered?'<a class="fiiller-app-empty-link" href="./mi-filler.html?modo=ingresar">Entrar a Mi Fiiller</a>':'')+'</div>';
     } else {
-      menu.innerHTML = (allView&&!searchQuery&&preparedGroups.length?
-        '<div class="fiiller-prepared-intro"><span>PRIMERO, LO QUE PREPARAMOS EN FIILLER</span><h3>Desayunos, café y alimentos frescos</h3><p>Elige tu comida o bebida preparada. Al final encontrarás los productos empaquetados para complementar.</p></div>':"")
-        + sections.map((section, idx) => {
-        const family = section.name;
-        const items = section.items;
-        const heading = family;
-        const badge=section.isRetail?'<span class="fiiller-family-tag">EXTRAS OPCIONALES</span>':'';
-        const count=section.totalItems||items.length;
-        const explanation=section.isRetail
-          ? '<p class="fiiller-family-intro">Bebidas embotelladas y botanas para acompañar lo que preparamos en Fiiller.</p>'
-          : '';
-        const expand=section.isRetail&&allView&&count>retailLimit&&!searchQuery
-          ? '<button type="button" class="fiiller-expand-complements" data-expand-complements aria-expanded="'+String(retailExpanded)+'">'+(retailExpanded?'Ver menos complementos':'Ver todos los complementos ('+count+')')+'</button>'
-          : '';
-        return '<section class="filler-family'+(section.isRetail?' fiiller-family--complementos':' fiiller-family--preparados')+'"><div class="filler-family-header"><div>'+badge+'<h3>'+esc(heading)+'</h3><small>'+count+(count===1?' producto':' productos')+'</small>'+explanation+'</div></div><div class="filler-family-track" id="filler-family-'+idx+'" data-family="'+esc(family)+'" role="region" aria-label="Productos de '+esc(family)+'" tabindex="0">'+items.map(productCard).join("")+'</div>'+expand+'</section>';
+      menu.innerHTML=sections.map((section,idx)=>{
+        const count=section.totalItems??section.items.length;
+        const heading=(section.compact||view==="menu")?
+          '<div class="fiiller-app-section-title"><div><h3>'+esc(section.name)+'</h3>'+
+            (section.isRetail?'<p>Algo extra para acompañar tu pedido, si se te antoja.</p>':'')+
+          '</div></div>':'';
+        const more=section.more&&count>section.items.length?
+          '<button type="button" class="fiiller-app-more" data-fiiller-more aria-label="Mostrar más productos de '+esc(section.name)+'">Ver más productos <span aria-hidden="true">↓</span></button>':'';
+        return '<section class="filler-family fiiller-app-family'+(section.compact?' fiiller-app-complementos':'')+
+          (section.isRetail?' fiiller-family--complementos':' fiiller-family--preparados')+'">'+heading+
+          '<div class="filler-family-track" id="filler-family-'+idx+'" role="region" aria-label="'+esc(section.name)+'" tabindex="0">'+
+          section.items.map(productCard).join('')+'</div>'+more+'</section>';
       }).join("");
     }
-    menu.querySelectorAll("[data-expand-complements]").forEach(button=>button.addEventListener("click",()=>{
-      retailExpanded=!retailExpanded;renderMenu();
-      if(retailExpanded)menu.querySelector(".fiiller-family--complementos")?.scrollIntoView({behavior:"smooth",block:"start"});
+    menu.querySelectorAll("[data-fiiller-more]").forEach(button=>button.addEventListener("click",()=>{
+      window.FiillerAppExperience?.loadMore();
     }));
+    window.FiillerAppExperience?.updateHead();
     FillerPhotos.applyImages(menu);
     menu.querySelectorAll("[data-coffee-size]").forEach(select => select.addEventListener("change", () => {
       const chosen = select.selectedOptions[0];
