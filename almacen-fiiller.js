@@ -441,7 +441,7 @@ $("barcode-camera-stop").addEventListener("click",()=>{stopBarcodeCamera();barco
 document.addEventListener("visibilitychange",()=>{if(document.hidden)stopBarcodeCamera();});
 window.addEventListener("pagehide",stopBarcodeCamera);
 
-const quick=window.FiillerWarehouseQuick.init({call,getInventory:()=>inventory,getBarcodes:()=>barcodes,refresh:load,navigate});
+const quick=window.FiillerWarehouseQuick.init({call,getInventory:()=>inventory,getBarcodes:()=>barcodes,getLots:()=>lots,getCounts:()=>counts,refresh:load,navigate});
 $("barcode-move-quick").addEventListener("click",()=>{if(barcodeSelected)quick.select(barcodeSelected.id);});
 $("inventory-list").addEventListener("click",event=>{const button=event.target.closest("[data-quick-select]");if(button)quick.select(button.dataset.quickSelect);});
 async function load(){
