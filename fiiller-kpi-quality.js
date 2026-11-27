@@ -32,7 +32,8 @@ function buildActions(info){
  const rows=[];
  if(info.pendingCuts.length)rows.push(action("cuts","Conciliar días sin corte",info.pendingCuts.join(", "),"Administración / Arrow"));
  if(info.pendingTickets.length)rows.push(action("tickets","Completar conteos de tickets",info.pendingTickets.join(", "),"Administración / Arrow"));
- if(info.unclassified.length)rows.push(action("classification","Validar cocina y retail",info.unclassified.length+" códigos sin clasificar · "+money(info.unclassifiedAmount)+" en detalle TPV","Control Fiiller"));
+ if(info.unclassified===null)rows.push(action("source","Verificar acceso a clasificación TPV","La consulta de códigos y categorías no estuvo disponible. No se interpreta como cero pendientes.","Administración"));
+ else if(info.unclassified.length)rows.push(action("classification","Validar cocina y retail",info.unclassified.length+" códigos sin clasificar · "+money(info.unclassifiedAmount)+" en detalle TPV","Control Fiiller"));
  if(info.avgGap!==null&&info.avgGap>0)rows.push(action("average","Probar complementos y medir ticket", "Brecha de "+money(info.avgGap)+" respecto a la meta, en fechas con venta y tickets comparables.","Fiiller · Comercial"));
  if(!rows.length)rows.push(action("followup","Revisión preventiva del periodo","Sin alertas detectadas en las fuentes consultadas. Comprobar cierre administrativo.","Administración"));
  const saved=readSaved(info.month);
@@ -53,7 +54,7 @@ function renderQuality(){
  $("quality-period").textContent=month;
  $("quality-coverage").textContent=(working.length-pendingCuts.length)+"/"+working.length+" cortes";
  $("quality-tickets").textContent=pendingTickets.length+" fechas sin tickets";
- $("quality-classification").textContent=unclassified===null?"Sin datos":unclassified.length+" códigos · "+money(unclassifiedAmount);
+ $("quality-classification").textContent=unclassified===null?"Sin datos":unclassified.length+" código"+(unclassified.length===1?"":"s")+" · "+money(unclassifiedAmount);
  const details=working.filter(d=>pendingCuts.includes(d)||pendingTickets.includes(d));
  $("quality-dates-count").textContent=details.length+" fecha"+(details.length===1?"":"s");
  $("quality-dates").innerHTML=details.length?details.map(d=>{
