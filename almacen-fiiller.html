@@ -227,7 +227,7 @@ button.quick-result:hover,button.quick-result[aria-pressed="true"]{background:#e
    <div class="quick-search-field"><input id="quick-search" type="search" autocomplete="off" placeholder="Nombre, SKU o código de barras…" aria-label="Buscar producto en el almacén"><select id="quick-family" aria-label="Filtrar por familia"><option value="">Todas las familias</option></select></div>
    <p class="quick-context" id="quick-results-hint">La búsqueda no modifica existencias. También puedes utilizar un lector USB o Bluetooth.</p>
    <div class="quick-results" id="quick-results" aria-label="Resultados de insumos"></div>
-   <div class="quick-footer"><button type="button" id="quick-new" class="secondary">＋ Crear insumo inexistente</button></div>
+   <div class="quick-footer"><button type="button" id="quick-new" class="secondary">＋ Crear insumo inexistente</button><button type="button" id="quick-scan-camera" class="secondary">▥ Escanear con cámara</button></div>
   </section>
   <section class="card">
    <div class="section-head"><h2>2. Registrar movimiento</h2><span class="pill">Solo administración</span></div>
@@ -271,6 +271,7 @@ button.quick-result:hover,button.quick-result[aria-pressed="true"]{background:#e
 <p class="muted">El sistema comparará el conteo con la existencia guardada y registrará el ajuste con trazabilidad.</p>
 <div class="fields"><label>Existencia del sistema<input id="barcode-system-qty" readonly value="—"></label><label>Cantidad encontrada<input id="barcode-physical-qty" name="physical" type="number" min="0" step="0.001" required placeholder="0"></label><label class="full">Observación del conteo<input name="note" maxlength="300" placeholder="Conteo físico, revisión en cocina…"></label></div>
 <button type="submit" id="barcode-save-count">Confirmar conteo y actualizar existencia</button>
+<button type="button" id="barcode-move-quick" class="secondary" hidden>↕ Registrar entrada o salida</button>
 </form>
 </section>
 </div>
