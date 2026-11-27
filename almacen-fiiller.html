@@ -219,6 +219,22 @@ button.quick-star[aria-pressed="true"]{color:#9d6319;background:#fff5e0}
 .quick-footer button{font-size:12px;padding:10px 12px}
 @media(max-width:1070px){.quick-grid-v2{grid-template-columns:1fr}.quick-action-card{position:static}}
 @media(max-width:540px){.quick-two{grid-template-columns:1fr 1fr}.quick-filter-tabs button{font-size:10px}.quick-selector-card .quick-results{max-height:305px}}
+
+/* Ajuste v62: controles compactos y recepción desplegable */
+.quick-selector-card .quick-results{max-height:292px}
+.quick-selector-card .quick-search-field{display:grid;grid-template-columns:minmax(0,1fr) minmax(155px,.64fr)}
+.quick-selector-card .quick-search-field input,.quick-selector-card .quick-search-field select{width:100%;min-width:0}
+#quick-selection-actions[hidden],#quick-batch-body[hidden],#quick-empty-hint[hidden]{display:none!important}
+.quick-action-card{height:fit-content;align-self:start}
+.quick-action-card .quick-selected{padding:14px}
+.quick-action-card .quick-selected p{margin:4px 0 0;line-height:1.45;font-size:12px}
+.quick-batch-card{padding-top:16px!important;padding-bottom:16px!important}
+.quick-batch-card .section-head{margin-bottom:0}
+.quick-batch-card #quick-batch-body{margin-top:14px;border-top:1px solid #e7eee6;padding-top:12px}
+.quick-batch-head-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.quick-batch-head-actions button{padding:8px 12px;font-size:12px}
+.quick-batch-card:has(#quick-batch-body:not([hidden])) .section-head{margin-bottom:12px}
+@media(max-width:580px){.quick-selector-card .quick-search-field{grid-template-columns:1fr}.quick-batch-head-actions{width:100%;justify-content:space-between}}
 </style></head><body><header><div class="head"><img src="./assets/filler-logo-oficial.webp" alt="Fiiller Café"><a href="./admin.html">← Control Fiiller</a></div><div class="hero"><small>OCS · OPERACIÓN DE CAFETERÍA</small><h1>Control de almacén</h1><div class="sub">Insumos, movimientos, mínimos y caducidades en un solo lugar.</div></div></header>
 <main><div class="warehouse-shell">
 <aside class="warehouse-side" aria-label="Secciones de almacén"><div class="side-title">☕ Fiiller Control</div><div class="side-subtitle">Administración de cocina</div>
@@ -266,7 +282,7 @@ button.quick-star[aria-pressed="true"]{color:#9d6319;background:#fff5e0}
 
 
 <section class="warehouse-pane" data-view="quick">
- <div class="pane-title"><div><h2>Recepción y registro rápido</h2><p>Busca, revisa existencias y registra mercancía sin abandonar esta pantalla.</p></div><span class="pill">Acceso administrador</span></div>
+ <div class="pane-title"><div><h2>Busca y registra mercancía</h2><p>Elige un insumo, verifica su unidad y registra su movimiento.</p></div><span class="pill">Acceso administrador</span></div>
  <div class="quick-grid quick-grid-v2">
   <section class="card quick-selector-card">
    <div class="section-head"><h2>1. Encontrar producto</h2><span class="pill" id="quick-results-count">Cargando…</span></div>
@@ -308,17 +324,19 @@ button.quick-star[aria-pressed="true"]{color:#9d6319;background:#fff5e0}
      <button type="button" id="quick-retry-lot" class="secondary" hidden>Guardar solamente el lote pendiente</button>
     </div>
    </form>
-   <div id="quick-empty-hint" class="quick-empty-hint"><strong>Cómo funciona</strong><p>① Busca o escanea. ② Selecciona el producto. ③ Captura cantidad, referencia y lote cuando aplique. ④ Confirma.</p></div>
+   <div id="quick-empty-hint" class="quick-empty-hint" hidden><strong>Cómo funciona</strong><p>① Busca o escanea. ② Selecciona el producto. ③ Captura cantidad, referencia y lote cuando aplique. ④ Confirma.</p></div>
    <p class="quick-notice" id="quick-notice" role="status" aria-live="polite"></p>
-   <div class="quick-footer"><button type="button" class="secondary" id="quick-next">Buscar otro</button><button type="button" class="secondary" id="quick-lot">Abrir control de lotes</button></div>
+   <div class="quick-footer" id="quick-selection-actions" hidden><button type="button" class="secondary" id="quick-next">Buscar otro</button><button type="button" class="secondary" id="quick-lot">Abrir control de lotes</button></div>
   </section>
  </div>
  <section class="card quick-batch-card" id="quick-receipt-section">
-  <div class="section-head"><div><h2>3. Recepción de varios productos</h2><p class="quick-context">Prepara una lista antes de guardar. Se registrarán individualmente y se detendrá el proceso si ocurre un error.</p></div><span class="pill" id="quick-batch-count">0 productos</span></div>
+  <div class="section-head"><div><h2>3. Recepción de varios productos</h2><p class="quick-context">Agrega productos a una lista antes de confirmar.</p></div><div class="quick-batch-head-actions"><span class="pill" id="quick-batch-count">0 productos</span><button type="button" id="quick-batch-toggle" class="secondary" aria-expanded="false" aria-controls="quick-batch-body">Abrir recepción ↓</button></div></div>
+  <div id="quick-batch-body" hidden>
   <div id="quick-batch-list" aria-live="polite"><p class="quick-context">Aún no agregas productos a la recepción.</p></div>
   <div class="quick-footer"><button type="button" id="quick-batch-save" disabled>Revisar y registrar recepción</button><button type="button" class="secondary" id="quick-batch-clear">Quitar registros completados</button></div>
   <p class="quick-context">La recepción múltiple no es una transacción única: cada entrada y su lote se guardan por separado. Ante un error se detiene el proceso y se indica qué quedó registrado para evitar doble captura.</p>
   <p class="quick-notice" id="quick-batch-notice" role="status" aria-live="polite"></p>
+  </div>
  </section>
 </section>
 <section class="warehouse-pane" data-view="inventory"><div class="pane-title"><div><h2>Inventario general</h2><p>Consulta productos, stock mínimo, familia y caducidad.</p></div></div>
@@ -376,4 +394,4 @@ button.quick-star[aria-pressed="true"]{color:#9d6319;background:#fff5e0}
 <div class="card"><div class="section-head"><h2>Lotes registrados</h2><span id="lot-count" class="pill">0 lotes</span></div><div id="lot-list"></div></div></section>
 <section class="warehouse-pane" data-view="purchase"><div class="pane-title"><div><h2>Pedido sugerido de insumos</h2><p>Calculado a partir del mínimo configurado y la existencia actual.</p></div><button type="button" id="export-purchases" class="secondary">↓ Descargar CSV</button></div><div class="card"><div id="purchase-list"></div></div><div class="card review-card"><div class="panel-header"><div><span class="panel-overline">CONTROL DE CALIDAD</span><h3>Insumos con unidad o mínimo por revisar</h3></div><span class="pill low" id="suspicious-count">—</span></div><p class="muted">Estos insumos quedan fuera de la compra sugerida hasta comprobar que el mínimo y la existencia utilizan la misma unidad.</p><div id="suspicious-list"></div></div><p class="muted">Estas cantidades indican cuánto falta para alcanzar el mínimo. El cálculo de compra ideal por demanda se activará cuando tengamos máximos y consumo histórico confiables.</p></section>
 <section class="warehouse-pane" data-view="recipes"><div class="pane-title"><div><h2>Recetas y consumo</h2><p>Conecta cada producto vendido con sus ingredientes, cantidades y costos.</p></div></div><a class="quick-link" href="https://ocs-filler.proyectocompas-info.workers.dev/recetario.html" target="_blank" rel="noopener">Recetario actual de OCS <span>↗ Abrir</span></a><a class="quick-link" href="./dashboard-ventas.html">Dashboard de KPIs de ventas <span>↗ Abrir</span></a><div class="info"><strong>Pendiente:</strong> confirmar equivalencias entre productos del menú Fiiller y recetas OCS antes de descontar ingredientes del almacén.</div></section>
-</div></div></div></main><script src="./filler-cloud.js?v=54"></script><script src="./almacen-fiiller-rapido.js?v=2"></script><script src="./almacen-fiiller.js?v=61"></script></body></html>
+</div></div></div></main><script src="./filler-cloud.js?v=54"></script><script src="./almacen-fiiller-rapido.js?v=3"></script><script src="./almacen-fiiller.js?v=61"></script></body></html>
