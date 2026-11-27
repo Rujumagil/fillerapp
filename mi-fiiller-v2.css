@@ -115,3 +115,11 @@ body.mi-v2-authenticated #fiiller-message-alerts p{font-size:11px!important}
  #member [data-mi-screen],#member .mi-v2-nav button,#member .quick-card,#member .mi-v2-claim-details summary>span{animation:none!important;transition:none!important;transform:none!important}
  html{scroll-behavior:auto}
 }
+
+/* Acciones de pedidos pendientes: visibles solo después de validar sesión y tener pendientes. */
+#member .mi-v2-change-orders{background:#fff;border:1px solid #dbe8dd;border-radius:17px;padding:16px 19px;margin:12px 0 17px}
+#member .mi-v2-change-orders[hidden]{display:none!important}
+#member .mi-v2-change-orders h3{color:#0c422c;font-size:16px}
+#member .mi-v2-change-orders button{min-height:38px}
+#member #member-order-history .mi-v2-order-item:focus-within{outline:2px solid #b1d5b9;outline-offset:2px}
+#member #member-favorites-list .mi-v2-fav-image img{background-color:#e7efe6}
