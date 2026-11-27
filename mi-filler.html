@@ -21,6 +21,7 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 @media(max-width:420px){.brand{font-size:16px}.brand img{width:48px;height:42px}.back-link{font-size:11px;padding:9px 10px}.member-hero{gap:12px}.member-hero h2{font-size:23px}.member-hero p{font-size:12px}.quick-card{grid-template-columns:1fr;gap:8px}.quick-card:last-child{grid-template-columns:36px 1fr}.quick-card strong{font-size:12px}.quick-card small{font-size:10px}.profile-logout{flex-wrap:wrap}.profile-logout .order-cta{width:100%;flex:auto}}
  .visitor-intro .card{color:#183629} #temporary-password-required .auth-card{align-self:start}
 </style>
+<link rel="stylesheet" href="./mi-fiiller-v2.css?v=1">
 </head>
 <body>
 <header class="brand-bar"><div class="brand-inner">
@@ -30,7 +31,7 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <main>
 <div class="page-eyebrow">TU ESPACIO PERSONAL</div>
 <h1 class="page-heading">Mi Fiiller</h1>
-<p class="page-intro">Todo lo que necesitas para pedir, consultar y personalizar tu experiencia en Fiiller Café.</p>
+<p class="page-intro">Tus pedidos, favoritos y preferencias en un solo lugar.</p>
 <div id="message" role="status" aria-live="polite" class="notice" hidden></div>
 <section id="visitor" class="visitor-shell" aria-label="Acceso a Mi Fiiller">
 <div class="visitor-intro">
@@ -83,23 +84,38 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <div class="member-hero-content">
 <div class="eyebrow">MI CUENTA FIILLER</div>
 <h2>¡Hola, <span id="member-name"></span>!</h2>
-<p id="member-email"></p>
+<p id="member-email" class="mi-v2-private-email"></p>
 <div class="subline">Tu espacio para pedir, recoger y disfrutar.</div>
+<a class="mi-v2-order-cta" href="./index.html#comprar-rapido">Hacer un pedido <span aria-hidden="true">→</span></a>
 </div>
 </div>
+<nav class="mi-v2-nav" id="mi-v2-nav" aria-label="Secciones de Mi Fiiller">
+<button type="button" data-mi-view="inicio" aria-controls="mi-v2-home" aria-current="page"><span aria-hidden="true">⌂</span><span>Inicio</span></button>
+<button type="button" data-mi-view="pedidos" aria-controls="mi-v2-orders"><span aria-hidden="true">▤</span><span>Pedidos</span></button>
+<button type="button" data-mi-view="favoritos" aria-controls="mi-v2-favorites"><span aria-hidden="true">♡</span><span>Favoritos</span></button>
+<button type="button" data-mi-view="cuenta" aria-controls="mi-v2-account"><span aria-hidden="true">☻</span><span>Mi cuenta</span></button>
+</nav>
+<div id="mi-v2-home" data-mi-screen="inicio">
+<div class="mi-v2-home-label"><h3>Accesos rápidos</h3><p>Todo lo importante, sin recorrer una página larga.</p></div>
 <div class="quick-grid">
 <a class="quick-card" id="member-orders-link" href="./pedido.html" aria-label="Consultar seguimiento de mi pedido">
 <span class="quick-icon" aria-hidden="true">▤</span><span><strong>Mi último pedido</strong><small id="member-orders-description">Consulta su seguimiento</small></span></a>
-<div class="quick-card is-inactive" aria-label="Mis beneficios, próximamente">
-<span class="quick-icon orange" aria-hidden="true">✦</span><span><strong>Mis beneficios</strong><small>Promociones y recompensas próximamente</small></span></div>
-<a class="quick-card" href="#app-settings"><span class="quick-icon" aria-hidden="true">▣</span><span><strong>Mi app</strong><small>Instalación y permisos del celular</small></span></a>
+<button type="button" class="quick-card mi-v2-quick-button" data-mi-view="favoritos"><span class="quick-icon orange" aria-hidden="true">♡</span><span><strong>Mis favoritos</strong><small id="mi-v2-favorites-count">Tus productos guardados</small></span></button>
+<button type="button" class="quick-card mi-v2-quick-button" data-mi-view="cuenta"><span class="quick-icon" aria-hidden="true">☷</span><span><strong>Mi cuenta</strong><small>Datos, preferencias y notificaciones</small></span></button>
 </div>
+<div class="mi-v2-home-banner"><span aria-hidden="true">☕</span><div><strong>¿Se te antoja algo fresco?</strong><p>Elige tus preparados favoritos y recógelos cuando te convenga.</p></div><a href="./index.html#comprar-rapido">Explorar menú →</a></div>
+</div>
+<div id="mi-v2-orders" data-mi-screen="pedidos" hidden>
+<div class="mi-v2-screen-head"><div><span class="page-eyebrow">TU HISTORIAL</span><h2>Mis pedidos</h2><p>Consulta el estado de tus compras y repite únicamente productos vigentes.</p></div></div>
 <section class="card" id="member-order-history" style="margin:18px 0 22px;padding:19px" aria-label="Historial de pedidos de los últimos 90 días">
 <div class="section-heading" style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h3>Mis pedidos · últimos 90 días</h3><button type="button" class="secondary" id="refresh-my-orders">Actualizar</button></div>
 <p class="muted mini">Consulta tus pedidos de los últimos 90 días, productos, importes y estado. Solo tú puedes verlos al iniciar sesión.</p>
 <div id="member-orders-summary" style="font-weight:750;color:#006241;margin:12px 0"></div>
 <div id="member-orders-list" aria-live="polite" style="display:grid;gap:12px"><p class="muted">Cargando tu historial…</p></div>
 </section>
+</div>
+<div id="mi-v2-favorites" data-mi-screen="favoritos" hidden>
+<div class="mi-v2-screen-head"><div><span class="page-eyebrow">TUS ELECCIONES</span><h2>Mis favoritos</h2><p>Productos que guardaste para pedir sin perder tiempo.</p></div></div>
 <section class="card" id="member-favorites" style="margin:18px 0 22px;padding:19px" aria-label="Productos favoritos de mi cuenta">
 <div class="section-heading"><h3>♡ Mis favoritos</h3><button type="button" class="secondary" id="refresh-my-favorites">Actualizar</button></div>
 <p class="muted mini">Guarda productos con el corazón del menú para encontrarlos aquí. Siempre verás el precio y la disponibilidad actuales.</p>
@@ -107,6 +123,10 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <div id="member-favorites-list" style="display:grid;gap:10px"><p class="muted">Cargando tus favoritos…</p></div>
 <a href="./index.html#menu" style="display:inline-block;margin-top:14px;font-size:13px;font-weight:800">Explorar el menú y guardar favoritos →</a>
 </section>
+</div>
+<div id="mi-v2-orders-claim-placeholder" hidden></div>
+<div id="mi-v2-guest-order-claim" data-mi-attach="pedidos" hidden></div>
+<details class="mi-v2-claim-details" id="mi-v2-claim-details" hidden><summary>¿Compraste como invitado? Vincula tu pedido <span aria-hidden="true">⌄</span></summary>
 <section class="card" id="guest-order-claim" style="margin:18px 0 22px;padding:20px" aria-label="Vincular pedido de invitado">
 <div class="section-heading"><h3>¿Compraste como invitado?</h3></div>
 <p class="muted mini">Agrega a tu cuenta un pedido de los últimos 90 días. Necesitas su enlace privado de seguimiento y el teléfono que registraste al comprar.</p>
@@ -123,6 +143,9 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <small class="muted">Solo puedes vincular pedidos que no pertenezcan a otra cuenta. Nadie puede verlos sin comprobar los datos.</small>
 </form>
 </section>
+</details>
+<div id="mi-v2-account" data-mi-screen="cuenta" hidden>
+<div class="mi-v2-screen-head"><div><span class="page-eyebrow">TUS AJUSTES</span><h2>Mi cuenta</h2><p>Controla tus datos personales y cómo te comunicas con Fiiller.</p></div></div>
 <section class="card" id="feedback-survey" style="margin:18px 0 22px;padding:22px;background:linear-gradient(120deg,#f1f8f3,#fff);border:1px solid #dbe9dd;border-radius:19px">
 <div style="display:flex;align-items:flex-start;gap:15px">
   <div style="background:#e3f2e7;color:#006241;border-radius:15px;width:52px;height:52px;display:grid;place-items:center;font-size:26px;flex-shrink:0" aria-hidden="true">★</div>
@@ -157,8 +180,7 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <button type="submit" class="secondary promo-save" id="save-preferences">Guardar preferencia</button>
 </form>
 </div>
-<div class="profile-logout"><a class="order-cta" href="./index.html#menu">Hacer un pedido <span aria-hidden="true">→</span></a><button class="logout-button secondary" type="button" id="logout">Cerrar sesión</button></div>
-</section>
+<div class="profile-logout"><a class="order-cta" href="./index.html#comprar-rapido">Hacer un pedido <span aria-hidden="true">→</span></a><button class="logout-button secondary" type="button" id="logout">Cerrar sesión</button></div>
 <section class="card app-card" id="app-settings" aria-label="Opciones de la aplicación">
 <div><h3>Fiiller Café en tu celular</h3><p>Instala la app para entrar más rápido. Puedes permitir notificaciones del navegador; para los avisos de un pedido, abre su seguimiento.</p><p id="mi-fiiller-install-help" data-install-status role="status" aria-live="polite" style="margin-top:9px">Toca «Instalar app» para agregar Fiiller a tu dispositivo.</p></div>
 <div class="app-actions">
@@ -174,13 +196,16 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
   <button type="button" id="filler-check-push-permission" class="secondary" style="min-height:44px">Volver a comprobar permisos</button>
 </div>
 </section>
+</div>
+</section>
 
 <p style="text-align:center"><a href="./atencion.html" style="display:inline-block;background:#006241;color:white;padding:13px 20px;border-radius:12px;text-decoration:none;font-weight:800">💬 Centro de mensajes · Pregunta por un producto</a></p>
 <p class="foot-note">Fiiller Café · Tus datos y preferencias permanecen en tu cuenta.</p>
 </main>
 <script src="./pwa.js?v=3"></script>
-<script src="./mi-filler.js?v=56"></script>
-<script src="./fiiller-order-actions.js?v=1"></script><script src="./filler-sounds.js?v=39"></script><script src="./fiiller-support-alerts.js?v=1"></script><script src="./fiiller-support-push-client.js?v=1"></script>
+<script src="./mi-filler.js?v=57"></script>
+<script src="./mi-fiiller-v2.js?v=1"></script>
+<script src="./fiiller-order-actions.js?v=2"></script><script src="./filler-sounds.js?v=39"></script><script src="./fiiller-support-alerts.js?v=1"></script><script src="./fiiller-support-push-client.js?v=1"></script>
 <script src="./filler-marketing-push-client.js?v=5"></script>
 
 </body>
