@@ -9,6 +9,13 @@ const $=id=>document.getElementById(id);
 const promoSection=$("promociones"),comingSection=$("proximos");
 if(!promoSection||!comingSection)return;
 promoSection.hidden=true;comingSection.hidden=true;
+const promoLinks=[...document.querySelectorAll('a[href="#promociones"]')];
+const comingLinks=[...document.querySelectorAll('a[href="#proximos"]')];
+const syncLinks=()=>{
+ promoLinks.forEach(link=>link.hidden=promoSection.hidden);
+ comingLinks.forEach(link=>link.hidden=comingSection.hidden);
+};
+syncLinks();
 let rows=[],loaded=false,lastSignature="";
 const esc=s=>String(s??"").slice(0,200);
 const safeImage=url=>typeof url==="string"&&(/^(https:\/\/[^\s"'<>]+|assets\/[A-Za-z0-9_./-]+)$/.test(url));
@@ -42,11 +49,10 @@ function promoCard(r,p){
  const photo=image(r,p);
  if(photo){card.append(photo);card.classList.add("has-photo");}
  const body=make("div","fiiller-feature-text");
- const tag=make("span","fiiller-feature-tag","Fiiller Promos");
  const title=make("h3","",r.title||p.name);
  const desc=make("p","",r.description||p.name);
  const price=make("strong","fiiller-promo-price",money(p.price));
- body.append(tag,title,desc,price);
+ body.append(title,desc,price);
  const add=make("button","fiiller-feature-buy","+ Agregar");
  add.type="button";add.setAttribute("aria-label","Elegir "+p.name+" desde la promoción");
  add.addEventListener("click",()=>{
@@ -72,7 +78,7 @@ function comingCard(r){
  return card;
 }
 function update(){
- if(!loaded||!window.FillerOnlineActive){promoSection.hidden=true;comingSection.hidden=true;return;}
+ if(!loaded||!window.FillerOnlineActive){promoSection.hidden=true;comingSection.hidden=true;syncLinks();return;}
  const validPromos=rows.filter(r=>r.kind==="promotion").map(r=>({r,p:productFor(r)})).filter(x=>x.p);
  const upcoming=rows.filter(r=>r.kind==="upcoming"&&safeImage(r.image_url)).map(comingCard).filter(Boolean);
  const signature=JSON.stringify({promos:validPromos.map(x=>[x.r.product_id,x.r.title,x.p.price,x.p.stock]),upcoming:rows.filter(r=>r.kind==="upcoming"&&safeImage(r.image_url)).map(r=>[r.title,r.image_url])});
@@ -88,6 +94,7 @@ function update(){
   else if(old){const fresh=make("div","fiiller-discovery-grid");fresh.append(...upcoming);old.replaceWith(fresh);}
   comingSection.hidden=false;
  }else comingSection.hidden=true;
+ syncLinks();
 }
 async function load(){
  try{
@@ -98,7 +105,7 @@ async function load(){
   const data=await res.json();
   rows=Array.isArray(data)?data.filter(r=>r&&typeof r.title==="string"):[];
   loaded=true;update();
- }catch{loaded=false;promoSection.hidden=true;comingSection.hidden=true;}
+ }catch{loaded=false;promoSection.hidden=true;comingSection.hidden=true;syncLinks();}
 }
 window.addEventListener("fiiller:catalog-ready",update);
 load();
