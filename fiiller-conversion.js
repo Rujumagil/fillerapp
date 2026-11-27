@@ -47,7 +47,7 @@ function updateSearchStatus(){
  const count=menu.querySelectorAll(".item").length;
  const loading=!window.FillerOnlineActive;
  status.textContent=loading?"Verificando el menú disponible…":
-   query?(count?count+" opción"+(count===1?"":"es")+" para «"+query.slice(0,40)+"».":"No encontramos ese producto. Prueba otra palabra o categoría."):
+   query?(count?count+(count===1?" opción":" opciones")+" para «"+query.slice(0,40)+"».":"No encontramos ese producto. Prueba otra palabra o categoría."):
    state.category==="Todos"?"Elige una categoría o busca por nombre para pedir más rápido.":
    "Mostrando "+state.category+". Selecciona un producto para personalizarlo.";
 }
