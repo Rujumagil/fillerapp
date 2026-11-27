@@ -13,7 +13,7 @@
   const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
   const actionable = () => [...cart.querySelectorAll(
     'button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
-  )].filter(el => !el.hidden && !el.closest("[hidden]") && getComputedStyle(el).display !== "none");
+  )].filter(el => !el.hidden && !el.closest("[hidden]") && getComputedStyle(el).display !== "none" && (!el.getClientRects || el.getClientRects().length > 0));
   const scrollToShop = () => {
     const target = $("comprar-rapido") || $("menu");
     target?.scrollIntoView({behavior: reduced() ? "auto" : "smooth",block:"start"});
@@ -50,7 +50,10 @@
   window.closeFillerCart = function(exploreMenu = false) {
     if (exploreMenu === true) goToMenuOnClose = true;
     if (history.state?.fillerCartOpen) history.back();
-    else show(false);
+    else {
+      show(false);
+      if(location.hash==="#carrito")history.replaceState(history.state,"",location.pathname+location.search);
+    }
   };
   overlay.addEventListener("click",()=>window.closeFillerCart());
   window.addEventListener("popstate",()=>show(Boolean(history.state?.fillerCartOpen)));
