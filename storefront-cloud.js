@@ -378,7 +378,7 @@
       if(typeof promo.id!=="string"||typeof promo.title!=="string")continue;
       const item=state.menu.find(product=>product.id===promo.product_id);
       // La campanita sigue la misma disponibilidad que el menú, sin campañas caducadas.
-      if(!item||Number(item.stock)<=0||!fiillerMenuPermitido(item))continue;
+      if(!window.FillerOnlineActive||!item||Number(item.stock)<=0||!fiillerMenuPermitido(item))continue;
       visiblePromoCount++;
       const card=document.createElement("article");
       card.style.cssText="display:grid;gap:6px;padding:14px 0;border-bottom:1px solid #e8e2d9";
