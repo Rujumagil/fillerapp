@@ -83,7 +83,7 @@
    }
    function getInput(){
     const item=current(),mode=$mode.value,val=$qty.value.trim(),quantity=Number(val),note=$note.value.trim();
-    const lot=lotInfo(),hasLot=!!(lot.code||lot.expiry);
+    const lot=lotInfo(),hasLot=mode==="entrada"&&!!(lot.code||lot.expiry);
     if(!item)return {error:"Selecciona un insumo."};
     if(!["entrada","salida","conteo"].includes(mode))return {error:"Tipo de registro inválido."};
     if(val===""||!Number.isFinite(quantity)||quantity<0||quantity>1000000||Math.abs(quantity*1000-Math.round(quantity*1000))>0.00001||(mode!=="conteo"&&quantity<=0))return {error:"Escribe una cantidad válida, según la unidad del insumo."};
