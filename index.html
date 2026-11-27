@@ -339,6 +339,7 @@
     }
 </style>
 <link rel="stylesheet" href="fiiller-premium.css?v=5">
+  <link rel="stylesheet" href="fiiller-conversion.css?v=1">
 </head>
 <body>
   <header><div class="nav"><div class="brand"><img class="brand-mark" src="assets/filler-logo-oficial.webp" alt="Fiiller Café" width="95" height="72"><div><h1>Fiiller Café</h1><p>Menu digital para pedir y recoger</p></div></div><nav class="filler-nav-actions"><a href="#menu">Menú</a><a class="fiiller-nav-feature" href="#promociones">Promos</a><a class="fiiller-nav-feature" href="#proximos">Próximos</a><a href="./mi-filler.html" aria-label="Mi Fiiller: registro e inicio de sesión">Mi Fiiller</a><button type="button" id="filler-bell" class="filler-bell" aria-label="Mis avisos" aria-expanded="false" aria-controls="filler-alert-panel" title="Mis avisos">🔔<span id="filler-bell-dot" class="filler-bell-dot" hidden></span></button><a href="#menu" class="order-link">Ordenar</a></nav></div><section id="filler-alert-panel" class="filler-alert-panel" hidden aria-label="Centro de notificaciones"><div class="filler-alert-header"><h2>🔔 Mis avisos</h2><button id="filler-alert-close" class="filler-alert-close" type="button" aria-label="Cerrar avisos">✕</button></div><div id="filler-alert-content" role="status"><p>Cargando avisos…</p></div></section></header>
@@ -360,7 +361,25 @@
         <img src="assets/filler-vitrina-hero-hd.webp" alt="Vitrina de Fiiller Café con los alimentos frescos preparados para elegir" fetchpriority="high" decoding="async">
       </div>
     </section>
+    <section class="fiiller-shop-start" id="comprar-rapido" aria-labelledby="fiiller-shop-title">
+       <div class="fiiller-shop-start__copy">
+         <span class="fiiller-shop-eyebrow">PEDIR Y RECOGER · FIILLER CAFÉ</span>
+         <h2 id="fiiller-shop-title">¿Qué se te antoja hoy?</h2>
+         <p>Encuentra tu favorito, personalízalo y elige cuándo pasar a recogerlo.</p>
+       </div>
+       <div class="fiiller-shop-start__actions">
+         <label class="filler-menu-search" for="filler-product-search">
+           <span aria-hidden="true">⌕</span>
+           <input id="filler-product-search" type="search" autocomplete="off" enterkeyhint="search" placeholder="Buscar café, desayuno o snack…" aria-label="Buscar productos de Fiiller Café">
+           <button type="button" id="filler-clear-search" aria-label="Limpiar búsqueda" hidden>✕</button>
+         </label>
+         <div class="fiiller-quick-categories" id="fiiller-quick-categories" aria-label="Categorías más consultadas"></div>
+         <p class="fiiller-shop-search-status" id="fiiller-shop-search-status" role="status" aria-live="polite">Elige una categoría o escribe el nombre de un producto.</p>
+       </div>
+     </section>
     <section id="menu">
+      <div class="section-head"><div><h2>Explora el menú Fiiller</h2><p>Elige tus favoritos, personalízalos y recógelos en Fiiller Café.</p></div></div>
+      <div class="order-layout" id="pedido"><aside class="filters" id="filters"></aside><div class="menu-grid" id="menu-list"></div><aside class="cart" id="filler-cart" aria-labelledby="filler-cart-title"><div class="filler-cart-header"><button type="button" class="filler-cart-back" onclick="closeFillerCart()" aria-label="Regresar al menú">‹ <span>Seguir comprando</span></button><h2 id="filler-cart-title">Tu pedido</h2><p>Revisa tus productos y elige cuándo recoger.</p></div><div class="filler-checkout-steps" aria-label="Pasos de tu pedido"><span><b>1</b> Revisa</span><span><b>2</b> Tus datos</span><span><b>3</b> Recoge</span></div><div class="notice" id="client-status" role="status" aria-live="polite" tabindex="-1"></div><div id="cart-lines"></div><div class="total"><span>Total</span><span id="cart-total">$0</span></div><div id="customer-account" class="notice" style="display:block;background:#f0f8f1;border-radius:13px;padding:13px;margin:14px 0;color:#174a34;font-size:14px"><strong>☕ Compra como invitado</strong><p style="margin:7px 0">Puedes pedir ahora o iniciar sesión para guardar tus datos y pedir más rápido.</p><a href="./mi-filler.html" id="customer-login-link" style="display:inline-block;padding:9px 12px;border-radius:9px;background:#006241;color:white;text-decoration:none;font-weight:800">Ingresar o crear cuenta</a></div><div id="customer-fields"><label>Nombre<input id="customer-name" placeholder="Ej. Juan Perez"></label><label>Teléfono<input id="customer-phone" placeholder="Ej. 3310161443" inputmode="tel"></label></div><label>¿Cuándo deseas recoger?<select id="pickup-date"><option value="today">Hoy</option><option value="tomorrow">Mañana (pedido programado)</option></select></label><label>Hora para recoger<select id="pickup-time"></select><small id="pickup-help" style="font-weight:500;color:#6e796f;line-height:1.4"></small></label><label>Notas<textarea id="notes" placeholder="Sin cebolla, extra salsa, etc."></textarea></label><div id="filler-checkout-error" class="filler-checkout-error" role="alert" hidden></div><div class="filler-checkout-action"><div class="filler-checkout-action-summary"><span>Total del pedido</span><strong id="filler-sticky-total">$0</strong></div><button id="send-order" type="button" disabled>Conectando con cocina…</button></div></aside></div>
       <section class="fiiller-discovery" id="promociones" aria-label="Promociones y especialidades de Fiiller Café">
         <div class="fiiller-discovery-head">
           <div><h2>Fiiller Promos</h2><p>Especialidades y productos para disfrutar hoy. Elige y haz tu pedido.</p></div>
@@ -376,8 +395,6 @@
         <div class="fiiller-discovery-head"><div><h2>Próximos a llegar</h2><p>Nuevas ideas para sorprenderte en Fiiller Café.</p></div></div>
         <div class="fiiller-coming"><div><span class="fiiller-feature-tag">Novedades en preparación</span><h3>Algo delicioso está por llegar</h3><p>Estamos preparando nuevas opciones para el menú. Las anunciaremos aquí cuando estén confirmadas y listas para pedir.</p></div><a href="./mi-filler.html">Conoce Mi Fiiller →</a></div>
       </section>
-      <div class="section-head"><div><h2>Explora el menú Fiiller</h2><p>Elige tus favoritos, personalízalos y recógelos en Fiiller Café.</p></div></div>
-      <div class="order-layout" id="pedido"><aside class="filters" id="filters"></aside><div class="menu-grid" id="menu-list"></div><aside class="cart" id="filler-cart" aria-labelledby="filler-cart-title"><div class="filler-cart-header"><button type="button" class="filler-cart-back" onclick="closeFillerCart()" aria-label="Regresar al menú">‹ <span>Seguir comprando</span></button><h2 id="filler-cart-title">Tu pedido</h2><p>Revisa tus productos y elige cuándo recoger.</p></div><div class="filler-checkout-steps" aria-label="Pasos de tu pedido"><span><b>1</b> Revisa</span><span><b>2</b> Tus datos</span><span><b>3</b> Recoge</span></div><div class="notice" id="client-status" role="status" aria-live="polite" tabindex="-1"></div><div id="cart-lines"></div><div class="total"><span>Total</span><span id="cart-total">$0</span></div><div id="customer-account" class="notice" style="display:block;background:#f0f8f1;border-radius:13px;padding:13px;margin:14px 0;color:#174a34;font-size:14px"><strong>☕ Compra como invitado</strong><p style="margin:7px 0">Puedes pedir ahora o iniciar sesión para guardar tus datos y pedir más rápido.</p><a href="./mi-filler.html" id="customer-login-link" style="display:inline-block;padding:9px 12px;border-radius:9px;background:#006241;color:white;text-decoration:none;font-weight:800">Ingresar o crear cuenta</a></div><div id="customer-fields"><label>Nombre<input id="customer-name" placeholder="Ej. Juan Perez"></label><label>Teléfono<input id="customer-phone" placeholder="Ej. 3310161443" inputmode="tel"></label></div><label>¿Cuándo deseas recoger?<select id="pickup-date"><option value="today">Hoy</option><option value="tomorrow">Mañana (pedido programado)</option></select></label><label>Hora para recoger<select id="pickup-time"></select><small id="pickup-help" style="font-weight:500;color:#6e796f;line-height:1.4"></small></label><label>Notas<textarea id="notes" placeholder="Sin cebolla, extra salsa, etc."></textarea></label><div id="filler-checkout-error" class="filler-checkout-error" role="alert" hidden></div><div class="filler-checkout-action"><div class="filler-checkout-action-summary"><span>Total del pedido</span><strong id="filler-sticky-total">$0</strong></div><button id="send-order" type="button" disabled>Conectando con cocina…</button></div></aside></div>
     </section>
   </main><div style="text-align:center;margin:24px auto"><a href="./atencion.html" style="display:inline-block;background:#006241;color:#fff;padding:14px 19px;border-radius:14px;text-decoration:none;font-weight:800">💬 ¿Hay algún producto disponible? Pregúntanos</a></div><nav class="filler-bottom-nav" aria-label="Navegación de Fiiller Café"><a href="#inicio"><span aria-hidden="true">⌂</span><small>Inicio</small></a><a href="#menu"><span aria-hidden="true">☕</span><small>Menú</small></a><button type="button" class="filler-nav-cart" onclick="openFillerCart()" aria-label="Abrir mi pedido"><span aria-hidden="true">▤</span><small>Pedido</small><b id="filler-nav-cart-count" hidden>0</b></button><a href="./mi-filler.html"><span aria-hidden="true">◉</span><small>Mi Fiiller</small></a></nav><button class="order-bubble" id="order-bubble" onclick="openFillerCart()"><span id="bubble-count">0 productos</span><strong id="bubble-total">Ver pedido</strong></button><div class="toast-msg" id="toast"></div>
   <script>
@@ -496,5 +513,6 @@
   <script src="storefront-cloud.js?v=47"></script>
   <script src="storefront-features.js?v=5" defer></script>
   <script src="promo-deeplink.js?v=1"></script>
+  <script src="fiiller-conversion.js?v=1" defer></script>
 </body>
 </html>
