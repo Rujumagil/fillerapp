@@ -13,7 +13,7 @@
    const getLocal=(key)=>{try{const x=JSON.parse(localStorage.getItem(key)||"[]");return Array.isArray(x)?x.filter(v=>typeof v==="string").slice(0,30):[];}catch{return [];}};
    const setLocal=(key,val)=>{try{localStorage.setItem(key,JSON.stringify(val));}catch{/* Private browsing: no persistence. */}};
    const state={
-    selectedId:"",filter:"all",limit:8,batchExpanded:false,recent:getLocal("fiiller_almacen_recent_v2"),
+    selectedId:"",filter:"all",reviewMode:false,limit:8,batchExpanded:false,recent:getLocal("fiiller_almacen_recent_v2"),
     favorites:getLocal("fiiller_almacen_favorites_v2"),busy:false,batchBusy:false,
     batch:[],lastSaved:null,pendingLot:null,unknownSingle:false
    };
@@ -33,6 +33,30 @@
     if(el.dataset.key===key)return;
     el.innerHTML='<option value="">Todas las familias</option>'+cats.map(c=>'<option value="'+safe(c)+'">'+safe(c)+'</option>').join("");
     el.dataset.key=key;el.value=cats.includes(old)?old:"";
+   }
+   function lowItems(){return config.getInventory().filter(item=>Number(item.min_quantity)>0&&Number(item.quantity)<=Number(item.min_quantity));}
+   function todayCounts(){return new Set(config.getCounts().map(x=>String(x.item_id)));}
+   function renderReview(){
+    const panel=$("quick-review-panel");
+    panel.hidden=!state.reviewMode;
+    if(!state.reviewMode)return;
+    const low=lowItems(),done=todayCounts();
+    const reviewed=low.filter(i=>done.has(String(i.id))).length;
+    const pending=low.length-reviewed;
+    $("quick-review-progress").textContent=pending+" sin revisar · "+reviewed+" contados hoy · "+low.length+" alertas vigentes";
+    $("quick-review-next").disabled=state.busy||state.batchBusy||!!state.pendingLot||pending===0;
+   }
+   function setReviewMode(on){
+    if(state.busy||state.batchBusy||state.pendingLot)return;
+    state.reviewMode=!!on;
+    state.filter=on?"low":"all";
+    state.limit=8;
+    state.selectedId="";
+    $qty.value="";$note.value="";$("quick-lot-code").value="";$("quick-expiry").value="";
+    $("quick-search").value="";
+    $("quick-family").value="";
+    if(on)$mode.value="conteo";
+    render();
    }
    function matches(){
     const term=norm($("quick-search").value),terms=term.split(" ").filter(Boolean),family=$("quick-family").value;
@@ -58,6 +82,7 @@
       else score=5;
      }else if(state.recent.includes(id))score=state.recent.indexOf(id)-20;
      else if(state.favorites.includes(id))score=state.favorites.indexOf(id)-8;
+     if(state.reviewMode&&!term)score=counted.has(id)?100:0;
      return {item,score};
     }).filter(Boolean).sort((a,b)=>a.score-b.score||String(a.item.name).localeCompare(String(b.item.name),"es"));
    }
@@ -68,7 +93,9 @@
     $("quick-results").innerHTML=rows.slice(0,state.limit).map(({item})=>{
      const id=String(item.id),favorite=state.favorites.includes(id),selected=state.selectedId===id;
      const low=Number(item.min_quantity)>0&&Number(item.quantity)<=Number(item.min_quantity);
-     return '<div class="quick-row"><button class="quick-result" type="button" data-quick-id="'+safe(id)+'" aria-pressed="'+selected+'"><span><strong>'+safe(item.name)+'</strong><small>'+safe(item.code)+' · '+safe(item.category)+'</small></span><span class="quick-balance">'+fmt(item.quantity)+' '+safe(item.unit)+(low?' ⚠':'')+'</span></button><button class="quick-star" type="button" data-quick-star="'+safe(id)+'" aria-pressed="'+favorite+'" aria-label="'+(favorite?"Quitar de":"Agregar a")+' favoritos: '+safe(item.name)+'">'+(favorite?"★":"☆")+'</button></div>';
+     const reviewed=todayCounts().has(id);
+     const reviewChip=state.reviewMode?'<small class="quick-review-chip'+(reviewed?' is-done':'')+'">'+(reviewed?'✓ Contado hoy · sigue bajo mínimo':'Pendiente de conteo')+'</small>':'';
+     return '<div class="quick-row"><button class="quick-result" type="button" data-quick-id="'+safe(id)+'" aria-pressed="'+selected+'"><span><strong>'+safe(item.name)+'</strong><small>'+safe(item.code)+' · '+safe(item.category)+'</small>'+reviewChip+'</span><span class="quick-balance">'+fmt(item.quantity)+' '+safe(item.unit)+(low?' ⚠':'')+'</span></button><button class="quick-star" type="button" data-quick-star="'+safe(id)+'" aria-pressed="'+favorite+'" aria-label="'+(favorite?"Quitar de":"Agregar a")+' favoritos: '+safe(item.name)+'">'+(favorite?"★":"☆")+'</button></div>';
     }).join("")||'<p class="quick-context">No hay productos para esta búsqueda. Prueba otro nombre, código o filtro antes de crear un insumo nuevo.</p>';
     $("quick-more").hidden=rows.length<=state.limit;
     $("quick-more").textContent="Ver más productos ("+Math.min(rows.length-state.limit,12)+")";
@@ -144,7 +171,7 @@
     $("quick-batch-toggle").setAttribute("aria-expanded",String(state.batchExpanded));
     $("quick-batch-toggle").textContent=state.batchExpanded?"Ocultar recepción ↑":"Abrir recepción ↓";
    }
-   function render(){renderResults();preview();renderBatch();}
+   function render(){renderResults();preview();renderBatch();renderReview();}
    function pick(id){
     const item=itemById(id);if(!item||state.busy||state.batchBusy)return;
     if(state.pendingLot){notice("Primero termina de guardar el lote pendiente.",true);return;}
@@ -152,12 +179,17 @@
     state.recent=[state.selectedId,...state.recent.filter(x=>x!==state.selectedId)].slice(0,20);
     setLocal("fiiller_almacen_recent_v2",state.recent);
     $qty.value="";$("quick-lot-code").value="";$("quick-expiry").value="";
-    config.navigate("quick");
-    render();notice("Verifica la unidad antes de capturar.");
+    if(state.reviewMode){
+     $mode.value="conteo";
+     $note.value="Verificación física de mínimo";
+    }
+    config.navigate(state.reviewMode?"review-low":"quick");
+    render();notice(state.reviewMode?"Cuenta la existencia total en "+item.unit+" y confirma. Si sigue bajo mínimo, la alerta permanece.":"Verifica la unidad antes de capturar.");
+    if(state.reviewMode&&window.matchMedia?.("(max-width:1070px)").matches)$("quick-selected").scrollIntoView({behavior:"smooth",block:"center"});
     $qty.focus();
    }
    function resetSelection(){
-    state.selectedId="";state.unknownSingle=false;$qty.value="";$("quick-lot-code").value="";$("quick-expiry").value="";$("quick-search").value="";
+    state.selectedId="";state.unknownSingle=false;$qty.value="";$note.value="";$("quick-lot-code").value="";$("quick-expiry").value="";$("quick-search").value="";
     render();$("quick-search").focus();
    }
    function commitNote(x){return x.note+(x.lot?" | Lote "+x.lot.code+" | Caducidad "+x.lot.expiry:"");}
@@ -191,9 +223,17 @@
    $("quick-family").addEventListener("change",()=>{state.limit=8;renderResults();});
    $("quick-filter-tabs").addEventListener("click",e=>{
     const b=e.target.closest("[data-quick-filter]");if(!b)return;
-    state.filter=b.dataset.quickFilter;state.limit=8;renderResults();
+    if(state.reviewMode){state.reviewMode=false;config.navigate("quick");}
+    state.filter=b.dataset.quickFilter;state.limit=8;render();
    });
    $("quick-more").addEventListener("click",()=>{state.limit+=12;renderResults();});
+   $("quick-review-next").addEventListener("click",()=>{
+    if(!state.reviewMode)return;
+    const done=todayCounts();
+    const next=lowItems().filter(i=>!done.has(String(i.id))).sort((a,b)=>String(a.name).localeCompare(String(b.name),"es"))[0];
+    if(next)pick(next.id);
+    else notice("No hay más alertas pendientes de conteo. Revisa las que siguen bajo mínimo.");
+   });
    $("quick-batch-toggle").addEventListener("click",()=>{state.batchExpanded=!state.batchExpanded;renderBatch();});
    $("quick-results").addEventListener("click",e=>{
     const star=e.target.closest("[data-quick-star]");
@@ -254,8 +294,11 @@
        return;
       }
      }
-     await refreshView();resetSelection();
-     notice("✓ Movimiento registrado. Puedes buscar otro producto.");
+     await refreshView();
+     const updated=itemById(x.item.id);
+     const remainsLow=updated&&Number(updated.min_quantity)>0&&Number(updated.quantity)<=Number(updated.min_quantity);
+     resetSelection();
+     notice(state.reviewMode&&x.mode==="conteo"?(remainsLow?"✓ Conteo guardado. El insumo sigue bajo mínimo y conserva su alerta.":"✓ Conteo guardado. La existencia quedó por encima del mínimo; la alerta se actualizó."):"✓ Movimiento registrado. Puedes buscar otro producto.");
     }catch(error){
      if(movementSent){
       state.unknownSingle=true;
@@ -352,7 +395,7 @@
     }
     state.batchBusy=false;renderBatch();preview();
    });
-   return {render,select:pick};
+   return {render,select:pick,setReviewMode};
   }
  };
 })();
