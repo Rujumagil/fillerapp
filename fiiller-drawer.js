@@ -28,6 +28,10 @@
     cart.setAttribute("aria-modal", String(open));
     if (open) {
       focusBefore = document.activeElement;
+      // Abrir siempre desde el encabezado; evita mostrar datos cortados
+      // por una posición de scroll conservada de la apertura anterior.
+      cart.scrollTop = 0;
+      requestAnimationFrame(() => { if (document.body.classList.contains("fiiller-drawer-open")) cart.scrollTop = 0; });
       // No se navega a otra página: la misma venta conserva carrito y selección.
       (back || cart).focus({preventScroll:true});
     } else {

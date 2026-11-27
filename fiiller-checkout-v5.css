@@ -1,0 +1,66 @@
+/* Fiiller Café · Checkout visual v5
+ * Solo presentación: no cambia precio, productos, checkout ni registro de pedidos.
+ */
+#filler-cart{gap:10px!important;scroll-padding-top:105px}
+#filler-cart .filler-cart-header{flex:0 0 auto;box-shadow:0 8px 16px #183b2910}
+#filler-cart .filler-cart-header h2{font-size:25px!important;letter-spacing:-.03em}
+#filler-cart .filler-cart-header p{font-size:12px!important;line-height:1.35}
+#filler-cart .filler-checkout-steps{padding:5px 0 2px!important;margin:0!important;border:0}
+#filler-cart #cart-lines{display:grid;gap:0;min-width:0}
+#filler-cart .cart-line{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:12px!important;padding:12px 0!important;border-bottom:1px solid #e7e8e0;min-width:0}
+#filler-cart .cart-line:first-child{padding-top:4px!important}
+#filler-cart .fiiller-line-details{display:flex;flex-direction:column;align-items:flex-start;min-width:0;gap:5px!important}
+#filler-cart .fiiller-line-name{display:block!important;max-width:100%!important;min-width:0;white-space:normal!important;overflow-wrap:anywhere;font-size:14px!important;line-height:1.37!important;margin:0!important;color:#0c3c2b;font-weight:850}
+#filler-cart .fiiller-line-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px;line-height:1.4;min-height:20px;color:#66766b!important;font-size:11px!important}
+#filler-cart .fiiller-line-meta .fiiller-line-price{font-size:14px;color:#006241;font-weight:850;font-variant-numeric:tabular-nums}
+#filler-cart .cart-extras{display:block;color:#5a7363;font-size:11px;line-height:1.4;margin-top:1px;white-space:normal}
+#filler-cart .cart-line .qty{display:grid;grid-template-columns:36px minmax(18px,auto) 36px;align-items:center;justify-items:center;gap:6px;white-space:nowrap}
+#filler-cart .cart-line .qty button{display:grid;place-items:center;width:36px;height:36px;min-width:36px;border:1px solid #cbded1;background:white;color:#006241;border-radius:50%;padding:0;font-size:20px;font-weight:800}
+#filler-cart .cart-line .qty button:active{background:#e2f2e8;transform:scale(.94)}
+#filler-cart .cart-line .qty button:focus-visible{outline:3px solid #ff9d3c;outline-offset:2px}
+#filler-cart .cart-line .qty b{font-size:14px;font-variant-numeric:tabular-nums;color:#143d2d}
+#filler-cart .fiiller-cart-upsell{gap:6px!important;margin:9px 0 5px!important;padding:12px 13px!important;background:#f6faf6;border-radius:15px;border:1px solid #dbe9dd}
+#filler-cart .fiiller-cart-upsell h3{font-size:14px;line-height:1.3;margin:0}
+#filler-cart .fiiller-cart-upsell>p{font-size:11px;line-height:1.35;margin:0}
+#filler-cart .fiiller-cart-upsell-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0!important}
+#filler-cart .fiiller-cart-upsell-item>span{display:grid;gap:2px}
+#filler-cart .fiiller-cart-upsell-item strong{font-size:12px;color:#0e5035}
+#filler-cart .fiiller-cart-upsell-item small{font-size:11px}
+#filler-cart .fiiller-cart-upsell-item button{min-height:37px;padding:8px 11px;font-size:11px;border-radius:10px}
+#filler-cart>.total{display:none!important} /* Un solo total en la barra fija del CTA */
+#filler-cart .filler-checkout-action{box-shadow:0 -7px 23px #1638241b!important}
+#filler-cart .filler-checkout-action-summary{display:flex!important;justify-content:space-between;align-items:center;font-size:13px;font-weight:750}
+#filler-cart .filler-checkout-action-summary strong{font-size:19px;font-weight:900;color:#006241;font-variant-numeric:tabular-nums}
+#filler-cart #send-order{min-height:48px!important;font-size:15px!important}
+#filler-cart #customer-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+#filler-cart label{min-width:0!important;line-height:1.35;color:#3b624d;font-size:12px!important;font-weight:780!important}
+#filler-cart :is(input,textarea,select){min-height:46px!important;padding:10px 12px!important;border-radius:12px!important;font-size:14px!important;scroll-margin-top:108px}
+#filler-cart textarea{min-height:68px!important;resize:vertical}
+#filler-cart .fiiller-schedule-caption{font-size:11px;margin:0!important;line-height:1.45}
+#filler-cart .fiiller-time-chips{gap:7px}
+#filler-cart .fiiller-time-chips button{min-height:42px;padding:9px 7px;font-size:12px!important}
+#filler-cart :is(input,select,textarea):focus-visible{outline:2px solid #f58a35;outline-offset:1px}
+#filler-cart #pickup-help{display:block;font-size:11px;line-height:1.4;margin-top:4px;color:#617568}
+#filler-cart #customer-account{margin:4px 0!important;padding:10px 12px!important;background:#eff7f0!important}
+#filler-cart #customer-account p{margin:3px 0!important;font-size:11px;line-height:1.4}
+#filler-cart #customer-account a{font-size:11px!important;padding:7px 10px!important}
+@media(max-width:700px){
+ #filler-cart .filler-cart-header{top:-14px!important}
+ #filler-cart .cart-line{gap:8px!important;padding:10px 0!important}
+ #filler-cart .fiiller-line-name{font-size:13px!important}
+ #filler-cart .cart-line .qty{grid-template-columns:34px minmax(18px,auto) 34px;gap:4px}
+ #filler-cart .cart-line .qty button{width:34px;height:34px;min-width:34px}
+ #filler-cart .filler-checkout-steps{gap:5px!important}
+ #filler-cart #customer-fields{gap:9px}
+ #filler-cart .filler-checkout-action{padding-top:10px!important}
+}
+@media(max-width:560px){
+ #filler-cart #customer-fields{grid-template-columns:1fr}
+ #filler-cart .filler-checkout-steps span{font-size:10px}
+}
+@media(max-width:355px){
+ #filler-cart .cart-line{grid-template-columns:minmax(0,1fr) auto!important;gap:5px!important}
+ #filler-cart .cart-line .qty{grid-template-columns:30px 16px 30px;gap:3px}
+ #filler-cart .cart-line .qty button{width:30px;height:30px;min-width:30px}
+}
+@media(prefers-reduced-motion:reduce){#filler-cart .qty button{transition:none!important;transform:none!important}}
