@@ -13,7 +13,7 @@
    const getLocal=(key)=>{try{const x=JSON.parse(localStorage.getItem(key)||"[]");return Array.isArray(x)?x.filter(v=>typeof v==="string").slice(0,30):[];}catch{return [];}};
    const setLocal=(key,val)=>{try{localStorage.setItem(key,JSON.stringify(val));}catch{/* Private browsing: no persistence. */}};
    const state={
-    selectedId:"",filter:"all",limit:12,recent:getLocal("fiiller_almacen_recent_v2"),
+    selectedId:"",filter:"all",limit:8,batchExpanded:false,recent:getLocal("fiiller_almacen_recent_v2"),
     favorites:getLocal("fiiller_almacen_favorites_v2"),busy:false,batchBusy:false,
     batch:[],lastSaved:null,pendingLot:null,unknownSingle:false
    };
@@ -71,7 +71,7 @@
      return '<div class="quick-row"><button class="quick-result" type="button" data-quick-id="'+safe(id)+'" aria-pressed="'+selected+'"><span><strong>'+safe(item.name)+'</strong><small>'+safe(item.code)+' · '+safe(item.category)+'</small></span><span class="quick-balance">'+fmt(item.quantity)+' '+safe(item.unit)+(low?' ⚠':'')+'</span></button><button class="quick-star" type="button" data-quick-star="'+safe(id)+'" aria-pressed="'+favorite+'" aria-label="'+(favorite?"Quitar de":"Agregar a")+' favoritos: '+safe(item.name)+'">'+(favorite?"★":"☆")+'</button></div>';
     }).join("")||'<p class="quick-context">No hay productos para esta búsqueda. Prueba otro nombre, código o filtro antes de crear un insumo nuevo.</p>';
     $("quick-more").hidden=rows.length<=state.limit;
-    $("quick-more").textContent="Ver más productos ("+Math.min(rows.length-state.limit,20)+")";
+    $("quick-more").textContent="Ver más productos ("+Math.min(rows.length-state.limit,12)+")";
     $("quick-results-hint").textContent=$("quick-search").value.trim()?"Selecciona el insumo correcto antes de registrar.":"Mostrando pocos resultados para trabajar rápido. Escribe o cambia de filtro para localizar otros.";
     document.querySelectorAll("[data-quick-filter]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.quickFilter===state.filter)));
    }
@@ -100,10 +100,11 @@
     const item=current();
     const hasItem=!!item;
     $("quick-form").hidden=!hasItem;
-    $("quick-empty-hint").hidden=hasItem;
+    $("quick-empty-hint").hidden=true;
+    $("quick-selection-actions").hidden=!hasItem;
     $("quick-lot").disabled=!hasItem;
     if(!hasItem){
-     $("quick-selected").innerHTML='<strong>Selecciona un producto</strong><p>La ficha mostrará existencias y unidad de captura.</p>';
+     $("quick-selected").innerHTML='<strong>Elige un insumo de la lista</strong><p>Al seleccionarlo aparecerá aquí su saldo, la unidad de captura y los campos para registrar.</p>';
      $("quick-save").disabled=true;$("quick-stage").disabled=true;
      return;
     }
@@ -139,6 +140,9 @@
     const locked=xs.some(x=>x.status==="unknown"||x.status==="lot_failed"||x.status==="moving");
     $("quick-batch-save").disabled=state.busy||state.batchBusy||locked||!xs.some(x=>x.status==="pending");
     $("quick-batch-clear").disabled=state.batchBusy||!xs.some(x=>x.status==="saved");
+    $("quick-batch-body").hidden=!state.batchExpanded;
+    $("quick-batch-toggle").setAttribute("aria-expanded",String(state.batchExpanded));
+    $("quick-batch-toggle").textContent=state.batchExpanded?"Ocultar recepción ↑":"Abrir recepción ↓";
    }
    function render(){renderResults();preview();renderBatch();}
    function pick(id){
@@ -183,13 +187,14 @@
    async function refreshView(){
     try{await config.refresh();}catch(e){notice("El registro fue enviado pero la pantalla no actualizó: "+e.message,true);}
    }
-   $("quick-search").addEventListener("input",()=>{state.limit=12;renderResults();});
-   $("quick-family").addEventListener("change",()=>{state.limit=12;renderResults();});
+   $("quick-search").addEventListener("input",()=>{state.limit=8;renderResults();});
+   $("quick-family").addEventListener("change",()=>{state.limit=8;renderResults();});
    $("quick-filter-tabs").addEventListener("click",e=>{
     const b=e.target.closest("[data-quick-filter]");if(!b)return;
-    state.filter=b.dataset.quickFilter;state.limit=12;renderResults();
+    state.filter=b.dataset.quickFilter;state.limit=8;renderResults();
    });
-   $("quick-more").addEventListener("click",()=>{state.limit+=20;renderResults();});
+   $("quick-more").addEventListener("click",()=>{state.limit+=12;renderResults();});
+   $("quick-batch-toggle").addEventListener("click",()=>{state.batchExpanded=!state.batchExpanded;renderBatch();});
    $("quick-results").addEventListener("click",e=>{
     const star=e.target.closest("[data-quick-star]");
     if(star){
@@ -278,6 +283,7 @@
     if(state.batch.length>=50){notice("Máximo 50 líneas por recepción.",true);return;}
     if(state.batch.some(y=>y.itemId===String(x.item.id))){notice("Este insumo ya está en la recepción. Para corregirlo, quita primero la línea pendiente.",true);return;}
     state.batch.push({itemId:String(x.item.id),name:x.item.name,unit:x.item.unit,base:Number(x.item.quantity),qty:x.quantity,note:x.note,lot:x.lot,status:"pending"});
+    state.batchExpanded=true;
     resetSelection();renderBatch();
     notice("✓ Producto añadido al borrador. Aún NO se modifican existencias.");
    });
