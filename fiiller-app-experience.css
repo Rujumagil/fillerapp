@@ -142,3 +142,25 @@ header .nav{max-width:1480px}
  #pedido .fiiller-app-family .item{animation:none;transition:none}
  .fiiller-quick-categories button,.fiiller-app-more{transition:none}
 }
+
+/* Premium density: keep product imagery readable and all desktop categories visible. */
+@media(min-width:701px){
+ .hero .hero-copy{min-height:230px!important;padding:22px 30px!important;gap:11px!important}
+ .hero .hero-visual{height:auto!important;min-height:230px!important;align-self:stretch;position:relative}
+ .hero .hero-visual img{position:absolute;inset:0}
+ .hero .hero-copy h2{font-size:clamp(28px,3vw,46px);margin:6px 0!important}
+ .fiiller-quick-categories{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));overflow:visible!important;gap:8px!important}
+ .fiiller-quick-categories button{min-width:0;min-height:68px!important;padding:7px 4px!important;border-radius:15px!important}
+ #pedido .fiiller-app-family:not(.fiiller-app-complementos) .item-media{aspect-ratio:5/4}
+ #pedido .fiiller-app-family .item-details{gap:4px!important;padding:8px 5px 4px!important}
+ #pedido .fiiller-app-family .item-bottom{gap:6px!important}
+}
+@media(min-width:1151px){
+ .fiiller-quick-categories{grid-template-columns:repeat(11,minmax(0,1fr))}
+}
+.fiiller-quick-categories button:focus-visible,#pedido .item-add:focus-visible{outline:3px solid #ee791d;outline-offset:3px}
+.fiiller-quick-categories .fiiller-cat-icon svg{display:block;width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:700px){
+ #pedido .fiiller-app-family .item-add{min-height:44px!important}
+ .fiiller-quick-categories button .fiiller-cat-icon svg{width:23px;height:23px}
+}
