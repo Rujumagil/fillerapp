@@ -96,14 +96,15 @@ const paneLabels={
  recipes:["Recetas y consumo","Conexión del menú con costos e ingredientes."]
 };
 function navigate(key){
- const chosen=paneLabels[key]?key:"overview";
+ const chosen=key==="review-low"?"quick":paneLabels[key]?key:"overview";
+ const route=key==="review-low"?"review-low":chosen;
  if(chosen!=="barcode" && cameraStream)stopBarcodeCamera();
  document.querySelectorAll("[data-pane]").forEach(b=>{b.classList.toggle("active",b.dataset.pane===chosen);b.setAttribute("aria-current",b.dataset.pane===chosen?"page":"false");});
  document.querySelectorAll("[data-view]").forEach(p=>p.classList.toggle("active",p.dataset.view===chosen));
  $("workspace-title").textContent=paneLabels[chosen][0];
  $("workspace-description").textContent=paneLabels[chosen][1];
  $("quick-movement").hidden=chosen==="quick";
- if(location.hash!=="#"+chosen)history.replaceState(null,"","#"+chosen);
+ if(location.hash!=="#"+route)history.replaceState(null,"","#"+route);
 }
 document.querySelectorAll("[data-pane]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.pane)));
 $("quick-scan").addEventListener("click",()=>{navigate("barcode");$("barcode-input").focus();});
@@ -136,13 +137,14 @@ function renderExtra(){
  const withoutCost=inventory.filter(i=>Number(i.unit_cost)<=0).length;
  $("priority-alerts").innerHTML=[
   ['expiry','red','◷','Capturar fechas de caducidad',inventory.filter(i=>!i.expiration_date).length,'No se registraron vencimientos en la migración'],
-  ['inventory','orange','!','Insumos bajo mínimo',low.length,'Revisar existencias y puntos de reposición','low'],
+  ['review-low','orange','!','Insumos bajo mínimo',low.length,'Contar y validar insumos uno por uno'],
   ['purchase','orange','≋','Mínimos y unidades por validar',suspect.length,'No generar compras sin confirmar unidades'],
   ['counts','','✓','Conteo físico pendiente',inventory.length-new Set(counts.map(c=>c.item_id)).size,'Comparar cantidades reales con sistema']
  ].map(([pane,color,symbol,title,count,subtitle,filter])=>
  '<button type="button" class="priority-action" data-priority="'+pane+'" '+(filter?'data-filter="'+filter+'"':'')+'><span class="priority-symbol '+color+'">'+symbol+'</span><span class="priority-copy"><strong>'+title+'</strong><small>'+subtitle+'</small></span><strong class="priority-count">'+count+'</strong><span aria-hidden="true">›</span></button>').join("");
  $("priority-alerts").querySelectorAll("[data-priority]").forEach(button=>button.addEventListener("click",()=>{
    navigate(button.dataset.priority);
+   if(button.dataset.priority==="review-low")quick.setReviewMode(true);
    if(button.dataset.filter && $("status-filter")){ $("status-filter").value=button.dataset.filter;render();}
  }));
  const done=new Set(counts.map(c=>c.item_id)).size;
@@ -179,6 +181,7 @@ function renderExtra(){
 }
 document.querySelectorAll("[data-jump]").forEach(button=>button.addEventListener("click",()=>{
  navigate(button.dataset.jump);
+  if(button.dataset.jump==="review-low")quick.setReviewMode(true);
  if(button.dataset.setStatus && $("status-filter")){ $("status-filter").value=button.dataset.setStatus;render(); }
 }));
 $("source-info-toggle").addEventListener("click",()=>{
@@ -443,6 +446,9 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden)stopBarcode
 window.addEventListener("pagehide",stopBarcodeCamera);
 
 const quick=window.FiillerWarehouseQuick.init({call,getInventory:()=>inventory,getBarcodes:()=>barcodes,getLots:()=>lots,getCounts:()=>counts,refresh:load,navigate});
+quick.setReviewMode(location.hash==="#review-low");
+window.addEventListener("hashchange",()=>quick.setReviewMode(location.hash==="#review-low"));
+document.querySelector('[data-pane="quick"]').addEventListener("click",()=>quick.setReviewMode(false));
 $("barcode-move-quick").addEventListener("click",()=>{if(barcodeSelected)quick.select(barcodeSelected.id);});
 $("inventory-list").addEventListener("click",event=>{const button=event.target.closest("[data-quick-select]");if(button)quick.select(button.dataset.quickSelect);});
 async function load(){
