@@ -143,13 +143,24 @@ function suggestions(){
  };
  prepared.sort(compare);
  retail.sort((a,b)=>String(a.name).localeCompare(String(b.name),"es"));
- // Una oferta preparada primero; el retail ocupa solo la segunda sugerencia.
+ // Evita dos tamaños del mismo café como sugerencias repetidas.
+ const distinctFamilies=(arr,max)=>{
+  const seen=new Set(),out=[];
+  for(const item of arr){
+   const family=clean(item.cat||"otros");
+   if(seen.has(family))continue;
+   seen.add(family);out.push(item);
+   if(out.length===max)break;
+  }
+  return out;
+ };
+ // Primero un preparado y después, si aplica, un complemento empaquetado.
  if(preparedInCart){
-  const first=prepared.slice(0,1),second=retail.slice(0,1);
-  return [...first,...second,...prepared.slice(first.length,first.length+(second.length?0:1))].slice(0,2);
+  const first=distinctFamilies(prepared,1),second=retail.slice(0,1);
+  return second.length?[...first,...second].slice(0,2):distinctFamilies(prepared,2);
  }
- // Si el cliente solo eligió un producto empaquetado, invitarlo a probar cocina.
- return prepared.slice(0,2);
+ // Si solo hay artículos empaquetados, priorizar opciones preparadas distintas.
+ return distinctFamilies(prepared,2);
 }
 
 function drawSuggestions(){
@@ -161,7 +172,7 @@ function drawSuggestions(){
  heading.textContent=currentCart().some(p=>window.FiillerMenuPriority?.isComplementProduct(p)!==true)
   ? "¿Le agregamos algo para acompañar?" : "¿Qué te preparamos para acompañarlo?";
  const subtitle=document.createElement("p");
- subtitle.textContent="Primero nuestros preparados; bebidas y botanas empaquetadas como extras opcionales.";
+ subtitle.textContent="Una opción preparada para acompañar tu pedido.";
  upsell.append(heading,subtitle);
  for(const p of offers){
   const row=document.createElement("div");row.className="fiiller-cart-upsell-item";
