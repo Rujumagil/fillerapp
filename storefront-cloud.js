@@ -147,6 +147,20 @@
       link.href="./mi-filler.html";link.textContent="¿Quieres guardar tus datos? Ir a Mi Fiiller";
       link.style.cssText="display:inline-block;margin-top:2px;color:#006241;text-decoration:underline;text-underline-offset:2px;font-size:12px;font-weight:800";
       panel.append(heading,info,link);
+      if(name.value||phone.value){
+        const hint=document.createElement("small");
+        hint.textContent="Datos recuperados de este dispositivo. Puedes eliminarlos cuando quieras.";
+        hint.style.cssText="display:block;font-size:11px;margin:7px 0;color:#5e7967";
+        const forget=document.createElement("button");
+        forget.type="button";forget.className="secondary";
+        forget.textContent="Olvidar mis datos";
+        forget.style.cssText="padding:7px 10px;font-size:11px;border-radius:9px";
+        forget.addEventListener("click",()=>{
+          try{localStorage.removeItem("fiiller_guest_checkout_v1");}catch{}
+          name.value="";phone.value="";hint.remove();forget.remove();name.focus();
+        });
+        panel.append(hint,forget);
+      }
       fields.hidden=false;
     };
     let session;
