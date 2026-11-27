@@ -374,7 +374,18 @@
     const preparedGroups=families
       .map(name=>({name,items:displayProducts.filter(p=>(p.cat||"Otros")===name&&!isComplement(p)&&!featured.includes(p)),isRetail:false}))
       .filter(section=>section.items.length);
-    const retailItems=displayProducts.filter(isComplement);
+    // Dar variedad al bloque corto: bebidas empaquetadas y botanas alternadas.
+    // Los agotados no ocupan un lugar destacado; siguen sujetos a catálogo/stock.
+    const retailPools=new Map();
+    displayProducts.filter(p=>isComplement(p)&&inStock(p)).forEach(p=>{
+      const category=p.cat||"Otros";
+      if(!retailPools.has(category))retailPools.set(category,[]);
+      retailPools.get(category).push(p);
+    });
+    const retailItems=[];
+    while([...retailPools.values()].some(pool=>pool.length)){
+      retailPools.forEach(pool=>{if(pool.length)retailItems.push(pool.shift())});
+    }
     const retailLimit=6;
     const sections=allView
       ? [
