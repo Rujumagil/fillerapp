@@ -373,10 +373,13 @@
       }
     }
     const promos=await fetchPromoAlerts();
+    let visiblePromoCount=0;
     for(const promo of promos){
       if(typeof promo.id!=="string"||typeof promo.title!=="string")continue;
-      // No promocionar recetas retiradas del menú comercial vigente.
-      if(["chilaquiles-rojos-sencillos","rojos-con-huevo","rojos-con-pollo"].includes(promo.product_id))continue;
+      const item=state.menu.find(product=>product.id===promo.product_id);
+      // La campanita sigue la misma disponibilidad que el menú, sin campañas caducadas.
+      if(!item||Number(item.stock)<=0||!fiillerMenuPermitido(item))continue;
+      visiblePromoCount++;
       const card=document.createElement("article");
       card.style.cssText="display:grid;gap:6px;padding:14px 0;border-bottom:1px solid #e8e2d9";
       const tag=document.createElement("small");
@@ -402,7 +405,7 @@
       if(safeGet(key)!=="1")promoUnread=true;
     }
     waiting.remove();
-    if(!hasOrder&&!promos.length){
+    if(!hasOrder&&!visiblePromoCount){
       const message=document.createElement("p");
       message.textContent="Todavía no tienes avisos. Las novedades y tus pedidos aparecerán aquí.";
       alertContent.appendChild(message);
