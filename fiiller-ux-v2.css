@@ -28,6 +28,8 @@ body.fiiller-drawer-open #pedido>.cart{transform:translateX(0);visibility:visibl
 #filler-cart:not(.cart-has-items)>.filler-checkout-action{display:none!important}
 #filler-cart:not(.cart-has-items) .fiiller-empty-cart-note{display:grid;gap:11px;padding:22px;margin:5px 0 0;border-radius:16px;min-height:148px;align-content:center;background:#f1f7f2;border:1px dashed #b9d8c5;text-align:center}
 #filler-cart .fiiller-empty-cart-note a{display:block;background:#006241;color:#fff;padding:12px 17px;text-decoration:none;border-radius:10px;max-width:210px;margin:3px auto 0}
+#filler-cart:has(#client-status[data-confirmed="true"]) .fiiller-empty-cart-note{display:none!important}
+body.fiiller-catalog-pending #pedido .filters,body.fiiller-catalog-error #pedido .filters{visibility:hidden}
 #filler-cart #client-status[data-confirmed="true"]{display:block!important;background:#eef8ef;border:1px solid #cbe3d2;padding:16px;border-radius:15px;font-size:13px;line-height:1.55}
 #filler-cart .total{position:relative;top:auto;margin:0;padding:12px 15px;font-size:18px;border:0}
 #filler-cart:not(.cart-has-items) .total{display:none}
