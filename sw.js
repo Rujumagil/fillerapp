@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v84";
+const CACHE_NAME = "filler-app-v85";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -30,6 +30,14 @@ const APP_SHELL = [
   "./catalogo-tpv.js",
   "./extras-control.js",
   "./extras-storefront.js",
+  "./fiiller-drawer.js",
+  "./fiiller-ux-v2.js",
+  "./fiiller-ux-v2.css",
+  "./fiiller-conversion.js",
+  "./fiiller-conversion.css",
+  "./fiiller-premium.css",
+  "./storefront-features.js",
+  "./chicken-availability.js",
   "./filler-favorites-menu.js",
   "./photo-store.js",
   "./filler-cloud.js",
