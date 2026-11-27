@@ -421,23 +421,34 @@
       const current=Number(part("hour"))*60+Number(part("minute"));
       const selectedTomorrow=dateSelect?.value==="tomorrow";
       const target=selectedTomorrow?tomorrow:today;
-      const slots=[];
+      const slots=[], added=new Set();
+      const addSlot=(minuteOfDay,delay=0)=>{
+        if(minuteOfDay<8*60||minuteOfDay>16*60+30||added.has(minuteOfDay))return;
+        const hour=Math.floor(minuteOfDay/60),minute=minuteOfDay%60;
+        const time=String(hour).padStart(2,"0")+":"+String(minute).padStart(2,"0");
+        slots.push({value:target+" "+time,label:time+" h",minuteOfDay,delay});
+        added.add(minuteOfDay);
+      };
       if(selectedTomorrow||current<16*60){
         for(let hour=8;hour<=16;hour++)for(const minute of [0,30]){
           const value=hour*60+minute;
-          if(selectedTomorrow||value>=current+10){
-            const time=String(hour).padStart(2,"0")+":"+String(minute).padStart(2,"0");
-            slots.push({value:target+" "+time,label:time+" h"});
-          }
+          if(selectedTomorrow||value>=current+10)addSlot(value);
         }
+        // Horarios exactos para recoger en 15, 20 o 30 minutos (no se redondean).
+        // No se ofrecen para mañana ni después del cierre de pedidos de hoy.
+        if(!selectedTomorrow)for(const delay of [15,20,30])addSlot(current+delay,delay);
       }
+      slots.sort((a,b)=>a.minuteOfDay-b.minuteOfDay);
       const previous=select.value;
       const signature=target+"|"+slots.map(x=>x.value).join("|");
       if(select.dataset.available===signature)return;
       select.dataset.available=signature;
-      select.innerHTML=slots.length?slots.map(x=>'<option value="'+x.value+'">'+x.label+'</option>').join(""):'<option value="">Sin horarios hoy: elige mañana</option>';
+      select.innerHTML=slots.length?slots.map(x=>'<option value="'+x.value+'"'+(x.delay?' data-quick-delay="'+x.delay+'"':'')+'>'+x.label+'</option>').join(""):'<option value="">Sin horarios hoy: elige mañana</option>';
       select.disabled=!slots.length;
-      if(slots.some(x=>x.value===previous))select.value=previous;
+      if(previous&&slots.some(x=>x.value===previous))select.value=previous;
+      // Si el horario caducó mientras el cliente compraba, exigir una selección nueva.
+      else if(previous&&slots.length)select.value="";
+      window.dispatchEvent(new Event("fiiller:pickup-options-updated"));
       const note=document.getElementById("pickup-help");
       if(note)note.textContent=selectedTomorrow?"Pedido programado para mañana ("+tomorrow+"). Recogida de 8:00 a 16:30 h.":"Pedidos del día hasta las 16:00 h (hora de Guadalajara). Recolección con mínimo 10 minutos de anticipación.";
     }function sendOrder(){const items=cartItems();const name=document.getElementById("customer-name").value.trim();const phone=document.getElementById("customer-phone").value.trim();if(!items.length)return toast("Agrega al menos un producto.");if(!name||!phone)return toast("Falta nombre y telefono.");items.forEach(l=>itemById(l.id).stock=Math.max(0,itemById(l.id).stock-l.qty));const now=Date.now();const order={id:"F-"+now.toString().slice(-6),date:todayKey,createdAt:new Date(now).toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"}),createdTs:now,statusUpdatedAt:now,customer:name,phone,pickup:document.getElementById("pickup-time").value,notes:document.getElementById("notes").value.trim(),status:"Nuevo",items,total:items.reduce((s,i)=>s+i.price*i.qty,0)};state.orders.unshift(order);state.cart={};save();document.getElementById("client-status").textContent=`Pedido ${order.id} recibido. Te avisaremos al ${phone} cuando este listo.`;document.getElementById("client-status").classList.add("show");toast("Pedido enviado a cocina.");fillerNotify("Pedido recibido",`Tu pedido ${order.id} ya esta en cocina.`);render()}function render(){
