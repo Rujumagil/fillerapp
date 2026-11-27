@@ -235,6 +235,22 @@ button.quick-star[aria-pressed="true"]{color:#9d6319;background:#fff5e0}
 .quick-batch-head-actions button{padding:8px 12px;font-size:12px}
 .quick-batch-card:has(#quick-batch-body:not([hidden])) .section-head{margin-bottom:12px}
 @media(max-width:580px){.quick-selector-card .quick-search-field{grid-template-columns:1fr}.quick-batch-head-actions{width:100%;justify-content:space-between}}
+
+/* Fiiller - revisión directa de alertas de mínimos */
+.quick-review-panel{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;padding:17px 19px;margin:0 0 13px;background:#f2f8f3;border:1px solid #c6e0cb;border-radius:16px}
+.quick-review-panel[hidden]{display:none!important}
+.quick-review-panel h3{margin:4px 0;font-size:18px;color:#07563a}
+.quick-review-panel p{margin:3px 0;color:#597565;font-size:12px;line-height:1.5}
+.quick-review-label{font-size:10px;font-weight:850;letter-spacing:.11em;color:#458364}
+.quick-review-controls{display:flex;flex-direction:column;align-items:flex-end;gap:9px}
+.quick-review-controls strong{font-size:12px;color:#006241;max-width:430px;text-align:right}
+.quick-review-buttons{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.quick-review-buttons button,.quick-review-buttons a{font-size:12px;font-weight:800;padding:10px 12px;border-radius:9px;text-decoration:none}
+.quick-review-buttons a{background:#fff;border:1px solid #cbded2;color:#285f42}
+.quick-review-chip{display:inline-block;margin-top:3px;color:#9e6319;font-size:10px;font-weight:800}
+.quick-review-chip.is-done{color:#247647}
+.quick-review-panel button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:750px){.quick-review-controls{align-items:stretch;width:100%}.quick-review-controls strong{text-align:left}}
 </style></head><body><header><div class="head"><img src="./assets/filler-logo-oficial.webp" alt="Fiiller Café"><a href="./admin.html">← Control Fiiller</a></div><div class="hero"><small>OCS · OPERACIÓN DE CAFETERÍA</small><h1>Control de almacén</h1><div class="sub">Insumos, movimientos, mínimos y caducidades en un solo lugar.</div></div></header>
 <main><div class="warehouse-shell">
 <aside class="warehouse-side" aria-label="Secciones de almacén"><div class="side-title">☕ Fiiller Control</div><div class="side-subtitle">Administración de cocina</div>
@@ -283,6 +299,13 @@ button.quick-star[aria-pressed="true"]{color:#9d6319;background:#fff5e0}
 
 <section class="warehouse-pane" data-view="quick">
  <div class="pane-title"><div><h2>Busca y registra mercancía</h2><p>Elige un insumo, verifica su unidad y registra su movimiento.</p></div><span class="pill">Acceso administrador</span></div>
+ <div class="quick-review-panel" id="quick-review-panel" hidden>
+  <div><span class="quick-review-label">CONTROL DE EXISTENCIAS · REVISIÓN FÍSICA</span><h3>Alertas de inventario bajo</h3>
+   <p>Cuenta el producto físicamente y confirma su saldo. Un insumo verificado puede seguir bajo mínimo hasta que se reponga.</p></div>
+  <div class="quick-review-controls"><strong id="quick-review-progress" role="status">Cargando alertas…</strong>
+   <div class="quick-review-buttons"><button id="quick-review-next" type="button">Revisar siguiente pendiente</button><a href="./admin.html#resumen">Volver a Control Fiiller</a></div>
+  </div>
+ </div>
  <div class="quick-grid quick-grid-v2">
   <section class="card quick-selector-card">
    <div class="section-head"><h2>1. Encontrar producto</h2><span class="pill" id="quick-results-count">Cargando…</span></div>
@@ -394,4 +417,4 @@ button.quick-star[aria-pressed="true"]{color:#9d6319;background:#fff5e0}
 <div class="card"><div class="section-head"><h2>Lotes registrados</h2><span id="lot-count" class="pill">0 lotes</span></div><div id="lot-list"></div></div></section>
 <section class="warehouse-pane" data-view="purchase"><div class="pane-title"><div><h2>Pedido sugerido de insumos</h2><p>Calculado a partir del mínimo configurado y la existencia actual.</p></div><button type="button" id="export-purchases" class="secondary">↓ Descargar CSV</button></div><div class="card"><div id="purchase-list"></div></div><div class="card review-card"><div class="panel-header"><div><span class="panel-overline">CONTROL DE CALIDAD</span><h3>Insumos con unidad o mínimo por revisar</h3></div><span class="pill low" id="suspicious-count">—</span></div><p class="muted">Estos insumos quedan fuera de la compra sugerida hasta comprobar que el mínimo y la existencia utilizan la misma unidad.</p><div id="suspicious-list"></div></div><p class="muted">Estas cantidades indican cuánto falta para alcanzar el mínimo. El cálculo de compra ideal por demanda se activará cuando tengamos máximos y consumo histórico confiables.</p></section>
 <section class="warehouse-pane" data-view="recipes"><div class="pane-title"><div><h2>Recetas y consumo</h2><p>Conecta cada producto vendido con sus ingredientes, cantidades y costos.</p></div></div><a class="quick-link" href="https://ocs-filler.proyectocompas-info.workers.dev/recetario.html" target="_blank" rel="noopener">Recetario actual de OCS <span>↗ Abrir</span></a><a class="quick-link" href="./dashboard-ventas.html">Dashboard de KPIs de ventas <span>↗ Abrir</span></a><div class="info"><strong>Pendiente:</strong> confirmar equivalencias entre productos del menú Fiiller y recetas OCS antes de descontar ingredientes del almacén.</div></section>
-</div></div></div></main><script src="./filler-cloud.js?v=54"></script><script src="./almacen-fiiller-rapido.js?v=3"></script><script src="./almacen-fiiller.js?v=61"></script></body></html>
+</div></div></div></main><script src="./filler-cloud.js?v=54"></script><script src="./almacen-fiiller-rapido.js?v=4"></script><script src="./almacen-fiiller.js?v=62"></script></body></html>
