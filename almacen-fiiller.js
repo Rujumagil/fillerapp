@@ -41,6 +41,7 @@ function safePurchaseItems(){
  Number(i.quantity)<Number(i.min_quantity));
 }
 function htmlSafe(s){return escape(s)}
+function findKey(s){return String(s??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("es-MX").replace(/\s+/g," ").trim();}
 function render(){
  const low=inventory.filter(i=>Number(i.min_quantity)>0&&Number(i.quantity)<=Number(i.min_quantity));
  const missingExpiry=inventory.filter(i=>!i.expiration_date).length;
@@ -55,11 +56,11 @@ function render(){
  $("k-value").textContent=priced.length?money(estimated):"Sin costos";
  $("k-value-note").textContent=priced.length?priced.length+" de "+inventory.length+" insumos con costo":"Captura costos para valorar inventario";
  $("k-items-detail").textContent=inventory.filter(i=>Number(i.quantity)>0).length+" con existencia positiva";
- const filter=$("search").value.trim().toLocaleLowerCase("es-MX");
+ const filter=findKey($("search").value);
  const family=$("family-filter")?.value||"";
  const status=$("status-filter")?.value||"";
  const results=inventory.filter(i=>{
-  if(!(i.name+" "+i.code+" "+i.category).toLocaleLowerCase("es-MX").includes(filter))return false;
+  if(!findKey(i.name+" "+i.code+" "+i.category+" "+barcodes.filter(b=>b.item_id===i.id).map(b=>b.barcode).join(" ")).includes(filter))return false;
   if(family&&i.category!==family)return false;
   const low=(Number(i.min_quantity)>0&&Number(i.quantity)<=Number(i.min_quantity));
   const d=expiryDays(i.expiration_date);
@@ -72,8 +73,8 @@ function render(){
    const d=expiryDays(i.expiration_date);
    const label=d!==null&&d<0?"Caducado":d!==null&&d<=7?"Caduca pronto":(Number(i.min_quantity)>0&&Number(i.quantity)<=Number(i.min_quantity))?"Bajo mínimo":"Correcto";
    const cls=d!==null&&d<=7?"exp":(Number(i.min_quantity)>0&&Number(i.quantity)<=Number(i.min_quantity))?"low":"";
-   return '<tr><td><strong>'+escape(i.code)+'</strong></td><td>'+escape(i.name)+'</td><td>'+escape(i.category)+'</td><td>'+nfmt(i.quantity)+' '+escape(i.unit)+'</td><td>'+nfmt(i.min_quantity)+'</td><td>'+escape(i.expiration_date||"—")+'</td><td><span class="pill '+cls+'">'+label+'</span></td></tr>';
- }).join("")||'<tr><td colspan="7">Todavía no hay insumos registrados para esta búsqueda.</td></tr>';
+   return '<tr><td><strong>'+escape(i.code)+'</strong></td><td>'+escape(i.name)+'</td><td>'+escape(i.category)+'</td><td>'+nfmt(i.quantity)+' '+escape(i.unit)+'</td><td>'+nfmt(i.min_quantity)+'</td><td>'+escape(i.expiration_date||"—")+'</td><td><span class="pill '+cls+'">'+label+'</span></td><td><button type="button" class="secondary" data-quick-select="'+escape(i.id)+'">Registrar</button></td></tr>';
+ }).join("")||'<tr><td colspan="8">Todavía no hay insumos registrados para esta búsqueda.</td></tr>';
  const previous=$("movement-item").value;
  $("movement-item").innerHTML='<option value="">Seleccionar insumo…</option>'+inventory.map(i=>'<option value="'+escape(i.id)+'">'+escape(i.name)+' ('+nfmt(i.quantity)+' '+escape(i.unit)+')</option>').join("");
  if(inventory.some(i=>i.id===previous))$("movement-item").value=previous;
@@ -85,6 +86,7 @@ function render(){
 
 const paneLabels={
  overview:["Resumen de almacén","Visibilidad total de existencias y alertas de cocina."],
+ quick:["Registro rápido","Busca por nombre, código o escáner y registra movimientos con confirmación."],
  inventory:["Inventario general","Cada insumo en un solo lugar, con filtros y registro."],
  barcode:["Escaneo rápido","Identifica productos por código de barras y confirma existencias en segundos."],
  counts:["Conteo físico de hoy","Verifica cada insumo y registra las diferencias contra el sistema."],
@@ -105,7 +107,7 @@ function navigate(key){
 document.querySelectorAll("[data-pane]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.pane)));
 $("quick-scan").addEventListener("click",()=>{navigate("barcode");$("barcode-input").focus();});
 $("quick-product").addEventListener("click",()=>{navigate("inventory");$("create-form").scrollIntoView({behavior:"smooth",block:"start"});});
-$("quick-movement").addEventListener("click",()=>{navigate("movements");$("movement-form").scrollIntoView({behavior:"smooth",block:"start"});});
+$("quick-movement").addEventListener("click",()=>{navigate("quick");$("quick-search").focus();});
 window.addEventListener("hashchange",()=>navigate(location.hash.replace("#","")));
 navigate(location.hash.replace("#",""));
 function recommendations(){
@@ -324,13 +326,7 @@ function barcodeShow(item){
  barcodeMessage("Producto identificado. Introduce lo encontrado y confirma el conteo.");
 }
 function barcodeUnknown(code){
- if(barcodeSelected && barcodeItem(barcodeSelected.id)){
-  barcodeShow(barcodeItem(barcodeSelected.id));
-  barcodeOptions();
-  $("barcode-link-form").hidden=false;
-  barcodeMessage("Código nuevo detectado. Comprueba el producto seleccionado y vincúlalo.");
-  return;
- }
+ // Un código desconocido nunca hereda el producto seleccionado previamente.
  barcodeSelected=null;
  $("barcode-product").classList.remove("matched");
  $("barcode-product").innerHTML='<strong>Código sin registrar: '+escape(code)+'</strong><span>Busca arriba el nombre y elige el insumo correcto antes de guardarlo.</span>';
@@ -443,9 +439,11 @@ $("barcode-camera-stop").addEventListener("click",()=>{stopBarcodeCamera();barco
 document.addEventListener("visibilitychange",()=>{if(document.hidden)stopBarcodeCamera();});
 window.addEventListener("pagehide",stopBarcodeCamera);
 
+const quick=window.FiillerWarehouseQuick.init({call,getInventory:()=>inventory,getBarcodes:()=>barcodes,refresh:load,navigate});
+$("inventory-list").addEventListener("click",event=>{const button=event.target.closest("[data-quick-select]");if(button)quick.select(button.dataset.quickSelect);});
 async function load(){
  const [i,m,c,l]=await Promise.all([call("filler_inventory_items?select=*&order=name.asc&limit=1000"),call("filler_inventory_movements?select=id,item_id,type,quantity_change,note,created_at&order=created_at.desc&limit=30"),call("filler_inventory_counts?select=id,item_id,system_quantity,physical_quantity,difference,count_date,counted_at&count_date=eq."+today()+"&order=counted_at.desc&limit=1000"),call("filler_inventory_lots?select=id,item_id,lot_code,expiration_date,quantity,received_at&order=expiration_date.asc.nullslast&limit=1000")]);
- inventory=i||[];movements=m||[];counts=c||[];lots=l||[];renderExtra();render();renderAudit();await loadBarcodes();message("Datos del almacén actualizados.");
+ inventory=i||[];movements=m||[];counts=c||[];lots=l||[];renderExtra();render();renderAudit();await loadBarcodes();render();quick.render();message("Datos del almacén actualizados.");
 }
 async function show(){
  const role=await FillerCloud.staffRole();
@@ -464,6 +462,9 @@ $("create-form").addEventListener("submit",async e=>{
  e.preventDefault();const f=e.currentTarget,b=f.querySelector("button");b.disabled=true;
  try{
  const d=new FormData(f);
+ const code=String(d.get("code")||"").trim(),name=String(d.get("name")||"").trim();
+ if(inventory.some(i=>findKey(i.code)===findKey(code)))throw Error("Este código ya existe. Localiza el insumo y registra un movimiento, no un producto duplicado.");
+ if(inventory.some(i=>findKey(i.name)===findKey(name)))throw Error("Ya existe un insumo con este nombre. Revisa el catálogo antes de crearlo de nuevo.");
  await call("rpc/filler_inventory_create",{method:"POST",body:{p_code:String(d.get("code")).trim(),p_name:String(d.get("name")).trim(),p_category:d.get("category"),p_unit:d.get("unit"),p_min:Number(d.get("min")),p_cost:Number(d.get("cost")),p_expiry:d.get("expiry")||null}});
  f.reset();await load();message("✓ Insumo creado. Registra una entrada para alimentar su existencia.");
  }catch(err){message(err.message,true);}finally{b.disabled=false;}
