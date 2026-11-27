@@ -90,7 +90,7 @@
       lines?.parentNode?.insertBefore(note,lines);
     }
     note.textContent=info.message;
-    if(info.added){toast("Pedido preparado. ¡Revisa tu carrito!");setTimeout(()=>window.openFillerCart?.(),80);}
+    if(info.added){toast("Tu pedido está preparado. Abre «Ver pedido» cuando quieras confirmarlo.");}
     else toast("Revisa los productos disponibles del menú.");
   }
   async function refresh(){
