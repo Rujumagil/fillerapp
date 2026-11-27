@@ -1,0 +1,57 @@
+/* Fiiller Café · experiencia de compra estilo app, noviembre 2026.
+ * Solo presentación: precios, existencias y checkout siguen siendo los oficiales. */
+.fiiller-shop-start{display:grid;grid-template-columns:minmax(230px,.75fr) minmax(330px,1.25fr);gap:22px;align-items:center;background:#fff;border:1px solid #dfe9df;border-radius:23px;padding:24px 28px;margin:0 0 19px;box-shadow:0 14px 38px #183a2510;scroll-margin-top:100px}
+.fiiller-shop-eyebrow{display:block;color:#a44d15;font-size:10px;font-weight:850;letter-spacing:.09em}
+.fiiller-shop-start h2{font-size:clamp(24px,2.65vw,35px);letter-spacing:-.04em;line-height:1.13;color:#103d2a;margin:6px 0}
+.fiiller-shop-start p{color:#617568;line-height:1.45;font-size:12px;margin:6px 0}
+.fiiller-shop-start__actions{min-width:0}
+.fiiller-shop-start .filler-menu-search{margin:0;padding:7px 11px;display:flex;align-items:center;gap:10px;background:#f8faf7;border:1px solid #c9ddce;border-radius:14px;box-shadow:none}
+.fiiller-shop-start .filler-menu-search>span{font-size:24px;color:#3f7756;line-height:1}
+.fiiller-shop-start #filler-product-search{display:block;flex:1;width:100%;min-width:0;min-height:38px;border:0;background:transparent;padding:6px 0;color:#183f2d;font-size:15px;outline:0}
+.fiiller-shop-start #filler-product-search::-webkit-search-cancel-button{cursor:pointer}
+.fiiller-shop-start #filler-clear-search{flex:none;width:36px;height:36px;padding:0;border-radius:11px;background:#e6efe8;color:#315d42;font-size:15px}
+.fiiller-shop-start .filler-menu-search:focus-within{border-color:#168352;box-shadow:0 0 0 3px #0a865522}
+.fiiller-quick-categories{display:flex;gap:7px;overflow-x:auto;align-items:center;scrollbar-width:thin;padding:10px 1px 3px}
+.fiiller-quick-categories button{flex:none;white-space:nowrap;background:#f4f8f4;color:#276244;border:1px solid #d7e6d9;border-radius:999px;font-size:12px;font-weight:780;padding:8px 12px;min-height:37px}
+.fiiller-quick-categories button[aria-pressed="true"]{background:#006241;color:#fff;border-color:#006241}
+.fiiller-quick-categories button:focus-visible{outline:3px solid #ffa351;outline-offset:2px}
+.fiiller-shop-start .fiiller-shop-search-status{font-size:11px;color:#718878;margin:5px 0 0;min-height:16px}
+#menu>.section-head{margin-top:5px}
+#menu>#promociones{margin-top:28px}
+#menu>#proximos{margin-top:15px}
+#proximos .fiiller-discovery-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),400px));justify-content:start}
+#proximos .fiiller-feature-card.has-photo{max-width:400px}
+#pedido .cart{align-self:start}
+#pedido .cart:not(.cart-has-items)>label,
+#pedido .cart:not(.cart-has-items)>#customer-account,
+#pedido .cart:not(.cart-has-items)>#customer-fields,
+#pedido .cart:not(.cart-has-items)>#filler-checkout-error,
+#pedido .cart:not(.cart-has-items)>#send-order{display:none!important}
+#pedido .cart .fiiller-empty-cart-note{display:none}
+#pedido .cart:not(.cart-has-items) .fiiller-empty-cart-note{display:grid;gap:7px;background:#f3f8f3;border:1px solid #e1eee2;padding:15px;border-radius:14px;color:#21563c;font-size:13px;margin:13px 0}
+.fiiller-empty-cart-note strong{font-size:14px;color:#0b4a32}
+.fiiller-empty-cart-note a{color:#ad530f;text-decoration:underline;font-weight:750}
+.fiiller-cart-upsell{margin:12px 0 6px;display:grid;gap:9px;border:1px solid #e3e9de;padding:13px;border-radius:14px;background:#fbfdf9}
+.fiiller-cart-upsell[hidden]{display:none!important}
+.fiiller-cart-upsell h3{font-size:14px;margin:0;color:#124a31;line-height:1.3}
+.fiiller-cart-upsell p{margin:0;font-size:11px;line-height:1.4;color:#687f70}
+.fiiller-cart-upsell-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;border-top:1px solid #e2ede3}
+.fiiller-cart-upsell-item>span{display:grid;gap:3px;min-width:0}
+.fiiller-cart-upsell-item strong{font-size:11px;line-height:1.33;color:#1a4a33;overflow-wrap:anywhere}
+.fiiller-cart-upsell-item small{font-size:11px;color:#617766}
+.fiiller-cart-upsell-item button{flex:none;border-radius:9px;background:#e7f2e9;color:#006241;font-size:11px;min-width:67px;padding:9px;white-space:nowrap;font-weight:850}
+.fiiller-cart-upsell-item button:hover{background:#d2e8d8}
+.fiiller-cart-upsell-item button:focus-visible{outline:3px solid #ffac58;outline-offset:2px}
+@media(min-width:981px){.filler-family-track{grid-auto-columns:minmax(195px, min(42%,280px))}}
+@media(max-width:980px){.fiiller-shop-start{grid-template-columns:1fr;gap:12px;padding:20px}.fiiller-shop-start h2{font-size:28px}}
+@media(max-width:700px){
+ .fiiller-shop-start{padding:15px 14px;border-radius:18px;gap:8px;margin-bottom:14px}
+ .fiiller-shop-start h2{font-size:24px}
+ .fiiller-shop-start p{font-size:11px}
+ .fiiller-shop-start #filler-product-search{min-height:35px;font-size:14px}
+ .fiiller-quick-categories button{font-size:11px;min-height:33px;padding:7px 10px}
+ #menu>#promociones{margin-top:25px}
+ #pedido .cart:not(.cart-has-items) .fiiller-empty-cart-note{margin:7px 0}
+ .fiiller-cart-upsell{padding:11px}
+}
+@media(prefers-reduced-motion:reduce){.filler-family-track{scroll-behavior:auto!important}}
