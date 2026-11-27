@@ -43,7 +43,7 @@ window.addEventListener("fiiller:member-ready",()=>{
  choose(hashToView[location.hash]||selected,{writeHistory:false});
 });
 window.addEventListener("fiiller:member-logout",()=>{
- document.body.classList.remove("mi-v2-authenticated");
+ document.body.classList.remove("mi-v2-authenticated","mi-v2-keyboard-open");
  choose("inicio",{writeHistory:false});
 });
 window.addEventListener("fiiller:my-favorites-count",event=>{
@@ -52,6 +52,15 @@ window.addEventListener("fiiller:my-favorites-count",event=>{
  const n=Number(event.detail?.count)||0;
  count.textContent=n?n+" producto"+(n===1?"":"s")+" guardado"+(n===1?"":"s"):"Guarda tus productos preferidos";
 });
+// La barra de pestañas no debe tapar campos al abrirse el teclado móvil.
+const editable=element=>element?.matches?.('input:not([type="checkbox"]):not([type="radio"]),textarea,select,[contenteditable="true"]');
+function updateKeyboardState(){
+ const mobile=window.matchMedia?.("(max-width: 740px)")?.matches;
+ document.body.classList.toggle("mi-v2-keyboard-open",Boolean(mobile && member.contains(document.activeElement) && editable(document.activeElement)));
+}
+member.addEventListener("focusin",updateKeyboardState);
+member.addEventListener("focusout",()=>window.requestAnimationFrame(updateKeyboardState));
+window.addEventListener("resize",updateKeyboardState);
 if(!member.hidden)document.body.classList.add("mi-v2-authenticated");
 choose(hashToView[location.hash]||"inicio",{writeHistory:false});
 window.MiFiillerView=Object.freeze({open:view=>choose(view,{focus:true}),current:()=>selected});
