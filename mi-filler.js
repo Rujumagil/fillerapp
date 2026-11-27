@@ -167,11 +167,12 @@ async function loadMyFavorites(){
   try{
     const [rows,products]=await Promise.all([
       request("filler_customer_favorites?select=product_id,created_at&user_id=eq."+encodeURIComponent(session.user.id)+"&order=created_at.desc"),
-      request("filler_products?select=id,name,price,stock,active&active=eq.true")
+      request("filler_products?select=id,name,category,price,stock,image_url,active&active=eq.true")
     ]);
     const byId=new Map((Array.isArray(products)?products:[]).map(p=>[String(p.id),p]));
     const favorites=Array.isArray(rows)?rows:[];
     summary.textContent=favorites.length+" producto"+(favorites.length===1?"":"s")+" guardado"+(favorites.length===1?"":"s")+" en tu cuenta.";
+    window.dispatchEvent(new CustomEvent("fiiller:my-favorites-count",{detail:{count:favorites.length}}));
     if(!favorites.length){
       list.innerHTML='<p class="muted">Aún no guardas favoritos. En el menú, toca el corazón ♡ de los productos que te gustan.</p>';
       return;
@@ -179,12 +180,20 @@ async function loadMyFavorites(){
     const money=value=>"$"+Number(value||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
     list.innerHTML=favorites.map(f=>{
       const id=String(f.product_id),product=byId.get(id);
-      const canOrder=Boolean(product&&Number(product.stock)>0);
-      return '<article style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border:1px solid #d6e6d8;border-radius:14px;padding:14px;background:#fafffa">'+
-        '<div style="min-width:145px;flex:1"><strong style="display:block">'+escHistory(product?.name||"Producto no disponible")+'</strong><span class="muted" style="font-size:12px">'+
-        (product?(money(product.price)+(canOrder?" · Disponible":" · Agotado")):"Ya no está en el menú")+'</span></div>'+
-        '<div class="actions"><button type="button" data-favorite-order="'+escHistory(id)+'"'+(canOrder?"":" disabled")+' style="padding:9px 12px;font-size:12px">Agregar al pedido</button>'+
-        '<button type="button" class="secondary" data-favorite-remove="'+escHistory(id)+'" style="padding:9px 12px;font-size:12px">Quitar ♡</button></div></article>';
+      const blocked=Boolean(product && (
+        window.FiillerAvailability?.isChilaquiles({id:product.id,name:product.name,cat:product.category}) ||
+        window.FiillerAvailability?.isDiscontinuedProduct({id:product.id,name:product.name,cat:product.category}) ||
+        /hot\s*cakes?|panqueques?/i.test(product.name)
+      ));
+      const canOrder=Boolean(product&&Number(product.stock)>0&&!blocked);
+      const image=product?.image_url&&/^https:\/\//i.test(product.image_url)
+        ? '<img src="'+escHistory(product.image_url)+'" alt="" loading="lazy" decoding="async">'
+        : '<span aria-hidden="true">☕</span>';
+      return '<article class="mi-v2-favorite-card"><div class="mi-v2-fav-image">'+image+'</div>'+
+        '<div class="mi-v2-fav-content"><strong>'+escHistory(product?.name||"Producto no disponible")+'</strong><small>'+
+        (product?(money(product.price)+(canOrder?" · Disponible":blocked?" · Fuera del menú":" · Agotado")):"Ya no está en el menú")+'</small>'+
+        '<div class="mi-v2-fav-actions"><button type="button" data-favorite-order="'+escHistory(id)+'"'+(canOrder?"":" disabled")+'>+ Agregar</button>'+
+        '<button type="button" class="secondary" data-favorite-remove="'+escHistory(id)+'" aria-label="Quitar '+escHistory(product?.name||"producto")+' de mis favoritos">Quitar ♡</button></div></div></article>';
     }).join("");
   }catch(error){
     summary.textContent="";
@@ -339,6 +348,7 @@ function showMember(){
   updateLastOrder();
   loadMyOrderHistory();
   loadMyFavorites();
+  window.dispatchEvent(new Event("fiiller:member-ready"));
   window.FillerPushClient?.refresh?.();
 }
 $("edit-profile").addEventListener("click",()=>{
@@ -452,7 +462,8 @@ e.preventDefault();const f=e.currentTarget,b=f.querySelector("button[type=submit
 try{await saveProfile({full_name:f.elements.name.value.trim(),phone:f.elements.phone.value.trim(),promotions_opt_in:f.elements.promotions.checked});showMember();message("Preferencias actualizadas.");}
 catch(err){message(err.message,true);}finally{b.disabled=false;}
 });
-$("logout").addEventListener("click",async()=>{const access=await token();if(access)fetch(BASE+"/auth/v1/logout",{method:"POST",headers:{...headers(),Authorization:"Bearer "+access}}).catch(()=>{});save(null);profile=null;$("member").hidden=true;$("visitor").hidden=false;tab("login");message("Sesión cerrada.");});
+$("logout").addEventListener("click",async()=>{const access=await token();if(access)fetch(BASE+"/auth/v1/logout",{method:"POST",headers:{...headers(),Authorization:"Bearer "+access}}).catch(()=>{});save(null);profile=null;recentOrders=[];$("member").hidden=true;$("visitor").hidden=false;
+window.dispatchEvent(new Event("fiiller:member-logout"));tab("login");message("Sesión cerrada.");});
 // El enlace de confirmación de Supabase regresa con los tokens en el fragmento.
 async function receiveEmailConfirmation(params){
   const access=params.get("access_token"), refresh=params.get("refresh_token");
