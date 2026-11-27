@@ -228,6 +228,9 @@ $("member-favorites-list")?.addEventListener("click",async event=>{
 async function loadMyOrderHistory(){
   const list=$("member-orders-list"),summary=$("member-orders-summary");
   if(!list||!summary||!session?.user?.id)return;
+  list.classList.remove("mi-v2-orders-expanded");
+  const more=$("mi-v2-orders-more");
+  if(more){more.hidden=true;more.setAttribute("aria-expanded","false");}
   list.innerHTML='<p class="muted">Consultando tus pedidos…</p>';
   try{
     const since=new Date(Date.now()-90*24*60*60*1000).toISOString();
@@ -287,11 +290,24 @@ async function loadMyOrderHistory(){
           : '<button type="button" class="secondary" data-reorder="'+escHistory(o.id)+'">Comprobar disponibilidad</button>')+
         '</div></div></article>';
     }).join("");
+    if(more && orders.length>5){
+      more.hidden=false;
+      more.textContent="Ver "+(orders.length-5)+" pedidos más";
+    }
   }catch(error){
     summary.textContent="";
     list.textContent="No se pudo consultar tu historial: "+error.message;
+    if(more)more.hidden=true;
   }
 }
+$("mi-v2-orders-more")?.addEventListener("click",()=>{
+  const list=$("member-orders-list"),button=$("mi-v2-orders-more");
+  if(!list||!button)return;
+  const expanded=list.classList.toggle("mi-v2-orders-expanded");
+  button.setAttribute("aria-expanded",String(expanded));
+  button.textContent=expanded?"Mostrar menos":"Ver "+Math.max(0,list.querySelectorAll(".mi-v2-order-item").length-5)+" pedidos más";
+  if(!expanded)button.scrollIntoView({behavior:window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches?"auto":"smooth",block:"nearest"});
+});
 $("refresh-my-orders")?.addEventListener("click",loadMyOrderHistory);
 // Antes de repetir un pedido, consultar el catálogo vigente. No reactivar recetas retiradas.
 async function repeatOrderSafely(order){
