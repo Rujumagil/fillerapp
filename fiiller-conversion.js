@@ -21,7 +21,18 @@ const allowed=p=>{
  if(/chilaquiles|\btortas?\b|\blonches?\b/.test(name+" "+cat))return false;
  return Number.isFinite(Number(p.price))&&Number(p.price)>=0;
 };
-const categoryLabels=[{label:"Café",value:"Bebidas calientes"},{label:"Sándwiches",value:"Sándwiches y más"},{label:"Panadería",value:"Panadería"},{label:"Bebidas frías",value:"Bebidas frías"},{label:"Desayunos",value:"De la plancha"},{label:"Bebidas embotelladas",value:"Bebidas embotelladas"},{label:"Frutas y bowls",value:"Frutas y bowls"}];
+const categoryLabels=[
+ {label:"Desayunos",value:"De la plancha"},
+ {label:"Sándwiches",value:"Sándwiches y más"},
+ {label:"Café",value:"Bebidas calientes"},
+ {label:"Bebidas preparadas",value:"Bebidas frías"},
+ {label:"Ensaladas",value:"Ensaladas"},
+ {label:"Fruta y bowls",value:"Frutas y bowls"},
+ {label:"Panadería",value:"Panadería"},
+ {label:"Repostería",value:"Galletas y repostería"},
+ {label:"Bebidas embotelladas",value:"Bebidas embotelladas"},
+ {label:"Botanas y dulces",value:"Botanas y dulces"}
+];
 function availableCategories(){
  const types=new Set(currentProducts().filter(allowed).map(x=>String(x.cat||"")));
  return [{label:"Todos",value:"Todos"},...categoryLabels.filter(x=>types.has(x.value))];
@@ -103,26 +114,43 @@ function suggestions(){
  if(!window.FillerOnlineActive)return [];
  const cartProducts=currentCart();
  if(!cartProducts.length)return [];
+ const priority=window.FiillerMenuPriority;
+ const isRetail=p=>priority?.isComplementProduct(p)===true;
  const chosen=new Set(cartProducts.map(p=>String(p.id)));
- const beverage=cartProducts.some(p=>/bebidas?|frapp|cafe|chocolate|jugo/.test(clean((p.cat||"")+" "+p.name)));
- const preferred=beverage?["Panadería","Galletas y repostería","De la plancha","Sándwiches y más"]:
-  ["Bebidas calientes","Bebidas frías","Bebidas embotelladas","Panadería"];
- const options=currentProducts().filter(p=>allowed(p)&&!chosen.has(String(p.id)));
- options.sort((a,b)=>{
-  const rank=p=>{const at=preferred.indexOf(p.cat);return at<0?999:at;};
+ const preparedInCart=cartProducts.some(p=>!isRetail(p));
+ const hasPreparedDrink=cartProducts.some(p=>!isRetail(p)&&
+   /bebidas calientes|bebidas frias|frapp|cafe|chocolate|jugo/.test(clean((p.cat||"")+" "+p.name)));
+ const preferred=hasPreparedDrink
+   ? ["Panadería","De la plancha","Sándwiches y más","Frutas y bowls","Ensaladas","Galletas y repostería"]
+   : ["Bebidas calientes","Bebidas frías","De la plancha","Sándwiches y más","Panadería","Frutas y bowls"];
+ const available=currentProducts().filter(p=>allowed(p)&&!chosen.has(String(p.id)));
+ const prepared=available.filter(p=>!isRetail(p));
+ const retail=available.filter(isRetail);
+ const compare=(a,b)=>{
+  const rank=p=>{const i=preferred.indexOf(p.cat);return i<0?999:i;};
   return rank(a)-rank(b)||String(a.name).localeCompare(String(b.name),"es");
- });
- return options.slice(0,2);
+ };
+ prepared.sort(compare);
+ retail.sort((a,b)=>String(a.name).localeCompare(String(b.name),"es"));
+ // Una oferta preparada primero; el retail ocupa solo la segunda sugerencia.
+ if(preparedInCart){
+  const first=prepared.slice(0,1),second=retail.slice(0,1);
+  return [...first,...second,...prepared.slice(first.length,first.length+(second.length?0:1))].slice(0,2);
+ }
+ // Si el cliente solo eligió un producto empaquetado, invitarlo a probar cocina.
+ return prepared.slice(0,2);
 }
+
 function drawSuggestions(){
  const offers=suggestions();
  upsell.hidden=offers.length===0;
  upsell.replaceChildren();
  if(!offers.length)return;
  const heading=document.createElement("h3");
- heading.textContent="¿Quieres complementar tu pedido?";
+ heading.textContent=currentCart().some(p=>window.FiillerMenuPriority?.isComplementProduct(p)!==true)
+  ? "¿Le agregamos algo para acompañar?" : "¿Qué te preparamos para acompañarlo?";
  const subtitle=document.createElement("p");
- subtitle.textContent="Estas opciones están en el menú actual. Puedes añadirlas si te apetecen.";
+ subtitle.textContent="Primero nuestros preparados; bebidas y botanas empaquetadas como extras opcionales.";
  upsell.append(heading,subtitle);
  for(const p of offers){
   const row=document.createElement("div");row.className="fiiller-cart-upsell-item";

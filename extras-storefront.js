@@ -44,6 +44,9 @@
   const featuredIds = featuredSales.map(s=>s.id);
   const featuredRank = new Map(featuredSales.map((s,i)=>[s.id,{units:s.units,rank:i+1}]));
   const featuredCategory = "Los más vendidos";
+  // Mostrar preparados antes que retail sin alterar las categorías del TPV.
+  const menuPriority=window.FiillerMenuPriority;
+  let retailExpanded=false;
   const eligible = item => item && (isFiillerCoffee(item) || item.allowExtras === true || (item.allowExtras !== false && /chilaquiles|plancha|sandwich|ensalada|mollete|torta|croque|baguette|panini/i.test(normalize(item.cat || ""))));
   try{
     const saved=JSON.parse(sessionStorage.getItem("filler_extras_cart_v1")||"{}");
@@ -312,10 +315,12 @@
     const menu = document.getElementById("menu-list");
     if (!menu) return;
     // La nueva vista en cuadrícula no conserva posiciones de carrusel.
-    const categoryProducts = state.category === "Todos" ? state.menu : state.category === featuredCategory ? state.menu.filter(i => featuredIds.includes(i.id)) : state.menu.filter(i => i.cat === state.category);
+    const categoryProducts = (state.category === "Todos" ? state.menu : state.category === featuredCategory ? state.menu.filter(i => featuredIds.includes(i.id)) : state.menu.filter(i => i.cat === state.category))
+      .filter(i=>typeof fiillerMenuPermitido!=="function"||fiillerMenuPermitido(i));
     const products = searchQuery ? categoryProducts.filter(i => normalize(i.name + " " + i.cat).includes(searchQuery)) : categoryProducts;
     // Agrupar presentaciones en una tarjeta; cada tamaño conserva su propio SKU, precio y stock.
-    const families = [...new Set(products.map(item => item.cat || "Otros"))];
+    const families = [...new Set(products.map(item => item.cat || "Otros"))]
+      .sort(menuPriority?.compareCategories||((a,b)=>String(a).localeCompare(String(b),"es")));
     const displayProducts = [];
     const grouped = new Map();
     for (const item of products) {
@@ -350,15 +355,52 @@
       grouped.get(groupName).sizeVariants.push({...item, sizeOz:Number(match[2])});
     }
     displayProducts.forEach(p => p.sizeVariants?.sort((a,b)=>a.sizeOz-b.sizeOz));
-    const featured = displayProducts.filter(p => (p.classicGroup ? p.classicVariants.some(v=>featuredIds.includes(v.id)) : p.chilaquilesGroup ? p.chilaquilesVariants.some(v=>featuredIds.includes(v.id)) : p.sizeVariants ? p.sizeVariants.some(v=>featuredIds.includes(v.id)) : featuredIds.includes(p.id))).sort((a,b)=>{
-      const rank = p => Math.min(...(p.classicGroup ? p.classicVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) : p.chilaquilesGroup ? p.chilaquilesVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) : p.sizeVariants ? p.sizeVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) : [featuredRank.get(p.id)?.rank ?? 999]));
+    const isComplement=item=>menuPriority?.isComplementProduct(item)===true;
+    const inStock=p=>{
+      const variants=p.classicGroup?p.classicVariants:p.chilaquilesGroup?p.chilaquilesVariants:p.sizeVariants||[p];
+      return variants.some(v=>Number(v.stock)>reserved(v.id));
+    };
+    const featured = displayProducts.filter(p=>!isComplement(p) && inStock(p) &&
+      (p.classicGroup ? p.classicVariants.some(v=>featuredIds.includes(v.id)) :
+       p.chilaquilesGroup ? p.chilaquilesVariants.some(v=>featuredIds.includes(v.id)) :
+       p.sizeVariants ? p.sizeVariants.some(v=>featuredIds.includes(v.id)) : featuredIds.includes(p.id))
+    ).sort((a,b)=>{
+      const rank=p=>Math.min(...(p.classicGroup ? p.classicVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) :
+        p.chilaquilesGroup ? p.chilaquilesVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) :
+        p.sizeVariants ? p.sizeVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) : [featuredRank.get(p.id)?.rank ?? 999]));
       return rank(a)-rank(b);
     });
-    const sections = state.category === "Todos"
-      ? [{name:featuredCategory,items:featured}, ...families.map(name => ({name,items:displayProducts.filter(p => (p.cat||"Otros")===name && !featured.includes(p))}))].filter(section=>section.items.length)
-      : state.category === featuredCategory
-        ? [{name:featuredCategory,items:featured}]
-        : families.map(name=>({name,items:displayProducts.filter(p=>(p.cat||"Otros")===name)}));
+    const allView=state.category==="Todos";
+    const preparedGroups=families
+      .map(name=>({name,items:displayProducts.filter(p=>(p.cat||"Otros")===name&&!isComplement(p)&&!featured.includes(p)),isRetail:false}))
+      .filter(section=>section.items.length);
+    // Dar variedad al bloque corto: bebidas empaquetadas y botanas alternadas.
+    // Los agotados no ocupan un lugar destacado; siguen sujetos a catálogo/stock.
+    const retailPools=new Map();
+    displayProducts.filter(p=>isComplement(p)&&inStock(p)).forEach(p=>{
+      const category=p.cat||"Otros";
+      if(!retailPools.has(category))retailPools.set(category,[]);
+      retailPools.get(category).push(p);
+    });
+    const retailItems=[];
+    while([...retailPools.values()].some(pool=>pool.length)){
+      retailPools.forEach(pool=>{if(pool.length)retailItems.push(pool.shift())});
+    }
+    const retailLimit=6;
+    const sections=allView
+      ? [
+          ...(featured.length?[{name:"Preparados destacados",items:featured,isRetail:false}]:[]),
+          ...preparedGroups,
+          ...(retailItems.length?[{
+            name:"Complementos para tu pedido",
+            items:!searchQuery&&!retailExpanded?retailItems.slice(0,retailLimit):retailItems,
+            totalItems:retailItems.length,isRetail:true
+          }]:[])
+        ]
+      : state.category===featuredCategory
+        ? [{name:"Preparados destacados",items:featured,isRetail:false}]
+        : families.map(name=>({name,items:displayProducts.filter(p=>(p.cat||"Otros")===name),isRetail:menuPriority?.isComplementCategory(name)}));
+
 
     function productCard(item) {
       const chilaquilesGroup=Boolean(item.chilaquilesGroup);
@@ -382,13 +424,27 @@
     if (!products.length) {
       menu.innerHTML = '<div class="empty">No encontramos productos para esta búsqueda. Prueba otra familia o palabra.</div>';
     } else {
-      menu.innerHTML = sections.map((section, idx) => {
+      menu.innerHTML = (allView&&!searchQuery&&preparedGroups.length?
+        '<div class="fiiller-prepared-intro"><span>PRIMERO, LO QUE PREPARAMOS EN FIILLER</span><h3>Desayunos, café y alimentos frescos</h3><p>Elige tu comida o bebida preparada. Al final encontrarás los productos empaquetados para complementar.</p></div>':"")
+        + sections.map((section, idx) => {
         const family = section.name;
         const items = section.items;
         const heading = family;
-        return '<section class="filler-family"><div class="filler-family-header"><div><h3>' + esc(heading) + '</h3><small>' + items.length + (items.length === 1 ? " producto" : " productos") + '</small></div></div><div class="filler-family-track" id="filler-family-' + idx + '" data-family="' + esc(family) + '" role="region" aria-label="Productos de ' + esc(family) + '" tabindex="0">' + items.map(productCard).join("") + '</div></section>';
+        const badge=section.isRetail?'<span class="fiiller-family-tag">EXTRAS OPCIONALES</span>':'';
+        const count=section.totalItems||items.length;
+        const explanation=section.isRetail
+          ? '<p class="fiiller-family-intro">Bebidas embotelladas y botanas para acompañar lo que preparamos en Fiiller.</p>'
+          : '';
+        const expand=section.isRetail&&allView&&count>retailLimit&&!searchQuery
+          ? '<button type="button" class="fiiller-expand-complements" data-expand-complements aria-expanded="'+String(retailExpanded)+'">'+(retailExpanded?'Ver menos complementos':'Ver todos los complementos ('+count+')')+'</button>'
+          : '';
+        return '<section class="filler-family'+(section.isRetail?' fiiller-family--complementos':' fiiller-family--preparados')+'"><div class="filler-family-header"><div>'+badge+'<h3>'+esc(heading)+'</h3><small>'+count+(count===1?' producto':' productos')+'</small>'+explanation+'</div></div><div class="filler-family-track" id="filler-family-'+idx+'" data-family="'+esc(family)+'" role="region" aria-label="Productos de '+esc(family)+'" tabindex="0">'+items.map(productCard).join("")+'</div>'+expand+'</section>';
       }).join("");
     }
+    menu.querySelectorAll("[data-expand-complements]").forEach(button=>button.addEventListener("click",()=>{
+      retailExpanded=!retailExpanded;renderMenu();
+      if(retailExpanded)menu.querySelector(".fiiller-family--complementos")?.scrollIntoView({behavior:"smooth",block:"start"});
+    }));
     FillerPhotos.applyImages(menu);
     menu.querySelectorAll("[data-coffee-size]").forEach(select => select.addEventListener("change", () => {
       const chosen = select.selectedOptions[0];

@@ -1,4 +1,4 @@
-const CACHE_NAME = "filler-app-v86";
+const CACHE_NAME = "filler-app-v87";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -31,6 +31,7 @@ const APP_SHELL = [
   "./extras-control.js",
   "./extras-storefront.js",
   "./fiiller-base.css",
+  "./fiiller-menu-priority.js",
   "./fiiller-catalog-core.js",
   "./fiiller-drawer.js",
   "./fiiller-ux-v2.js",
