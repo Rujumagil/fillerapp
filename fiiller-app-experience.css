@@ -48,7 +48,7 @@ header .nav{max-width:1480px}
 #pedido .fiiller-app-family .item:nth-child(3){animation-delay:65ms}
 #pedido .fiiller-app-family .item:nth-child(4){animation-delay:95ms}
 #pedido .fiiller-app-family .item:hover{transform:translateY(-3px);box-shadow:0 18px 34px #1736211e!important;border-color:#cadfd0}
-#pedido .fiiller-app-family .item-media{aspect-ratio:1.25/1;border-radius:15px;overflow:hidden}
+#pedido .fiiller-app-family .item-media{aspect-ratio:1/1;border-radius:15px;overflow:hidden}
 #pedido .fiiller-app-family .item-photo{width:100%!important;height:100%!important;aspect-ratio:auto!important;min-height:0!important;max-height:none!important;border-radius:15px!important;margin:0!important}
 #pedido .fiiller-app-family:not(.fiiller-app-complementos) .item-photo[data-has-photo="true"]{background-size:cover!important;background-position:center!important}
 #pedido .fiiller-app-family .item-photo[data-has-photo="false"]{background-size:contain!important}
@@ -113,7 +113,7 @@ header .nav{max-width:1480px}
  #fiiller-view-all{font-size:11px!important;padding:6px 2px!important}
  #pedido .fiiller-app-family .filler-family-track{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;padding:0 0 9px!important}
  #pedido .fiiller-app-family .item{border-radius:17px!important;padding:7px!important}
- #pedido .fiiller-app-family .item-media{aspect-ratio:1.06/1}
+ #pedido .fiiller-app-family .item-media{aspect-ratio:1/1}
  #pedido .fiiller-app-family .item-details{padding:8px 3px 4px!important;gap:5px!important}
  #pedido .fiiller-app-family .item h3{font-size:13px!important}
  #pedido .fiiller-app-family .fiiller-item-description{min-height:28px!important;font-size:10px!important}
