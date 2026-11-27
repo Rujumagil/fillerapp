@@ -1,0 +1,116 @@
+/* Fiiller Café · Storefront UX v2 — mobile first, sin modificar precios ni checkout */
+:root{--fiiller-aa-green:#064831;--fiiller-aa-cream:#fff8ef;--fiiller-aa-orange:#ef6c13}
+html{scroll-padding-top:85px}
+.fiiller-drawer-open{overflow:hidden!important}
+.fiiller-cart-scrim[hidden],.fiiller-order-skeleton[hidden],.fiiller-catalog-skeleton[hidden],#fiiller-catalog-error[hidden],#fiiller-schedule-chips[hidden]{display:none!important}
+.fiiller-cart-scrim{position:fixed;inset:0;z-index:109;background:rgba(5,29,20,.54);backdrop-filter:blur(4px);animation:fiiller-overlay-in .22s ease}
+@keyframes fiiller-overlay-in{from{opacity:0}to{opacity:1}}
+/* Evitar que el carrito, el formulario y el total $0 ocupen espacio en la página principal */
+#pedido{grid-template-columns:170px minmax(0,1fr);align-items:start}
+#pedido>.cart,.order-layout>.cart{position:fixed!important;inset:0 0 0 auto!important;display:flex!important;flex-direction:column;gap:12px;width:min(460px,100vw)!important;max-width:none!important;max-height:none!important;height:100dvh!important;min-height:0!important;overflow-y:auto;overscroll-behavior:contain;z-index:110!important;background:#fffaf4;border-radius:22px 0 0 22px!important;padding:17px 22px 26px!important;box-shadow:-20px 0 56px #08261b30!important;transform:translateX(104%);visibility:hidden;pointer-events:none;transition:transform .25s cubic-bezier(.22,.74,.28,1),visibility 0s linear .25s;scrollbar-width:thin}
+body.fiiller-drawer-open #pedido>.cart{transform:translateX(0);visibility:visible;pointer-events:auto;transition:transform .25s cubic-bezier(.22,.74,.28,1);display:flex!important}
+#filler-cart .filler-cart-header{display:block;position:sticky;top:-17px;z-index:6;background:#fffaf4;border-bottom:1px solid #e9e3d8;padding:12px 0 13px;margin:-8px 0 0;border-radius:0}
+#filler-cart .filler-cart-header h2{font-size:25px;color:#073d2c;line-height:1.1;margin:6px 0 4px}
+#filler-cart .filler-cart-header p{color:#658274;margin:0;font-size:12px;line-height:1.4}
+#filler-cart .filler-cart-back{min-height:37px;color:#05583c;background:#eaf3ed;border:1px solid #d9e9db;border-radius:10px;padding:7px 11px;font-weight:780;font-size:12px}
+#filler-cart .filler-checkout-steps{display:flex;justify-content:space-between;gap:8px;font-size:11px}
+#filler-cart .filler-checkout-steps span{display:flex;gap:6px;align-items:center;color:#476451;font-weight:750}
+#filler-cart .filler-checkout-steps b{width:23px;height:23px;border-radius:50%;display:grid;place-items:center;background:#e6f2e8;color:#006241;font-size:12px}
+#filler-cart .filler-checkout-action{position:sticky!important;bottom:-26px;z-index:5;margin:auto -22px -26px!important;padding:13px 22px calc(15px + env(safe-area-inset-bottom))!important;background:#fffaf4;border-top:1px solid #e7e5dc;box-shadow:0 -9px 25px #183d2812}
+#filler-cart .filler-checkout-action-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:770;color:#4e665a}
+#filler-cart #send-order{min-height:49px;background:#006241;color:white;font-weight:840;border-radius:12px}
+#filler-cart .fiiller-empty-cart-note{display:none}
+#filler-cart:not(.cart-has-items)>label,
+#filler-cart:not(.cart-has-items)>#customer-fields,
+#filler-cart:not(.cart-has-items)>#customer-account,
+#filler-cart:not(.cart-has-items)>#fiiller-schedule-chips,
+#filler-cart:not(.cart-has-items)>#filler-checkout-error,
+#filler-cart:not(.cart-has-items)>.filler-checkout-action{display:none!important}
+#filler-cart:not(.cart-has-items) .fiiller-empty-cart-note{display:grid;gap:11px;padding:22px;margin:5px 0 0;border-radius:16px;min-height:148px;align-content:center;background:#f1f7f2;border:1px dashed #b9d8c5;text-align:center}
+#filler-cart .fiiller-empty-cart-note a{display:block;background:#006241;color:#fff;padding:12px 17px;text-decoration:none;border-radius:10px;max-width:210px;margin:3px auto 0}
+#filler-cart:has(#client-status[data-confirmed="true"]) .fiiller-empty-cart-note{display:none!important}
+body.fiiller-catalog-pending #pedido .filters,body.fiiller-catalog-error #pedido .filters{visibility:hidden}
+#filler-cart #client-status[data-confirmed="true"]{display:block!important;background:#eef8ef;border:1px solid #cbe3d2;padding:16px;border-radius:15px;font-size:13px;line-height:1.55}
+#filler-cart .total{position:relative;top:auto;margin:0;padding:12px 15px;font-size:18px;border:0}
+#filler-cart:not(.cart-has-items) .total{display:none}
+#filler-cart .fiiller-cart-upsell{flex-shrink:0}
+#filler-cart label{display:block;min-width:0}
+#filler-cart input,#filler-cart textarea,#filler-cart select{max-width:100%}
+#filler-cart .fiiller-time-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+#filler-cart .fiiller-time-chips button{color:#1c603f;background:#f6faf7;border:1px solid #cbe4d1;border-radius:10px;padding:10px 7px;min-height:43px;font-size:12px;font-weight:790;line-height:1.2}
+#filler-cart .fiiller-time-chips button[aria-pressed="true"]{background:#006241;color:white;border-color:#006241}
+#filler-cart .fiiller-time-chips button:disabled{opacity:.38;cursor:not-allowed}
+#filler-cart .fiiller-time-chips button:focus-visible{outline:3px solid #ff9b42;outline-offset:2px}
+#filler-cart .fiiller-schedule-caption{margin:4px 0 1px;font-size:12px;font-weight:770;color:#385d45}
+.fiiller-shop-start{scroll-margin-top:95px}
+.fiiller-shop-start .filler-menu-search{border:1px solid #a7c9b2}
+.fiiller-shop-start .filler-menu-search:focus-within{outline:2px solid #ca6a16;outline-offset:2px}
+.fiiller-shop-eyebrow{color:#914310}
+.hero .eyebrow{background:#f4efe5;color:#154532!important;border:1px solid #ffffffd9;font-weight:860;text-shadow:none}
+.hero{margin-bottom:18px}
+.hero-copy .hero-actions button{min-height:47px;font-size:14px}
+.fiiller-shop-start{margin-top:0}
+#menu .section-head{margin-bottom:12px}
+#pedido{scroll-margin-top:100px}
+#pedido .filters{max-height:min(77vh,810px);overflow:auto}
+#pedido .menu-grid{gap:21px}
+#pedido .filler-family-controls{display:none}
+#pedido .filler-family-track{display:grid!important;grid-auto-flow:row!important;grid-auto-columns:auto!important;grid-template-columns:repeat(auto-fill,minmax(min(100%,205px),1fr));gap:13px;overflow:visible!important;scroll-snap-type:none!important;padding:2px 0 11px;min-width:0}
+#pedido .filler-family-track .item{height:100%;scroll-snap-align:none}
+#pedido .menu-grid .item-photo{aspect-ratio:1 / 1!important;min-height:0!important;max-height:none!important;background-position:center!important;background-size:contain!important}
+#pedido .menu-grid .item-media{aspect-ratio:1/1}
+#pedido .menu-grid .item{padding:9px;gap:0}
+#pedido .menu-grid .item h3{min-height:0;font-size:14px;line-height:1.35}
+#pedido .menu-grid .item-details{gap:7px}
+#pedido .menu-grid .fiiller-item-description{color:#63786a;font-size:11px;line-height:1.4;min-height:29px;margin:0}
+#pedido .menu-grid .item-bottom{margin-top:auto}
+#pedido .menu-grid .item-add{min-height:43px;font-size:13px}
+#pedido .menu-grid .item-bottom .price{font-size:18px}
+#pedido .menu-grid .item-stock-badge{background:#fffefaf5;color:#07583c}
+.fiiller-catalog-skeleton{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:14px;padding:5px 0 24px}
+.fiiller-skeleton-card{min-height:245px;border-radius:20px;background:#fff;border:1px solid #ecebe3;padding:12px;display:grid;gap:12px;align-content:start}
+.fiiller-skeleton-photo{height:140px;border-radius:12px}
+.fiiller-skeleton-line{height:15px;border-radius:7px}
+.fiiller-skeleton-line.short{width:58%}
+.fiiller-skeleton-photo,.fiiller-skeleton-line,.fiiller-skeleton-pill{background:linear-gradient(100deg,#e9f0e9 12%,#f7faf7 32%,#e9f0e9 54%);background-size:250% 100%;animation:fiiller-skeleton-wave 1.5s linear infinite}
+@keyframes fiiller-skeleton-wave{from{background-position:200% 0}to{background-position:-80% 0}}
+body.fiiller-catalog-pending #menu-list{display:none!important}
+body.fiiller-catalog-error #menu-list{display:none!important}
+#fiiller-catalog-error{background:#fff2e7;color:#823d13;border:1px solid #f7d6ba;padding:18px;border-radius:14px;font-size:13px;line-height:1.5}
+.fiiller-order-skeleton{display:grid;gap:10px;padding:14px;margin:8px 0;border:1px solid #deebdf;border-radius:13px;background:#f4f8f4}
+.fiiller-order-skeleton .fiiller-skeleton-line{height:15px}
+.filler-alert-panel .fiiller-order-skeleton{margin:10px 0}
+.fiiller-install-footer{margin:26px auto 9px;max-width:450px;display:flex;align-items:center;justify-content:center;gap:12px;background:#f4f7f2;border:1px solid #dae5d9;border-radius:13px;padding:11px 13px;color:#43644d;font-size:11px}
+.fiiller-install-footer[hidden]{display:none!important}
+.fiiller-install-footer button{flex:none;background:#edf3ed;color:#07573b;border:1px solid #cbdccf;border-radius:9px;padding:8px 11px;font-size:11px;font-weight:800}
+.fiiller-install-footer button:hover{background:#dfece1}
+#promociones[hidden],#proximos[hidden]{display:none!important}
+.nav a.fiiller-nav-feature[hidden],nav a[href="#promociones"][hidden],nav a[href="#proximos"][hidden]{display:none!important}
+#promociones .fiiller-feature-card{gap:10px;min-height:0;padding:0;border-radius:18px;background:#fff;box-shadow:0 10px 26px #152b1d14;overflow:hidden}
+#promociones .fiiller-feature-card::after{display:none}
+#promociones .fiiller-feature-photo{width:100%;aspect-ratio:1.45;max-height:220px;object-fit:contain;background:#f6f9f5;border-radius:0}
+#promociones .fiiller-feature-text{padding:15px 16px 0}
+#promociones .fiiller-feature-card h3{max-width:none;font-size:18px}
+#promociones .fiiller-promo-price{display:block;font-size:19px;color:#006241;font-weight:900;margin-top:5px}
+#promociones .fiiller-feature-buy{display:flex;align-items:center;justify-content:center;text-align:center;margin:7px 16px 16px;background:#f6751d;color:#fff;min-height:43px;border:0;border-radius:11px;font-size:13px;font-weight:860}
+#promociones .fiiller-feature-buy:hover{background:#d95c0c}
+#proximos .fiiller-feature-card.has-photo{max-width:400px}
+.fiiller-icon-button:focus-visible,.filler-bell:focus-visible{outline:3px solid #f78c31;outline-offset:3px}
+@media(max-width:1080px){#pedido{grid-template-columns:145px minmax(0,1fr)}}
+@media(max-width:980px){#pedido{display:grid;grid-template-columns:1fr}#pedido .filters{max-height:none}#pedido .filler-family-track{grid-template-columns:repeat(auto-fill,minmax(min(100%,175px),1fr))}}
+@media(max-width:700px){
+ #pedido>.cart,.order-layout>.cart{inset:auto 0 0!important;width:100%!important;height:min(92dvh,900px)!important;max-height:92dvh!important;padding:14px 18px calc(16px + env(safe-area-inset-bottom))!important;border-radius:25px 25px 0 0!important;transform:translateY(105%);box-shadow:0 -19px 50px #0b251d31!important}
+ body.fiiller-drawer-open #pedido>.cart{transform:translateY(0)!important;display:flex!important}
+ #filler-cart .filler-cart-header{margin:-6px -18px 4px;padding:10px 18px 12px;top:-14px;border-radius:25px 25px 0 0}
+ #filler-cart .filler-checkout-action{bottom:calc(-16px - env(safe-area-inset-bottom));margin:auto -18px calc(-16px - env(safe-area-inset-bottom))!important;padding:10px 18px calc(14px + env(safe-area-inset-bottom))!important}
+ #pedido .filler-family-track{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ #pedido .menu-grid .item h3{font-size:12px}
+ #pedido .menu-grid .fiiller-item-description{font-size:10px;min-height:27px}
+ #pedido .menu-grid .item-bottom .price{font-size:16px}
+ #pedido .menu-grid .item-add{min-height:40px;font-size:11px}
+ #pedido .menu-grid .item-photo{aspect-ratio:1/1!important}
+ .fiiller-install-footer{margin:18px 16px calc(85px + env(safe-area-inset-bottom));font-size:10px}
+ .fiiller-catalog-skeleton{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .fiiller-skeleton-card{min-height:210px}
+}
+@media(prefers-reduced-motion:reduce){.fiiller-skeleton-photo,.fiiller-skeleton-line,.fiiller-skeleton-pill{animation:none!important}#pedido>.cart,.order-layout>.cart{transition:none!important}}

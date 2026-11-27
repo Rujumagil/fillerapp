@@ -21,18 +21,18 @@ const allowed=p=>{
  if(/chilaquiles|\btortas?\b|\blonches?\b/.test(name+" "+cat))return false;
  return Number.isFinite(Number(p.price))&&Number(p.price)>=0;
 };
-const categoryLabels=["Bebidas calientes","Bebidas frías","De la plancha","Sándwiches y más","Panadería","Bebidas embotelladas","Frutas y bowls"];
+const categoryLabels=[{label:"Café",value:"Bebidas calientes"},{label:"Sándwiches",value:"Sándwiches y más"},{label:"Panadería",value:"Panadería"},{label:"Bebidas frías",value:"Bebidas frías"},{label:"Desayunos",value:"De la plancha"},{label:"Bebidas embotelladas",value:"Bebidas embotelladas"},{label:"Frutas y bowls",value:"Frutas y bowls"}];
 function availableCategories(){
  const types=new Set(currentProducts().filter(allowed).map(x=>String(x.cat||"")));
- return ["Todos",...categoryLabels.filter(x=>types.has(x))];
+ return [{label:"Todos",value:"Todos"},...categoryLabels.filter(x=>types.has(x.value))];
 }
 function drawCategories(){
  const available=availableCategories();
- const signature=available.join("|");
+ const signature=available.map(x=>x.value).join("|");
  if(lastCategories!==signature){
   categories.replaceChildren(...available.map(category=>{
    const button=document.createElement("button");
-   button.type="button";button.textContent=category;button.dataset.quickCategory=category;
+   button.type="button";button.textContent=category.label;button.dataset.quickCategory=category.value;
    button.setAttribute("aria-pressed","false");
    return button;
   }));
@@ -59,7 +59,7 @@ categories.addEventListener("click",e=>{
  const chip=e.target.closest("[data-quick-category]");
  if(!chip)return;
  const cat=chip.dataset.quickCategory;
- if(!availableCategories().includes(cat))return;
+ if(!availableCategories().some(c=>c.value===cat))return;
  state.category=cat;
  if(search.value){
   search.value="";
@@ -83,9 +83,10 @@ title.textContent="Tu próximo antojo empieza en el menú";
 const explanation=document.createElement("span");
 explanation.textContent="Agrega un producto para elegir la hora de recolección y confirmar tus datos.";
 const link=document.createElement("a");
-link.href="#comprar-rapido";link.textContent="Explorar productos";
-link.addEventListener("click",()=>{
- if(document.body.classList.contains("filler-cart-open"))window.closeFillerCart?.();
+link.href="#comprar-rapido";link.textContent="Explorar el menú";
+link.addEventListener("click",event=>{
+ event.preventDefault();
+ window.closeFillerCart?.(true);
 });
 note.append(title,explanation,link);
 cartLines.after(note);

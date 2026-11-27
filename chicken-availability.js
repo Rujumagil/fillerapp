@@ -1,10 +1,10 @@
 /* Fiiller Café · Disponibilidad temporal del menú.
-   Pollo, chilaquiles, molletes y tortas habilitados; otros productos retirados siguen ocultos.
+   Molletes y productos autorizados activos; chilaquiles y tortas/lonches retirados no se ofrecen.
    No borra recetas ni historial y no modifica existencias físicas en Supabase. */
 (function(){
   "use strict";
   const CHICKEN_UNAVAILABLE = false;
-  const CHILAQUILES_UNAVAILABLE = false;
+  const CHILAQUILES_UNAVAILABLE = true;
   const norm = v => String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
   const chickenProducts = new Set(["club-sandwich","tpvs027","tpv027"]);
   function isChickenProduct(p){
@@ -35,6 +35,7 @@
     const id=norm(p.id), name=norm(p.name);
     if(discontinuedIds.has(id))return true;
     if(/licuado de platano/.test(name))return true;
+    if(/\b(?:lonche|torta)s?\b/.test(name)&&/\b(?:jamon|milanesa|salchicha)\b/.test(name))return true;
     return /(nestle|nescafe)/.test(name) &&
       /(cafe|americano|cappuccino|capuchino|latte|moka|mokaccino|frappe)/.test(name);
   }
