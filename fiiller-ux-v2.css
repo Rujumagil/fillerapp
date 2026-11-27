@@ -114,3 +114,40 @@ body.fiiller-catalog-error #menu-list{display:none!important}
  .fiiller-skeleton-card{min-height:210px}
 }
 @media(prefers-reduced-motion:reduce){.fiiller-skeleton-photo,.fiiller-skeleton-line,.fiiller-skeleton-pill{animation:none!important}#pedido>.cart,.order-layout>.cart{transition:none!important}}
+
+
+/* Jerarquía comercial: comida preparada primero; retail como compra complementaria. */
+.fiiller-prepared-intro{display:grid;gap:4px;padding:18px 20px 16px;margin:2px 0 12px;
+  background:linear-gradient(115deg,#06432e,#08704c);border-radius:18px;color:#fff}
+.fiiller-prepared-intro>span{font-size:10px;letter-spacing:.1em;font-weight:850;color:#f9d4a9}
+.fiiller-prepared-intro h3{font-size:clamp(19px,2.25vw,25px);line-height:1.2;margin:0;color:#fff}
+.fiiller-prepared-intro p{font-size:12px;line-height:1.5;margin:1px 0 0;color:#e6f7ec;max-width:650px}
+#pedido .fiiller-family--preparados{order:0}
+#pedido .fiiller-family--complementos{order:10;background:#fcfaf5;border:1px solid #eadfd0;
+  border-radius:20px;padding:16px;margin-top:23px;scroll-margin-top:110px}
+#pedido .fiiller-family--complementos .filler-family-header{margin-bottom:12px}
+#pedido .fiiller-family--complementos .filler-family-header h3{font-size:clamp(20px,2vw,25px);color:#254537}
+#pedido .fiiller-family--complementos .filler-family-track{gap:11px}
+#pedido .fiiller-family--complementos .item{box-shadow:none;border-color:#e3e5d9}
+.fiiller-family-tag{display:inline-flex;font-size:10px;letter-spacing:.07em;font-weight:850;
+  color:#7b4d1e;background:#fff1dc;padding:5px 9px;border-radius:999px;margin-bottom:5px}
+.fiiller-family-intro{margin:7px 0 0;color:#6b7568;line-height:1.5;font-size:12px;max-width:630px}
+.fiiller-expand-complements{display:flex;align-items:center;justify-content:center;width:100%;
+  margin-top:12px;padding:12px 16px;border:1px solid #c9dccd;border-radius:12px;
+  color:#095b3b;background:#eaf3eb;font-size:13px;font-weight:850;cursor:pointer}
+.fiiller-expand-complements:hover{background:#d9eade}
+.fiiller-expand-complements:focus-visible{outline:3px solid #ef862f;outline-offset:3px}
+#pedido .filters .fiiller-filter-extras-heading{margin:22px 6px 8px;padding:9px 0 0;
+  font-size:11px;line-height:1.4;font-weight:850;color:#946024;text-transform:uppercase;
+  letter-spacing:.06em;border-top:1px solid #e8e1d5}
+#pedido .filters .fiiller-chip-extra{background:#fcfaf3;border-color:#eee1cc;color:#5a6b53}
+#pedido .filters .fiiller-chip-extra.active{background:#056643;border-color:#056643;color:#fff}
+#pedido .filters .fiiller-chip-extra:hover:not(.active){background:#f5eedf}
+@media(max-width:700px){
+  .fiiller-prepared-intro{padding:15px;margin-bottom:12px;border-radius:15px}
+  .fiiller-prepared-intro h3{font-size:19px}
+  .fiiller-prepared-intro p{font-size:11px}
+  #pedido .fiiller-family--complementos{padding:11px;margin-top:18px;border-radius:16px}
+  #pedido .fiiller-family--complementos .filler-family-track{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fiiller-expand-complements{font-size:12px}
+}
