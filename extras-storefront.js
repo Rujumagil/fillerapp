@@ -425,6 +425,10 @@
       return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" role="img" aria-label="' + esc(item.image ? "Fotografía de "+item.name : "Fotografía pendiente de "+item.name) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3><p class="fiiller-item-description">' + esc(description) + '</p>' + sizeSelector + '<div class="item-bottom"><strong class="price">' + (variants || groupVariants ? "Desde " : "") + money(displayPrice) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options || variants || groupVariants ? "Elegir " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(groupVariants ? (groupVariants.find(v=>Number(v.stock)>reserved(v.id))?.id||selected.id) : selected.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
     }
 
+    // Mantener la posición del carrusel cuando se actualiza el carrito o el stock.
+    const previousSliderScroll=new Map(
+      [...menu.querySelectorAll('[data-fiiller-slider="true"]')].map(track=>[track.id,track.scrollLeft])
+    );
     const hasCards=sections.some(section=>section.items.length);
     if(!products.length||!hasCards){
       const unregistered=view==="favorites"&&!window.FiillerFavoriteIds?.signedIn();
@@ -435,17 +439,27 @@
     } else {
       menu.innerHTML=sections.map((section,idx)=>{
         const count=section.totalItems??section.items.length;
+        const slider=view==="home"&&!searchActive&&section.items.length>1;
         const heading=(section.compact||view==="menu")?
           '<div class="fiiller-app-section-title"><div><h3>'+esc(section.name)+'</h3>'+
             (section.isRetail?'<p>Algo extra para acompañar tu pedido, si se te antoja.</p>':'')+
           '</div></div>':'';
+        const controls=slider?
+          '<div class="fiiller-slider-toolbar"><span class="fiiller-slider-tip">Desliza para descubrir <span aria-hidden="true">→</span></span>'+
+          '<div class="fiiller-slider-actions"><button type="button" class="fiiller-slider-arrow" data-fiiller-slide="-1" data-track-id="filler-family-'+idx+'" aria-controls="filler-family-'+idx+'" aria-label="Ver productos anteriores de '+esc(section.name)+'">‹</button>'+
+          '<span class="fiiller-slider-page" data-slider-page="filler-family-'+idx+'" aria-live="off">1 / '+section.items.length+'</span>'+
+          '<button type="button" class="fiiller-slider-arrow" data-fiiller-slide="1" data-track-id="filler-family-'+idx+'" aria-controls="filler-family-'+idx+'" aria-label="Ver más productos de '+esc(section.name)+'">›</button></div></div>':'';
         const more=section.more&&count>section.items.length?
           '<button type="button" class="fiiller-app-more" data-fiiller-more aria-label="Mostrar más productos de '+esc(section.name)+'">Ver más productos <span aria-hidden="true">↓</span></button>':'';
         return '<section class="filler-family fiiller-app-family'+(section.compact?' fiiller-app-complementos':'')+
-          (section.isRetail?' fiiller-family--complementos':' fiiller-family--preparados')+'">'+heading+
-          '<div class="filler-family-track" id="filler-family-'+idx+'" role="region" aria-label="'+esc(section.name)+'" tabindex="0">'+
+          (section.isRetail?' fiiller-family--complementos':' fiiller-family--preparados')+
+          (slider?' fiiller-slider-section':'')+'">'+heading+controls+
+          '<div class="filler-family-track" id="filler-family-'+idx+'" role="region" aria-label="'+esc(section.name)+'" tabindex="0"'+(slider?' data-fiiller-slider="true"':'')+'>'+
           section.items.map(productCard).join('')+'</div>'+more+'</section>';
       }).join("");
+    }
+    for(const track of menu.querySelectorAll('[data-fiiller-slider="true"]')){
+      if(previousSliderScroll.has(track.id))track.scrollLeft=previousSliderScroll.get(track.id);
     }
     menu.querySelectorAll("[data-fiiller-more]").forEach(button=>button.addEventListener("click",()=>{
       window.FiillerAppExperience?.loadMore();
@@ -470,7 +484,9 @@
       badge.className = "item-stock-badge " + (stock<=0?"sold-out":stock<=5?"low":"");
     }));
     menu.querySelectorAll("[data-add]").forEach(b => b.addEventListener("click", () => addToCart(b.dataset.add)));
-
+    window.dispatchEvent(new CustomEvent("fiiller:menu-rendered",{
+      detail:{view,sliderCount:menu.querySelectorAll("[data-fiiller-slider]").length}
+    }));
   };
   renderCart = function() {
     try{
