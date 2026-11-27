@@ -9,7 +9,7 @@ const items=[
  ["sales","Ventas de hoy · Arrow","dashboard-ventas.html","chart","Corte TPV pendiente"],
  ["orders","Pedidos digitales activos","pedidos.html","clipboard","Consultando pedidos"],
  ["messages","Avisos de mensajes","atencion.html?personal=1","message","Avisos de esta sesión"],
- ["stock","Insumos bajo mínimo","almacen-fiiller.html#inventory","box","Consultando almacén"]
+ ["stock","Insumos bajo mínimo","almacen-fiiller.html#review-low","box","Consultando almacén"]
 ];
 const overview=document.createElement("section");
 overview.className="fiiller-snapshot";
@@ -39,7 +39,7 @@ if(oldGrid&&cancellation){
  priorities.innerHTML='<h3 class="fiiller-priority-title">Prioridades operativas</h3>'+
  [
   ["orders","Pedidos por atender","pedidos.html","Consultando pedidos…"],
-  ["stock","Existencias por revisar","almacen-fiiller.html#inventory","Consultando inventario…"],
+  ["stock","Existencias por revisar","almacen-fiiller.html#review-low","Consultando inventario…"],
   ["sales","Corte Arrow de hoy","dashboard-ventas.html","Consultando corte…"]
  ].map(([key,label,url,note])=>
  '<a class="fiiller-priority-row" href="'+url+'" id="priority-'+key+'">'+
