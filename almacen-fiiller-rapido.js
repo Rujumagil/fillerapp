@@ -39,11 +39,13 @@
    function renderReview(){
     const panel=$("quick-review-panel");
     panel.hidden=!state.reviewMode;
+    $("quick-receipt-section").hidden=state.reviewMode;
+    $("quick-stage").hidden=state.reviewMode;
     if(!state.reviewMode)return;
     const low=lowItems(),done=todayCounts();
     const reviewed=low.filter(i=>done.has(String(i.id))).length;
     const pending=low.length-reviewed;
-    $("quick-review-progress").textContent=pending+" sin revisar · "+reviewed+" contados hoy · "+low.length+" alertas vigentes";
+    $("quick-review-progress").textContent=pending+" sin revisar · "+reviewed+" contados hoy · "+low.length+" alerta"+(low.length===1?"":"s")+" vigente"+(low.length===1?"":"s");
     $("quick-review-next").disabled=state.busy||state.batchBusy||!!state.pendingLot||pending===0;
    }
    function setReviewMode(on){
