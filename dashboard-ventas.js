@@ -150,13 +150,18 @@ async function renderGoals(token,firstDay,monthEnd,dates,salesByDate,ticketByDat
  const isPriorComplete=prevRows.length>0;
  const comparable=current?priorValue:priorAll;
  put("goal-previous-value",isPriorComplete?money(comparable):"Sin histórico");
- put("goal-previous-label",current?"Mes anterior, hasta el día "+cutDay:"Mes anterior completo");
- put("goal-comparison",isPriorComplete&&observedDates.length&&comparable>0?((amount/comparable-1)*100).toFixed(1)+"% frente al periodo de referencia":"Comparación pendiente");
+ put("goal-previous-label",current?"Mes anterior · cortes hasta el día "+cutDay:"Mes anterior · cortes registrados");
+ // Los meses no son comparables si faltan cortes o si difieren días operativos.
+ put("goal-comparison",!isPriorComplete?"Sin histórico verificable":missingSales.length?
+  "Comparación no válida: faltan "+missingSales.length+" cortes del periodo actual.":
+  "Referencia histórica registrada. Verifica cobertura y fechas antes de calcular variaciones.");
  const completeCurrent=missingSales.length===0&&observedDates.length>=3;
  const workdaysInMonth=(()=>{let n=0;for(let i=1;i<=Number(new Date(Date.UTC(Number(firstDay.slice(0,4)),Number(firstDay.slice(5,7)),0)).getUTCDate());i++){const day=new Date(Date.UTC(Number(firstDay.slice(0,4)),Number(firstDay.slice(5,7))-1,i)).getUTCDay();if(day!==0&&day!==6)n++;}return n;})();
  const forecast=current&&completeCurrent?amount/observedDates.length*workdaysInMonth:null;
  put("goal-forecast",forecast!==null?money(forecast):current?"Pendiente":future?"Mes futuro":"Mes histórico");
- put("goal-forecast-note",forecast!==null?"Proyección: promedio por día hábil × "+workdaysInMonth+" días hábiles. No es una venta confirmada.":current?"Se requieren por lo menos 3 días hábiles con cortes completos para pronosticar.":future?"El periodo todavía no inicia.":"Las proyecciones se reservan para el mes en curso.");
+ put("goal-forecast-note",forecast!==null?"Proyección: promedio por día hábil × "+workdaysInMonth+" días hábiles. No es una venta confirmada.":current?
+  (missingSales.length?"Pronóstico suspendido: faltan "+missingSales.length+" cortes de "+dates.length+" días hábiles transcurridos. Se exige cobertura completa y al menos tres cortes.":"Se requieren al menos tres días hábiles con cortes confirmados para pronosticar."):
+  future?"El periodo todavía no inicia.":"Las proyecciones se reservan para el mes en curso.");
  const goalNarrative=!target?"No hay objetivos definidos para este mes.":future?"Mes futuro: solo objetivos, sin ventas observadas.":!observedDates.length?"Todavía no hay cortes del TPV para este mes. No se interpreta como venta de $0.":missingSales.length?"Hay "+missingSales.length+" días hábiles sin corte: avance parcial de "+money(amount)+" y pronóstico suspendido.":("Ventas registradas: "+money(amount)+" ("+Math.round(salesPct)+"% de meta). "+(forecast!==null?(forecast>=targetSales?"La proyección alcanza la meta.":"La proyección queda por debajo de la meta."):""));
  put("goal-summary",goalNarrative+(missingTickets.length?" Faltan tickets en "+missingTickets.length+" día(s).":""));
 }
@@ -461,7 +466,7 @@ async function flyChatAsk(question) {
  try{
   let jwt=await FillerCloud.accessToken();
   if(!jwt)throw Error("Tu sesión expiró. Inicia sesión nuevamente como administrador de Fiiller.");
-  const requestBody=JSON.stringify({agent:selected,question,report:flyOpsReportText});
+  const requestBody=JSON.stringify({agent:selected,question,report:flyOpsReportText+(window.FiillerKpiQuality?.exportText?.()||"")});
   const send=access=>fetch(FLY_ENDPOINT,{
     method:"POST",cache:"no-store",signal:AbortSignal.timeout(24000),
     headers:{"Content-Type":"application/json","Authorization":"Bearer "+access},
@@ -797,6 +802,11 @@ async function show(){
  $("top-products").innerHTML=products.map((d,i)=>'<div class="list-line"><span class="num">'+(i+1)+'</span><span class="name">'+escape(d.name)+'<br><span class="small">'+fmt(d.qty)+' unidades</span></span><div class="bar"><div class="fill" style="width:'+Math.round(100*Number(d.qty||0)/maxQ)+'%"></div></div></div>').join("")||'<p class="small">Aún no hay suficientes pedidos de la app para mostrar un ranking.</p>';
  $("updated").textContent="Actualizado: "+new Date(data.generated_at).toLocaleString("es-MX");
  status("✓ Indicadores actualizados desde Supabase. Ventas Arrow y pedidos de la app se mantienen separados.");
+ window.dispatchEvent(new CustomEvent("fiiller:kpis-ready",{detail:{
+  month:firstDay.slice(0,7),working:dates.slice(),cutDates:dates.filter(d=>salesByDate.has(d)),
+  ticketDates:dates.filter(d=>ticketByDate.has(d)),
+  comparableAmount,comparableTickets:comparableTicketCount
+ }}));
 }
 $("report-month").value=new Intl.DateTimeFormat("sv-SE",{timeZone:"America/Mexico_City",year:"numeric",month:"2-digit"}).format(new Date()).slice(0,7);
 $("report-month").addEventListener("change",()=>{$("report-month").dataset.userSelected="yes";show().catch(e=>status(e.message,true));});
@@ -852,7 +862,7 @@ $("fly-generate-report").addEventListener("click",async()=>{
  if(!flyOpsReportText)return;
  const period=flyChatContext?.period||"periodo seleccionado";
  const report="REPORTE OPERATIVO VERIFICABLE · "+period+"\n\n"+flyOpsReportText+
-  "\n\nLECTURA: cifras TPV y tickets solo de fechas confirmadas, inventario actual independiente, sin inferir ventas en fechas pendientes. Sujeto a revisión humana.";
+  "\n\nLECTURA: cifras TPV y tickets solo de fechas confirmadas, inventario actual independiente, sin inferir ventas en fechas pendientes. Sujeto a revisión humana."+(window.FiillerKpiQuality?.exportText?.()||"");
  flyLastAnswer=report;
  flyChatAdd(report,"bot");
  $("fly-copy-answer").disabled=false;
@@ -891,7 +901,7 @@ $("fly-chat-form").addEventListener("submit",event=>{
 $("fly-copy-report").addEventListener("click",async()=>{
  if(!flyOpsReportText)return;
  try{
-  await navigator.clipboard.writeText(flyOpsReportText);
+  await navigator.clipboard.writeText(flyOpsReportText+(window.FiillerKpiQuality?.exportText?.()||""));
   $("fly-copy-state").textContent="Reporte copiado. Puedes consultarlo y generar análisis sin salir de Fiiller en la pestaña Compás Fly IA.";
  }catch(error){
   $("fly-copy-state").textContent="No se pudo acceder al portapapeles en este navegador. Revisa los permisos del sitio.";
