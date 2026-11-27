@@ -8,6 +8,7 @@ const APP_SHELL = [
   "./mi-filler.js",
   "./mi-fiiller-v2.css",
   "./mi-fiiller-v2.js",
+  "./fiiller-order-actions.js",
   "./pedido.html",
   "./order-tracking.js",
   "./admin.html",
