@@ -33,7 +33,7 @@ function card(r){
  return article;
 }
 async function load(){
- const res=await fetch(base+"/rest/v1/filler_storefront_features?select=kind,title,description,eyebrow,image_url,sort_order,product_id&order=sort_order.asc&limit=18",{
+ const res=await fetch(base+"/rest/v1/filler_storefront_features?select=kind,title,description,eyebrow,image_url,sort_order,product_id&is_published=eq.true&order=sort_order.asc&limit=18",{
  headers:{apikey:key,Accept:"application/json"},cache:"no-store"});
  if(!res.ok)return;
  const rows=await res.json();if(!Array.isArray(rows))return;
