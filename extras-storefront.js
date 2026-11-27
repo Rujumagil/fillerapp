@@ -362,45 +362,49 @@
     };
     const featured = displayProducts.filter(p=>!isComplement(p) && inStock(p) &&
       (p.classicGroup ? p.classicVariants.some(v=>featuredIds.includes(v.id)) :
-       p.chilaquilesGroup ? p.chilaquilesVariants.some(v=>featuredIds.includes(v.id)) :
-       p.sizeVariants ? p.sizeVariants.some(v=>featuredIds.includes(v.id)) : featuredIds.includes(p.id))
+        p.chilaquilesGroup ? p.chilaquilesVariants.some(v=>featuredIds.includes(v.id)) :
+        p.sizeVariants ? p.sizeVariants.some(v=>featuredIds.includes(v.id)) : featuredIds.includes(p.id))
     ).sort((a,b)=>{
       const rank=p=>Math.min(...(p.classicGroup ? p.classicVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) :
         p.chilaquilesGroup ? p.chilaquilesVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) :
         p.sizeVariants ? p.sizeVariants.map(v=>featuredRank.get(v.id)?.rank ?? 999) : [featuredRank.get(p.id)?.rank ?? 999]));
       return rank(a)-rank(b);
     });
-    const allView=state.category==="Todos";
-    const preparedGroups=families
-      .map(name=>({name,items:displayProducts.filter(p=>(p.cat||"Otros")===name&&!isComplement(p)&&!featured.includes(p)),isRetail:false}))
-      .filter(section=>section.items.length);
-    // Dar variedad al bloque corto: bebidas empaquetadas y botanas alternadas.
-    // Los agotados no ocupan un lugar destacado; siguen sujetos a catálogo/stock.
+    const ux=window.FiillerAppExperience;
+    const view=ux?.getView()||"home";
+    const limit=ux?.getVisibleCount()||8;
+    const searchActive=Boolean(searchQuery);
+    const prepared=displayProducts.filter(p=>!isComplement(p));
+    const retail=displayProducts.filter(isComplement);
+    const rankedPrepared=[...featured,...prepared.filter(p=>!featured.includes(p))];
     const retailPools=new Map();
-    displayProducts.filter(p=>isComplement(p)&&inStock(p)).forEach(p=>{
-      const category=p.cat||"Otros";
-      if(!retailPools.has(category))retailPools.set(category,[]);
-      retailPools.get(category).push(p);
+    retail.filter(inStock).forEach(p=>{
+      const family=p.cat||"Otros";
+      if(!retailPools.has(family))retailPools.set(family,[]);
+      retailPools.get(family).push(p);
     });
-    const retailItems=[];
-    while([...retailPools.values()].some(pool=>pool.length)){
-      retailPools.forEach(pool=>{if(pool.length)retailItems.push(pool.shift())});
-    }
-    const retailLimit=6;
-    const sections=allView
-      ? [
-          ...(featured.length?[{name:"Preparados destacados",items:featured,isRetail:false}]:[]),
-          ...preparedGroups,
-          ...(retailItems.length?[{
-            name:"Complementos para tu pedido",
-            items:!searchQuery&&!retailExpanded?retailItems.slice(0,retailLimit):retailItems,
-            totalItems:retailItems.length,isRetail:true
-          }]:[])
-        ]
-      : state.category===featuredCategory
-        ? [{name:"Preparados destacados",items:featured,isRetail:false}]
-        : families.map(name=>({name,items:displayProducts.filter(p=>(p.cat||"Otros")===name),isRetail:menuPriority?.isComplementCategory(name)}));
-
+    const retailMix=[];
+    while([...retailPools.values()].some(pool=>pool.length))retailPools.forEach(pool=>{
+      if(pool.length)retailMix.push(pool.shift());
+    });
+    const cards=items=>items.slice(0,limit);
+    const sections=searchActive
+      ? [{name:"Resultados",items:cards([...prepared,...retail]),totalItems:displayProducts.length,isRetail:false,more:true}]
+      : view==="favorites"
+        ? (()=>{const fav=window.FiillerFavoriteIds?.get()||new Set();
+            const matches=displayProducts.filter(p=>fav.has(p.id)||
+              [p.classicVariants,p.chilaquilesVariants,p.sizeVariants].some(group=>
+                Array.isArray(group)&&group.some(v=>fav.has(v.id))));
+            return [{name:"Tus favoritos",items:cards(matches),totalItems:matches.length,isRetail:false,more:true}];
+          })()
+        : view==="category" && state.category!=="Todos"
+          ? [{name:ux?.label(state.category)||state.category,items:cards(displayProducts),totalItems:displayProducts.length,isRetail:menuPriority?.isComplementCategory(state.category),more:true}]
+          : view==="menu"
+            ? [{name:"Preparados para ti",items:cards(rankedPrepared),totalItems:rankedPrepared.length,isRetail:false,more:true}]
+            : [
+                {name:"Preparados destacados",items:rankedPrepared.filter(inStock).slice(0,6),isRetail:false},
+                ...(retailMix.length?[{name:"Complementos",items:retailMix.slice(0,4),totalItems:retailMix.length,isRetail:true,compact:true}]:[])
+              ];
 
     function productCard(item) {
       const chilaquilesGroup=Boolean(item.chilaquilesGroup);
@@ -421,30 +425,32 @@
       return '<article class="item"><div class="item-media"><div class="item-photo photo ' + photoClass(item.cat) + '" role="img" aria-label="' + esc(item.image ? "Fotografía de "+item.name : "Fotografía pendiente de "+item.name) + '" data-has-photo="' + Boolean(item.image) + '" data-photo-key="' + esc(item.imageKey || "") + '" ' + photo + '></div><span class="item-stock-badge ' + stockClass + '">' + stockLabel + '</span></div><div class="item-details"><div class="item-category">' + esc(item.cat) + '</div><h3>' + esc(item.name) + '</h3><p class="fiiller-item-description">' + esc(description) + '</p>' + sizeSelector + '<div class="item-bottom"><strong class="price">' + (variants || groupVariants ? "Desde " : "") + money(displayPrice) + '</strong><button class="item-add" type="button" aria-label="' + (available <= 0 ? "Agotado: " : options || variants || groupVariants ? "Elegir " : "Agregar ") + esc(item.name) + '" ' + (available <= 0 ? "disabled" : "") + ' data-add="' + esc(groupVariants ? (groupVariants.find(v=>Number(v.stock)>reserved(v.id))?.id||selected.id) : selected.id) + '"><span class="item-add-plus" aria-hidden="true">+</span><span>' + addLabel + '</span></button></div></div></article>';
     }
 
-    if (!products.length) {
-      menu.innerHTML = '<div class="empty">No encontramos productos para esta búsqueda. Prueba otra familia o palabra.</div>';
+    const hasCards=sections.some(section=>section.items.length);
+    if(!products.length||!hasCards){
+      const unregistered=view==="favorites"&&!window.FiillerFavoriteIds?.signedIn();
+      menu.innerHTML='<div class="fiiller-app-empty"><span aria-hidden="true">'+(view==="favorites"?"♡":"⌕")+'</span><h3>'+
+        (view==="favorites"?"Tus favoritos estarán aquí":"No encontramos productos")+'</h3><p>'+
+        (unregistered?"Inicia sesión en Mi Fiiller para guardar y consultar tus favoritos.":view==="favorites"?"Guarda un producto con el corazón para tenerlo a la mano.":"Prueba otra categoría o una palabra diferente.")+
+        '</p>'+(unregistered?'<a class="fiiller-app-empty-link" href="./mi-filler.html?modo=ingresar">Entrar a Mi Fiiller</a>':'')+'</div>';
     } else {
-      menu.innerHTML = (allView&&!searchQuery&&preparedGroups.length?
-        '<div class="fiiller-prepared-intro"><span>PRIMERO, LO QUE PREPARAMOS EN FIILLER</span><h3>Desayunos, café y alimentos frescos</h3><p>Elige tu comida o bebida preparada. Al final encontrarás los productos empaquetados para complementar.</p></div>':"")
-        + sections.map((section, idx) => {
-        const family = section.name;
-        const items = section.items;
-        const heading = family;
-        const badge=section.isRetail?'<span class="fiiller-family-tag">EXTRAS OPCIONALES</span>':'';
-        const count=section.totalItems||items.length;
-        const explanation=section.isRetail
-          ? '<p class="fiiller-family-intro">Bebidas embotelladas y botanas para acompañar lo que preparamos en Fiiller.</p>'
-          : '';
-        const expand=section.isRetail&&allView&&count>retailLimit&&!searchQuery
-          ? '<button type="button" class="fiiller-expand-complements" data-expand-complements aria-expanded="'+String(retailExpanded)+'">'+(retailExpanded?'Ver menos complementos':'Ver todos los complementos ('+count+')')+'</button>'
-          : '';
-        return '<section class="filler-family'+(section.isRetail?' fiiller-family--complementos':' fiiller-family--preparados')+'"><div class="filler-family-header"><div>'+badge+'<h3>'+esc(heading)+'</h3><small>'+count+(count===1?' producto':' productos')+'</small>'+explanation+'</div></div><div class="filler-family-track" id="filler-family-'+idx+'" data-family="'+esc(family)+'" role="region" aria-label="Productos de '+esc(family)+'" tabindex="0">'+items.map(productCard).join("")+'</div>'+expand+'</section>';
+      menu.innerHTML=sections.map((section,idx)=>{
+        const count=section.totalItems??section.items.length;
+        const heading=(section.compact||view==="menu")?
+          '<div class="fiiller-app-section-title"><div><h3>'+esc(section.name)+'</h3>'+
+            (section.isRetail?'<p>Algo extra para acompañar tu pedido, si se te antoja.</p>':'')+
+          '</div></div>':'';
+        const more=section.more&&count>section.items.length?
+          '<button type="button" class="fiiller-app-more" data-fiiller-more aria-label="Mostrar más productos de '+esc(section.name)+'">Ver más productos <span aria-hidden="true">↓</span></button>':'';
+        return '<section class="filler-family fiiller-app-family'+(section.compact?' fiiller-app-complementos':'')+
+          (section.isRetail?' fiiller-family--complementos':' fiiller-family--preparados')+'">'+heading+
+          '<div class="filler-family-track" id="filler-family-'+idx+'" role="region" aria-label="'+esc(section.name)+'" tabindex="0">'+
+          section.items.map(productCard).join('')+'</div>'+more+'</section>';
       }).join("");
     }
-    menu.querySelectorAll("[data-expand-complements]").forEach(button=>button.addEventListener("click",()=>{
-      retailExpanded=!retailExpanded;renderMenu();
-      if(retailExpanded)menu.querySelector(".fiiller-family--complementos")?.scrollIntoView({behavior:"smooth",block:"start"});
+    menu.querySelectorAll("[data-fiiller-more]").forEach(button=>button.addEventListener("click",()=>{
+      window.FiillerAppExperience?.loadMore();
     }));
+    window.FiillerAppExperience?.updateHead();
     FillerPhotos.applyImages(menu);
     menu.querySelectorAll("[data-coffee-size]").forEach(select => select.addEventListener("change", () => {
       const chosen = select.selectedOptions[0];

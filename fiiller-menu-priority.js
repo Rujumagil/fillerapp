@@ -8,12 +8,12 @@
   const normalize=value=>String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toLocaleLowerCase("es-MX").replace(/\s+/g," ");
   const retailCategories=new Set([
     "bebidas embotelladas","bebidas envasadas","botanas y dulces",
-    "botanas empaquetadas","snacks empaquetados","productos empaquetados"
+    "botanas empaquetadas","snacks empaquetados","productos empaquetados",
+    "galletas y reposteria"
   ]);
   const preparedPriority=[
     "De la plancha","Sándwiches y más","Bebidas calientes",
-    "Bebidas frías","Ensaladas","Frutas y bowls","Panadería",
-    "Galletas y repostería"
+    "Bebidas frías","Ensaladas","Frutas y bowls","Panadería"
   ];
   const preparedOrder=new Map(preparedPriority.map((c,i)=>[normalize(c),i]));
   const isComplementCategory=category=>retailCategories.has(normalize(category));
@@ -21,7 +21,13 @@
     const explicit=normalize(item?.merchandising_type||item?.sales_type||"");
     if(explicit==="retail"||explicit==="empaquetado")return true;
     if(explicit==="preparado")return false;
-    return isComplementCategory(item?.cat||item?.category);
+    const name=normalize(item?.name);
+    const category=normalize(item?.cat||item?.category);
+    // Pasteles y repostería de elaboración propia pueden seguir siendo protagonistas.
+    // Galletas comerciales de bolsa (Oreo, Príncipe, Chocorroles, etc.) son extras.
+    if(category==="galletas y reposteria" &&
+      /\b(pastel|pay|cheesecake|carlota|roles? de canela|empanada|artesanal|hecho en casa)\b/.test(name))return false;
+    return isComplementCategory(category);
   };
   const compareCategories=(a,b)=>{
     const aExtra=isComplementCategory(a),bExtra=isComplementCategory(b);
