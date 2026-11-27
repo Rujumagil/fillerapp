@@ -321,6 +321,7 @@ function barcodeShow(item){
  $("barcode-product").innerHTML='<strong>'+escape(item.name)+'</strong><span>Código OCS: '+escape(item.code)+' · Familia: '+escape(item.category)+'</span><span>Existencia actual: <strong>'+nfmt(item.quantity)+' '+escape(item.unit)+'</strong> · Mínimo: '+nfmt(item.min_quantity)+' '+escape(item.unit)+'</span>';
  $("barcode-system-qty").value=nfmt(item.quantity)+" "+item.unit;
  $("barcode-count-form").hidden=false;
+ $("barcode-move-quick").hidden=false;
  $("barcode-link-form").hidden=true;
  $("barcode-physical-qty").value="";
  barcodeMessage("Producto identificado. Introduce lo encontrado y confirma el conteo.");
@@ -332,6 +333,7 @@ function barcodeUnknown(code){
  $("barcode-product").innerHTML='<strong>Código sin registrar: '+escape(code)+'</strong><span>Busca arriba el nombre y elige el insumo correcto antes de guardarlo.</span>';
  $("barcode-link-form").hidden=true;
  $("barcode-count-form").hidden=true;
+ $("barcode-move-quick").hidden=true;
  barcodeMessage("Código nuevo. Busca el nombre del producto y selecciónalo.");
  $("barcode-name-search").focus();
 }
@@ -440,6 +442,7 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden)stopBarcode
 window.addEventListener("pagehide",stopBarcodeCamera);
 
 const quick=window.FiillerWarehouseQuick.init({call,getInventory:()=>inventory,getBarcodes:()=>barcodes,refresh:load,navigate});
+$("barcode-move-quick").addEventListener("click",()=>{if(barcodeSelected)quick.select(barcodeSelected.id);});
 $("inventory-list").addEventListener("click",event=>{const button=event.target.closest("[data-quick-select]");if(button)quick.select(button.dataset.quickSelect);});
 async function load(){
  const [i,m,c,l]=await Promise.all([call("filler_inventory_items?select=*&order=name.asc&limit=1000"),call("filler_inventory_movements?select=id,item_id,type,quantity_change,note,created_at&order=created_at.desc&limit=30"),call("filler_inventory_counts?select=id,item_id,system_quantity,physical_quantity,difference,count_date,counted_at&count_date=eq."+today()+"&order=counted_at.desc&limit=1000"),call("filler_inventory_lots?select=id,item_id,lot_code,expiration_date,quantity,received_at&order=expiration_date.asc.nullslast&limit=1000")]);
