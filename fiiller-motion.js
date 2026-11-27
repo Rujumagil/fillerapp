@@ -89,7 +89,7 @@
    const width=first?.getBoundingClientRect().width||track.clientWidth*.72;
    const gap=parseFloat(window.getComputedStyle(track).columnGap)||10;
    const step=Math.max(1,width+gap);
-   track.scrollBy({left:direction*step,behavior:reduced()?"instant":"smooth"});
+   track.scrollBy({left:direction*step,behavior:reduced()?"auto":"smooth"});
  }
  document.addEventListener("click",event=>{
    const arrow=event.target.closest("[data-fiiller-slide]");
@@ -102,7 +102,7 @@
    }
    const chip=event.target.closest("#fiiller-quick-categories [data-quick-category]");
    if(chip)requestAnimationFrame(()=>chip.scrollIntoView({
-     behavior:reduced()?"instant":"smooth",block:"nearest",inline:"center"
+     behavior:reduced()?"auto":"smooth",block:"nearest",inline:"center"
    }));
  });
  let lastQty=null;
