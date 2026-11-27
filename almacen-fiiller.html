@@ -174,6 +174,51 @@ button.quick-result:hover,button.quick-result[aria-pressed="true"]{background:#e
 .quick-context{font-size:12px;color:#667a6a;line-height:1.55;margin:12px 0}
 @media(max-width:950px){.quick-grid{grid-template-columns:1fr}}
 @media(max-width:580px){.quick-search-field{flex-direction:column;align-items:stretch}.quick-search-field select{width:100%}.quick-footer button{flex:1}.quick-result{align-items:flex-start!important;flex-wrap:wrap}}
+
+/* Fiiller almacén · recepción compacta v61 */
+.quick-grid-v2{grid-template-columns:minmax(0,1.07fr) minmax(350px,.93fr);align-items:start}
+.quick-selector-card,.quick-action-card{min-width:0}
+.quick-selector-card .quick-search-field input{min-height:49px;padding:12px 14px}
+.quick-selector-card .quick-search-field select{min-height:49px}
+.quick-selector-card .quick-results{max-height:338px;gap:5px;margin-top:12px}
+.quick-row{display:flex;align-items:stretch;gap:5px}
+button.quick-result{flex:1;min-width:0;padding:9px 12px;border-radius:9px;min-height:52px}
+button.quick-result>span:first-child{min-width:0;flex:1}
+button.quick-result strong{font-size:12px;line-height:1.35;overflow-wrap:anywhere}
+button.quick-result small{font-size:10px;margin-top:3px}
+button.quick-result .quick-balance{font-size:11px;white-space:nowrap;color:#23553c;font-weight:800}
+button.quick-star{flex:0 0 36px;background:#f4f7f2;border:1px solid #e1e9df;border-radius:9px;color:#7b8a80;padding:0;font-size:20px}
+button.quick-star[aria-pressed="true"]{color:#9d6319;background:#fff5e0}
+.quick-filter-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 8px}
+.quick-filter-tabs button{padding:8px 10px;border:1px solid #d8e5da;background:#fff;color:#3d6650;border-radius:999px;font-size:11px}
+.quick-filter-tabs button[aria-pressed="true"]{background:#006241;color:#fff;border-color:#006241}
+.quick-more{width:100%;margin-top:8px;padding:9px 12px}
+.quick-action-card{position:sticky;top:12px}
+.quick-selected{margin:0 0 12px}
+.quick-selected[hidden]{display:none}
+.quick-selected strong{font-size:17px}
+.quick-empty-hint{padding:14px 16px;border:1px dashed #c8dcca;border-radius:12px;background:#f8faf7;color:#3d604c;font-size:13px;line-height:1.5}
+.quick-empty-hint p{margin:5px 0 0}
+.quick-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}
+.quick-two label{min-width:0}
+.quick-unit-box{display:grid;gap:6px;background:#edf5ef;padding:11px 13px;border-radius:11px}
+.quick-unit-box span{font-size:11px;color:#687f70}
+.quick-unit-box strong{font-size:17px;color:#075937}
+.quick-lot-fields{border-top:1px solid #e4eae2;padding-top:12px}
+.quick-lot-fields[hidden]{display:none}
+.quick-subtitle{font-weight:800;font-size:13px;margin:0 0 9px}
+.quick-subtitle span{font-size:11px;color:#84998a;font-weight:500}
+.quick-batch-card{margin-top:15px}
+.quick-batch-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:11px 0;border-bottom:1px solid #e8efe8}
+.quick-batch-row:last-child{border-bottom:0}
+.quick-batch-row strong{display:block;font-size:13px}
+.quick-batch-row small{font-size:11px;display:block;color:#688174;margin-top:4px}
+.quick-batch-row button{padding:7px 10px;font-size:11px}
+.quick-status{border-radius:999px;padding:5px 8px;font-size:10px;font-weight:800;background:#edf4ed;color:#306447}
+.quick-status.saved{background:#e2f3e9;color:#166d3a}.quick-status.error{background:#fff0e3;color:#a4571d}
+.quick-footer button{font-size:12px;padding:10px 12px}
+@media(max-width:1070px){.quick-grid-v2{grid-template-columns:1fr}.quick-action-card{position:static}}
+@media(max-width:540px){.quick-two{grid-template-columns:1fr 1fr}.quick-filter-tabs button{font-size:10px}.quick-selector-card .quick-results{max-height:305px}}
 </style></head><body><header><div class="head"><img src="./assets/filler-logo-oficial.webp" alt="Fiiller Café"><a href="./admin.html">← Control Fiiller</a></div><div class="hero"><small>OCS · OPERACIÓN DE CAFETERÍA</small><h1>Control de almacén</h1><div class="sub">Insumos, movimientos, mínimos y caducidades en un solo lugar.</div></div></header>
 <main><div class="warehouse-shell">
 <aside class="warehouse-side" aria-label="Secciones de almacén"><div class="side-title">☕ Fiiller Control</div><div class="side-subtitle">Administración de cocina</div>
@@ -219,33 +264,62 @@ button.quick-result:hover,button.quick-result[aria-pressed="true"]{background:#e
 <div id="data-quality" class="data-quality" role="note"></div>
 </section>
 
+
 <section class="warehouse-pane" data-view="quick">
- <div class="pane-title"><div><h2>Registro rápido de inventario</h2><p>Encuentra el insumo por nombre, código interno o código de barras y guarda entradas, salidas o conteos sin duplicar productos.</p></div></div>
- <div class="quick-grid">
-  <section class="card">
-   <div class="section-head"><h2>1. Encuentra el insumo</h2><span class="pill" id="quick-results-count">0 coincidencias</span></div>
-   <div class="quick-search-field"><input id="quick-search" type="search" autocomplete="off" placeholder="Nombre, SKU o código de barras…" aria-label="Buscar producto en el almacén"><select id="quick-family" aria-label="Filtrar por familia"><option value="">Todas las familias</option></select></div>
-   <p class="quick-context" id="quick-results-hint">La búsqueda no modifica existencias. También puedes utilizar un lector USB o Bluetooth.</p>
-   <div class="quick-results" id="quick-results" aria-label="Resultados de insumos"></div>
-   <div class="quick-footer"><button type="button" id="quick-new" class="secondary">＋ Crear insumo inexistente</button><button type="button" id="quick-scan-camera" class="secondary">▥ Escanear con cámara</button></div>
+ <div class="pane-title"><div><h2>Recepción y registro rápido</h2><p>Busca, revisa existencias y registra mercancía sin abandonar esta pantalla.</p></div><span class="pill">Acceso administrador</span></div>
+ <div class="quick-grid quick-grid-v2">
+  <section class="card quick-selector-card">
+   <div class="section-head"><h2>1. Encontrar producto</h2><span class="pill" id="quick-results-count">Cargando…</span></div>
+   <div class="quick-search-field">
+    <input id="quick-search" type="search" autocomplete="off" placeholder="Nombre, SKU o código de barras…" aria-label="Buscar productos del almacén">
+    <select id="quick-family" aria-label="Filtrar por familia"><option value="">Todas las familias</option></select>
+   </div>
+   <div class="quick-filter-tabs" id="quick-filter-tabs" role="group" aria-label="Filtros rápidos">
+    <button type="button" data-quick-filter="all" aria-pressed="true">Todos</button>
+    <button type="button" data-quick-filter="recent" aria-pressed="false">Recientes</button>
+    <button type="button" data-quick-filter="favorites" aria-pressed="false">★ Favoritos</button>
+    <button type="button" data-quick-filter="low" aria-pressed="false">Stock bajo</button>
+    <button type="button" data-quick-filter="pending" aria-pressed="false">Sin contar</button>
+   </div>
+   <p class="quick-context" id="quick-results-hint">Escribe para buscar; también puedes usar un lector conectado y presionar Enter.</p>
+   <div class="quick-results" id="quick-results" aria-label="Resultados de búsqueda de insumos"></div>
+   <button type="button" id="quick-more" class="secondary quick-more" hidden>Ver más productos</button>
+   <div class="quick-footer"><button type="button" id="quick-new" class="secondary">＋ Insumo inexistente</button><button type="button" id="quick-scan-camera" class="secondary">▥ Escanear</button></div>
   </section>
-  <section class="card">
-   <div class="section-head"><h2>2. Registrar movimiento</h2><span class="pill">Solo administración</span></div>
-   <div id="quick-selected" class="quick-selected"><strong>Selecciona un producto</strong><p>Busca arriba para mostrar sus existencias.</p></div>
+  <section class="card quick-action-card">
+   <div class="section-head"><h2>2. Registrar movimiento</h2><span class="pill">Confirmación obligatoria</span></div>
+   <div id="quick-selected" class="quick-selected"><strong>Selecciona un producto</strong><p>Podrás confirmar cantidad, unidad, lote y caducidad sin cambiar de pantalla.</p></div>
    <form id="quick-form" hidden>
     <div class="quick-form-fields">
-     <label>¿Qué deseas registrar?<select id="quick-mode" required><option value="entrada">Entrada de mercancía (+)</option><option value="salida">Salida o merma (-)</option><option value="conteo">Conteo físico (existencia final)</option></select></label>
-     <label>Cantidad<input id="quick-quantity" type="number" min="0" max="1000000" step="0.001" required placeholder="Cantidad según unidad del producto"><span id="quick-unit" class="quick-unit">Unidad del catálogo</span></label>
-     <label>Motivo / folio / responsable<input id="quick-note" type="text" minlength="3" maxlength="300" required placeholder="Ej. Factura 1042, proveedor o merma"></label>
-     <div id="quick-preview" class="quick-preview" aria-live="polite">Captura una cantidad para visualizar el nuevo saldo.</div>
-     <button type="submit" id="quick-save" disabled>Revisar y confirmar registro</button>
+     <label>Tipo de registro<select id="quick-mode" required><option value="entrada">Entrada de mercancía (+)</option><option value="salida">Salida / merma (-)</option><option value="conteo">Conteo físico (saldo final)</option></select></label>
+     <div class="quick-two">
+      <label>Cantidad<input id="quick-quantity" type="number" min="0" max="1000000" step="0.001" required placeholder="0"></label>
+      <div class="quick-unit-box"><span>Unidad del almacén</span><strong id="quick-unit">—</strong></div>
+     </div>
+     <label>Proveedor, folio o motivo<input id="quick-note" type="text" minlength="3" maxlength="250" required placeholder="Ej. Proveedor / factura 1042"></label>
+     <div id="quick-lot-fields" class="quick-lot-fields">
+      <div class="quick-subtitle">Lote y caducidad <span>Opcional para no perecederos</span></div>
+      <div class="quick-two"><label>No. de lote<input id="quick-lot-code" maxlength="100" placeholder="Ej. LOTE-2026-001"></label><label>Caducidad<input id="quick-expiry" type="date"></label></div>
+      <p class="quick-context">Si registras lote, llena ambos campos. La cantidad del lote corresponde a esta entrada; guardar un lote no suma existencias otra vez.</p>
+     </div>
+     <div id="quick-preview" class="quick-preview" aria-live="polite">Captura una cantidad para revisar el saldo.</div>
+     <button type="submit" id="quick-save" disabled>Confirmar y guardar movimiento</button>
+     <button type="button" id="quick-stage" class="secondary" disabled>＋ Añadir a recepción múltiple</button>
+     <button type="button" id="quick-retry-lot" class="secondary" hidden>Guardar solamente el lote pendiente</button>
     </div>
    </form>
+   <div id="quick-empty-hint" class="quick-empty-hint"><strong>Cómo funciona</strong><p>① Busca o escanea. ② Selecciona el producto. ③ Captura cantidad, referencia y lote cuando aplique. ④ Confirma.</p></div>
    <p class="quick-notice" id="quick-notice" role="status" aria-live="polite"></p>
-   <div class="quick-footer"><button type="button" class="secondary" id="quick-next">Buscar otro producto</button><button type="button" class="secondary" id="quick-lot">Registrar lote / caducidad</button></div>
-   <p class="quick-context">Entrada suma, salida resta y conteo establece la cantidad total encontrada. Para productos perecederos registra también su lote; guardar el lote no vuelve a sumar inventario. Las recetas todavía no generan salidas automáticas.</p>
+   <div class="quick-footer"><button type="button" class="secondary" id="quick-next">Buscar otro</button><button type="button" class="secondary" id="quick-lot">Abrir control de lotes</button></div>
   </section>
  </div>
+ <section class="card quick-batch-card" id="quick-receipt-section">
+  <div class="section-head"><div><h2>3. Recepción de varios productos</h2><p class="quick-context">Prepara una lista antes de guardar. Se registrarán individualmente y se detendrá el proceso si ocurre un error.</p></div><span class="pill" id="quick-batch-count">0 productos</span></div>
+  <div id="quick-batch-list" aria-live="polite"><p class="quick-context">Aún no agregas productos a la recepción.</p></div>
+  <div class="quick-footer"><button type="button" id="quick-batch-save" disabled>Revisar y registrar recepción</button><button type="button" class="secondary" id="quick-batch-clear">Quitar registros completados</button></div>
+  <p class="quick-context">La recepción múltiple no es una transacción única: cada entrada y su lote se guardan por separado. Ante un error se detiene el proceso y se indica qué quedó registrado para evitar doble captura.</p>
+  <p class="quick-notice" id="quick-batch-notice" role="status" aria-live="polite"></p>
+ </section>
 </section>
 <section class="warehouse-pane" data-view="inventory"><div class="pane-title"><div><h2>Inventario general</h2><p>Consulta productos, stock mínimo, familia y caducidad.</p></div></div>
 <div class="warehouse-filterbar"><input id="search" placeholder="Buscar insumo, código o familia…" aria-label="Buscar insumos"><select id="family-filter" aria-label="Filtrar familia"><option value="">Todas las familias</option></select><select id="status-filter" aria-label="Filtrar estado"><option value="">Todos los estados</option><option value="low">Bajo mínimo o agotado</option><option value="expiry">Por caducar</option><option value="ok">Existencia correcta</option></select></div>
@@ -302,4 +376,4 @@ button.quick-result:hover,button.quick-result[aria-pressed="true"]{background:#e
 <div class="card"><div class="section-head"><h2>Lotes registrados</h2><span id="lot-count" class="pill">0 lotes</span></div><div id="lot-list"></div></div></section>
 <section class="warehouse-pane" data-view="purchase"><div class="pane-title"><div><h2>Pedido sugerido de insumos</h2><p>Calculado a partir del mínimo configurado y la existencia actual.</p></div><button type="button" id="export-purchases" class="secondary">↓ Descargar CSV</button></div><div class="card"><div id="purchase-list"></div></div><div class="card review-card"><div class="panel-header"><div><span class="panel-overline">CONTROL DE CALIDAD</span><h3>Insumos con unidad o mínimo por revisar</h3></div><span class="pill low" id="suspicious-count">—</span></div><p class="muted">Estos insumos quedan fuera de la compra sugerida hasta comprobar que el mínimo y la existencia utilizan la misma unidad.</p><div id="suspicious-list"></div></div><p class="muted">Estas cantidades indican cuánto falta para alcanzar el mínimo. El cálculo de compra ideal por demanda se activará cuando tengamos máximos y consumo histórico confiables.</p></section>
 <section class="warehouse-pane" data-view="recipes"><div class="pane-title"><div><h2>Recetas y consumo</h2><p>Conecta cada producto vendido con sus ingredientes, cantidades y costos.</p></div></div><a class="quick-link" href="https://ocs-filler.proyectocompas-info.workers.dev/recetario.html" target="_blank" rel="noopener">Recetario actual de OCS <span>↗ Abrir</span></a><a class="quick-link" href="./dashboard-ventas.html">Dashboard de KPIs de ventas <span>↗ Abrir</span></a><div class="info"><strong>Pendiente:</strong> confirmar equivalencias entre productos del menú Fiiller y recetas OCS antes de descontar ingredientes del almacén.</div></section>
-</div></div></div></main><script src="./filler-cloud.js?v=54"></script><script src="./almacen-fiiller-rapido.js?v=1"></script><script src="./almacen-fiiller.js?v=60"></script></body></html>
+</div></div></div></main><script src="./filler-cloud.js?v=54"></script><script src="./almacen-fiiller-rapido.js?v=2"></script><script src="./almacen-fiiller.js?v=61"></script></body></html>
