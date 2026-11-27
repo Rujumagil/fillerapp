@@ -88,7 +88,7 @@
     if(!["entrada","salida","conteo"].includes(mode))return {error:"Tipo de registro inválido."};
     if(val===""||!Number.isFinite(quantity)||quantity<0||quantity>1000000||Math.abs(quantity*1000-Math.round(quantity*1000))>0.00001||(mode!=="conteo"&&quantity<=0))return {error:"Escribe una cantidad válida, según la unidad del insumo."};
     if(mode==="salida"&&quantity>Number(item.quantity))return {error:"La salida excede el saldo del almacén."};
-    if(note.length<3||note.length>250)return {error:"Introduce un proveedor, folio o motivo de 3 a 250 caracteres."};
+    if(note.length<3||note.length>(hasLot?160:250))return {error:"Introduce un proveedor, folio o motivo de 3 a "+(hasLot?160:250)+" caracteres."};
     if(mode==="entrada"&&hasLot){
      if(!lot.code||!lot.expiry)return {error:"Si registras lote, son obligatorios el número de lote y la fecha de caducidad."};
      if(lot.expiry<dateToday())return {error:"El lote ya está caducado. Revísalo antes de ingresarlo como disponible."};
