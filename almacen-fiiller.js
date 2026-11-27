@@ -102,6 +102,7 @@ function navigate(key){
  document.querySelectorAll("[data-view]").forEach(p=>p.classList.toggle("active",p.dataset.view===chosen));
  $("workspace-title").textContent=paneLabels[chosen][0];
  $("workspace-description").textContent=paneLabels[chosen][1];
+ $("quick-movement").hidden=chosen==="quick";
  if(location.hash!=="#"+chosen)history.replaceState(null,"","#"+chosen);
 }
 document.querySelectorAll("[data-pane]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.pane)));
@@ -441,7 +442,7 @@ $("barcode-camera-stop").addEventListener("click",()=>{stopBarcodeCamera();barco
 document.addEventListener("visibilitychange",()=>{if(document.hidden)stopBarcodeCamera();});
 window.addEventListener("pagehide",stopBarcodeCamera);
 
-const quick=window.FiillerWarehouseQuick.init({call,getInventory:()=>inventory,getBarcodes:()=>barcodes,refresh:load,navigate});
+const quick=window.FiillerWarehouseQuick.init({call,getInventory:()=>inventory,getBarcodes:()=>barcodes,getLots:()=>lots,getCounts:()=>counts,refresh:load,navigate});
 $("barcode-move-quick").addEventListener("click",()=>{if(barcodeSelected)quick.select(barcodeSelected.id);});
 $("inventory-list").addEventListener("click",event=>{const button=event.target.closest("[data-quick-select]");if(button)quick.select(button.dataset.quickSelect);});
 async function load(){
