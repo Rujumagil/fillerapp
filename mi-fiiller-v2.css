@@ -123,3 +123,46 @@ body.mi-v2-authenticated #fiiller-message-alerts p{font-size:11px!important}
 #member .mi-v2-change-orders button{min-height:38px}
 #member #member-order-history .mi-v2-order-item:focus-within{outline:2px solid #b1d5b9;outline-offset:2px}
 #member #member-favorites-list .mi-v2-fav-image img{background-color:#e7efe6}
+
+/* Mi Fiiller V2.1 — menor ruido visual y controles cómodos para pantallas táctiles. */
+body.mi-v2-authenticated main > .page-eyebrow,
+body.mi-v2-authenticated main > .page-heading,
+body.mi-v2-authenticated main > .page-intro{display:none}
+body.mi-v2-authenticated main{padding-top:16px}
+#member .mi-v2-order-item:nth-child(n+6){display:none}
+#member .mi-v2-orders-expanded .mi-v2-order-item:nth-child(n+6){display:grid}
+#member .mi-v2-more-orders{width:100%;margin:7px 0 0;min-height:46px;background:#e5f3e8;color:#075f40;font-size:13px;font-weight:850}
+#member .mi-v2-more-orders[hidden]{display:none!important}
+#member .mi-v2-reorder-unavailable{display:inline-flex;align-items:center;color:#935c2b!important;background:#fff6e8;padding:8px 11px;border-radius:10px;min-height:38px;font-weight:800;line-height:1.35}
+#member .mi-v2-order-actions{align-items:center}
+#member .mi-v2-order-actions a{display:inline-flex;align-items:center;min-height:38px}
+#member .mi-v2-order-status{max-width:100%;overflow-wrap:anywhere}
+#member .mi-v2-nav button{min-height:48px}
+#member :is(button,a,input,summary):focus-visible{outline:3px solid #ea9b47;outline-offset:3px}
+@media(max-width:740px){
+  body.mi-v2-authenticated main{padding-top:10px}
+  #member .member-hero{border-radius:18px}
+  #member .mi-v2-screen-head{padding-top:2px}
+  #member .mi-v2-order-item{padding:14px}
+  #member .mi-v2-home-banner{margin-top:12px}
+  #member #member-favorites-list{display:flex!important;gap:12px!important;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;padding:2px 2px 10px;scrollbar-width:thin}
+  #member #member-favorites-list .mi-v2-favorite-card{flex:0 0 min(85%,330px);scroll-snap-align:start;align-items:flex-start;flex-direction:column}
+  #member .mi-v2-fav-image{width:100%;height:auto;aspect-ratio:16/9;flex:auto}
+  #member .mi-v2-fav-image img{width:100%;height:100%;object-fit:cover}
+  #member .mi-v2-fav-content{width:100%}
+  #member .mi-v2-fav-actions button{min-height:42px}
+  #member .mi-v2-claim-details summary{min-height:52px;align-items:center}
+  #member :is(.mi-v2-order-actions button,.mi-v2-order-actions a){min-height:44px!important}
+  #member .app-actions button{min-height:44px}
+  body.mi-v2-keyboard-open #member .mi-v2-nav{display:none}
+  body.mi-v2-keyboard-open main{padding-bottom:38px}
+}
+@media(max-width:360px){
+ #member .mi-v2-nav{padding-left:3px;padding-right:3px;gap:1px}
+ #member .mi-v2-nav button{font-size:9px}
+ #member .mi-v2-nav button>span:first-child{font-size:21px}
+ #member .mi-v2-fav-actions{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){
+ #member #member-favorites-list{scroll-behavior:auto}
+}
