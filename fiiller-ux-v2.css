@@ -85,6 +85,7 @@ body.fiiller-catalog-error #menu-list{display:none!important}
 .fiiller-install-footer button{flex:none;background:#edf3ed;color:#07573b;border:1px solid #cbdccf;border-radius:9px;padding:8px 11px;font-size:11px;font-weight:800}
 .fiiller-install-footer button:hover{background:#dfece1}
 #promociones[hidden],#proximos[hidden]{display:none!important}
+.nav a.fiiller-nav-feature[hidden],nav a[href="#promociones"][hidden],nav a[href="#proximos"][hidden]{display:none!important}
 #promociones .fiiller-feature-card{gap:10px;min-height:0;padding:0;border-radius:18px;background:#fff;box-shadow:0 10px 26px #152b1d14;overflow:hidden}
 #promociones .fiiller-feature-card::after{display:none}
 #promociones .fiiller-feature-photo{width:100%;aspect-ratio:1.45;max-height:220px;object-fit:contain;background:#f6f9f5;border-radius:0}
