@@ -51,6 +51,7 @@ window.FiillerWarehouseQuick={
    const item=current();
    $("quick-selected").hidden=!item;
    $("quick-form").hidden=!item;
+   $("quick-lot").disabled=!item;
    if(!item){
     $("quick-selected").innerHTML='<strong>Selecciona un producto</strong><p>Busca arriba por nombre, SKU o código de barras para mostrar sus existencias.</p>';
     return;
@@ -122,6 +123,7 @@ window.FiillerWarehouseQuick={
    selectedId="";$("quick-search").value="";$("quick-quantity").value="";$("quick-note").value="";
    render();$("quick-search").focus();notice("Listo para buscar el siguiente producto.");
   });
+  $("quick-scan-camera").addEventListener("click",()=>{config.navigate("barcode");$("barcode-input").focus();});
   $("quick-new").addEventListener("click",()=>{
    config.navigate("inventory");
    $("create-form").scrollIntoView({behavior:"smooth",block:"start"});
@@ -171,7 +173,7 @@ window.FiillerWarehouseQuick={
      $("quick-search").focus();
     }catch(error){notice("✓ Movimiento guardado, pero no se pudo actualizar la vista: "+error.message,true);}
    }catch(error){notice(error.message,true);}
-   finally{busy=false;preview();if(committed)$("quick-save").disabled=false;}
+   finally{busy=false;preview();}
   });
   return {render,select};
  }
