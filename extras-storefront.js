@@ -512,9 +512,18 @@
       delete priorNotice.dataset.confirmed;
     }
 
-    document.getElementById("cart-lines").innerHTML = items.length ? items.map(i => {
+    const cartLines=document.getElementById("cart-lines");
+    cartLines.setAttribute("role",items.length?"list":"status");
+    cartLines.setAttribute("aria-label","Productos de tu pedido");
+    cartLines.innerHTML = items.length ? items.map(i => {
       const extras = i.extras.length ? '<small class="cart-extras">Extras: ' + i.extras.map(x => esc(x.name) + ' (+' + money(x.price) + ')').join(", ") + '</small>' : "";
-      return '<div class="cart-line"><div><strong>' + esc(i.name) + '</strong>' + extras + '<span>' + money(i.unitPrice) + ' x ' + i.qty + '</span></div><div class="qty"><button class="secondary" data-qty="' + esc(i.key) + '" data-delta="-1">−</button><b>' + i.qty + '</b><button class="secondary" data-qty="' + esc(i.key) + '" data-delta="1">+</button></div></div>';
+      const safeName=esc(i.name);
+      return '<div class="cart-line" role="listitem"><div class="fiiller-line-details"><strong class="fiiller-line-name">' + safeName + '</strong>' + extras +
+        '<span class="fiiller-line-meta"><b class="fiiller-line-price">' + money(i.unitPrice) + '</b><span> por unidad</span></span></div>' +
+        '<div class="qty" role="group" aria-label="Cantidad de ' + safeName + '">' +
+        '<button type="button" class="secondary" aria-label="Quitar una unidad de ' + safeName + '" data-qty="' + esc(i.key) + '" data-delta="-1">−</button>' +
+        '<b aria-label="' + i.qty + ' unidades">' + i.qty + '</b>' +
+        '<button type="button" class="secondary" aria-label="Agregar una unidad de ' + safeName + '" data-qty="' + esc(i.key) + '" data-delta="1">+</button></div></div>';
     }).join("") : '<div class="empty">Tu pedido está vacío.</div>';
     document.querySelectorAll("[data-qty]").forEach(b => b.addEventListener("click", () => changeQty(b.dataset.qty, Number(b.dataset.delta))));
     document.getElementById("cart-total").textContent = money(total);
