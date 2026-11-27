@@ -21,7 +21,7 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 @media(max-width:420px){.brand{font-size:16px}.brand img{width:48px;height:42px}.back-link{font-size:11px;padding:9px 10px}.member-hero{gap:12px}.member-hero h2{font-size:23px}.member-hero p{font-size:12px}.quick-card{grid-template-columns:1fr;gap:8px}.quick-card:last-child{grid-template-columns:36px 1fr}.quick-card strong{font-size:12px}.quick-card small{font-size:10px}.profile-logout{flex-wrap:wrap}.profile-logout .order-cta{width:100%;flex:auto}}
  .visitor-intro .card{color:#183629} #temporary-password-required .auth-card{align-self:start}
 </style>
-<link rel="stylesheet" href="./mi-fiiller-v2.css?v=1">
+<link rel="stylesheet" href="./mi-fiiller-v2.css?v=2">
 </head>
 <body>
 <header class="brand-bar"><div class="brand-inner">
@@ -112,6 +112,7 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 <p class="muted mini">Consulta tus pedidos de los últimos 90 días, productos, importes y estado. Solo tú puedes verlos al iniciar sesión.</p>
 <div id="member-orders-summary" style="font-weight:750;color:#006241;margin:12px 0"></div>
 <div id="member-orders-list" aria-live="polite" style="display:grid;gap:12px"><p class="muted">Cargando tu historial…</p></div>
+<button id="mi-v2-orders-more" type="button" class="secondary mi-v2-more-orders" aria-controls="member-orders-list" aria-expanded="false" hidden>Ver más pedidos</button>
 </section>
 <details class="mi-v2-claim-details" id="mi-v2-claim-details"><summary>¿Compraste como invitado? Vincula tu pedido <span aria-hidden="true">⌄</span></summary>
 <section class="card" id="guest-order-claim" style="margin:18px 0 22px;padding:20px" aria-label="Vincular pedido de invitado">
@@ -203,8 +204,8 @@ main{max-width:1040px;margin:auto;padding:30px 22px 85px}h1,h2,h3,p{margin-top:0
 </main>
 <script src="./pwa.js?v=3"></script>
 <script src="./chicken-availability.js?v=6"></script>
-<script src="./mi-filler.js?v=57"></script>
-<script src="./mi-fiiller-v2.js?v=1"></script>
+<script src="./mi-filler.js?v=58"></script>
+<script src="./mi-fiiller-v2.js?v=2"></script>
 <script src="./fiiller-order-actions.js?v=2"></script><script src="./filler-sounds.js?v=39"></script><script src="./fiiller-support-alerts.js?v=1"></script><script src="./fiiller-support-push-client.js?v=1"></script>
 <script src="./filler-marketing-push-client.js?v=5"></script>
 
