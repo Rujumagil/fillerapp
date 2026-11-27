@@ -255,30 +255,57 @@ async function loadMyOrderHistory(){
       const pickup=String(o.pickup||"");
       const tracking=String(o.tracking_token||"");
       const follow=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(tracking)
-        ? '<a href="./pedido.html#token='+encodeURIComponent(tracking)+'" style="justify-self:start;color:#006241;font-size:13px;font-weight:800;text-decoration:underline">Ver seguimiento →</a>' : '';
-      return '<article style="border:1px solid #d6e6d8;background:#f9fcf9;border-radius:14px;padding:14px;display:grid;gap:6px">'+
-        '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><strong>'+escHistory(o.public_code)+'</strong><strong style="color:#006241">'+escHistory(o.status)+'</strong></div>'+
-        '<span class="muted" style="font-size:12px">Registrado: '+escHistory(date)+' · Recoger: '+escHistory(pickup)+'</span>'+
-        '<div style="font-size:13px">'+(items||"Productos registrados")+'</div>'+
-        '<strong style="text-align:right">'+money(o.total)+'</strong><div class="actions">'+follow+
-        '<button type="button" class="secondary" data-reorder="'+escHistory(o.id)+'" style="font-size:12px;padding:9px 12px">Repetir pedido ↻</button></div></article>';
-    }).join("");
+        ? '<a href="./pedido.html#token='+encodeURIComponent(tracking)+'">Ver seguimiento →</a>' : '';
+      const status=String(o.status||"");
+      return '<article class="mi-v2-order-item">'+
+        '<div class="mi-v2-order-header"><strong>'+escHistory(o.public_code)+'</strong><span class="mi-v2-order-status" data-status="'+escHistory(status)+'">'+escHistory(status)+'</span></div>'+
+        '<span class="mi-v2-order-date">Registrado: '+escHistory(date)+' · Recoger: '+escHistory(pickup)+'</span>'+
+        '<p class="mi-v2-order-products">'+(items||"Productos registrados")+'</p>'+
+        '<div class="mi-v2-order-bottom"><strong>'+money(o.total)+'</strong><div class="mi-v2-order-actions">'+follow+
+        '<button type="button" class="secondary" data-reorder="'+escHistory(o.id)+'">Volver a pedir ↻</button></div></div></article>';
+    }).join("");;
   }catch(error){
     summary.textContent="";
     list.textContent="No se pudo consultar tu historial: "+error.message;
   }
 }
 $("refresh-my-orders")?.addEventListener("click",loadMyOrderHistory);
+// Antes de repetir un pedido, consultar el catálogo vigente. No reactivar recetas retiradas.
+async function repeatOrderSafely(order){
+ const button=$("member-orders-list").querySelector('[data-reorder="'+CSS.escape(String(order.id))+'"]');
+ if(button)button.disabled=true;
+ try{
+   const products=await request("filler_products?select=id,name,category,stock,active&active=eq.true");
+   if(!Array.isArray(products))throw Error("No pudimos verificar el catálogo actual.");
+   const available=new Map(products.map(product=>[String(product.id),product]));
+   const source=Array.isArray(order.filler_order_items)?order.filler_order_items:[];
+   const valid=[];
+   let skipped=0;
+   for(const line of source){
+     const product=available.get(String(line.product_id||""));
+     const blocked=product&&(
+       window.FiillerAvailability?.isChilaquiles({id:product.id,name:product.name,cat:product.category}) ||
+       window.FiillerAvailability?.isDiscontinuedProduct({id:product.id,name:product.name,cat:product.category}) ||
+       /hot\\s*cakes?|panqueques?/i.test(product.name)
+     );
+     if(!product||blocked||!Number.isFinite(Number(product.stock))||Number(product.stock)<=0){skipped++;continue;}
+     const requested=Math.floor(Number(line.qty||0));
+     const qty=Math.min(requested,Math.floor(Number(product.stock)));
+     if(qty<1){skipped++;continue;}
+     if(qty<requested)skipped++;
+     valid.push({id:product.id,qty,extras:line.extras});
+   }
+   if(!valid.length)throw Error("Los productos de este pedido ya no están disponibles. Explora el menú actual.");
+   if(skipped && !window.confirm("Algunos productos ya no están disponibles o cambiaron de existencia. Se omitirá o ajustará "+skipped+" artículo(s). ¿Deseas continuar con los disponibles?"))return;
+   prepareCart(valid,"repetir pedido");
+ }catch(error){message(error.message,true);}
+ finally{if(button?.isConnected)button.disabled=false;}
+}
 $("member-orders-list")?.addEventListener("click",event=>{
-  const button=event.target.closest("[data-reorder]");
-  if(!button)return;
-  const order=recentOrders.find(item=>item.id===button.dataset.reorder);
-  if(!order)return;
-  try{
-    prepareCart((order.filler_order_items||[]).map(item=>({
-      id:item.product_id,qty:item.qty,extras:item.extras
-    })),"repetir pedido");
-  }catch(error){message(error.message,true);}
+ const button=event.target.closest("[data-reorder]");
+ if(!button)return;
+ const order=recentOrders.find(item=>item.id===button.dataset.reorder);
+ if(order)repeatOrderSafely(order);
 });
 
 const trackingUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
