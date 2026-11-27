@@ -146,6 +146,18 @@ function updateLastOrder(){
   link.classList.remove("is-inactive");
 }
 const escHistory=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+// Un mismo criterio comercial para favoritos e historial; el servidor sigue
+// verificando existencia y vigencia al confirmar cualquier pedido.
+function isAvailableToOrder(product){
+  if(!product||product.active===false||!Number.isFinite(Number(product.stock))||Number(product.stock)<=0)return false;
+  const normalized=String(product.name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+  const item={id:product.id,name:product.name,cat:product.category};
+  return !(/hot\s*cakes?|panqueques?/.test(normalized)||
+    window.FiillerAvailability?.isChilaquiles(item)||
+    window.FiillerAvailability?.isDiscontinuedProduct(item)||
+    window.FiillerAvailability?.isChickenProduct(item));
+}
+
 
 const DRAFT_KEY="filler_pending_cart_v1";
 let recentOrders=[];
@@ -180,18 +192,13 @@ async function loadMyFavorites(){
     const money=value=>"$"+Number(value||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
     list.innerHTML=favorites.map(f=>{
       const id=String(f.product_id),product=byId.get(id);
-      const blocked=Boolean(product && (
-        window.FiillerAvailability?.isChilaquiles({id:product.id,name:product.name,cat:product.category}) ||
-        window.FiillerAvailability?.isDiscontinuedProduct({id:product.id,name:product.name,cat:product.category}) ||
-        /hot\s*cakes?|panqueques?/i.test(product.name)
-      ));
-      const canOrder=Boolean(product&&Number(product.stock)>0&&!blocked);
+      const canOrder=isAvailableToOrder(product);
       const image=product?.image_url&&/^https:\/\//i.test(product.image_url)
         ? '<img src="'+escHistory(product.image_url)+'" alt="" loading="lazy" decoding="async">'
         : '<span aria-hidden="true">☕</span>';
       return '<article class="mi-v2-favorite-card"><div class="mi-v2-fav-image">'+image+'</div>'+
         '<div class="mi-v2-fav-content"><strong>'+escHistory(product?.name||"Producto no disponible")+'</strong><small>'+
-        (product?(money(product.price)+(canOrder?" · Disponible":blocked?" · Fuera del menú":" · Agotado")):"Ya no está en el menú")+'</small>'+
+        (product?(money(product.price)+(canOrder?" · Disponible":" · No disponible")):"Ya no está en el menú")+'</small>'+
         '<div class="mi-v2-fav-actions"><button type="button" data-favorite-order="'+escHistory(id)+'"'+(canOrder?"":" disabled")+'>+ Agregar</button>'+
         '<button type="button" class="secondary" data-favorite-remove="'+escHistory(id)+'" aria-label="Quitar '+escHistory(product?.name||"producto")+' de mis favoritos">Quitar ♡</button></div></div></article>';
     }).join("");
@@ -221,14 +228,24 @@ $("member-favorites-list")?.addEventListener("click",async event=>{
 async function loadMyOrderHistory(){
   const list=$("member-orders-list"),summary=$("member-orders-summary");
   if(!list||!summary||!session?.user?.id)return;
+  list.classList.remove("mi-v2-orders-expanded");
+  const more=$("mi-v2-orders-more");
+  if(more){more.hidden=true;more.setAttribute("aria-expanded","false");}
   list.innerHTML='<p class="muted">Consultando tus pedidos…</p>';
   try{
     const since=new Date(Date.now()-90*24*60*60*1000).toISOString();
     // Supabase RLS comprueba auth.uid() tanto en órdenes como en sus artículos.
     const path="filler_orders?select=id,public_code,tracking_token,pickup,status,total,created_at,filler_order_items(product_id,name,qty,price,extras)&customer_user_id=eq."+
       encodeURIComponent(session.user.id)+"&created_at=gte."+encodeURIComponent(since)+"&order=created_at.desc&limit=100";
-    const rows=await request(path);
-    const orders=Array.isArray(rows)?rows:[];
+    // El fallo en catálogo nunca debe impedir consultar el historial privado.
+    const [ordersResult,catalogResult]=await Promise.allSettled([
+      request(path),
+      request("filler_products?select=id,name,category,stock,active&active=eq.true")
+    ]);
+    if(ordersResult.status!=="fulfilled")throw ordersResult.reason;
+    const orders=Array.isArray(ordersResult.value)?ordersResult.value:[];
+    const currentCatalog=catalogResult.status==="fulfilled"&&Array.isArray(catalogResult.value)
+      ? new Map(catalogResult.value.map(p=>[String(p.id),p])) : null;
     recentOrders=orders;
     const money=value=>"$"+Number(value||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
     summary.textContent=orders.length+" pedido"+(orders.length===1?"":"s")+" en los últimos 90 días · Total registrado "+money(orders.reduce((n,o)=>n+Number(o.total||0),0));
@@ -252,7 +269,11 @@ async function loadMyOrderHistory(){
     list.innerHTML=orders.map(o=>{
       const items=(o.filler_order_items||[]).map(i=>escHistory(i.qty)+" × "+escHistory(i.name)).join(" · ");
       const date=new Date(o.created_at).toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"});
-      const pickup=String(o.pickup||"");
+      const rawPickup=String(o.pickup||"");
+      const pickupDate=new Date(rawPickup.replace(" ","T"));
+      const pickup=!Number.isNaN(pickupDate.getTime())
+        ? pickupDate.toLocaleString("es-MX",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit",hour12:false})
+        : rawPickup;
       const tracking=String(o.tracking_token||"");
       const follow=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(tracking)
         ? '<a href="./pedido.html#token='+encodeURIComponent(tracking)+'">Ver seguimiento →</a>' : '';
@@ -262,13 +283,31 @@ async function loadMyOrderHistory(){
         '<span class="mi-v2-order-date">Registrado: '+escHistory(date)+' · Recoger: '+escHistory(pickup)+'</span>'+
         '<p class="mi-v2-order-products">'+(items||"Productos registrados")+'</p>'+
         '<div class="mi-v2-order-bottom"><strong>'+money(o.total)+'</strong><div class="mi-v2-order-actions">'+follow+
-        '<button type="button" class="secondary" data-reorder="'+escHistory(o.id)+'">Volver a pedir ↻</button></div></div></article>';
-    }).join("");;
+        (currentCatalog
+          ? (o.filler_order_items||[]).some(line=>isAvailableToOrder(currentCatalog.get(String(line.product_id))))
+            ? '<button type="button" class="secondary" data-reorder="'+escHistory(o.id)+'">Volver a pedir ↻</button>'
+            : '<a class="mi-v2-reorder-unavailable" href="./index.html#menu" aria-label="Productos agotados o retirados, explorar el menú actual">Productos no disponibles · Ver menú</a>'
+          : '<button type="button" class="secondary" data-reorder="'+escHistory(o.id)+'">Comprobar disponibilidad</button>')+
+        '</div></div></article>';
+    }).join("");
+    if(more && orders.length>5){
+      more.hidden=false;
+      more.textContent="Ver "+(orders.length-5)+" pedidos más";
+    }
   }catch(error){
     summary.textContent="";
     list.textContent="No se pudo consultar tu historial: "+error.message;
+    if(more)more.hidden=true;
   }
 }
+$("mi-v2-orders-more")?.addEventListener("click",()=>{
+  const list=$("member-orders-list"),button=$("mi-v2-orders-more");
+  if(!list||!button)return;
+  const expanded=list.classList.toggle("mi-v2-orders-expanded");
+  button.setAttribute("aria-expanded",String(expanded));
+  button.textContent=expanded?"Mostrar menos":"Ver "+Math.max(0,list.querySelectorAll(".mi-v2-order-item").length-5)+" pedidos más";
+  if(!expanded)button.scrollIntoView({behavior:window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches?"auto":"smooth",block:"nearest"});
+});
 $("refresh-my-orders")?.addEventListener("click",loadMyOrderHistory);
 // Antes de repetir un pedido, consultar el catálogo vigente. No reactivar recetas retiradas.
 async function repeatOrderSafely(order){
@@ -283,12 +322,7 @@ async function repeatOrderSafely(order){
    let skipped=0;
    for(const line of source){
      const product=available.get(String(line.product_id||""));
-     const blocked=product&&(
-       window.FiillerAvailability?.isChilaquiles({id:product.id,name:product.name,cat:product.category}) ||
-       window.FiillerAvailability?.isDiscontinuedProduct({id:product.id,name:product.name,cat:product.category}) ||
-       /hot\s*cakes?|panqueques?/i.test(product.name)
-     );
-     if(!product||blocked||!Number.isFinite(Number(product.stock))||Number(product.stock)<=0){skipped++;continue;}
+     if(!isAvailableToOrder(product)){skipped++;continue;}
      const requested=Math.floor(Number(line.qty||0));
      const qty=Math.min(requested,Math.floor(Number(product.stock)));
      if(qty<1){skipped++;continue;}
