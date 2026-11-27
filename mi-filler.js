@@ -141,9 +141,9 @@ function updateLastOrder(){
   if(!link||!description)return;
   // Una cuenta autenticada solo puede abrir pedidos asociados a esa misma cuenta.
   // No reutilizar enlaces locales de invitados u otras personas en dispositivos compartidos.
-  description.textContent="Buscando tu último pedido…";
-  link.removeAttribute("href");link.setAttribute("aria-disabled","true");link.tabIndex=-1;
-  link.classList.add("is-inactive");
+  description.textContent="Ver mi historial de pedidos";
+  link.href="./mi-filler.html#mi-pedidos";link.removeAttribute("aria-disabled");link.removeAttribute("tabindex");
+  link.classList.remove("is-inactive");
 }
 const escHistory=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
@@ -286,7 +286,7 @@ async function repeatOrderSafely(order){
      const blocked=product&&(
        window.FiillerAvailability?.isChilaquiles({id:product.id,name:product.name,cat:product.category}) ||
        window.FiillerAvailability?.isDiscontinuedProduct({id:product.id,name:product.name,cat:product.category}) ||
-       /hot\\s*cakes?|panqueques?/i.test(product.name)
+       /hot\s*cakes?|panqueques?/i.test(product.name)
      );
      if(!product||blocked||!Number.isFinite(Number(product.stock))||Number(product.stock)<=0){skipped++;continue;}
      const requested=Math.floor(Number(line.qty||0));
