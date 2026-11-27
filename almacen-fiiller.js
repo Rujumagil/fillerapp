@@ -102,6 +102,7 @@ function navigate(key){
  document.querySelectorAll("[data-view]").forEach(p=>p.classList.toggle("active",p.dataset.view===chosen));
  $("workspace-title").textContent=paneLabels[chosen][0];
  $("workspace-description").textContent=paneLabels[chosen][1];
+ $("quick-movement").hidden=chosen==="quick";
  if(location.hash!=="#"+chosen)history.replaceState(null,"","#"+chosen);
 }
 document.querySelectorAll("[data-pane]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.pane)));
