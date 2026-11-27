@@ -9,7 +9,7 @@ const initialMenu=[{id:"chilaquiles-rojos-sencillos",cat:"Chilaquiles",name:"Roj
   const host=document.getElementById("filters");
   if(!host)return;
   const priority=window.FiillerMenuPriority;
-  const categories=[...new Set(state.menu.map(i=>canonicalCategory(i.cat)).filter(c=>c!=="Antojo"))];
+  const categories=[...new Set(state.menu.filter(fiillerMenuPermitido).map(i=>canonicalCategory(i.cat)).filter(c=>c!=="Antojo"))];
   categories.sort(priority?.compareCategories||((a,b)=>String(a).localeCompare(String(b),"es")));
   const prepared=categories.filter(c=>!priority?.isComplementCategory(c));
   const extras=categories.filter(c=>priority?.isComplementCategory(c));
