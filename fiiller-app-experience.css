@@ -1,0 +1,144 @@
+/* Fiiller Café · Mobile-first app storefront · visual layer v3
+ * Respeta URLs de fotos, catálogo, control de stock y drawer existentes.
+ */
+:root{--app-green:#005b3d;--app-deep:#063e2d;--app-orange:#f7771c;--app-cream:#fbf7f1}
+body{background:var(--app-cream)}
+header{background:#fffcf7}
+main{max-width:1480px}
+header .nav{max-width:1480px}
+.hero{min-height:0!important;margin-bottom:15px!important;border-radius:26px;box-shadow:0 20px 44px #123c2619}
+.hero .hero-copy{min-height:275px!important;padding:28px 34px!important;gap:17px!important;background:linear-gradient(125deg,#063a2a,#00583c)!important}
+.hero .hero-copy h2{font-size:clamp(30px,3.1vw,51px);margin:11px 0!important;line-height:1.05}
+.hero .hero-copy p{font-size:14px;line-height:1.5;max-width:300px}
+.hero .hero-actions button{min-height:45px;font-size:13px;border-radius:14px;padding:12px 17px}
+.hero .hero-visual{min-height:275px!important;height:275px!important;overflow:hidden;background:#0c3a2c}
+.hero .hero-visual::before{display:none}
+.hero .hero-visual img{height:100%!important;width:100%!important;max-height:none!important;object-fit:cover!important;object-position:center!important}
+.fiiller-hero-benefits{gap:10px;flex-wrap:wrap}
+.fiiller-hero-benefits span{font-size:10px}
+.fiiller-shop-start{display:block!important;margin:0 0 18px!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important}
+.fiiller-shop-start__actions{width:100%}
+.fiiller-shop-start .filler-menu-search{background:white!important;max-width:none;min-height:53px;margin:0 0 9px!important;border-radius:16px!important;border:1px solid #cfded2!important;box-shadow:0 9px 20px #162e1b0c}
+.fiiller-shop-start #filler-product-search{font-size:15px}
+.fiiller-quick-categories{display:flex!important;gap:9px!important;overflow-x:auto!important;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-width:none;padding:6px 1px 11px!important}
+.fiiller-quick-categories::-webkit-scrollbar{display:none}
+.fiiller-quick-categories button{display:grid!important;justify-items:center;align-content:center;flex:0 0 108px!important;gap:4px;min-height:78px!important;padding:9px 7px!important;border-radius:19px!important;border:1px solid #e7e6dd!important;background:#fffdf8!important;color:#134631!important;box-shadow:0 5px 14px #142f2210;font-size:11px!important;white-space:normal!important;scroll-snap-align:start;line-height:1.25}
+.fiiller-quick-categories button[aria-pressed="true"]{background:linear-gradient(150deg,#00744e,#00452f)!important;color:white!important;border-color:#005f3f!important;box-shadow:0 8px 20px #12513b30}
+.fiiller-quick-categories button:active{transform:scale(.96)}
+.fiiller-quick-categories button .fiiller-cat-icon{font-size:27px;line-height:1.25;filter:saturate(.94)}
+.fiiller-quick-categories button .fiiller-cat-name{display:block;font-weight:820;max-width:100%;overflow-wrap:break-word;text-align:center}
+.fiiller-shop-start .fiiller-shop-search-status{font-size:11px;color:#6c8174;margin:0 3px!important}
+#menu{scroll-margin-top:105px}
+#menu .section-head{display:flex!important;align-items:end;justify-content:space-between;gap:12px;margin:12px 0 15px!important}
+#menu .section-head h2{font-size:clamp(23px,2.7vw,33px)!important;color:#063e2d;line-height:1.13;letter-spacing:-.035em}
+#menu .section-head p{font-size:12px;line-height:1.4;color:#627b6a;max-width:520px}
+#fiiller-view-all{border:0;background:none;color:#bc4b0b;font-size:13px;font-weight:850;white-space:nowrap;min-height:42px;padding:8px 2px;align-self:center}
+#fiiller-view-all:hover{text-decoration:underline}
+#fiiller-view-all[hidden]{display:none!important}
+#pedido{display:block!important;min-width:0}
+#pedido .filters{display:none!important}
+#pedido .menu-grid{display:block!important;width:100%!important;min-width:0}
+.fiiller-app-family{margin:0 0 24px;min-width:0}
+.fiiller-app-section-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 11px}
+.fiiller-app-section-title h3{margin:0;font-size:21px;color:#0a4832}
+.fiiller-app-section-title p{margin:3px 0 0;font-size:12px;color:#708073}
+#pedido .fiiller-app-family .filler-family-track{display:grid!important;grid-auto-flow:row!important;grid-auto-columns:auto!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:14px!important;overflow:visible!important;margin:0!important;padding:2px 1px 16px!important}
+#pedido .fiiller-app-family .item{height:100%;display:flex;flex-direction:column;background:white;border:1px solid #ede6dc;border-radius:21px!important;padding:9px!important;box-shadow:0 12px 24px #172a1d0c!important;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;animation:fiiller-card-in .3s ease both}
+#pedido .fiiller-app-family .item:nth-child(2){animation-delay:35ms}
+#pedido .fiiller-app-family .item:nth-child(3){animation-delay:65ms}
+#pedido .fiiller-app-family .item:nth-child(4){animation-delay:95ms}
+#pedido .fiiller-app-family .item:hover{transform:translateY(-3px);box-shadow:0 18px 34px #1736211e!important;border-color:#cadfd0}
+#pedido .fiiller-app-family .item-media{aspect-ratio:1.25/1;border-radius:15px;overflow:hidden}
+#pedido .fiiller-app-family .item-photo{width:100%!important;height:100%!important;aspect-ratio:auto!important;min-height:0!important;max-height:none!important;border-radius:15px!important;margin:0!important}
+#pedido .fiiller-app-family:not(.fiiller-app-complementos) .item-photo[data-has-photo="true"]{background-size:cover!important;background-position:center!important}
+#pedido .fiiller-app-family .item-photo[data-has-photo="false"]{background-size:contain!important}
+#pedido .fiiller-app-family .item-stock-badge{top:8px;left:8px;color:#00583d;border-radius:999px;background:#fffefaf5;box-shadow:0 5px 12px #203c2820;font-size:10px;padding:6px 9px}
+#pedido .fiiller-app-family .item-details{padding:10px 5px 4px!important;gap:6px!important;min-height:0!important;flex:1}
+#pedido .fiiller-app-family .item-category{display:none!important}
+#pedido .fiiller-app-family .item h3{font-size:15px!important;min-height:0!important;line-height:1.25;font-weight:850;color:#0c3d2d;overflow-wrap:anywhere}
+#pedido .fiiller-app-family .fiiller-item-description{color:#708174;font-size:11px!important;line-height:1.4;min-height:31px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#pedido .fiiller-app-family .item-bottom{display:grid;grid-template-columns:1fr;gap:9px!important;align-items:end;padding-top:5px}
+#pedido .fiiller-app-family .item-bottom .price{font-size:19px!important;font-weight:900;color:#075b3e}
+#pedido .fiiller-app-family .item-add{width:100%!important;min-width:0!important;min-height:42px!important;display:flex!important;gap:7px;align-items:center;justify-content:center;padding:9px 13px!important;border-radius:12px!important;background:#f67619!important;color:white!important;font-size:13px!important;font-weight:850!important;transition:transform .15s ease,background .15s ease}
+#pedido .fiiller-app-family .item-add>span:not(.item-add-plus){display:inline!important}
+#pedido .fiiller-app-family .item-add:active{transform:scale(.96);background:#d85d0c!important}
+#pedido .fiiller-app-family .item-add:disabled{opacity:.45;cursor:not-allowed}
+#pedido .fiiller-app-family .filler-favorite-toggle{width:36px!important;height:36px!important;font-size:25px!important;border:0!important;box-shadow:0 4px 14px #0c322227!important}
+#pedido .fiiller-app-complementos{order:initial!important;background:linear-gradient(115deg,#ebf4ed,#f5f1e8)!important;border:1px solid #e0eade!important;padding:16px!important;border-radius:23px!important;margin-top:12px!important}
+#pedido .fiiller-app-complementos .fiiller-app-section-title h3{font-size:19px}
+#pedido .fiiller-app-complementos .item{box-shadow:0 4px 12px #19342412!important}
+#pedido .fiiller-app-complementos .item-media{aspect-ratio:1.45/1!important}
+#pedido .fiiller-app-complementos .item-photo[data-has-photo="true"]{background-size:contain!important;background-color:#fff!important}
+#pedido .fiiller-app-complementos .item-details{padding-top:5px!important}
+#pedido .fiiller-app-complementos .item h3{font-size:12px!important}
+#pedido .fiiller-app-complementos .fiiller-item-description{display:none}
+#pedido .fiiller-app-complementos .item-add{background:#e5efe7!important;color:#00573b!important;border:1px solid #cde0d1!important}
+.fiiller-app-more{display:block;width:min(100%,340px);min-height:46px;margin:12px auto 0;border:1px solid #bad9c7;background:#eef7f0;border-radius:13px;color:#006241;font-weight:850;font-size:13px}
+.fiiller-app-more:hover{background:#dceddf}
+.fiiller-app-empty{padding:40px 20px;border:1px dashed #d7e4d8;border-radius:22px;background:white;text-align:center;color:#506d5a}
+.fiiller-app-empty>span{display:block;font-size:45px;line-height:1}
+.fiiller-app-empty h3{margin:10px 0 4px;font-size:21px;color:#0e4833}
+.fiiller-app-empty p{font-size:13px;line-height:1.5;max-width:400px;margin:4px auto 15px}
+.fiiller-app-empty-link{display:inline-flex;background:#006241;color:white;padding:12px 17px;border-radius:12px;text-decoration:none;font-size:13px;font-weight:850}
+.filler-bottom-nav .is-active{background:#dcf0e3!important;color:#004b33!important;border-radius:22px}
+.filler-bottom-nav button{display:grid;justify-items:center;gap:3px;border:0;background:transparent;color:#4e6257;padding:3px 0;font-size:11px;font-weight:750}
+.filler-bottom-nav button>span{font-size:23px;line-height:1.15}
+.filler-bottom-nav .filler-nav-cart{position:relative}
+@keyframes fiiller-card-in{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:1150px){
+ #pedido .fiiller-app-family .filler-family-track{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:700px){
+ main{padding:12px 13px 120px!important}
+ header .nav{min-height:62px}
+ .hero{display:grid!important;grid-template-columns:57% 43%!important;min-height:0!important;height:216px!important;margin-bottom:13px!important;border-radius:22px!important}
+ .hero .hero-copy{order:0!important;min-width:0!important;min-height:0!important;height:216px!important;gap:8px!important;padding:17px 13px!important;border-radius:0!important;justify-content:center}
+ .hero .hero-copy .eyebrow{display:inline-flex;max-width:max-content;font-size:8px!important;padding:5px 7px!important;letter-spacing:.02em}
+ .hero .hero-copy h2{font-size:clamp(23px,6.5vw,32px)!important;max-width:180px;margin:5px 0 6px!important}
+ .hero .hero-copy p{font-size:10px!important;line-height:1.35!important;margin:0;max-width:195px}
+ .hero .hero-actions{margin-top:5px!important}
+ .hero .hero-actions button{font-size:10px!important;min-height:37px!important;padding:8px 10px!important;border-radius:11px!important;white-space:nowrap}
+ .hero .fiiller-hero-benefits{display:none!important}
+ .hero .hero-visual{order:1!important;height:216px!important;min-height:216px!important;display:block!important;overflow:hidden}
+ .hero .hero-visual img{height:216px!important;width:100%!important;max-height:none!important;object-fit:cover!important;object-position:center!important}
+ .fiiller-shop-start .filler-menu-search{min-height:48px!important;border-radius:999px!important}
+ .fiiller-shop-start #filler-product-search{font-size:13px!important}
+ .fiiller-quick-categories{gap:7px!important;padding:4px 0 8px!important}
+ .fiiller-quick-categories button{flex-basis:93px!important;min-height:72px!important;border-radius:17px!important;padding:7px 5px!important;font-size:10px!important}
+ .fiiller-quick-categories button .fiiller-cat-icon{font-size:24px}
+ .fiiller-shop-start .fiiller-shop-search-status{display:none}
+ #menu .section-head{margin:7px 0 10px!important}
+ #menu .section-head h2{font-size:22px!important}
+ #menu .section-head p{font-size:11px}
+ #fiiller-view-all{font-size:11px!important;padding:6px 2px!important}
+ #pedido .fiiller-app-family .filler-family-track{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;padding:0 0 9px!important}
+ #pedido .fiiller-app-family .item{border-radius:17px!important;padding:7px!important}
+ #pedido .fiiller-app-family .item-media{aspect-ratio:1.06/1}
+ #pedido .fiiller-app-family .item-details{padding:8px 3px 4px!important;gap:5px!important}
+ #pedido .fiiller-app-family .item h3{font-size:13px!important}
+ #pedido .fiiller-app-family .fiiller-item-description{min-height:28px!important;font-size:10px!important}
+ #pedido .fiiller-app-family .item-bottom .price{font-size:17px!important}
+ #pedido .fiiller-app-family .item-add{min-height:39px!important;border-radius:10px!important;font-size:11px!important}
+ #pedido .fiiller-app-family .item-add>span:not(.item-add-plus){display:inline!important;font-size:11px}
+ #pedido .fiiller-app-complementos{padding:12px!important;border-radius:18px!important;margin-top:8px!important}
+ #pedido .fiiller-app-complementos .filler-family-track{display:flex!important;gap:9px!important;overflow-x:auto!important;scroll-snap-type:x mandatory!important;scrollbar-width:none;padding-bottom:7px!important}
+ #pedido .fiiller-app-complementos .item{flex:0 0 146px!important;scroll-snap-align:start;min-width:0}
+ #pedido .fiiller-app-complementos .item-media{aspect-ratio:1.45/1!important}
+ #pedido .fiiller-app-complementos .item-bottom .price{font-size:15px!important}
+ #pedido .fiiller-app-complementos .item-add{min-height:35px!important;font-size:10px!important}
+ .filler-bottom-nav{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;gap:4px;max-width:100vw;border-radius:23px 23px 0 0;padding:9px 10px calc(9px + env(safe-area-inset-bottom));box-shadow:0 -10px 29px #1236231a}
+ .filler-bottom-nav a,.filler-bottom-nav button{min-height:50px;align-content:center;justify-content:center;text-align:center;gap:2px!important;border-radius:20px;font-size:11px!important;padding:4px 0!important}
+ .filler-bottom-nav a>span,.filler-bottom-nav button>span{font-size:22px!important}
+ .order-bubble{bottom:calc(74px + env(safe-area-inset-bottom))!important;border-radius:15px!important}
+ #pedido>.cart{z-index:110}
+ .fiiller-app-empty{padding:27px 12px}
+}
+@media(max-width:360px){
+ .hero .hero-copy h2{font-size:22px!important}
+ .fiiller-quick-categories button{flex-basis:85px!important}
+ #pedido .fiiller-app-family .item-bottom .price{font-size:15px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #pedido .fiiller-app-family .item{animation:none;transition:none}
+ .fiiller-quick-categories button,.fiiller-app-more{transition:none}
+}
