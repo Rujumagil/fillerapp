@@ -356,7 +356,11 @@
     }
     displayProducts.forEach(p => p.sizeVariants?.sort((a,b)=>a.sizeOz-b.sizeOz));
     const isComplement=item=>menuPriority?.isComplementProduct(item)===true;
-    const featured = displayProducts.filter(p=>!isComplement(p) &&
+    const inStock=p=>{
+      const variants=p.classicGroup?p.classicVariants:p.chilaquilesGroup?p.chilaquilesVariants:p.sizeVariants||[p];
+      return variants.some(v=>Number(v.stock)>reserved(v.id));
+    };
+    const featured = displayProducts.filter(p=>!isComplement(p) && inStock(p) &&
       (p.classicGroup ? p.classicVariants.some(v=>featuredIds.includes(v.id)) :
        p.chilaquilesGroup ? p.chilaquilesVariants.some(v=>featuredIds.includes(v.id)) :
        p.sizeVariants ? p.sizeVariants.some(v=>featuredIds.includes(v.id)) : featuredIds.includes(p.id))
@@ -367,8 +371,8 @@
       return rank(a)-rank(b);
     });
     const allView=state.category==="Todos";
-    const preparedGroups=families.filter(name=>!menuPriority?.isComplementCategory(name))
-      .map(name=>({name,items:displayProducts.filter(p=>(p.cat||"Otros")===name&&!featured.includes(p)),isRetail:false}))
+    const preparedGroups=families
+      .map(name=>({name,items:displayProducts.filter(p=>(p.cat||"Otros")===name&&!isComplement(p)&&!featured.includes(p)),isRetail:false}))
       .filter(section=>section.items.length);
     const retailItems=displayProducts.filter(isComplement);
     const retailLimit=6;
