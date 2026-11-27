@@ -4,8 +4,14 @@
   const banner=document.createElement("div");
   banner.id="filler-online-status";
   banner.style.cssText="padding:12px 15px;margin:-9px 0 18px;border-radius:14px;border:1px solid #bfdcc9;background:#e8f4ea;color:#07583d;font-weight:750";
-  const section=document.getElementById("menu");
-  section.querySelector(".section-head").after(banner);
+  // La conexión con cocina solo se muestra dentro del checkout, nunca sobre el catálogo.
+  const loader=document.getElementById("fiiller-cloud-connection");
+  const catalogLoader=document.getElementById("fiiller-catalog-skeleton");
+  const catalogError=document.getElementById("fiiller-catalog-error");
+  loader?.after(banner);
+  banner.setAttribute("role","status");
+  banner.setAttribute("aria-live","polite");
+  banner.hidden=true;
   const confirm=document.getElementById("send-order");
   const button=confirm.cloneNode(true);
   button.disabled=true;
@@ -13,10 +19,20 @@
   let enabled=false, working=false;
   const status=(message,error=false)=>{
     banner.textContent=message;
+    banner.hidden=!error;
     banner.style.background=error?"#fff0eb":"#e8f4ea";
     banner.style.color=error?"#953b2c":"#07583d";
+    if(error&&loader)loader.hidden=true;
   };
-  function block(message){enabled=false;window.FillerOnlineActive=false;button.disabled=true;button.textContent="Pedidos en línea aún no disponibles";status(message,true);}
+  function block(message){
+    enabled=false;window.FillerOnlineActive=false;button.disabled=true;
+    button.textContent="Pedidos en línea aún no disponibles";
+    document.body.classList.remove("fiiller-catalog-pending");
+    document.body.classList.add("fiiller-catalog-error");
+    if(catalogLoader)catalogLoader.hidden=true;
+    if(catalogError)catalogError.hidden=false;
+    status(message,true);
+  }
 
   const DRAFT_KEY="filler_pending_cart_v1";
   let draftProcessed=false;
@@ -98,7 +114,12 @@
       window.FillerOnlineActive = true;
       enabled=true;button.disabled=working;button.textContent="Confirmar pedido";
       status("✓ Menú actualizado · Elige tus favoritos y recógelos en Fiiller Café");
+      if(loader)loader.hidden=true;
+      if(catalogLoader)catalogLoader.hidden=true;
+      if(catalogError)catalogError.hidden=true;
+      document.body.classList.remove("fiiller-catalog-pending","fiiller-catalog-error");
       render();
+      window.dispatchEvent(new CustomEvent("fiiller:catalog-ready"));
       if(draftInfo)showDraftNotice(draftInfo);
     }catch(error){block("No se puede comprobar la recepción de pedidos. "+error.message);}
   }
@@ -109,6 +130,14 @@
     const phone=document.getElementById("customer-phone");
     if(!panel||!fields||!name||!phone)return;
     const guest=()=>{
+      // Datos solo del dispositivo del cliente; nunca se transfieren por estar guardados.
+      try{
+        const cached=JSON.parse(localStorage.getItem("fiiller_guest_checkout_v1")||"null");
+        if(cached&&Date.now()-Number(cached.savedAt)<90*24*3600*1000&&Date.now()>=Number(cached.savedAt)){
+          if(!name.value&&typeof cached.name==="string")name.value=cached.name.slice(0,90);
+          if(!phone.value&&typeof cached.phone==="string")phone.value=cached.phone.slice(0,25);
+        }
+      }catch{}
       panel.textContent="";
       const heading=document.createElement("strong");heading.textContent="☕ Compra sin registrarte";
       const info=document.createElement("p");
@@ -211,6 +240,13 @@
         p_notes:notes,
         p_lines:items.map(i=>({id:i.id,qty:i.qty,extras:(i.extras||[]).map(x=>x.id)}))
       });
+      // Guardar los datos de invitado SOLAMENTE después de que Supabase confirme el pedido.
+      try{
+        const customerSession=JSON.parse(localStorage.getItem("filler_customer_session_v1")||sessionStorage.getItem("filler_customer_session_v1")||"null");
+        if(!customerSession?.access_token)localStorage.setItem("fiiller_guest_checkout_v1",JSON.stringify({
+          name:customer,phone,savedAt:Date.now()
+        }));
+      }catch{}
       state.cart={};state.extraSelections={};
       render();
       const notice=document.getElementById("client-status");
@@ -241,7 +277,9 @@
     }finally{working=false;button.disabled=!enabled;button.textContent=enabled?"Confirmar pedido":"Pedidos en línea aún no disponibles";}
   }
   button.addEventListener("click",checkout);
-  block("Comprobando conexión segura con cocina…");
+  enabled=false;window.FillerOnlineActive=false;button.disabled=true;
+  button.textContent="Confirmar pedido";banner.hidden=true;
+  if(loader)loader.hidden=false;
   window.FillerCloudModeReady=true;
   // Centro de avisos: solo muestra el estado obtenido del enlace privado del pedido.
   const bell=document.getElementById("filler-bell");
@@ -277,6 +315,11 @@
   async function refreshAlerts(){
     const item=lastTracking();
     alertContent.replaceChildren();
+    const waiting=document.createElement("div");
+    waiting.className="fiiller-order-skeleton";
+    waiting.setAttribute("aria-label","Actualizando avisos");
+    waiting.innerHTML='<div class="fiiller-skeleton-line"></div><div class="fiiller-skeleton-line short"></div>';
+    alertContent.append(waiting);
     let orderUnread=false,promoUnread=false,hasOrder=false;
     if(item){
       try{
@@ -318,6 +361,8 @@
     const promos=await fetchPromoAlerts();
     for(const promo of promos){
       if(typeof promo.id!=="string"||typeof promo.title!=="string")continue;
+      // No promocionar recetas retiradas del menú comercial vigente.
+      if(["chilaquiles-rojos-sencillos","rojos-con-huevo","rojos-con-pollo"].includes(promo.product_id))continue;
       const card=document.createElement("article");
       card.style.cssText="display:grid;gap:6px;padding:14px 0;border-bottom:1px solid #e8e2d9";
       const tag=document.createElement("small");
@@ -342,6 +387,7 @@
       if(!alertPanel.hidden)safeSet(key,"1");
       if(safeGet(key)!=="1")promoUnread=true;
     }
+    waiting.remove();
     if(!hasOrder&&!promos.length){
       const message=document.createElement("p");
       message.textContent="Todavía no tienes avisos. Las novedades y tus pedidos aparecerán aquí.";
